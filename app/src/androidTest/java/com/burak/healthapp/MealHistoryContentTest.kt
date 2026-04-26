@@ -7,11 +7,11 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.burak.healthapp.domain.model.MealType
-import com.burak.healthapp.ui.mealhistory.MealHistoryContent
-import com.burak.healthapp.ui.model.MealHistoryEntryState
-import com.burak.healthapp.ui.model.MealHistorySectionState
-import com.burak.healthapp.ui.model.MealHistoryUiState
-import com.burak.healthapp.ui.theme.HealthTheme
+import com.burak.healthapp.feature.detail.mealhistory.MealHistoryContent
+import com.burak.healthapp.feature.detail.mealhistory.MealHistoryEntryState
+import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
+import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +33,7 @@ class MealHistoryContentTest {
 
         composeRule.onNodeWithText("Kahvaltı").assertIsDisplayed()
         composeRule.onNodeWithText("Omlet").assertIsDisplayed()
-        composeRule.onNodeWithText("Akşam").assertIsDisplayed()
+        composeRule.onNodeWithText("AkÅŸam").assertIsDisplayed()
         composeRule.onNodeWithText("Somon").assertIsDisplayed()
     }
 
@@ -72,7 +72,7 @@ class MealHistoryContentTest {
                     ),
                 ),
                 MealHistorySectionState(
-                    title = "Akşam",
+                    title = "AkÅŸam",
                     entries = listOf(
                         MealHistoryEntryState(
                             id = 2,

@@ -1,11 +1,11 @@
 package com.burak.healthapp
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import com.burak.healthapp.data.local.BodyMeasurementDao
-import com.burak.healthapp.data.local.BodyMeasurementEntity
-import com.burak.healthapp.data.local.SupplementTemplateDao
-import com.burak.healthapp.data.local.SupplementTemplateEntity
-import com.burak.healthapp.data.repository.DefaultSettingsRepository
+import com.burak.healthapp.data.local.dao.BodyMeasurementDao
+import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
+import com.burak.healthapp.data.repository.SettingsRepositoryImpl
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.WaterReminderSettings
@@ -29,7 +29,7 @@ class SettingsRepositoryTest {
             scope = backgroundScope,
             produceFile = { tempFile },
         )
-        val repository = DefaultSettingsRepository(
+        val repository = SettingsRepositoryImpl(
             dataStore = dataStore,
             templateDao = EmptyTemplateDao,
             measurementDao = EmptyMeasurementDao,
@@ -49,7 +49,7 @@ class SettingsRepositoryTest {
             scope = backgroundScope,
             produceFile = { tempFile },
         )
-        val repository = DefaultSettingsRepository(
+        val repository = SettingsRepositoryImpl(
             dataStore = dataStore,
             templateDao = EmptyTemplateDao,
             measurementDao = EmptyMeasurementDao,
@@ -69,7 +69,7 @@ class SettingsRepositoryTest {
             scope = backgroundScope,
             produceFile = { tempFile },
         )
-        val repository = DefaultSettingsRepository(
+        val repository = SettingsRepositoryImpl(
             dataStore = dataStore,
             templateDao = EmptyTemplateDao,
             measurementDao = EmptyMeasurementDao,
@@ -89,7 +89,7 @@ class SettingsRepositoryTest {
             scope = backgroundScope,
             produceFile = { tempFile },
         )
-        val repository = DefaultSettingsRepository(
+        val repository = SettingsRepositoryImpl(
             dataStore = dataStore,
             templateDao = EmptyTemplateDao,
             measurementDao = EmptyMeasurementDao,

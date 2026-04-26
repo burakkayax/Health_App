@@ -1,7 +1,7 @@
 package com.burak.healthapp
 
-import com.burak.healthapp.data.repository.DashboardRepository
-import com.burak.healthapp.data.repository.SettingsRepository
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
@@ -18,7 +18,9 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.TodaySnapshot
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import com.burak.healthapp.ui.profile.ProfileViewModel
+import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.feature.profile.ProfileViewModel
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,9 +65,18 @@ class ProfileViewModelTest {
 
         assertTrue(editor.isVisible)
         assertFalse(editor.canSave)
-        assertEquals("Kaydetmeden önce eksik alanları düzelt.", editor.validationMessage)
-        assertEquals("Takviye adı gerekli.", draft.nameError)
-        assertEquals("Hedef doz gerekli.", draft.targetAmountError)
+        assertEquals(
+            UiText.StringResource(R.string.error_fix_missing_fields),
+            editor.validationMessage,
+        )
+        assertEquals(
+            UiText.StringResource(R.string.error_supplement_name_required),
+            draft.nameError,
+        )
+        assertEquals(
+            UiText.StringResource(R.string.error_supplement_target_required),
+            draft.targetAmountError,
+        )
     }
 
     @Test
@@ -88,8 +99,15 @@ class ProfileViewModelTest {
         val editor = viewModel.uiState.value.supplementEditor
 
         assertFalse(editor.canSave)
-        assertEquals("Aynı takviye adı iki kez kullanılamaz.", editor.validationMessage)
-        assertTrue(editor.drafts.all { it.nameError == "Aynı takviye adı iki kez kullanılamaz." })
+        assertEquals(
+            UiText.StringResource(R.string.error_supplement_duplicate_name),
+            editor.validationMessage,
+        )
+        assertTrue(
+            editor.drafts.all {
+                it.nameError == UiText.StringResource(R.string.error_supplement_duplicate_name)
+            },
+        )
     }
 
     @Test
@@ -114,7 +132,10 @@ class ProfileViewModelTest {
         val editor = viewModel.uiState.value.supplementEditor
         assertTrue(editor.isVisible)
         assertTrue(editor.canSave)
-        assertEquals("Takviyeler kaydedilemedi. Tekrar dene.", editor.saveErrorMessage)
+        assertEquals(
+            UiText.StringResource(R.string.error_supplement_save_failed),
+            editor.saveErrorMessage,
+        )
         assertNotNull(settingsRepository.lastReplaceAttempt)
     }
 

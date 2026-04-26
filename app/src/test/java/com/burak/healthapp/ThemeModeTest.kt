@@ -1,7 +1,7 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.ui.theme.resolveDarkTheme
+import com.burak.healthapp.core.ui.theme.resolveDarkTheme
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

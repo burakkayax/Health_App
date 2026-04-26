@@ -18,22 +18,22 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SupplementDoseEntry
-import com.burak.healthapp.ui.model.ExerciseCardState
-import com.burak.healthapp.ui.model.HydrationCardState
-import com.burak.healthapp.ui.model.MacroRingState
-import com.burak.healthapp.ui.model.MealDraftFoodState
-import com.burak.healthapp.ui.model.MealEditorUiState
-import com.burak.healthapp.ui.model.NutritionCardState
-import com.burak.healthapp.ui.model.SleepCardState
-import com.burak.healthapp.ui.model.SmokingCardState
-import com.burak.healthapp.ui.model.SmokingStatus
-import com.burak.healthapp.ui.model.StepCardState
-import com.burak.healthapp.ui.model.SupplementCardState
-import com.burak.healthapp.ui.model.SupplementItemState
-import com.burak.healthapp.ui.model.TodayUiState
-import com.burak.healthapp.ui.model.WeightCardState
-import com.burak.healthapp.ui.theme.HealthTheme
-import com.burak.healthapp.ui.today.TodayContent
+import com.burak.healthapp.feature.today.ExerciseCardState
+import com.burak.healthapp.feature.today.HydrationCardState
+import com.burak.healthapp.feature.today.MacroRingState
+import com.burak.healthapp.feature.today.meal.MealDraftFoodState
+import com.burak.healthapp.feature.today.meal.MealEditorUiState
+import com.burak.healthapp.feature.today.NutritionCardState
+import com.burak.healthapp.feature.today.SleepCardState
+import com.burak.healthapp.feature.today.SmokingCardState
+import com.burak.healthapp.feature.today.SmokingStatus
+import com.burak.healthapp.feature.today.StepCardState
+import com.burak.healthapp.feature.today.SupplementCardState
+import com.burak.healthapp.feature.today.SupplementItemState
+import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.WeightCardState
+import com.burak.healthapp.core.ui.theme.HealthTheme
+import com.burak.healthapp.feature.today.TodayContent
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -473,7 +473,7 @@ class TodayContentTest {
                 progress = 0.74f,
                 macros = listOf(
                     MacroRingState("Karb", 145, 220, 0.66f),
-                    MacroRingState("Yağ", 52, 70, 0.74f),
+                    MacroRingState("YaÄŸ", 52, 70, 0.74f),
                     MacroRingState("Protein", 128, 160, 0.8f, isEmphasized = true),
                 ),
                 entries = listOf(
@@ -505,7 +505,7 @@ class TodayContentTest {
                 progress = 1f,
                 title = "Ağırlık",
                 durationLabel = "45 dk",
-                intensityLabel = "Orta yoğunluk",
+                intensityLabel = "Orta yoÄŸunluk",
                 helperLabel = "Bu hafta 2 / hedef 4 gün",
             ),
             hydration = HydrationCardState(

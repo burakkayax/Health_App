@@ -9,9 +9,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.ui.model.ProfileGoalsUiState
-import com.burak.healthapp.ui.profile.ProfileGoalsContent
-import com.burak.healthapp.ui.theme.HealthTheme
+import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
+import com.burak.healthapp.feature.profile.goals.ProfileGoalsContent
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Rule

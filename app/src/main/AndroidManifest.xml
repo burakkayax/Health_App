@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".step.StepCounterService"
+            android:name=".core.step.StepCounterService"
             android:exported="false"
             android:foregroundServiceType="health" />
     </application>

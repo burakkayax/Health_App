@@ -7,15 +7,17 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.ui.model.EditableSupplementTemplateState
-import com.burak.healthapp.ui.model.ProfileGoalSummaryState
-import com.burak.healthapp.ui.model.ProfileSupplementTemplateState
-import com.burak.healthapp.ui.model.ProfileUiState
-import com.burak.healthapp.ui.model.SupplementEditorUiState
-import com.burak.healthapp.ui.profile.ProfileContent
-import com.burak.healthapp.ui.profile.SupplementTemplateEditorSheet
-import com.burak.healthapp.ui.theme.HealthTheme
+import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
+import com.burak.healthapp.feature.profile.ProfileContent
+import com.burak.healthapp.feature.profile.ProfileGoalSummaryState
+import com.burak.healthapp.feature.profile.ProfileSupplementTemplateState
+import com.burak.healthapp.feature.profile.ProfileUiState
+import com.burak.healthapp.feature.profile.SupplementEditorUiState
+import com.burak.healthapp.feature.profile.SupplementTemplateEditorSheet
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -108,8 +110,10 @@ class ProfileContentTest {
 
     @Test
     fun supplementEditor_invalidState_showsMessageAndDisablesSave() {
+        var validationMessage = ""
         composeRule.setContent {
             HealthTheme {
+                validationMessage = UiText.StringResource(R.string.error_fix_missing_fields).asString()
                 SupplementTemplateEditorSheet(
                     state = SupplementEditorUiState(
                         isVisible = true,
@@ -119,12 +123,12 @@ class ProfileContentTest {
                                 name = "",
                                 targetAmount = "",
                                 unitLabel = "mg",
-                                nameError = "Takviye adı gerekli.",
-                                targetAmountError = "Hedef doz gerekli.",
+                                nameError = UiText.StringResource(R.string.error_supplement_name_required),
+                                targetAmountError = UiText.StringResource(R.string.error_supplement_target_required),
                             ),
                         ),
                         canSave = false,
-                        validationMessage = "Kaydetmeden önce eksik alanları düzelt.",
+                        validationMessage = UiText.StringResource(R.string.error_fix_missing_fields),
                     ),
                     onNameChange = { _, _ -> },
                     onTargetAmountChange = { _, _ -> },
@@ -137,7 +141,7 @@ class ProfileContentTest {
         }
 
         composeRule.onNodeWithTag("supplement_editor_message").assertIsDisplayed()
-        composeRule.onNodeWithText("Kaydetmeden önce eksik alanları düzelt.").assertIsDisplayed()
+        composeRule.onNodeWithText(validationMessage).assertIsDisplayed()
         composeRule.onNodeWithTag("supplement_template_save_button").assertIsNotEnabled()
     }
 
@@ -147,7 +151,10 @@ class ProfileContentTest {
             avatarInitials = "BK",
             themeMode = ThemeMode.SYSTEM,
             goalSummaries = listOf(
-                ProfileGoalSummaryState("Kalori / Su", "2200 kcal • 2500 ml"),
+                ProfileGoalSummaryState(
+                    UiText.DynamicString("Kalori / Su"),
+                    UiText.DynamicString("2200 kcal • 2500 ml"),
+                ),
             ),
             supplementTemplates = listOf(
                 ProfileSupplementTemplateState(1, "Magnezyum", 200f, "mg"),

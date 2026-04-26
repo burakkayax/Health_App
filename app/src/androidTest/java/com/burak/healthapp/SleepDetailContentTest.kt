@@ -5,14 +5,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.ui.model.SleepBarState
-import com.burak.healthapp.ui.model.SleepCalendarDayState
-import com.burak.healthapp.ui.model.SleepCalendarWeekState
-import com.burak.healthapp.ui.model.SleepDetailUiState
-import com.burak.healthapp.ui.model.SleepRegularityState
-import com.burak.healthapp.ui.model.SleepRegularityStatus
-import com.burak.healthapp.ui.sleepdetail.SleepDetailContent
-import com.burak.healthapp.ui.theme.HealthTheme
+import com.burak.healthapp.feature.detail.sleep.SleepBarState
+import com.burak.healthapp.feature.detail.sleep.SleepCalendarDayState
+import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
+import com.burak.healthapp.feature.detail.sleep.SleepDetailUiState
+import com.burak.healthapp.feature.detail.sleep.SleepRegularityState
+import com.burak.healthapp.feature.detail.sleep.SleepRegularityStatus
+import com.burak.healthapp.feature.detail.sleep.SleepDetailContent
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import org.junit.Rule
 import org.junit.Test
 

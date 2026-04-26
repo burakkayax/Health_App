@@ -1,7 +1,7 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.ui.sleepdetail.buildSleepCalendarWeeks
+import com.burak.healthapp.feature.detail.sleep.buildSleepCalendarWeeks
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals

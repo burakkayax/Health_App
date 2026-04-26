@@ -1,26 +1,26 @@
 package com.burak.healthapp
 
-import com.burak.healthapp.data.local.BodyMeasurementDao
-import com.burak.healthapp.data.local.BodyMeasurementEntity
-import com.burak.healthapp.data.local.ExerciseDao
-import com.burak.healthapp.data.local.ExerciseEntryEntity
-import com.burak.healthapp.data.local.HydrationDao
-import com.burak.healthapp.data.local.HydrationEntryEntity
-import com.burak.healthapp.data.local.MealDao
-import com.burak.healthapp.data.local.MealEntryEntity
-import com.burak.healthapp.data.local.SleepDao
-import com.burak.healthapp.data.local.SleepSessionEntity
-import com.burak.healthapp.data.local.SmokingDao
-import com.burak.healthapp.data.local.SmokingEntryEntity
-import com.burak.healthapp.data.local.StepDao
-import com.burak.healthapp.data.local.StepEntryEntity
-import com.burak.healthapp.data.local.SupplementDoseDao
-import com.burak.healthapp.data.local.SupplementDoseEntryEntity
-import com.burak.healthapp.data.local.SupplementTemplateDao
-import com.burak.healthapp.data.local.SupplementTemplateEntity
-import com.burak.healthapp.data.repository.DefaultDashboardRepository
-import com.burak.healthapp.data.repository.DefaultTrendsRepository
-import com.burak.healthapp.data.repository.SettingsRepository
+import com.burak.healthapp.data.local.dao.BodyMeasurementDao
+import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.dao.ExerciseDao
+import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
+import com.burak.healthapp.data.local.dao.HydrationDao
+import com.burak.healthapp.data.local.entity.HydrationEntryEntity
+import com.burak.healthapp.data.local.dao.MealDao
+import com.burak.healthapp.data.local.entity.MealEntryEntity
+import com.burak.healthapp.data.local.dao.SleepDao
+import com.burak.healthapp.data.local.entity.SleepSessionEntity
+import com.burak.healthapp.data.local.dao.SmokingDao
+import com.burak.healthapp.data.local.entity.SmokingEntryEntity
+import com.burak.healthapp.data.local.dao.StepDao
+import com.burak.healthapp.data.local.entity.StepEntryEntity
+import com.burak.healthapp.data.local.dao.SupplementDoseDao
+import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
+import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
+import com.burak.healthapp.data.repository.DashboardRepositoryImpl
+import com.burak.healthapp.data.repository.TrendsRepositoryImpl
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
@@ -344,7 +344,7 @@ class DashboardRepositoryTest {
     @Test
     fun observeTrends_includesStepAverageAndTrendPoints() = runTest {
         val anchorDate = LocalDate.of(2026, 4, 22)
-        val repository = DefaultTrendsRepository(
+        val repository = TrendsRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = FakeMealDao(),
             hydrationDao = FakeHydrationDao(),
@@ -370,7 +370,7 @@ class DashboardRepositoryTest {
     @Test
     fun observeTrends_interpolatesWeightPointsWithoutZeroValues() = runTest {
         val anchorDate = LocalDate.of(2026, 4, 22)
-        val repository = DefaultTrendsRepository(
+        val repository = TrendsRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = FakeMealDao(),
             hydrationDao = FakeHydrationDao(),
@@ -420,7 +420,7 @@ class DashboardRepositoryTest {
     @Test
     fun observeTrends_clipsWeightPointsUntilFirstMeasurementInWindow() = runTest {
         val anchorDate = LocalDate.of(2026, 4, 22)
-        val repository = DefaultTrendsRepository(
+        val repository = TrendsRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = FakeMealDao(),
             hydrationDao = FakeHydrationDao(),
@@ -452,7 +452,7 @@ class DashboardRepositoryTest {
 
     @Test
     fun observeTrends_usesMonthToDateForMonthlyAggregates() = runTest {
-        val repository = DefaultTrendsRepository(
+        val repository = TrendsRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = FakeMealDao(
                 initialEntries = listOf(
@@ -525,8 +525,8 @@ class DashboardRepositoryTest {
         templateDao: FakeSupplementTemplateDao = FakeSupplementTemplateDao(),
         doseDao: FakeSupplementDoseDao = FakeSupplementDoseDao(),
         measurementDao: FakeBodyMeasurementDao = FakeBodyMeasurementDao(),
-    ): DefaultDashboardRepository {
-        return DefaultDashboardRepository(
+    ): DashboardRepositoryImpl {
+        return DashboardRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = mealDao,
             hydrationDao = hydrationDao,

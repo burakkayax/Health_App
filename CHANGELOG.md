@@ -2,6 +2,45 @@
 
 Bu dosya projedeki kullanıcıya dönük değişiklikleri ve önemli teknik güncellemeleri takip eder.
 
+
+## Unreleased - 2026-04-26
+
+### Değiştirildi
+
+- Proje mimarisi tek modül içinde daha temiz bir yapıya taşındı.
+- Paket yapısı `core`, `data`, `domain` ve `feature` katmanları etrafında yeniden düzenlendi.
+- Uygulama shell, navigation, top bar, bottom bar ve permission side-effect kodları ayrı dosyalara bölündü.
+- `HealthApplication` sadeleştirildi; uygulama başlangıç sorumluluğu dışındaki kodlar ilgili altyapı dosyalarına taşındı.
+- Manuel dependency container ayrı bir `AppContainer` yapısına ayrıldı.
+- Repository interface’leri domain katmanına, repository implementasyonları data katmanına taşındı.
+- Büyük repository dosyası daha küçük ve sorumluluğu net dosyalara bölündü.
+- Room entity, DAO, mapper, database ve migration kodları daha düzenli paketlere ayrıldı.
+- Domain modelleri konu bazlı dosyalara ayrıldı.
+- Domain hesaplama fonksiyonları beslenme, uyku, kilo, adım, trend ve tarih hesaplamaları gibi ayrı dosyalara bölündü.
+- Today ekranı route, screen, ViewModel, UI state, mapper, action, kart component’leri ve bottom sheet dosyaları olarak yeniden yapılandırıldı.
+- Feature’a özel UI state modelleri ilgili feature paketlerine taşındı.
+- Kullanıcıya gösterilen metinler lokalizasyona hazır olacak şekilde string resource yapısına taşındı.
+- ViewModel kaynaklı validasyon ve hata mesajları için lokalizasyona uygun metin yönetimi altyapısı eklendi.
+- Varsayılan sağlık hedefleri ve tekrar eden iş kuralı sabitleri merkezi config yapısına taşındı.
+- Notification, reminder ve step counter altyapısı ilgili core paketlerine ayrıldı.
+- README dosyası yeni mimariyi, özellikleri, ekran görüntülerini ve geliştirme komutlarını açıklayacak şekilde güncellendi.
+
+### Korundu
+
+- Uygulama ID’si ve namespace aynı bırakıldı: `com.burak.healthapp`.
+- Room veritabanı adı, mevcut migration’lar ve schema geçmişi korundu.
+- Mevcut kullanıcı akışları ve uygulama davranışı korunacak şekilde refactor yapıldı.
+- Sağlık takip özellikleri, onboarding, dashboard, profil, trend ve detay ekranları korunarak yeniden organize edildi.
+
+### Doğrulama
+
+- `./gradlew :app:compileDebugKotlin`
+- `./gradlew :app:testDebugUnitTest`
+- `./gradlew :app:compileDebugAndroidTestKotlin`
+- `./gradlew :app:assembleDebug`
+
+
+
 ## Unreleased - 2026-04-26
 
 ### Eklendi
