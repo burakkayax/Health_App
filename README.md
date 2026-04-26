@@ -1,5 +1,7 @@
 # Health_App
 
+![Android CI](https://github.com/burakkayax/Health_App/actions/workflows/android-ci.yml/badge.svg)
+
 **Health_App**, Kotlin ve Jetpack Compose ile geliştirilmiş, local-first çalışan modern bir Android sağlık takip uygulamasıdır.
 
 Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersiz, sigara, takviye ve adım takibini tek bir günlük sağlık panelinde birleştirir. Veriler cihaz üzerinde saklanır ve uygulama kişisel sağlık alışkanlıklarını daha düzenli takip etmeye odaklanır.
