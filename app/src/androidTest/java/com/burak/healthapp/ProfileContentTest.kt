@@ -36,6 +36,7 @@ class ProfileContentTest {
                     state = sampleProfileState(),
                     onOpenGoals = { openedGoals = true },
                     onManageSupplements = {},
+                    onExportData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -53,6 +54,7 @@ class ProfileContentTest {
                     state = sampleProfileState(),
                     onOpenGoals = {},
                     onManageSupplements = {},
+                    onExportData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -69,12 +71,35 @@ class ProfileContentTest {
                     state = sampleProfileState(),
                     onOpenGoals = {},
                     onManageSupplements = {},
+                    onExportData = {},
                     onThemeModeChange = {},
                 )
             }
         }
 
         composeRule.onNodeWithTag("profile_theme_section").assertIsDisplayed()
+    }
+
+    @Test
+    fun dataManagementSection_showsExportAction() {
+        var exportClicked = false
+
+        composeRule.setContent {
+            HealthTheme {
+                ProfileContent(
+                    state = sampleProfileState(),
+                    onOpenGoals = {},
+                    onManageSupplements = {},
+                    onExportData = { exportClicked = true },
+                    onThemeModeChange = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_data_management_section").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_export_data_button").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_export_data_button").performClick()
+        assertEquals(true, exportClicked)
     }
 
     @Test

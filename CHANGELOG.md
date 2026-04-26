@@ -2,6 +2,33 @@
 
 Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder.
 
+## Unreleased - 2026-04-27
+
+### Eklendi
+
+- Profil ekranına Veri Yönetimi bölümü eklendi.
+- Android Storage Access Framework üzerinden kullanıcı kontrollü JSON dışa aktarma eklendi.
+- `schemaVersion = 1` kullanan versiyonlu sağlık verisi export modeli eklendi.
+- Export JSON üretimi için use case/repository/exporter katmanı ve unit testler eklendi.
+
+### Korundu
+
+- Import, tüm verileri silme, Health Connect, cloud sync veya Hilt/multi-module değişikliği eklenmedi.
+- Export işlemi kullanıcı dosya konumu seçmeden başlamayacak şekilde sınırlandırıldı.
+
+## Unreleased - 2026-04-27
+
+### Değiştirildi
+
+- Android otomatik backup politikası local-first sağlık verisi yaklaşımıyla uyumlu olacak şekilde sıkılaştırıldı.
+- `health.db`, `health.db-shm`, `health.db-wal` ve `health_preferences` DataStore dosyası backup/data extraction kurallarında açıkça dışarıda bırakıldı.
+- README veri saklama ve gizlilik bölümü gerçek uygulama davranışını yansıtacak şekilde güncellendi.
+
+### Korundu
+
+- Export/import, Health Connect, veritabanı şifreleme veya backend senkronizasyonu eklenmedi.
+- Local Room/DataStore çalışma davranışı değiştirilmedi.
+
 
 ## Unreleased - 2026-04-26
 

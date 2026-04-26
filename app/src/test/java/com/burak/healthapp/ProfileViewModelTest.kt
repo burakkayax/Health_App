@@ -1,6 +1,14 @@
 package com.burak.healthapp
 
+import android.net.Uri
+import com.burak.healthapp.data.export.HealthDataExportFileWriter
+import com.burak.healthapp.data.export.JsonHealthDataExporter
+import com.burak.healthapp.domain.export.ExportedGoalSettings
+import com.burak.healthapp.domain.export.ExportedUserProfile
+import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
+import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.HealthDataExportRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
@@ -22,6 +30,8 @@ import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.feature.profile.ProfileViewModel
+import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
+import java.time.Instant
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -153,6 +163,12 @@ class ProfileViewModelTest {
         return ProfileViewModel(
             settingsRepository = settingsRepository,
             dashboardRepository = dashboardRepository,
+            exportHealthDataUseCase = ExportHealthDataUseCase(
+                repository = EmptyHealthDataExportRepository,
+                jsonExporter = JsonHealthDataExporter(),
+                appVersion = "test",
+            ),
+            exportFileWriter = NoOpExportFileWriter,
         )
     }
 }
@@ -282,4 +298,52 @@ private class FakeProfileDashboardRepository : DashboardRepository {
     override suspend fun saveWeightMeasurement(weightKg: Float, date: LocalDate) = Unit
 
     override suspend fun recordStepSensorValue(sensorValue: Int, date: LocalDate) = Unit
+}
+
+private object EmptyHealthDataExportRepository : HealthDataExportRepository {
+    override suspend fun buildExportModel(
+        exportedAt: Instant,
+        appVersion: String,
+    ): HealthDataExportModel {
+        val goals = GoalSettings()
+        val reminder = WaterReminderSettings()
+        return HealthDataExportModel(
+            exportedAt = exportedAt.toString(),
+            appVersion = appVersion,
+            profile = ExportedUserProfile(
+                name = "Burak",
+                avatarInitials = "BK",
+                heightCm = null,
+            ),
+            goals = ExportedGoalSettings(
+                dailyCaloriesTarget = goals.dailyCaloriesTarget,
+                proteinTargetGrams = goals.proteinTargetGrams,
+                carbTargetGrams = goals.carbTargetGrams,
+                fatTargetGrams = goals.fatTargetGrams,
+                waterTargetMl = goals.waterTargetMl,
+                dailyStepTarget = goals.dailyStepTarget,
+                sleepTargetBedtime = goals.sleepTargetBedtime.toString(),
+                sleepTargetWakeTime = goals.sleepTargetWakeTime.toString(),
+                exerciseTargetDaysPerWeek = goals.exerciseTargetDaysPerWeek,
+                exerciseTargetDurationMinutes = goals.exerciseTargetDurationMinutes,
+                smokeDailyLimit = goals.smokeDailyLimit,
+                baselineWeightKg = goals.baselineWeightKg,
+                targetWeightKg = goals.targetWeightKg,
+                baselineShoulderCm = goals.baselineShoulderCm,
+                baselineWaistCm = goals.baselineWaistCm,
+                baselineHipCm = goals.baselineHipCm,
+            ),
+            waterReminderSettings = ExportedWaterReminderSettings(
+                enabled = reminder.enabled,
+                startTime = reminder.startTime.toString(),
+                endTime = reminder.endTime.toString(),
+                intervalMinutes = reminder.intervalMinutes,
+            ),
+            themeMode = ThemeMode.SYSTEM.name,
+        )
+    }
+}
+
+private object NoOpExportFileWriter : HealthDataExportFileWriter {
+    override suspend fun writeJson(uri: Uri, json: String) = Unit
 }

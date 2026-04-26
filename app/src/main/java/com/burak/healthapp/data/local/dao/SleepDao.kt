@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SleepDao {
+    @Query("SELECT * FROM sleep_sessions ORDER BY sessionDate ASC, endTime ASC")
+    suspend fun getAll(): List<SleepSessionEntity>
+
     @Query("SELECT * FROM sleep_sessions WHERE sessionDate = :date ORDER BY endTime DESC LIMIT 1")
     fun observeForDate(date: LocalDate): Flow<SleepSessionEntity?>
 

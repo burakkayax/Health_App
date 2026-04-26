@@ -1,5 +1,6 @@
 package com.burak.healthapp.feature.profile
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.calculation.formatClockRange
@@ -18,11 +20,13 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileGoalSummaryState
+import com.burak.healthapp.feature.profile.ProfileExportUiState
 import com.burak.healthapp.feature.profile.ProfileSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import com.burak.healthapp.feature.profile.toDomainTemplate
 import com.burak.healthapp.feature.root.healthApplication
+import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
 import java.time.LocalDate
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,11 +39,14 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
+    private val exportHealthDataUseCase: ExportHealthDataUseCase,
+    private val exportFileWriter: HealthDataExportFileWriter,
 ) : ViewModel() {
     private var nextDraftId = 1L
     private var latestTemplates: List<SupplementTemplate> = emptyList()
 
     private val editorState = MutableStateFlow(SupplementEditorUiState())
+    private val exportState = MutableStateFlow(ProfileExportUiState())
     private val supplementTemplates = settingsRepository.observeSupplementTemplates()
         .onEach { templates -> latestTemplates = templates }
         .stateIn(
@@ -53,11 +60,13 @@ class ProfileViewModel(
         supplementTemplates,
         dashboardRepository.observeLatestMeasurement(),
         editorState,
-    ) { settings, templates, latestMeasurement, editor ->
+        exportState,
+    ) { settings, templates, latestMeasurement, editor, export ->
         settings.toProfileUiState(
             supplementTemplates = templates,
             latestMeasurement = latestMeasurement,
             supplementEditor = editor,
+            exportState = export,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -69,6 +78,7 @@ class ProfileViewModel(
             goalSummaries = emptyList(),
             supplementTemplates = emptyList(),
             supplementEditor = SupplementEditorUiState(),
+            exportState = ProfileExportUiState(),
         ),
     )
 
@@ -156,12 +166,33 @@ class ProfileViewModel(
         }
     }
 
+    fun exportData(uri: Uri) {
+        viewModelScope.launch {
+            exportState.value = ProfileExportUiState(isExporting = true)
+            runCatching {
+                val json = exportHealthDataUseCase.exportJson()
+                exportFileWriter.writeJson(uri, json)
+            }.onSuccess {
+                exportState.value = ProfileExportUiState(
+                    message = UiText.StringResource(R.string.export_success),
+                )
+            }.onFailure {
+                exportState.value = ProfileExportUiState(
+                    message = UiText.StringResource(R.string.export_failed),
+                    isError = true,
+                )
+            }
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 ProfileViewModel(
                     settingsRepository = healthApplication().container.settingsRepository,
                     dashboardRepository = healthApplication().container.dashboardRepository,
+                    exportHealthDataUseCase = healthApplication().container.exportHealthDataUseCase,
+                    exportFileWriter = healthApplication().container.healthDataExportFileWriter,
                 )
             }
         }
@@ -267,6 +298,7 @@ private fun SettingsState.toProfileUiState(
     supplementTemplates: List<SupplementTemplate>,
     latestMeasurement: BodyMeasurementEntry?,
     supplementEditor: SupplementEditorUiState,
+    exportState: ProfileExportUiState,
 ): ProfileUiState {
     val locale = Locale.forLanguageTag("tr")
     val measurement = latestMeasurement ?: BodyMeasurementEntry(
@@ -296,6 +328,7 @@ private fun SettingsState.toProfileUiState(
             )
         },
         supplementEditor = supplementEditor,
+        exportState = exportState,
     )
 }
 

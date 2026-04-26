@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HydrationDao {
+    @Query("SELECT * FROM hydration_entries ORDER BY date ASC, createdAt ASC")
+    suspend fun getAll(): List<HydrationEntryEntity>
+
     @Query("SELECT * FROM hydration_entries WHERE date = :date ORDER BY createdAt ASC")
     fun observeForDate(date: LocalDate): Flow<List<HydrationEntryEntity>>
 

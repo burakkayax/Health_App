@@ -1,5 +1,7 @@
 package com.burak.healthapp.feature.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +50,7 @@ import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.text.asString
+import java.time.LocalDate
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,11 +60,21 @@ fun ProfileRoute(
 ) {
     val viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri != null) {
+            viewModel.exportData(uri)
+        }
+    }
 
     ProfileContent(
         state = uiState,
         onOpenGoals = onOpenGoals,
         onManageSupplements = viewModel::openSupplementEditor,
+        onExportData = {
+            exportLauncher.launch(defaultExportFileName())
+        },
         onThemeModeChange = viewModel::updateThemeMode,
     )
 
@@ -85,6 +98,7 @@ fun ProfileContent(
     state: ProfileUiState,
     onOpenGoals: () -> Unit,
     onManageSupplements: () -> Unit,
+    onExportData: () -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
 ) {
     LazyColumn(
@@ -206,6 +220,60 @@ fun ProfileContent(
                             },
                         )
                     },
+                )
+            }
+        }
+        item {
+            HealthCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("profile_data_management_section"),
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_data_management_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = stringResource(R.string.profile_data_management_helper),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = stringResource(R.string.export_sensitive_data_notice),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                state.exportState.message?.let { message ->
+                    Text(
+                        modifier = Modifier
+                            .padding(top = HealthSpacing.xs)
+                            .testTag("profile_export_message"),
+                        text = message.asString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (state.exportState.isError) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                    )
+                }
+                RoundedPillButton(
+                    label = if (state.exportState.isExporting) {
+                        stringResource(R.string.common_saving)
+                    } else {
+                        stringResource(R.string.profile_export_data)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = HealthSpacing.sm)
+                        .testTag("profile_export_data_button"),
+                    containerColor = HealthPrimary,
+                    contentColor = Color.White,
+                    enabled = !state.exportState.isExporting,
+                    onClick = onExportData,
                 )
             }
         }
@@ -423,4 +491,8 @@ private fun formatTemplateAmount(
         String.format(Locale.US, "%.1f", amount)
     }
     return "$value $unitLabel"
+}
+
+private fun defaultExportFileName(): String {
+    return "health_app_export_${LocalDate.now()}.json"
 }

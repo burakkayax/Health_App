@@ -124,6 +124,8 @@ private object EmptyTemplateDao : SupplementTemplateDao {
 }
 
 private object EmptyMeasurementDao : BodyMeasurementDao {
+    override suspend fun getAll(): List<BodyMeasurementEntity> = emptyList()
+
     override fun observeForDate(date: java.time.LocalDate): Flow<BodyMeasurementEntity?> = emptyFlow()
 
     override fun observeLatest(): Flow<BodyMeasurementEntity?> = emptyFlow()

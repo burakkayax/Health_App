@@ -140,6 +140,13 @@
     <string name="profile_supplement_unit">Birim</string>
     <string name="profile_new_supplement">Yeni Takviye</string>
     <string name="profile_save_supplements">Takviyeleri Kaydet</string>
+    <string name="profile_data_management_title">Veri Y&#246;netimi</string>
+    <string name="profile_data_management_helper">Sa&#287;l&#305;k verilerini se&#231;ti&#287;in konuma JSON dosyas&#305; olarak d&#305;&#351;a aktarabilirsin.</string>
+    <string name="profile_export_data">Verileri d&#305;&#351;a aktar</string>
+    <string name="export_success">Veriler ba&#351;ar&#305;yla d&#305;&#351;a aktar&#305;ld&#305;.</string>
+    <string name="export_failed">Veriler d&#305;&#351;a aktar&#305;lamad&#305;. Tekrar dene.</string>
+    <string name="export_file_picker_title">D&#305;&#351;a aktarma dosyas&#305;n&#305; se&#231;</string>
+    <string name="export_sensitive_data_notice">D&#305;&#351;a aktar&#305;lan dosya hassas sa&#287;l&#305;k verisi i&#231;erir; dosyay&#305; yaln&#305;zca g&#252;vendi&#287;in konumlarda sakla.</string>
     <string name="profile_goals_daily_title">Günlük Hedefler</string>
     <string name="profile_goals_daily_subtitle">Kalori, makro, su ve uyku hedeflerini tek yerde düzenle.</string>
     <string name="profile_goals_water_reminder_title">Su Hatırlatıcısı</string>

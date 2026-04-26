@@ -18,6 +18,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - [Mimari](#mimari)
 - [Proje Yapısı](#proje-yapısı)
 - [Veri Saklama ve Gizlilik](#veri-saklama-ve-gizlilik)
+- [Veri Dışa Aktarma](#veri-dışa-aktarma)
 - [Kurulum](#kurulum)
 - [Geliştirme Komutları](#geliştirme-komutları)
 - [Testler](#testler)
@@ -256,13 +257,26 @@ Health_App, local-first bir uygulamadır.
 * Ana veri kaynağı Room veritabanıdır.
 * Kullanıcı ayarları DataStore ile tutulur.
 * Uygulamada varsayılan olarak uzak sunucu veya backend entegrasyonu bulunmaz.
-* Sağlık verileri hassas veri olarak kabul edilir; bu nedenle backup, export ve senkronizasyon özellikleri dikkatli yönetilmelidir.
+* Sağlık verileri hassas veri olarak kabul edilir.
+* Otomatik Android cloud backup devre dışıdır; `health.db` ve `health_preferences` DataStore dosyası backup/data extraction kurallarında ayrıca dışarıda tutulur.
+* Cihazlar arası senkronizasyon, backend aktarımı veya otomatik bulut yedekleme varsayılan davranış değildir.
+* Profil > Veri Yönetimi üzerinden kullanıcı kontrollü JSON dışa aktarma desteği vardır; dışa aktarılan dosya hassas sağlık verisi içerir ve kullanıcının seçtiği konuma yazılır.
+* İçe aktarma ve tüm verileri silme akışları henüz yoktur; ileride kullanıcı kontrollü ve açık onaylı özellikler olarak planlanmaktadır.
+* Bu uygulama tıbbi tavsiye vermez ve tıbbi karar destek sistemi olarak kullanılmamalıdır.
 
-Önerilen güvenlik yaklaşımı:
+---
 
-* Hassas sağlık verilerini Android cloud backup dışında tutmak
-* Uygulama ileride dışa aktarma veya senkronizasyon desteklerse açık kullanıcı onayı almak
-* Gerektiğinde veritabanı şifreleme eklemek
+## Veri Dışa Aktarma
+
+Profil ekranındaki Veri Yönetimi bölümü, kullanıcının seçtiği dosya konumuna JSON formatında dışa aktarma yapar.
+
+* Export dosyası `schemaVersion` alanı ile versiyonlanır ve ilk şema sürümü `1` değerini kullanır.
+* `exportedAt` ISO-8601 zaman damgası, `appVersion` ise uygulama sürüm bilgisini içerir.
+* Profil, hedefler, su hatırlatma ayarları, tema modu ve local Room kayıtları tek JSON kök modeli altında toplanır.
+* Uygulama dosya konumunu otomatik seçmez; Android Storage Access Framework ile kullanıcıdan konum seçimi alınır.
+* JSON export dosyası sağlık verisi içerdiği için güvenilir konumlarda saklanmalıdır.
+
+Import, export önizleme ve tüm verileri silme özellikleri sonraki PR’lar için planlıdır.
 
 ---
 
@@ -390,12 +404,12 @@ Planlanan geliştirmeler:
 * [ ] Hilt tabanlı dependency injection
 * [ ] Multi-module mimariye geçiş
 * [ ] Health Connect entegrasyonu
-* [ ] CSV/JSON dışa aktarma
+* [ ] JSON içe aktarma ve CSV/PDF raporlar
 * [ ] Daha gelişmiş grafik ve trend analizleri
 * [ ] Widget desteği
 * [ ] İngilizce dil desteği
 * [ ] Baseline Profile ve Macrobenchmark
-* [ ] Gelişmiş gizlilik ve backup politikası
+* [ ] Kullanıcı kontrollü yedek içe aktarma ve veri silme akışları
 * [ ] Release build optimizasyonları
 
 ---

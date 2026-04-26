@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<full-backup-content />
+<full-backup-content>
+    <!--
+        Health_App stores sensitive local-first health data in Room and DataStore.
+        Automatic backup is disabled in the manifest; these explicit exclusions
+        document the privacy boundary if backup policy changes in the future.
+    -->
+    <exclude domain="database" path="health.db" />
+    <exclude domain="database" path="health.db-shm" />
+    <exclude domain="database" path="health.db-wal" />
+    <exclude domain="file" path="datastore/health_preferences.preferences_pb" />
+</full-backup-content>

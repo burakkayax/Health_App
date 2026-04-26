@@ -56,6 +56,12 @@ data class SupplementEditorUiState(
     val saveErrorMessage: UiText? = null,
 )
 
+data class ProfileExportUiState(
+    val isExporting: Boolean = false,
+    val message: UiText? = null,
+    val isError: Boolean = false,
+)
+
 data class ProfileUiState(
     val userName: String,
     val avatarInitials: String,
@@ -63,4 +69,5 @@ data class ProfileUiState(
     val goalSummaries: List<ProfileGoalSummaryState>,
     val supplementTemplates: List<ProfileSupplementTemplateState>,
     val supplementEditor: SupplementEditorUiState = SupplementEditorUiState(),
+    val exportState: ProfileExportUiState = ProfileExportUiState(),
 )

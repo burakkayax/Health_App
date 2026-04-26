@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SmokingDao {
+    @Query("SELECT * FROM smoking_entries ORDER BY date ASC")
+    suspend fun getAll(): List<SmokingEntryEntity>
+
     @Query("SELECT * FROM smoking_entries WHERE date = :date ORDER BY id DESC LIMIT 1")
     fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?>
 

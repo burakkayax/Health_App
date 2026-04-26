@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BodyMeasurementDao {
+    @Query("SELECT * FROM body_measurements ORDER BY date ASC, recordedAt ASC")
+    suspend fun getAll(): List<BodyMeasurementEntity>
+
     @Query("SELECT * FROM body_measurements WHERE date = :date ORDER BY recordedAt DESC LIMIT 1")
     fun observeForDate(date: LocalDate): Flow<BodyMeasurementEntity?>
 

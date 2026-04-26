@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MealDao {
+    @Query("SELECT * FROM meal_entries ORDER BY date ASC, mealType ASC, createdAt ASC")
+    suspend fun getAll(): List<MealEntryEntity>
+
     @Query("SELECT * FROM meal_entries WHERE date = :date ORDER BY mealType ASC, createdAt ASC")
     fun observeForDate(date: LocalDate): Flow<List<MealEntryEntity>>
 

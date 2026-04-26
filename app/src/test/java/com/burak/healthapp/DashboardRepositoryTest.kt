@@ -575,6 +575,8 @@ private class FakeMealDao(
     private val entries = MutableStateFlow(initialEntries)
     var requestedDate: LocalDate? = null
 
+    override suspend fun getAll(): List<MealEntryEntity> = entries.value
+
     override fun observeForDate(date: LocalDate): Flow<List<MealEntryEntity>> {
         requestedDate = date
         return entries.map { current -> current.filter { it.date == date } }
@@ -598,6 +600,8 @@ private class FakeHydrationDao(
 ) : HydrationDao {
     private val entries = MutableStateFlow(initialEntries)
 
+    override suspend fun getAll(): List<HydrationEntryEntity> = entries.value
+
     override fun observeForDate(date: LocalDate): Flow<List<HydrationEntryEntity>> {
         return entries.map { current -> current.filter { it.date == date } }
     }
@@ -619,6 +623,8 @@ private class FakeSleepDao(
     initialEntries: List<SleepSessionEntity> = emptyList(),
 ) : SleepDao {
     private val entries = MutableStateFlow(initialEntries)
+
+    override suspend fun getAll(): List<SleepSessionEntity> = entries.value
 
     override fun observeForDate(date: LocalDate): Flow<SleepSessionEntity?> {
         return entries.map { current ->
@@ -660,6 +666,8 @@ private class FakeExerciseDao(
 ) : ExerciseDao {
     private val entries = MutableStateFlow(initialEntries)
 
+    override suspend fun getAll(): List<ExerciseEntryEntity> = entries.value
+
     override fun observeForDate(date: LocalDate): Flow<ExerciseEntryEntity?> {
         return entries.map { current -> current.firstOrNull { it.date == date } }
     }
@@ -695,6 +703,8 @@ private class FakeSmokingDao(
 ) : SmokingDao {
     private val entries = MutableStateFlow(initialEntries)
 
+    override suspend fun getAll(): List<SmokingEntryEntity> = entries.value
+
     override fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?> {
         return entries.map { current -> current.firstOrNull { it.date == date } }
     }
@@ -725,6 +735,8 @@ private class FakeStepDao(
     initialEntries: List<StepEntryEntity> = emptyList(),
 ) : StepDao {
     private val entries = MutableStateFlow(initialEntries)
+
+    override suspend fun getAll(): List<StepEntryEntity> = entries.value
 
     override fun observeForDate(date: LocalDate): Flow<StepEntryEntity?> {
         return entries.map { current -> current.firstOrNull { it.date == date } }
@@ -784,6 +796,8 @@ private class FakeSupplementDoseDao(
 ) : SupplementDoseDao {
     private val entries = MutableStateFlow(initialEntries)
 
+    override suspend fun getAll(): List<SupplementDoseEntryEntity> = entries.value
+
     override fun observeForDate(date: LocalDate): Flow<List<SupplementDoseEntryEntity>> {
         return entries.map { current -> current.filter { it.date == date } }
     }
@@ -805,6 +819,8 @@ private class FakeBodyMeasurementDao(
     initialMeasurements: List<BodyMeasurementEntity> = emptyList(),
 ) : BodyMeasurementDao {
     private val measurements = MutableStateFlow(initialMeasurements)
+
+    override suspend fun getAll(): List<BodyMeasurementEntity> = measurements.value
 
     override fun observeForDate(date: LocalDate): Flow<BodyMeasurementEntity?> {
         return measurements.map { current ->

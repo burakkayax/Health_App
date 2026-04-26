@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StepDao {
+    @Query("SELECT * FROM step_entries ORDER BY date ASC, updatedAt ASC")
+    suspend fun getAll(): List<StepEntryEntity>
+
     @Query("SELECT * FROM step_entries WHERE date = :date LIMIT 1")
     fun observeForDate(date: LocalDate): Flow<StepEntryEntity?>
 
