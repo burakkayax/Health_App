@@ -33,6 +33,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -321,7 +322,7 @@ private fun emptyStepDetailUiState(): StepDetailUiState {
         monthDays = emptyList(),
         totalStepsLabel = "0 adım",
         averageStepsLabel = "0 adım",
-        targetLabel = "8000 adım",
+        targetLabel = "${DefaultHealthGoals.DAILY_STEPS} adım",
         hasData = false,
     )
 }

@@ -5,8 +5,10 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
@@ -68,8 +70,48 @@ class ProfileGoalsContentTest {
         }
 
         composeRule.onNodeWithText("Adım Hedefi").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_goal_step_target_field").assertIsDisplayed()
         composeRule.onNodeWithText("Su Hatırlatıcısı").assertIsDisplayed()
         composeRule.onNodeWithText("Sıklık (dk)").assertIsDisplayed()
+    }
+
+    @Test
+    fun invalidStepGoal_showsErrorAndDoesNotSave() {
+        var saveCount = 0
+
+        composeRule.setContent {
+            HealthTheme {
+                ProfileGoalsContent(
+                    state = sampleState(),
+                    onSave = { _, _, _, _ -> saveCount++ },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_goal_step_target_field").performTextReplacement("100001")
+        composeRule.onNodeWithText("Hedefleri Kaydet").performClick()
+
+        composeRule.onNodeWithText("Adım hedefi en fazla 100000 olabilir.").assertIsDisplayed()
+        assertEquals(0, saveCount)
+    }
+
+    @Test
+    fun validStepGoal_isSavedIntoGoalSettings() {
+        var savedGoals: GoalSettings? = null
+
+        composeRule.setContent {
+            HealthTheme {
+                ProfileGoalsContent(
+                    state = sampleState(),
+                    onSave = { goals, _, _, _ -> savedGoals = goals },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_goal_step_target_field").performTextReplacement("12000")
+        composeRule.onNodeWithText("Hedefleri Kaydet").performClick()
+
+        assertEquals(12000, savedGoals?.dailyStepTarget)
     }
 
     private fun sampleState(): ProfileGoalsUiState {

@@ -2,14 +2,19 @@ package com.burak.healthapp.feature.detail.hydration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -187,18 +194,6 @@ fun HydrationDetailContent(
         item {
             InsightCard(
                 modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.hydration_detail_total_title),
-                value = stringResource(R.string.today_format_ml, state.totalMl),
-                subtitle = if (state.selectedPeriod == TrendsPeriod.WEEKLY) {
-                    stringResource(R.string.hydration_detail_period_weekly)
-                } else {
-                    stringResource(R.string.hydration_detail_period_monthly)
-                },
-            )
-        }
-        item {
-            InsightCard(
-                modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.hydration_detail_average_title),
                 value = stringResource(R.string.today_format_ml, state.averageMl),
                 subtitle = stringResource(R.string.hydration_detail_logged_days_subtitle),
@@ -232,19 +227,12 @@ fun HydrationDetailContent(
                         activeColor = HealthWater,
                     )
                 } else {
-                    Column(
-                        modifier = Modifier.padding(top = HealthSpacing.sm),
-                        verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                    ) {
-                        state.periodDays.forEach { day ->
-                            ProgressBarRow(
-                                label = day.label,
-                                valueLabel = stringResource(R.string.today_format_ml, day.amountMl),
-                                progress = day.progress,
-                                color = HealthWater,
-                            )
-                        }
-                    }
+                    HydrationWeekBarChart(
+                        days = state.periodDays,
+                        modifier = Modifier
+                            .padding(top = HealthSpacing.sm)
+                            .testTag("hydration_week_bar_chart"),
+                    )
                 }
             }
         }
@@ -304,6 +292,65 @@ fun HydrationDetailContent(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HydrationWeekBarChart(
+    days: List<HydrationSummaryDayState>,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        days.forEachIndexed { index, day ->
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .testTag("hydration_week_bar_$index"),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            ) {
+                Text(
+                    text = if (day.amountMl == 0) "--" else stringResource(R.string.today_format_ml, day.amountMl),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .width(18.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(999.dp),
+                        ),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .fillMaxHeight(day.progress.coerceIn(0f, 1f))
+                            .background(
+                                color = HealthWater,
+                                shape = RoundedCornerShape(999.dp),
+                            ),
+                    )
+                }
+                Text(
+                    text = day.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }

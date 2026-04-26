@@ -36,6 +36,27 @@ class MetricDetailStateTest {
     }
 
     @Test
+    fun stepMonthRingDays_usesProvidedTargetForProgress() {
+        val anchorDate = LocalDate.of(2026, 4, 19)
+        val entryDate = LocalDate.of(2026, 4, 4)
+        val entries = mapOf(entryDate to StepEntry(date = entryDate, steps = 4_000))
+
+        val defaultTargetDays = buildStepMonthRingDays(
+            anchorDate = anchorDate,
+            entriesByDate = entries,
+            targetSteps = 8_000,
+        )
+        val customTargetDays = buildStepMonthRingDays(
+            anchorDate = anchorDate,
+            entriesByDate = entries,
+            targetSteps = 4_000,
+        )
+
+        assertEquals(0.5f, defaultTargetDays.first { it.dayLabel == "4" && it.isInCurrentMonth }.progress, 0.001f)
+        assertEquals(1f, customTargetDays.first { it.dayLabel == "4" && it.isInCurrentMonth }.progress, 0.001f)
+    }
+
+    @Test
     fun hydrationDetailState_calculatesDailyAndMonthlySummary() {
         val selectedDate = LocalDate.of(2026, 4, 19)
         val entries = listOf(

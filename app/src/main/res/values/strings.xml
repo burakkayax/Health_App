@@ -186,6 +186,10 @@
     <string name="error_supplement_target_positive">Hedef doz 0\'dan büyük olmalı.</string>
     <string name="error_supplement_unit_required">Birim gerekli.</string>
     <string name="error_supplement_duplicate_name">Aynı takviye adı iki kez kullanılamaz.</string>
+    <string name="error_step_target_required">Adım hedefi gerekli.</string>
+    <string name="error_step_target_must_be_number">Adım hedefi tam sayı olmalı.</string>
+    <string name="error_step_target_positive">Adım hedefi 0\'dan büyük olmalı.</string>
+    <string name="error_step_target_too_high">Adım hedefi en fazla 100000 olabilir.</string>
 
     <string name="format_kcal_water">%1$d kcal • %2$d ml</string>
     <string name="format_macros">%1$dP • %2$dK • %3$dY</string>

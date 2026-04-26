@@ -79,6 +79,7 @@ fun ProfileGoalsContent(
     var fat by remember(state.goalSettings) { mutableStateOf(state.goalSettings.fatTargetGrams.toString()) }
     var water by remember(state.goalSettings) { mutableStateOf(state.goalSettings.waterTargetMl.toString()) }
     var dailySteps by remember(state.goalSettings) { mutableStateOf(state.goalSettings.dailyStepTarget.toString()) }
+    var stepGoalError by remember(state.goalSettings) { mutableStateOf<StepGoalInputError?>(null) }
     var sleepBedtime by remember(state.goalSettings) { mutableStateOf(state.goalSettings.sleepTargetBedtime.toString()) }
     var sleepWakeTime by remember(state.goalSettings) { mutableStateOf(state.goalSettings.sleepTargetWakeTime.toString()) }
     var exerciseTargetDays by remember(state.goalSettings) { mutableStateOf(state.goalSettings.exerciseTargetDaysPerWeek.toString()) }
@@ -100,6 +101,7 @@ fun ProfileGoalsContent(
     val waterReminderSubtitle = stringResource(R.string.profile_goals_water_reminder_subtitle)
     val measurementsTitle = stringResource(R.string.profile_goals_measurements_title)
     val measurementsSubtitle = stringResource(R.string.profile_goals_measurements_subtitle)
+    val stepGoalErrorText = stepGoalError?.asErrorText()
 
     LazyColumn(
         modifier = Modifier
@@ -140,7 +142,14 @@ fun ProfileGoalsContent(
                 rightLabel = stringResource(R.string.profile_goal_step_target),
                 rightValue = dailySteps,
                 onLeftChange = { water = it },
-                onRightChange = { dailySteps = it },
+                onRightChange = { value ->
+                    dailySteps = value
+                    if (stepGoalError != null) {
+                        stepGoalError = validateStepTargetInput(value).errorOrNull()
+                    }
+                },
+                rightErrorText = stepGoalErrorText,
+                rightTestTag = "profile_goal_step_target_field",
             )
             GoalFieldRow(
                 leftLabel = stringResource(R.string.profile_goal_smoke_limit),
@@ -256,6 +265,15 @@ fun ProfileGoalsContent(
                 containerColor = HealthPrimary,
                 contentColor = Color.White,
                 onClick = {
+                    val stepValidation = validateStepTargetInput(dailySteps)
+                    val validatedDailySteps = when (stepValidation) {
+                        is StepGoalValidationResult.Valid -> stepValidation.value
+                        is StepGoalValidationResult.Invalid -> {
+                            stepGoalError = stepValidation.error
+                            return@RoundedPillButton
+                        }
+                    }
+
                     onSave(
                         GoalSettings(
                             dailyCaloriesTarget = dailyCalories.toIntOrDefault(DefaultHealthGoals.DAILY_CALORIES),
@@ -263,7 +281,7 @@ fun ProfileGoalsContent(
                             carbTargetGrams = carbs.toIntOrDefault(DefaultHealthGoals.CARBS_GRAMS),
                             fatTargetGrams = fat.toIntOrDefault(DefaultHealthGoals.FAT_GRAMS),
                             waterTargetMl = water.toIntOrDefault(DefaultHealthGoals.WATER_TARGET_ML),
-                            dailyStepTarget = dailySteps.toIntOrDefault(DefaultHealthGoals.DAILY_STEPS),
+                            dailyStepTarget = validatedDailySteps,
                             sleepTargetBedtime = sleepBedtime.toLocalTimeOrDefault(state.goalSettings.sleepTargetBedtime),
                             sleepTargetWakeTime = sleepWakeTime.toLocalTimeOrDefault(state.goalSettings.sleepTargetWakeTime),
                             exerciseTargetDaysPerWeek = exerciseTargetDays.toIntOrDefault(DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK),
@@ -327,6 +345,20 @@ private fun LazyListScope.profileGoalsSection(
 }
 
 @Composable
+private fun StepGoalInputError.asErrorText(): String {
+    return when (this) {
+        StepGoalInputError.REQUIRED -> stringResource(R.string.error_step_target_required)
+        StepGoalInputError.MUST_BE_NUMBER -> stringResource(R.string.error_step_target_must_be_number)
+        StepGoalInputError.POSITIVE -> stringResource(R.string.error_step_target_positive)
+        StepGoalInputError.TOO_HIGH -> stringResource(R.string.error_step_target_too_high)
+    }
+}
+
+private fun StepGoalValidationResult.errorOrNull(): StepGoalInputError? {
+    return (this as? StepGoalValidationResult.Invalid)?.error
+}
+
+@Composable
 private fun GoalFieldRow(
     leftLabel: String,
     leftValue: String,
@@ -337,12 +369,16 @@ private fun GoalFieldRow(
     decimal: Boolean = false,
     leftKeyboardType: KeyboardType? = null,
     rightKeyboardType: KeyboardType? = null,
+    leftErrorText: String? = null,
+    rightErrorText: String? = null,
+    leftTestTag: String? = null,
+    rightTestTag: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
     ) {
-        HealthPillTextField(
+        GoalFieldColumn(
             modifier = Modifier.weight(1f),
             value = leftValue,
             onValueChange = onLeftChange,
@@ -350,9 +386,11 @@ private fun GoalFieldRow(
             keyboardOptions = KeyboardOptions(
                 keyboardType = leftKeyboardType ?: if (decimal) KeyboardType.Decimal else KeyboardType.Number,
             ),
+            errorText = leftErrorText,
+            testTag = leftTestTag,
         )
         if (rightLabel.isNotBlank()) {
-            HealthPillTextField(
+            GoalFieldColumn(
                 modifier = Modifier.weight(1f),
                 value = rightValue,
                 onValueChange = onRightChange,
@@ -360,6 +398,40 @@ private fun GoalFieldRow(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = rightKeyboardType ?: if (decimal) KeyboardType.Decimal else KeyboardType.Number,
                 ),
+                errorText = rightErrorText,
+                testTag = rightTestTag,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GoalFieldColumn(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    keyboardOptions: KeyboardOptions,
+    modifier: Modifier = Modifier,
+    errorText: String? = null,
+    testTag: String? = null,
+) {
+    Column(modifier = modifier) {
+        HealthPillTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            isError = errorText != null,
+            keyboardOptions = keyboardOptions,
+        )
+        if (errorText != null) {
+            Text(
+                modifier = Modifier.padding(start = HealthSpacing.sm, top = HealthSpacing.xs),
+                text = errorText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
             )
         }
     }
