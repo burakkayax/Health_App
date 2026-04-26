@@ -1,6 +1,6 @@
 # Changelog
 
-Bu dosya projedeki kullanıcıya dönük değişiklikleri ve önemli teknik güncellemeleri takip eder.
+Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder.
 
 
 ## Unreleased - 2026-04-26
