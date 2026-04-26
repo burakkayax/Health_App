@@ -1,0 +1,153 @@
+package com.burak.healthapp
+
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.burak.healthapp.data.local.BodyMeasurementDao
+import com.burak.healthapp.data.local.BodyMeasurementEntity
+import com.burak.healthapp.data.local.SupplementTemplateDao
+import com.burak.healthapp.data.local.SupplementTemplateEntity
+import com.burak.healthapp.data.repository.DefaultSettingsRepository
+import com.burak.healthapp.domain.model.UserProfile
+import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.model.GoalSettings
+import java.time.LocalTime
+import java.io.File
+import java.nio.file.Files
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SettingsRepositoryTest {
+    @Test
+    fun updateThemeMode_persistsAndEmitsThemeMode() = runTest {
+        val tempDir = Files.createTempDirectory("health-settings").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = DefaultSettingsRepository(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        repository.updateThemeMode(ThemeMode.DARK)
+
+        assertEquals(ThemeMode.DARK, repository.settings.first().themeMode)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun updateProfile_persistsHeight() = runTest {
+        val tempDir = Files.createTempDirectory("health-profile").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = DefaultSettingsRepository(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        repository.updateProfile(UserProfile(name = "Burak", avatarInitials = "BK", heightCm = 175f))
+
+        assertEquals(175f, repository.settings.first().userProfile.heightCm)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun updateGoalSettings_persistsDailyStepTarget() = runTest {
+        val tempDir = Files.createTempDirectory("health-step-goal").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = DefaultSettingsRepository(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        repository.updateGoalSettings(GoalSettings(dailyStepTarget = 12000))
+
+        assertEquals(12000, repository.settings.first().goalSettings.dailyStepTarget)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun updateWaterReminderSettings_persistsReminderWindow() = runTest {
+        val tempDir = Files.createTempDirectory("health-water-reminder").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = DefaultSettingsRepository(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        repository.updateWaterReminderSettings(
+            WaterReminderSettings(
+                enabled = true,
+                startTime = LocalTime.of(10, 0),
+                endTime = LocalTime.of(20, 30),
+                intervalMinutes = 45,
+            ),
+        )
+
+        val settings = repository.settings.first().waterReminderSettings
+        assertEquals(true, settings.enabled)
+        assertEquals(LocalTime.of(10, 0), settings.startTime)
+        assertEquals(LocalTime.of(20, 30), settings.endTime)
+        assertEquals(45, settings.intervalMinutes)
+        tempDir.deleteRecursively()
+    }
+}
+
+private object EmptyTemplateDao : SupplementTemplateDao {
+    override fun observeActive(): Flow<List<SupplementTemplateEntity>> = emptyFlow()
+
+    override suspend fun getAll(): List<SupplementTemplateEntity> = emptyList()
+
+    override suspend fun upsertAll(templates: List<SupplementTemplateEntity>) = Unit
+
+    override suspend fun deactivate(ids: List<Long>) = Unit
+}
+
+private object EmptyMeasurementDao : BodyMeasurementDao {
+    override fun observeForDate(date: java.time.LocalDate): Flow<BodyMeasurementEntity?> = emptyFlow()
+
+    override fun observeLatest(): Flow<BodyMeasurementEntity?> = emptyFlow()
+
+    override fun observeAll(): Flow<List<BodyMeasurementEntity>> = emptyFlow()
+
+    override fun observeEarliest(): Flow<BodyMeasurementEntity?> = emptyFlow()
+
+    override suspend fun getLatest(): BodyMeasurementEntity? = null
+
+    override suspend fun getForDate(date: java.time.LocalDate): BodyMeasurementEntity? = null
+
+    override suspend fun getLatestOnOrBefore(date: java.time.LocalDate): BodyMeasurementEntity? = null
+
+    override fun observeLatestOnOrBefore(date: java.time.LocalDate): Flow<BodyMeasurementEntity?> = emptyFlow()
+
+    override fun observeEarliestOnOrAfter(date: java.time.LocalDate): Flow<BodyMeasurementEntity?> = emptyFlow()
+
+    override fun observeBetween(
+        startDate: java.time.LocalDate,
+        endDate: java.time.LocalDate,
+    ): Flow<List<BodyMeasurementEntity>> = emptyFlow()
+
+    override suspend fun deleteById(id: Long) = Unit
+
+    override suspend fun upsert(measurement: BodyMeasurementEntity) = Unit
+}

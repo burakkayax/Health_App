@@ -1,0 +1,25 @@
+package com.burak.healthapp.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val HealthLightBackground = Color(0xFFF5F5F7)
+val HealthDarkBackground = Color(0xFF000000)
+val HealthLightSurface = Color(0xFFFFFFFF)
+val HealthDarkSurface = Color(0xFF121212)
+val HealthLightSurfaceMuted = Color(0xFFF0F1F4)
+val HealthDarkSurfaceMuted = Color(0xFF1A1C1F)
+val HealthPrimary = Color(0xFF18C6A3)
+val HealthPrimaryDark = Color(0xFF10967E)
+val HealthProtein = Color(0xFF5A3CF0)
+val HealthCarbs = Color(0xFFF8B400)
+val HealthFat = Color(0xFFE05A47)
+val HealthWater = Color(0xFF5DA9FF)
+val HealthSleep = Color(0xFF4F5BD5)
+val HealthLightTextPrimary = Color(0xFF191C20)
+val HealthDarkTextPrimary = Color(0xFFF5F7FA)
+val HealthLightTextSecondary = Color(0xFF7D8592)
+val HealthDarkTextSecondary = Color(0xFF98A2B3)
+val HealthLightDivider = Color(0xFFE8EBF0)
+val HealthDarkDivider = Color(0xFF2A2E36)
+val HealthSuccess = Color(0xFF1EB980)
+val HealthShadow = Color(0x330B1422)
