@@ -16,6 +16,13 @@
     <string name="common_edit">Düzenle</string>
     <string name="common_manage">Yönet</string>
     <string name="common_saving">Kaydediliyor...</string>
+    <string name="weekday_monday_short">P</string>
+    <string name="weekday_tuesday_short">S</string>
+    <string name="weekday_wednesday_short">Ç</string>
+    <string name="weekday_thursday_short">P</string>
+    <string name="weekday_friday_short">C</string>
+    <string name="weekday_saturday_short">C</string>
+    <string name="weekday_sunday_short">P</string>
     <string name="default_guest_name">Misafir</string>
     <string name="default_avatar_initials">M</string>
 
@@ -27,6 +34,7 @@
     <string name="route_weight_detail">Kilo Detayı</string>
     <string name="route_sleep_detail">Uyku Detayı</string>
     <string name="route_step_detail">Adım Detayı</string>
+    <string name="route_hydration_detail">Su Detayı</string>
     <string name="route_today_meals">Bugünün Öğünleri</string>
     <string name="route_date_meals">%1$s Öğünleri</string>
 
@@ -88,6 +96,33 @@
     <string name="today_format_target_ml">/ %1$d ml</string>
     <string name="today_format_quick_add_ml">+%1$d ml</string>
     <string name="today_format_supplement_amount">%1$s/%2$s%3$s</string>
+
+    <string name="hydration_detail_title">Su Geçmişi</string>
+    <string name="hydration_detail_target">Günlük hedef %1$s</string>
+    <string name="hydration_detail_empty">Bu tarih için su kaydı yok.</string>
+    <string name="hydration_detail_entries_title">Günlük Kayıtlar</string>
+    <string name="hydration_detail_summary_title">Dönem Özeti</string>
+    <string name="hydration_detail_total_title">Toplam Su</string>
+    <string name="hydration_detail_average_title">Ortalama Su</string>
+    <string name="hydration_detail_logged_days_subtitle">Kayıt olan günlere göre</string>
+    <string name="hydration_detail_period_weekly">Son 7 gün</string>
+    <string name="hydration_detail_period_monthly">Bu ay</string>
+    <string name="hydration_detail_record_time">%1$s • %2$s</string>
+    <string name="hydration_detail_no_period_data">Bu dönem için henüz su kaydı yok.</string>
+    <string name="format_percent">%1$d%%</string>
+    <string name="weight_detail_chart_title">Kilo Geçmişi Grafiği</string>
+    <string name="weight_detail_chart_empty">Henüz kilo kaydı yok. Kilo kartındaki + Ekle aksiyonuyla kayıt oluşturmaya başla.</string>
+    <string name="weight_detail_latest_record">Son kayıt %1$s</string>
+    <string name="weight_detail_bmi_title">Vücut Kitle İndeksi</string>
+    <string name="weight_detail_bmi_helper">Boyun ve en son kilo kaydın üzerinden güncel VKİ durumunu gösterir.</string>
+    <string name="weight_detail_history_title">Girilenler Geçmişi</string>
+    <string name="weight_detail_history_empty">Henüz geçmiş kilo kaydı bulunmuyor.</string>
+    <string name="weight_chart_start">Başlangıç %1$.1f kg</string>
+    <string name="weight_chart_target">Hedef %1$.1f kg</string>
+    <string name="weight_chart_current">Mevcut %1$.1f kg</string>
+    <string name="weight_chart_progress">Hedef ilerleme %1$d%%</string>
+    <string name="trends_weight_chart_title">Kilo Trendi</string>
+    <string name="trends_weight_chart_subtitle">Başlangıç, hedef ve mevcut kilo birlikte izlenir.</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
     <string name="profile_goals_title">Hedefler</string>

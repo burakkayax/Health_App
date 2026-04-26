@@ -7,6 +7,7 @@ import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SleepSession
@@ -229,6 +230,10 @@ private class FakeProfileDashboardRepository : DashboardRepository {
     }
 
     override fun observeMealsForDate(date: LocalDate): Flow<List<MealEntry>> = flowOf(emptyList())
+
+    override fun observeHydrationBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntry>> {
+        return flowOf(emptyList())
+    }
 
     override fun observeLatestMeasurement(): Flow<BodyMeasurementEntry?> = flowOf(null)
 

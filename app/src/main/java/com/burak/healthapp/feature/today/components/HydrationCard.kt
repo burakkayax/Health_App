@@ -98,12 +98,14 @@ internal fun HydrationCard(
     state: TodayUiState,
     onQuickAdd: (Int) -> Unit,
     onMore: () -> Unit,
-    onDeleteHydration: (Long) -> Unit,
+    onOpenDetails: () -> Unit,
+    onDeleteHydration: (Long) -> Unit = {},
 ) {
     HealthCard(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("hydration_card"),
+            .testTag("hydration_card")
+            .clickable(onClick = onOpenDetails),
     ) {
         SectionTitle(
             title = stringResource(R.string.today_title_hydration),
@@ -162,33 +164,6 @@ internal fun HydrationCard(
                     label = stringResource(R.string.today_format_quick_add_ml, 500),
                     onClick = { onQuickAdd(500) },
                 )
-            }
-            if (state.hydration.entries.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    state.hydration.entries.forEachIndexed { index, entry ->
-                        if (index > 0) {
-                            HorizontalDivider()
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("hydration_entry_${entry.id}"),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.today_format_ml, entry.amountMl),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            DeleteIconButton(
-                                testTag = "hydration_delete_${entry.id}",
-                                contentDescription = stringResource(R.string.content_description_delete_hydration),
-                                onClick = { onDeleteHydration(entry.id) },
-                            )
-                        }
-                    }
-                }
             }
         }
     }

@@ -24,6 +24,7 @@ data class TodayActions(
     val onOpenWeightDetail: () -> Unit,
     val onOpenSleepDetail: () -> Unit,
     val onOpenStepDetail: () -> Unit = {},
+    val onOpenHydrationDetail: () -> Unit = {},
     val onMealTypeChange: (MealType) -> Unit,
     val onAddMealDraft: () -> Unit,
     val onRemoveMealDraft: (Long) -> Unit,

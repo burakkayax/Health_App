@@ -50,7 +50,10 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.core.ui.components.HealthCard
+import com.burak.healthapp.core.ui.components.MetricDayRingState
+import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.feature.detail.sleep.SleepBarState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarDayState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
@@ -267,40 +270,24 @@ private fun SleepMonthlyCalendar(
     weeks: List<SleepCalendarWeekState>,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-        ) {
-            listOf("P", "S", "Ç", "P", "C", "C", "P").forEach { label ->
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+    MetricMonthRingGrid(
+        days = weeks.flatMap { week ->
+            week.days.map { day ->
+                MetricDayRingState(
+                    dayLabel = day.dayLabel,
+                    progress = day.progress,
+                    hasData = day.hasData,
+                    isInCurrentMonth = day.isInCurrentMonth,
+                    isTargetMet = day.isTargetMet,
                 )
             }
-        }
-        weeks.forEach { week ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-            ) {
-                week.days.forEach { day ->
-                    SleepCalendarDayCell(
-                        day = day,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        }
-    }
+        },
+        weekdayLabels = metricWeekdayLabels(),
+        modifier = modifier,
+        testTag = "sleep_month_calendar",
+        activeColor = HealthSleep,
+    )
 }
-
 @Composable
 private fun SleepCalendarDayCell(
     day: SleepCalendarDayState,

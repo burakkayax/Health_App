@@ -22,8 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.burak.healthapp.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,7 +40,10 @@ import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
+import com.burak.healthapp.core.ui.components.MetricDayRingState
+import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.feature.detail.step.StepBarState
 import com.burak.healthapp.feature.detail.step.StepDetailUiState
 import com.burak.healthapp.feature.root.healthApplication
@@ -65,7 +70,8 @@ class StepDetailViewModel(
             val displayDays = if (period == TrendsPeriod.WEEKLY) {
                 (6L downTo 0L).map(date::minusDays)
             } else {
-                (29L downTo 0L).map(date::minusDays)
+                val monthStart = date.withDayOfMonth(1)
+                (0L..java.time.temporal.ChronoUnit.DAYS.between(monthStart, date)).map(monthStart::plusDays)
             }
             combine(
                 settingsRepository.settings,
@@ -73,6 +79,7 @@ class StepDetailViewModel(
             ) { settings, entries ->
                 entries.toStepDetailUiState(
                     days = displayDays,
+                    anchorDate = date,
                     period = period,
                     targetSteps = settings.goalSettings.dailyStepTarget,
                 )
@@ -142,7 +149,10 @@ fun StepDetailContent(
         item {
             SegmentedControl(
                 modifier = Modifier.fillMaxWidth(),
-                options = listOf("Haftalık", "Aylık"),
+                options = listOf(
+                    stringResource(R.string.common_weekly),
+                    stringResource(R.string.common_monthly),
+                ),
                 selectedIndex = if (state.selectedPeriod == TrendsPeriod.WEEKLY) 0 else 1,
                 onSelectionChange = { index ->
                     onSelectPeriod(if (index == 0) TrendsPeriod.WEEKLY else TrendsPeriod.MONTHLY)
@@ -173,7 +183,16 @@ fun StepDetailContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                } else {
+                }
+                if (state.selectedPeriod == TrendsPeriod.MONTHLY) {
+                    MetricMonthRingGrid(
+                        days = state.monthDays,
+                        weekdayLabels = metricWeekdayLabels(),
+                        modifier = Modifier.padding(top = HealthSpacing.sm),
+                        testTag = "step_month_ring_grid",
+                        activeColor = HealthPrimary,
+                    )
+                } else if (state.hasData) {
                     StepBarChart(
                         modifier = Modifier
                             .padding(top = HealthSpacing.sm)
@@ -260,6 +279,7 @@ private fun StepBarChart(
 
 private fun List<StepEntry>.toStepDetailUiState(
     days: List<LocalDate>,
+    anchorDate: LocalDate,
     period: TrendsPeriod,
     targetSteps: Int,
 ): StepDetailUiState {
@@ -278,6 +298,15 @@ private fun List<StepEntry>.toStepDetailUiState(
                 progress = clampProgress(steps.toFloat(), targetSteps.toFloat()),
             )
         },
+        monthDays = if (period == TrendsPeriod.MONTHLY) {
+            buildStepMonthRingDays(
+                anchorDate = anchorDate,
+                entriesByDate = entriesByDate,
+                targetSteps = targetSteps,
+            )
+        } else {
+            emptyList()
+        },
         totalStepsLabel = "$totalSteps adım",
         averageStepsLabel = "$averageSteps adım",
         targetLabel = "$targetSteps adım",
@@ -289,11 +318,39 @@ private fun emptyStepDetailUiState(): StepDetailUiState {
     return StepDetailUiState(
         selectedPeriod = TrendsPeriod.WEEKLY,
         bars = emptyList(),
+        monthDays = emptyList(),
         totalStepsLabel = "0 adım",
         averageStepsLabel = "0 adım",
         targetLabel = "8000 adım",
         hasData = false,
     )
+}
+
+internal fun buildStepMonthRingDays(
+    anchorDate: LocalDate,
+    entriesByDate: Map<LocalDate, StepEntry>,
+    targetSteps: Int,
+): List<MetricDayRingState> {
+    val monthStart = anchorDate.withDayOfMonth(1)
+    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
+    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
+    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
+    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
+    val target = targetSteps.toFloat().coerceAtLeast(1f)
+
+    return (0 until dayCount).map { offset ->
+        val date = gridStart.plusDays(offset.toLong())
+        val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
+        val steps = if (isInCurrentMonth) entriesByDate[date]?.steps ?: 0 else 0
+        val progress = clampProgress(steps.toFloat(), target)
+        MetricDayRingState(
+            dayLabel = date.dayOfMonth.toString(),
+            progress = progress,
+            hasData = steps > 0,
+            isInCurrentMonth = isInCurrentMonth,
+            isTargetMet = steps > 0 && progress >= 1f,
+        )
+    }
 }
 
 private fun LocalDate.toWeekLabel(): String {

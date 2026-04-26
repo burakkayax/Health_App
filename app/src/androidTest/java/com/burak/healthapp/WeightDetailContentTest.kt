@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.core.ui.model.BmiGaugeState
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.detail.weight.WeightDetailUiState
 import com.burak.healthapp.feature.detail.weight.WeightHistoryItemState
 import com.burak.healthapp.core.ui.theme.HealthTheme
@@ -35,6 +36,9 @@ class WeightDetailContentTest {
         composeRule.onNodeWithTag("weight_detail_bmi_card").assertIsDisplayed()
         composeRule.onNodeWithText("Girilenler Geçmişi").assertIsDisplayed()
         composeRule.onNodeWithText("24.5 • Normal").assertIsDisplayed()
+        composeRule.onNodeWithText("Başlangıç 77.8 kg").assertIsDisplayed()
+        composeRule.onNodeWithText("Hedef 74.0 kg").assertIsDisplayed()
+        composeRule.onNodeWithText("Mevcut 77.4 kg").assertIsDisplayed()
     }
 
     @Test
@@ -72,11 +76,13 @@ class WeightDetailContentTest {
     }
 
     private fun sampleState(): WeightDetailUiState {
+        val chartPoints = listOf(
+            TrendPoint("18 Nis", 77.8f),
+            TrendPoint("19 Nis", 77.4f),
+        )
         return WeightDetailUiState(
-            chartPoints = listOf(
-                TrendPoint("18 Nis", 77.8f),
-                TrendPoint("19 Nis", 77.4f),
-            ),
+            chartPoints = chartPoints,
+            weightChart = buildWeightTrendChartState(chartPoints, targetWeightKg = 74f),
             historyItems = listOf(
                 WeightHistoryItemState(id = 2, dateLabel = "19 Nisan 2026", weightLabel = "77.4 kg"),
                 WeightHistoryItemState(id = 1, dateLabel = "18 Nisan 2026", weightLabel = "77.8 kg"),

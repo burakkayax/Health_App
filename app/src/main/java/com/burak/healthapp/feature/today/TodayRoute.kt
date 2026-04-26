@@ -98,6 +98,7 @@ fun TodayRoute(
     onOpenWeightDetail: () -> Unit,
     onOpenSleepDetail: () -> Unit,
     onOpenStepDetail: () -> Unit,
+    onOpenHydrationDetail: () -> Unit,
 ) {
     val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory)
     val mealEditorViewModel: MealEditorViewModel = viewModel()
@@ -129,6 +130,7 @@ fun TodayRoute(
             onOpenWeightDetail = onOpenWeightDetail,
             onOpenSleepDetail = onOpenSleepDetail,
             onOpenStepDetail = onOpenStepDetail,
+            onOpenHydrationDetail = onOpenHydrationDetail,
             onMealTypeChange = mealEditorViewModel::setMealType,
             onAddMealDraft = mealEditorViewModel::addDraftFood,
             onRemoveMealDraft = mealEditorViewModel::removeDraftFood,

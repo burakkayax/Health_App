@@ -14,13 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.burak.healthapp.R
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.SmoothTrendChart
+import com.burak.healthapp.core.ui.components.WeightTrendChart
 import com.burak.healthapp.core.ui.components.WeeklyCaloriesBarChart
 import com.burak.healthapp.feature.trends.TrendsUiState
 import com.burak.healthapp.core.ui.theme.HealthSpacing
@@ -44,6 +47,7 @@ fun TrendsContent(
     onSelectPeriod: (TrendsPeriod) -> Unit,
 ) {
     val hasMeaningfulData = state.weeklyCaloriesCard?.bars?.any { it.calories > 0 } == true ||
+        state.weightChart?.chart?.points?.isNotEmpty() == true ||
         state.charts.any { chart -> chart.points.isNotEmpty() } ||
         state.insights.any { insight ->
             insight.value != "0 g" &&
@@ -130,6 +134,49 @@ fun TrendsContent(
                     value = insight.value,
                     subtitle = insight.subtitle,
                 )
+            }
+            state.weightChart?.let { weightChart ->
+                item {
+                    HealthCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("trends_weight_chart_card"),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.trends_weight_chart_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            modifier = Modifier.padding(top = HealthSpacing.xs),
+                            text = stringResource(R.string.trends_weight_chart_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        WeightTrendChart(
+                            state = weightChart.chart,
+                            startLabel = stringResource(
+                                R.string.weight_chart_start,
+                                weightChart.chart.startWeightKg,
+                            ),
+                            targetLabel = stringResource(
+                                R.string.weight_chart_target,
+                                weightChart.chart.targetWeightKg,
+                            ),
+                            currentLabel = stringResource(
+                                R.string.weight_chart_current,
+                                weightChart.chart.currentWeightKg,
+                            ),
+                            progressLabel = stringResource(
+                                R.string.weight_chart_progress,
+                                (weightChart.chart.progress * 100).toInt(),
+                            ),
+                            modifier = Modifier
+                                .padding(top = HealthSpacing.sm)
+                                .testTag("trends_weight_chart"),
+                        )
+                    }
+                }
             }
             items(state.charts) { chart ->
                 HealthCard(modifier = Modifier.fillMaxWidth()) {

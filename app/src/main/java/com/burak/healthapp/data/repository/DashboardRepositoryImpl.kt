@@ -149,6 +149,12 @@ class DashboardRepositoryImpl(
         }
     }
 
+    override fun observeHydrationBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntry>> {
+        return hydrationDao.observeBetween(startDate, endDate).map { entries ->
+            entries.map(HydrationEntryEntity::toDomain)
+        }
+    }
+
     override fun observeLatestMeasurement(): Flow<BodyMeasurementEntry?> {
         return measurementDao.observeLatest().map { measurement ->
             measurement?.toDomain()

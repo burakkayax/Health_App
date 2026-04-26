@@ -9,9 +9,11 @@ import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.repository.TrendsRepository
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.trends.InsightCardState
 import com.burak.healthapp.feature.trends.TrendChartState
 import com.burak.healthapp.feature.trends.TrendsUiState
+import com.burak.healthapp.feature.trends.WeightTrendChartCardState
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
 import com.burak.healthapp.feature.root.healthApplication
@@ -36,7 +38,10 @@ class TrendsViewModel(
                 settingsRepository.settings,
                 trendsRepository.observeTrends(period),
             ) { settings, snapshot ->
-                snapshot.toUiState(avatarInitials = settings.userProfile.avatarInitials)
+                snapshot.toUiState(
+                    avatarInitials = settings.userProfile.avatarInitials,
+                    targetWeightKg = settings.goalSettings.targetWeightKg,
+                )
             }
         }
         .stateIn(
@@ -61,7 +66,10 @@ class TrendsViewModel(
     }
 }
 
-private fun TrendsSnapshot.toUiState(avatarInitials: String): TrendsUiState {
+private fun TrendsSnapshot.toUiState(
+    avatarInitials: String,
+    targetWeightKg: Float,
+): TrendsUiState {
     val locale = Locale.forLanguageTag("tr")
     val sleepHours = averageSleepMinutes.toInt() / 60
     val sleepMinutes = averageSleepMinutes.toInt() % 60
@@ -109,16 +117,21 @@ private fun TrendsSnapshot.toUiState(avatarInitials: String): TrendsUiState {
         },
         charts = listOf(
             TrendChartState(
-                title = "Kilo Trendi",
-                subtitle = "Turkuaz çizgiyle yumuşak akış.",
-                points = weightPoints,
-            ),
-            TrendChartState(
                 title = "Adım Trendi",
                 subtitle = "Günlük hedefe göre adım akışı.",
                 points = stepPoints,
             ),
         ),
+        weightChart = buildWeightTrendChartState(
+            points = weightPoints,
+            targetWeightKg = targetWeightKg,
+        )?.let { chart ->
+            WeightTrendChartCardState(
+                title = "Kilo Trendi",
+                subtitle = "Başlangıç, hedef ve mevcut kilo birlikte izlenir.",
+                chart = chart,
+            )
+        },
     )
 }
 

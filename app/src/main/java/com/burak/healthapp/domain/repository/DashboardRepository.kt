@@ -3,6 +3,7 @@ package com.burak.healthapp.domain.repository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SleepSession
@@ -22,6 +23,8 @@ interface DashboardRepository {
     fun observeToday(date: LocalDate = LocalDate.now()): Flow<TodaySnapshot>
 
     fun observeMealsForDate(date: LocalDate = LocalDate.now()): Flow<List<MealEntry>>
+
+    fun observeHydrationBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntry>>
 
     fun observeLatestMeasurement(): Flow<BodyMeasurementEntry?>
 

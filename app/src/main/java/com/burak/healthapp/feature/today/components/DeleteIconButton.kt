@@ -53,11 +53,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.burak.healthapp.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.domain.model.ExerciseIntensity
@@ -68,6 +70,7 @@ import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.CardFooterLinkRow
 import com.burak.healthapp.core.ui.components.CardHeaderActionButton
+import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
 import com.burak.healthapp.core.ui.components.CircularProgressRing
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SegmentedControl
@@ -97,14 +100,11 @@ internal fun DeleteIconButton(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
-    IconButton(
+    CardHeaderDestructiveButton(
+        label = stringResource(R.string.common_delete),
+        contentDescription = contentDescription,
         modifier = Modifier.testTag(testTag),
+        icon = Icons.Outlined.DeleteOutline,
         onClick = onClick,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.DeleteOutline,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    )
 }

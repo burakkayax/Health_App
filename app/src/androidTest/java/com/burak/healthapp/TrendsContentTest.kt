@@ -10,9 +10,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.trends.InsightCardState
 import com.burak.healthapp.feature.trends.TrendChartState
 import com.burak.healthapp.feature.trends.TrendsUiState
+import com.burak.healthapp.feature.trends.WeightTrendChartCardState
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
 import com.burak.healthapp.core.ui.theme.HealthTheme
@@ -98,14 +100,26 @@ class TrendsContentTest {
             ),
             charts = listOf(
                 TrendChartState(
-                    title = "Kilo Trendi",
-                    subtitle = "Turkuaz çizgiyle yumuşak akış.",
+                    title = "Adım Trendi",
+                    subtitle = "Günlük hedefe göre adım akışı.",
+                    points = listOf(
+                        TrendPoint("Pzt", 4200f),
+                        TrendPoint("Sal", 5400f),
+                        TrendPoint("Çrş", 6100f),
+                    ),
+                ),
+            ),
+            weightChart = WeightTrendChartCardState(
+                title = "Kilo Trendi",
+                subtitle = "Başlangıç, hedef ve mevcut kilo birlikte izlenir.",
+                chart = buildWeightTrendChartState(
                     points = listOf(
                         TrendPoint("Pzt", 78f),
                         TrendPoint("Sal", 77.8f),
                         TrendPoint("Çrş", 77.4f),
                     ),
-                ),
+                    targetWeightKg = 74f,
+                )!!,
             ),
         )
     }

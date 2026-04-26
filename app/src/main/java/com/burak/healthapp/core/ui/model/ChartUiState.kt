@@ -12,6 +12,7 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.calculation.directionAwareProgress
 
 data class WeeklyCalorieBarState(
     val label: String,
@@ -24,3 +25,31 @@ data class BmiGaugeState(
     val valueLabel: String? = null,
     val helperMessage: String? = null,
 )
+
+data class WeightTrendChartState(
+    val points: List<TrendPoint>,
+    val startWeightKg: Float,
+    val targetWeightKg: Float,
+    val currentWeightKg: Float,
+    val progress: Float,
+)
+
+fun buildWeightTrendChartState(
+    points: List<TrendPoint>,
+    targetWeightKg: Float,
+): WeightTrendChartState? {
+    if (points.isEmpty()) return null
+    val startWeightKg = points.first().value
+    val currentWeightKg = points.last().value
+    return WeightTrendChartState(
+        points = points,
+        startWeightKg = startWeightKg,
+        targetWeightKg = targetWeightKg,
+        currentWeightKg = currentWeightKg,
+        progress = directionAwareProgress(
+            baseline = startWeightKg,
+            current = currentWeightKg,
+            target = targetWeightKg,
+        ),
+    )
+}

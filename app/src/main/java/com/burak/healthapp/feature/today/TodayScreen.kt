@@ -141,6 +141,7 @@ fun TodayContent(
         onOpenWeightDetail = actions.onOpenWeightDetail,
         onOpenSleepDetail = actions.onOpenSleepDetail,
         onOpenStepDetail = actions.onOpenStepDetail,
+        onOpenHydrationDetail = actions.onOpenHydrationDetail,
         mealEditorState = mealEditorState,
         onMealTypeChange = actions.onMealTypeChange,
         onAddMealDraft = actions.onAddMealDraft,
@@ -175,6 +176,7 @@ fun TodayContent(
     onOpenWeightDetail: () -> Unit,
     onOpenSleepDetail: () -> Unit,
     onOpenStepDetail: () -> Unit = {},
+    onOpenHydrationDetail: () -> Unit = {},
     mealEditorState: MealEditorUiState,
     onMealTypeChange: (MealType) -> Unit,
     onAddMealDraft: () -> Unit,
@@ -237,6 +239,7 @@ fun TodayContent(
                     state = state,
                     onQuickAdd = onAddHydration,
                     onMore = { activeSheet = TodaySheet.Hydration },
+                    onOpenDetails = onOpenHydrationDetail,
                     onDeleteHydration = onDeleteHydration,
                 )
             }

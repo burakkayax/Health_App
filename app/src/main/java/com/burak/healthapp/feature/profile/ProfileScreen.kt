@@ -136,6 +136,7 @@ fun ProfileContent(
                     )
                     CardHeaderActionButton(
                         label = stringResource(R.string.common_edit),
+                        icon = null,
                         modifier = Modifier.testTag("profile_goals_button"),
                         onClick = onOpenGoals,
                     )
@@ -222,6 +223,7 @@ fun ProfileContent(
                     )
                     CardHeaderActionButton(
                         label = stringResource(R.string.common_manage),
+                        icon = null,
                         modifier = Modifier.testTag("profile_supplements_button"),
                         onClick = onManageSupplements,
                     )

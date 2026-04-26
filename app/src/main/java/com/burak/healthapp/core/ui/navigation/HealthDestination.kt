@@ -60,6 +60,11 @@ data object StepDetailDestination : HealthDestination(
     titleRes = R.string.route_step_detail,
 )
 
+data object HydrationDetailDestination : HealthDestination(
+    route = "hydration_detail",
+    titleRes = R.string.route_hydration_detail,
+)
+
 val mainDestinations = listOf(
     TodayDestination,
     TrendsDestination,

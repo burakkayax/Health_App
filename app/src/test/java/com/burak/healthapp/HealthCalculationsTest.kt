@@ -152,6 +152,17 @@ class HealthCalculationsTest {
     }
 
     @Test
+    fun directionAwareProgress_handlesHigherGoal() {
+        val progress = directionAwareProgress(
+            baseline = 70f,
+            current = 75f,
+            target = 80f,
+        )
+
+        assertEquals(0.5f, progress, 0.001f)
+    }
+
+    @Test
     fun calculateBodyMassIndex_returnsExpectedValue() {
         val bmi = calculateBodyMassIndex(weightKg = 75f, heightCm = 175f)
 

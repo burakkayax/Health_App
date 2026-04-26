@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.burak.healthapp.R
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.calculation.calculateBodyMassIndex
@@ -38,8 +40,10 @@ import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.BmiGaugeChart
-import com.burak.healthapp.core.ui.components.SmoothTrendChart
+import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
+import com.burak.healthapp.core.ui.components.WeightTrendChart
 import com.burak.healthapp.core.ui.model.BmiGaugeState
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.detail.weight.WeightDetailUiState
 import com.burak.healthapp.feature.detail.weight.WeightHistoryItemState
 import com.burak.healthapp.feature.root.healthApplication
@@ -59,7 +63,10 @@ class WeightDetailViewModel(
         settingsRepository.settings,
         dashboardRepository.observeWeightHistory(),
     ) { settings, measurements ->
-        measurements.toWeightDetailUiState(heightCm = settings.userProfile.heightCm)
+        measurements.toWeightDetailUiState(
+            heightCm = settings.userProfile.heightCm,
+            targetWeightKg = settings.goalSettings.targetWeightKg,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -124,14 +131,14 @@ fun WeightDetailContent(
                     .testTag("weight_detail_chart_card"),
             ) {
                 Text(
-                    text = "Kilo Geçmişi Grafiği",
+                    text = stringResource(R.string.weight_detail_chart_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (state.chartPoints.isEmpty()) {
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.sm),
-                        text = "Henüz kilo kaydı yok. Kilo kartındaki + Ekle aksiyonuyla kayıt oluşturmaya başla.",
+                        text = stringResource(R.string.weight_detail_chart_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -139,18 +146,26 @@ fun WeightDetailContent(
                     state.historyItems.firstOrNull()?.let { latestItem ->
                         Text(
                             modifier = Modifier.padding(top = HealthSpacing.xs),
-                            text = "Son kayıt ${latestItem.weightLabel}",
+                            text = stringResource(R.string.weight_detail_latest_record, latestItem.weightLabel),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    SmoothTrendChart(
-                        modifier = Modifier
-                            .padding(top = HealthSpacing.sm)
-                            .testTag("weight_detail_chart"),
-                        points = state.chartPoints,
-                        chartHeight = 240.dp,
-                    )
+                    state.weightChart?.let { chart ->
+                        WeightTrendChart(
+                            state = chart,
+                            startLabel = stringResource(R.string.weight_chart_start, chart.startWeightKg),
+                            targetLabel = stringResource(R.string.weight_chart_target, chart.targetWeightKg),
+                            currentLabel = stringResource(R.string.weight_chart_current, chart.currentWeightKg),
+                            progressLabel = stringResource(
+                                R.string.weight_chart_progress,
+                                (chart.progress * 100).toInt(),
+                            ),
+                            modifier = Modifier
+                                .padding(top = HealthSpacing.sm)
+                                .testTag("weight_detail_chart"),
+                        )
+                    }
                 }
             }
         }
@@ -161,13 +176,13 @@ fun WeightDetailContent(
                     .testTag("weight_detail_bmi_card"),
             ) {
                 Text(
-                    text = "Vücut Kitle İndeksi",
+                    text = stringResource(R.string.weight_detail_bmi_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     modifier = Modifier.padding(top = HealthSpacing.xs),
-                    text = "Boyun ve en son kilo kaydın üzerinden güncel VKİ durumunu gösterir.",
+                    text = stringResource(R.string.weight_detail_bmi_helper),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -191,7 +206,7 @@ fun WeightDetailContent(
         }
         item {
             Text(
-                text = "Girilenler Geçmişi",
+                text = stringResource(R.string.weight_detail_history_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -204,7 +219,7 @@ fun WeightDetailContent(
                         .testTag("weight_detail_history_empty"),
                 ) {
                     Text(
-                        text = "Henüz geçmiş kilo kaydı bulunmuyor.",
+                        text = stringResource(R.string.weight_detail_history_empty),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -237,16 +252,12 @@ fun WeightDetailContent(
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
-                        IconButton(
+                        CardHeaderDestructiveButton(
+                            label = stringResource(R.string.common_delete),
+                            contentDescription = stringResource(R.string.content_description_delete_weight),
                             modifier = Modifier.testTag("weight_history_delete_${item.id}"),
                             onClick = { onDeleteMeasurement(item.id) },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.DeleteOutline,
-                                contentDescription = "Kilo kaydını sil",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -254,25 +265,33 @@ fun WeightDetailContent(
     }
 }
 
-private fun List<BodyMeasurementEntry>.toWeightDetailUiState(heightCm: Float?): WeightDetailUiState {
+private fun List<BodyMeasurementEntry>.toWeightDetailUiState(
+    heightCm: Float?,
+    targetWeightKg: Float,
+): WeightDetailUiState {
     val locale = Locale.forLanguageTag("tr")
     val historyFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", locale)
     val chartFormatter = DateTimeFormatter.ofPattern("d MMM", locale)
     val chartMeasurements = groupBy(BodyMeasurementEntry::date)
         .mapNotNull { (_, entries) -> entries.maxByOrNull(BodyMeasurementEntry::recordedAt) }
         .sortedBy(BodyMeasurementEntry::date)
+    val chartPoints = chartMeasurements.map { measurement ->
+        TrendPoint(
+            label = measurement.date.format(chartFormatter),
+            value = measurement.weightKg,
+        )
+    }
     val latestMeasurement = maxWithOrNull(
         compareBy<BodyMeasurementEntry> { it.date }.thenBy { it.recordedAt },
     )
     val bmi = calculateBodyMassIndex(latestMeasurement?.weightKg, heightCm)
 
     return WeightDetailUiState(
-        chartPoints = chartMeasurements.map { measurement ->
-            TrendPoint(
-                label = measurement.date.format(chartFormatter),
-                value = measurement.weightKg,
-            )
-        },
+        chartPoints = chartPoints,
+        weightChart = buildWeightTrendChartState(
+            points = chartPoints,
+            targetWeightKg = targetWeightKg,
+        ),
         historyItems = sortedWith(
             compareByDescending<BodyMeasurementEntry> { it.date }.thenByDescending { it.recordedAt },
         ).map { measurement ->

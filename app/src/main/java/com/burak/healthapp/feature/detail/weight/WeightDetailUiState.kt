@@ -13,6 +13,7 @@ import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.ui.model.BmiGaugeState
+import com.burak.healthapp.core.ui.model.WeightTrendChartState
 
 data class WeightHistoryItemState(
     val id: Long,
@@ -22,6 +23,7 @@ data class WeightHistoryItemState(
 
 data class WeightDetailUiState(
     val chartPoints: List<TrendPoint>,
+    val weightChart: WeightTrendChartState? = null,
     val historyItems: List<WeightHistoryItemState>,
     val bmiGauge: BmiGaugeState,
 )

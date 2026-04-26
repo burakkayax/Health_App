@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +43,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -107,29 +109,54 @@ fun SectionTitle(
 fun CardHeaderActionButton(
     label: String,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = Icons.Rounded.Add,
+    iconContentDescription: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+    contentColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
+            .background(containerColor)
             .clickable(onClick = onClick)
             .padding(horizontal = HealthSpacing.sm, vertical = HealthSpacing.xs),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.Rounded.Add,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp),
-        )
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = iconContentDescription,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp),
+            )
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = contentColor,
         )
     }
+}
+
+@Composable
+fun CardHeaderDestructiveButton(
+    label: String,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = Icons.Outlined.DeleteOutline,
+    onClick: () -> Unit,
+) {
+    CardHeaderActionButton(
+        label = label,
+        modifier = modifier,
+        icon = icon,
+        iconContentDescription = contentDescription,
+        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+        contentColor = MaterialTheme.colorScheme.error,
+        onClick = onClick,
+    )
 }
 
 @Composable

@@ -6,6 +6,7 @@ import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
 import com.burak.healthapp.core.ui.navigation.ProfileGoalsDestination
+import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.SleepDetailDestination
 import com.burak.healthapp.core.ui.navigation.StepDetailDestination
 import com.burak.healthapp.core.ui.navigation.TodayDestination
@@ -35,6 +36,7 @@ internal fun resolveTitle(currentRoute: String, selectedDate: LocalDate): String
         WeightDetailDestination.route -> stringResource(WeightDetailDestination.titleRes)
         SleepDetailDestination.route -> stringResource(SleepDetailDestination.titleRes)
         StepDetailDestination.route -> stringResource(StepDetailDestination.titleRes)
+        HydrationDetailDestination.route -> stringResource(HydrationDetailDestination.titleRes)
         else -> {
             if (selectedDate == today) {
                 stringResource(TodayDestination.titleRes)
