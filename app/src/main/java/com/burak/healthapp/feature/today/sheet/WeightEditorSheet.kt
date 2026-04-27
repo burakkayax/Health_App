@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.ValidationResult
+import com.burak.healthapp.domain.validation.WeightInputValidator
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -103,6 +107,7 @@ internal fun WeightEditorSheet(
     onSave: (Float) -> Unit,
 ) {
     var weight by rememberSaveable { mutableStateOf(if (initialWeight > 0f) formatFloat(initialWeight) else "") }
+    var weightError by rememberSaveable { mutableStateOf<HealthInputError?>(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,16 +121,30 @@ internal fun WeightEditorSheet(
         )
         HealthPillTextField(
             value = weight,
-            onValueChange = { weight = it },
+            onValueChange = {
+                weight = it
+                if (weightError != null) {
+                    weightError = (WeightInputValidator.validateWeight(it) as? ValidationResult.Invalid)
+                        ?.errors
+                        ?.firstOrNull()
+                }
+            },
             label = stringResource(R.string.today_label_weight_kg),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            isError = weightError != null,
+            supportingText = weightError?.asString(),
         )
         RoundedPillButton(
             label = stringResource(R.string.common_save),
             modifier = Modifier.fillMaxWidth(),
             containerColor = HealthPrimary,
             contentColor = Color.White,
-            onClick = { onSave(weight.toFloatOrDefault(0f)) },
+            onClick = {
+                when (val result = WeightInputValidator.validateWeight(weight)) {
+                    is ValidationResult.Valid -> onSave(result.value)
+                    is ValidationResult.Invalid -> weightError = result.errors.firstOrNull()
+                }
+            },
         )
         Spacer(modifier = Modifier.height(HealthSpacing.xs))
     }

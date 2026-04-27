@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.SleepInputValidator
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -104,6 +108,7 @@ internal fun SleepEditorSheet(
 ) {
     var start by rememberSaveable { mutableStateOf(timeRangeLabel.substringBefore(" - ").ifBlank { "23:30" }) }
     var end by rememberSaveable { mutableStateOf(timeRangeLabel.substringAfter(" - ", "07:00")) }
+    var timeError by rememberSaveable { mutableStateOf<HealthInputError?>(null) }
 
     Column(
         modifier = Modifier
@@ -126,19 +131,33 @@ internal fun SleepEditorSheet(
             leftValue = start,
             rightLabel = stringResource(R.string.today_label_sleep_end),
             rightValue = end,
-            onLeftChange = { start = it },
-            onRightChange = { end = it },
+            onLeftChange = {
+                start = it
+                timeError = null
+            },
+            onRightChange = {
+                end = it
+                timeError = null
+            },
             numeric = false,
         )
+        if (timeError != null) {
+            Text(
+                text = timeError!!.asString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
         RoundedPillButton(
             label = stringResource(R.string.common_save),
             modifier = Modifier.fillMaxWidth(),
             containerColor = HealthPrimary,
             contentColor = Color.White,
             onClick = {
-                val startTime = start.toLocalTimeOrNull() ?: LocalTime.of(23, 30)
-                val endTime = end.toLocalTimeOrNull() ?: LocalTime.of(7, 0)
-                onSave(startTime, endTime)
+                when (val result = SleepInputValidator.validate(start, end)) {
+                    is ValidationResult.Valid -> onSave(result.value.first, result.value.second)
+                    is ValidationResult.Invalid -> timeError = result.errors.firstOrNull()
+                }
             },
         )
         Spacer(modifier = Modifier.height(HealthSpacing.xs))

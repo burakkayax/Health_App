@@ -87,6 +87,7 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -169,6 +170,8 @@ internal fun MealEditorSheet(
                     value = draft.name,
                     onValueChange = { onDraftNameChange(draft.draftId, it) },
                     label = stringResource(R.string.today_meal_food_name),
+                    isError = draft.nameError != null,
+                    supportingText = draft.nameError?.asString(),
                 )
                 NumberFieldRow(
                     leftLabel = stringResource(R.string.today_meal_calories),
@@ -186,6 +189,15 @@ internal fun MealEditorSheet(
                     onLeftChange = { onDraftCarbsChange(draft.draftId, it) },
                     onRightChange = { onDraftFatChange(draft.draftId, it) },
                 )
+                val fieldError = draft.calorieError ?: draft.macroError
+                if (fieldError != null) {
+                    Text(
+                        modifier = Modifier.padding(top = HealthSpacing.xs),
+                        text = fieldError.asString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
         item {

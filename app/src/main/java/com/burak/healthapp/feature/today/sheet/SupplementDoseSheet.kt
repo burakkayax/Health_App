@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.SupplementDoseValidator
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -131,11 +135,13 @@ internal fun SupplementDoseSheet(
                 value = item.amountText,
                 onValueChange = { newValue ->
                     editableDrafts = editableDrafts.toMutableList().also { list ->
-                        list[index] = list[index].copy(amountText = newValue)
+                        list[index] = list[index].copy(amountText = newValue, error = null)
                     }
                 },
                 label = item.name,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                isError = item.error != null,
+                supportingText = item.error?.asString(),
                 suffix = {
                     Text(
                         text = item.unitLabel,
@@ -150,16 +156,27 @@ internal fun SupplementDoseSheet(
             containerColor = HealthPrimary,
             contentColor = Color.White,
             onClick = {
+                val validatedDrafts = editableDrafts.map { item ->
+                    if (item.amountText.isBlank()) {
+                        item.copy(error = null)
+                    } else {
+                        when (val result = SupplementDoseValidator.validateAmount(item.amountText)) {
+                            is ValidationResult.Valid -> item.copy(error = null)
+                            is ValidationResult.Invalid -> item.copy(error = result.errors.firstOrNull())
+                        }
+                    }
+                }
+                editableDrafts = validatedDrafts
+                if (validatedDrafts.any { it.error != null }) return@RoundedPillButton
+
                 onSave(
-                    editableDrafts.mapNotNull { item ->
-                        val amount = item.amountText.toFloatOrNull()
-                        if (amount == null || amount <= 0f) {
-                            null
-                        } else {
+                    validatedDrafts.mapNotNull { item ->
+                        val amount = (SupplementDoseValidator.validateAmount(item.amountText) as? ValidationResult.Valid)?.value
+                        amount?.let {
                             SupplementDoseEntry(
                                 templateId = item.templateId,
                                 date = LocalDate.now(),
-                                amount = amount,
+                                amount = it,
                             )
                         }
                     },
@@ -175,4 +192,5 @@ private data class SupplementDoseDraft(
     val name: String,
     val unitLabel: String,
     val amountText: String,
+    val error: HealthInputError? = null,
 )

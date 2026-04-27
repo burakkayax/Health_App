@@ -377,6 +377,7 @@ Hedefler:
 * ViewModel içinde doğrudan Android `Context` kullanmadan metin üretmek
 
 ViewModel kaynaklı hata ve validasyon mesajları için `UiText` yaklaşımı kullanılır.
+Kullanıcı form girişleri için Android bağımsız validator sınıfları kullanılır; UI katmanı yalnız hata modelini string resource metnine çevirir.
 
 ---
 

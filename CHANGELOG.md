@@ -6,6 +6,15 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Öğün, su, uyku, kilo, egzersiz, sigara, takviye dozu ve hedef ayarları için Android bağımsız validator katmanı eklendi.
+- Today sheet akışlarında geçersiz input için kullanıcıya hata metni gösteren form davranışı eklendi.
+- Profil hedefleri kayıt akışında sayı/saat parse hatalarında sessiz fallback yerine hata gösterimi eklendi.
+- Validator sınır değerleri için unit testler eklendi.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Profil > Veri Yönetimi bölümüne JSON içe aktarma ve tüm sağlık verilerini silme aksiyonları eklendi.
 - JSON import için schema validation, desteklenen şema kontrolü ve kayıt sayısı önizleme dialog'u eklendi.
 - Import işlemi Room transaction içinde uygulanacak şekilde veri yönetimi repository/use case katmanı eklendi.

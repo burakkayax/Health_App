@@ -12,6 +12,7 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.validation.HealthInputError
 
 data class MealDraftFoodState(
     val draftId: Long,
@@ -20,6 +21,9 @@ data class MealDraftFoodState(
     val protein: String = "",
     val carbs: String = "",
     val fat: String = "",
+    val nameError: HealthInputError? = null,
+    val calorieError: HealthInputError? = null,
+    val macroError: HealthInputError? = null,
 )
 
 data class MealEditorUiState(

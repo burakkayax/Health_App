@@ -427,6 +427,7 @@ fun HealthPillTextField(
     singleLine: Boolean = true,
     minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    supportingText: String? = null,
     suffix: (@Composable () -> Unit)? = null,
 ) {
     OutlinedTextField(
@@ -438,6 +439,7 @@ fun HealthPillTextField(
         singleLine = singleLine,
         minLines = minLines,
         keyboardOptions = keyboardOptions,
+        supportingText = supportingText?.let { text -> { Text(text) } },
         suffix = suffix,
         shape = RoundedCornerShape(28.dp),
         colors = OutlinedTextFieldDefaults.colors(

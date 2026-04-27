@@ -34,9 +34,13 @@ import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.RoundedPillButton
+import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.validation.GoalSettingsValidator
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -95,6 +99,7 @@ fun ProfileGoalsContent(
     var waterReminderStart by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.startTime.toString()) }
     var waterReminderEnd by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.endTime.toString()) }
     var waterReminderInterval by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.intervalMinutes.toString()) }
+    var formError by remember(state.goalSettings, latestMeasurement) { mutableStateOf<HealthInputError?>(null) }
     val dailyGoalsTitle = stringResource(R.string.profile_goals_daily_title)
     val dailyGoalsSubtitle = stringResource(R.string.profile_goals_daily_subtitle)
     val waterReminderTitle = stringResource(R.string.profile_goals_water_reminder_title)
@@ -265,6 +270,7 @@ fun ProfileGoalsContent(
                 containerColor = HealthPrimary,
                 contentColor = Color.White,
                 onClick = {
+                    formError = null
                     val stepValidation = validateStepTargetInput(dailySteps)
                     val validatedDailySteps = when (stepValidation) {
                         is StepGoalValidationResult.Valid -> stepValidation.value
@@ -274,44 +280,114 @@ fun ProfileGoalsContent(
                         }
                     }
 
+                    val parsedCalories = dailyCalories.toIntOrNull()
+                    val parsedProtein = protein.toIntOrNull()
+                    val parsedCarbs = carbs.toIntOrNull()
+                    val parsedFat = fat.toIntOrNull()
+                    val parsedWater = water.toIntOrNull()
+                    val parsedSmokeLimit = smokeDailyLimit.toIntOrNull()
+                    val parsedExerciseDays = exerciseTargetDays.toIntOrNull()
+                    val parsedExerciseDuration = exerciseTargetDuration.toIntOrNull()
+                    val parsedTargetWeight = targetWeight.toFloatOrNull()
+                    val parsedCurrentWeight = currentWeight.toFloatOrNull()
+                    val parsedCurrentShoulder = currentShoulder.toFloatOrNull()
+                    val parsedCurrentWaist = currentWaist.toFloatOrNull()
+                    val parsedCurrentHip = currentHip.toFloatOrNull()
+                    val parsedHeight = currentHeight.trim().ifBlank { null }?.toFloatOrNull()
+                    val parsedBedtime = sleepBedtime.toLocalTimeOrNull()
+                    val parsedWakeTime = sleepWakeTime.toLocalTimeOrNull()
+                    val parsedReminderStart = waterReminderStart.toLocalTimeOrNull()
+                    val parsedReminderEnd = waterReminderEnd.toLocalTimeOrNull()
+                    val parsedReminderInterval = waterReminderInterval.toIntOrNull()
+
+                    if (
+                        listOf(
+                            parsedCalories,
+                            parsedProtein,
+                            parsedCarbs,
+                            parsedFat,
+                            parsedWater,
+                            parsedSmokeLimit,
+                            parsedExerciseDays,
+                            parsedExerciseDuration,
+                            parsedReminderInterval,
+                        ).any { it == null } ||
+                        listOf(
+                            parsedTargetWeight,
+                            parsedCurrentWeight,
+                            parsedCurrentShoulder,
+                            parsedCurrentWaist,
+                            parsedCurrentHip,
+                        ).any { it == null } ||
+                        (currentHeight.isNotBlank() && parsedHeight == null)
+                    ) {
+                        formError = HealthInputError.MUST_BE_NUMBER
+                        return@RoundedPillButton
+                    }
+                    if (
+                        parsedBedtime == null ||
+                        parsedWakeTime == null ||
+                        parsedReminderStart == null ||
+                        parsedReminderEnd == null
+                    ) {
+                        formError = HealthInputError.INVALID_TIME
+                        return@RoundedPillButton
+                    }
+
+                    val goals = GoalSettings(
+                        dailyCaloriesTarget = parsedCalories!!,
+                        proteinTargetGrams = parsedProtein!!,
+                        carbTargetGrams = parsedCarbs!!,
+                        fatTargetGrams = parsedFat!!,
+                        waterTargetMl = parsedWater!!,
+                        dailyStepTarget = validatedDailySteps,
+                        sleepTargetBedtime = parsedBedtime,
+                        sleepTargetWakeTime = parsedWakeTime,
+                        exerciseTargetDaysPerWeek = parsedExerciseDays!!,
+                        exerciseTargetDurationMinutes = parsedExerciseDuration!!,
+                        smokeDailyLimit = parsedSmokeLimit!!,
+                        baselineWeightKg = state.goalSettings.baselineWeightKg,
+                        targetWeightKg = parsedTargetWeight!!,
+                        baselineShoulderCm = state.goalSettings.baselineShoulderCm,
+                        baselineWaistCm = state.goalSettings.baselineWaistCm,
+                        baselineHipCm = state.goalSettings.baselineHipCm,
+                    )
+                    when (val goalValidation = GoalSettingsValidator.validate(goals)) {
+                        is ValidationResult.Valid -> Unit
+                        is ValidationResult.Invalid -> {
+                            formError = goalValidation.errors.firstOrNull()
+                            return@RoundedPillButton
+                        }
+                    }
+
                     onSave(
-                        GoalSettings(
-                            dailyCaloriesTarget = dailyCalories.toIntOrDefault(DefaultHealthGoals.DAILY_CALORIES),
-                            proteinTargetGrams = protein.toIntOrDefault(DefaultHealthGoals.PROTEIN_GRAMS),
-                            carbTargetGrams = carbs.toIntOrDefault(DefaultHealthGoals.CARBS_GRAMS),
-                            fatTargetGrams = fat.toIntOrDefault(DefaultHealthGoals.FAT_GRAMS),
-                            waterTargetMl = water.toIntOrDefault(DefaultHealthGoals.WATER_TARGET_ML),
-                            dailyStepTarget = validatedDailySteps,
-                            sleepTargetBedtime = sleepBedtime.toLocalTimeOrDefault(state.goalSettings.sleepTargetBedtime),
-                            sleepTargetWakeTime = sleepWakeTime.toLocalTimeOrDefault(state.goalSettings.sleepTargetWakeTime),
-                            exerciseTargetDaysPerWeek = exerciseTargetDays.toIntOrDefault(DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK),
-                            exerciseTargetDurationMinutes = exerciseTargetDuration.toIntOrDefault(DefaultHealthGoals.EXERCISE_DURATION_MINUTES),
-                            smokeDailyLimit = smokeDailyLimit.toIntOrDefault(DefaultHealthGoals.SMOKE_DAILY_LIMIT),
-                            baselineWeightKg = state.goalSettings.baselineWeightKg,
-                            targetWeightKg = targetWeight.toFloatOrDefault(DefaultHealthGoals.TARGET_WEIGHT_KG),
-                            baselineShoulderCm = state.goalSettings.baselineShoulderCm,
-                            baselineWaistCm = state.goalSettings.baselineWaistCm,
-                            baselineHipCm = state.goalSettings.baselineHipCm,
-                        ),
+                        goals,
                         BodyMeasurementEntry(
                             date = LocalDate.now(),
-                            weightKg = currentWeight.toFloatOrDefault(latestMeasurement.weightKg),
-                            shoulderCm = currentShoulder.toFloatOrDefault(latestMeasurement.shoulderCm),
-                            waistCm = currentWaist.toFloatOrDefault(latestMeasurement.waistCm),
-                            hipCm = currentHip.toFloatOrDefault(latestMeasurement.hipCm),
+                            weightKg = parsedCurrentWeight!!,
+                            shoulderCm = parsedCurrentShoulder!!,
+                            waistCm = parsedCurrentWaist!!,
+                            hipCm = parsedCurrentHip!!,
                         ),
-                        currentHeight.toFloatOrNull(),
+                        parsedHeight,
                         WaterReminderSettings(
                             enabled = waterReminderEnabled,
-                            startTime = waterReminderStart.toLocalTimeOrDefault(state.waterReminderSettings.startTime),
-                            endTime = waterReminderEnd.toLocalTimeOrDefault(state.waterReminderSettings.endTime),
-                            intervalMinutes = waterReminderInterval
-                                .toIntOrDefault(DefaultHealthGoals.DEFAULT_WATER_REMINDER_INTERVAL_MINUTES)
+                            startTime = parsedReminderStart,
+                            endTime = parsedReminderEnd,
+                            intervalMinutes = parsedReminderInterval!!
                                 .coerceAtLeast(DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES),
                         ),
                     )
                 },
             )
+            formError?.let { error ->
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = error.asString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }
@@ -440,6 +516,7 @@ private fun GoalFieldColumn(
 private fun String.toIntOrDefault(fallback: Int): Int = toIntOrNull() ?: fallback
 private fun String.toFloatOrDefault(fallback: Float): Float = toFloatOrNull() ?: fallback
 private fun String.toLocalTimeOrDefault(fallback: LocalTime): LocalTime = runCatching { LocalTime.parse(this) }.getOrElse { fallback }
+private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.parse(this) }.getOrNull()
 private fun Float?.toEditableText(): String = this?.let {
     if (it % 1f == 0f) it.toInt().toString() else it.toString()
 } ?: ""

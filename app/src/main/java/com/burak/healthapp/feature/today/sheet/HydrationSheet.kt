@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.HydrationInputValidator
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -102,6 +106,7 @@ internal fun HydrationSheet(
     onSave: (Int) -> Unit,
 ) {
     var amount by rememberSaveable { mutableStateOf("750") }
+    var amountError by rememberSaveable { mutableStateOf<HealthInputError?>(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,16 +120,30 @@ internal fun HydrationSheet(
         )
         HealthPillTextField(
             value = amount,
-            onValueChange = { amount = it },
+            onValueChange = {
+                amount = it
+                if (amountError != null) {
+                    amountError = (HydrationInputValidator.validate(it) as? ValidationResult.Invalid)
+                        ?.errors
+                        ?.firstOrNull()
+                }
+            },
             label = stringResource(R.string.today_label_amount_ml),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = amountError != null,
+            supportingText = amountError?.asString(),
         )
         RoundedPillButton(
             label = stringResource(R.string.common_save),
             modifier = Modifier.fillMaxWidth(),
             containerColor = HealthPrimary,
             contentColor = Color.White,
-            onClick = { onSave(amount.toIntOrDefault(0)) },
+            onClick = {
+                when (val result = HydrationInputValidator.validate(amount)) {
+                    is ValidationResult.Valid -> onSave(result.value)
+                    is ValidationResult.Invalid -> amountError = result.errors.firstOrNull()
+                }
+            },
         )
         Spacer(modifier = Modifier.height(HealthSpacing.xs))
     }

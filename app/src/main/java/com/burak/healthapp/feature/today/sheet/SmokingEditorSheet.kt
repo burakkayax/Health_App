@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.SmokingInputValidator
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -103,6 +107,7 @@ internal fun SmokingEditorSheet(
     onSave: (Int) -> Unit,
 ) {
     var count by rememberSaveable { mutableStateOf(initialCount.toString()) }
+    var countError by rememberSaveable { mutableStateOf<HealthInputError?>(null) }
 
     Column(
         modifier = Modifier
@@ -117,16 +122,26 @@ internal fun SmokingEditorSheet(
         )
         HealthPillTextField(
             value = count,
-            onValueChange = { count = it },
+            onValueChange = {
+                count = it
+                countError = null
+            },
             label = stringResource(R.string.today_label_daily_total),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = countError != null,
+            supportingText = countError?.asString(),
         )
         RoundedPillButton(
             label = stringResource(R.string.common_save),
             modifier = Modifier.fillMaxWidth(),
             containerColor = HealthPrimary,
             contentColor = Color.White,
-            onClick = { onSave(count.toIntOrDefault(0)) },
+            onClick = {
+                when (val result = SmokingInputValidator.validateCount(count)) {
+                    is ValidationResult.Valid -> onSave(result.value)
+                    is ValidationResult.Invalid -> countError = result.errors.firstOrNull()
+                }
+            },
         )
         Spacer(modifier = Modifier.height(HealthSpacing.xs))
     }

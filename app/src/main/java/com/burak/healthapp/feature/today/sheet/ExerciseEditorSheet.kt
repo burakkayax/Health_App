@@ -87,6 +87,10 @@ import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.domain.validation.ExerciseInputValidator
+import com.burak.healthapp.domain.validation.HealthInputError
+import com.burak.healthapp.domain.validation.ValidationResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -109,6 +113,7 @@ internal fun ExerciseEditorSheet(
     var useCustomDuration by rememberSaveable { mutableStateOf(currentDuration !in listOf(30, 45, 60) && currentDuration > 0) }
     var customDuration by rememberSaveable { mutableStateOf(if (useCustomDuration) currentDuration.toString() else "") }
     var selectedIntensity by rememberSaveable { mutableStateOf(currentIntensity ?: ExerciseIntensity.MEDIUM) }
+    var durationError by rememberSaveable { mutableStateOf<HealthInputError?>(null) }
 
     Column(
         modifier = Modifier
@@ -167,9 +172,14 @@ internal fun ExerciseEditorSheet(
         if (useCustomDuration) {
             HealthPillTextField(
                 value = customDuration,
-                onValueChange = { customDuration = it },
+                onValueChange = {
+                    customDuration = it
+                    durationError = null
+                },
                 label = stringResource(R.string.today_label_custom_duration),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = durationError != null,
+                supportingText = durationError?.asString(),
             )
         }
         SegmentedControl(
@@ -186,16 +196,11 @@ internal fun ExerciseEditorSheet(
             containerColor = HealthPrimary,
             contentColor = Color.White,
             onClick = {
-                val duration = if (useCustomDuration) {
-                    customDuration.toIntOrDefault(selectedDuration)
-                } else {
-                    selectedDuration
+                val durationText = if (useCustomDuration) customDuration else selectedDuration.toString()
+                when (val result = ExerciseInputValidator.validateDuration(durationText)) {
+                    is ValidationResult.Valid -> onSave(selectedType, result.value, selectedIntensity)
+                    is ValidationResult.Invalid -> durationError = result.errors.firstOrNull()
                 }
-                onSave(
-                    selectedType,
-                    duration,
-                    selectedIntensity,
-                )
             },
         )
         Spacer(modifier = Modifier.height(HealthSpacing.xs))
