@@ -9,9 +9,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
+import com.burak.healthapp.data.export.HealthDataImportFileReader
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.calculation.formatClockRange
+import com.burak.healthapp.domain.export.HealthDataExportModel
+import com.burak.healthapp.domain.export.HealthDataJsonImporter
+import com.burak.healthapp.domain.export.ImportValidationError
+import com.burak.healthapp.domain.export.ImportValidationResult
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SettingsState
@@ -26,7 +31,9 @@ import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import com.burak.healthapp.feature.profile.toDomainTemplate
 import com.burak.healthapp.feature.root.healthApplication
+import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
+import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
 import java.time.LocalDate
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,9 +48,14 @@ class ProfileViewModel(
     private val dashboardRepository: DashboardRepository,
     private val exportHealthDataUseCase: ExportHealthDataUseCase,
     private val exportFileWriter: HealthDataExportFileWriter,
+    private val importFileReader: HealthDataImportFileReader,
+    private val jsonImporter: HealthDataJsonImporter,
+    private val importHealthDataUseCase: ImportHealthDataUseCase,
+    private val deleteAllHealthDataUseCase: DeleteAllHealthDataUseCase,
 ) : ViewModel() {
     private var nextDraftId = 1L
     private var latestTemplates: List<SupplementTemplate> = emptyList()
+    private var pendingImportModel: HealthDataExportModel? = null
 
     private val editorState = MutableStateFlow(SupplementEditorUiState())
     private val exportState = MutableStateFlow(ProfileExportUiState())
@@ -168,17 +180,127 @@ class ProfileViewModel(
 
     fun exportData(uri: Uri) {
         viewModelScope.launch {
-            exportState.value = ProfileExportUiState(isExporting = true)
+            exportState.value = exportState.value.copy(
+                isExporting = true,
+                message = null,
+                isError = false,
+            )
             runCatching {
                 val json = exportHealthDataUseCase.exportJson()
                 exportFileWriter.writeJson(uri, json)
             }.onSuccess {
-                exportState.value = ProfileExportUiState(
+                exportState.value = exportState.value.copy(
+                    isExporting = false,
                     message = UiText.StringResource(R.string.export_success),
+                    isError = false,
                 )
             }.onFailure {
-                exportState.value = ProfileExportUiState(
+                exportState.value = exportState.value.copy(
+                    isExporting = false,
                     message = UiText.StringResource(R.string.export_failed),
+                    isError = true,
+                )
+            }
+        }
+    }
+
+    fun loadImportPreview(uri: Uri) {
+        viewModelScope.launch {
+            pendingImportModel = null
+            exportState.value = exportState.value.copy(
+                isImporting = true,
+                importPreview = null,
+                message = null,
+                isError = false,
+            )
+
+            runCatching {
+                val rawJson = importFileReader.readText(uri)
+                jsonImporter.validate(rawJson)
+            }.onSuccess { result ->
+                when (result) {
+                    is ImportValidationResult.Valid -> {
+                        pendingImportModel = result.model
+                        exportState.value = exportState.value.copy(
+                            isImporting = false,
+                            importPreview = result.preview,
+                        )
+                    }
+                    is ImportValidationResult.Invalid -> {
+                        exportState.value = exportState.value.copy(
+                            isImporting = false,
+                            message = result.error.toUiText(),
+                            isError = true,
+                        )
+                    }
+                }
+            }.onFailure {
+                exportState.value = exportState.value.copy(
+                    isImporting = false,
+                    message = UiText.StringResource(R.string.import_failed),
+                    isError = true,
+                )
+            }
+        }
+    }
+
+    fun dismissImportPreview() {
+        pendingImportModel = null
+        exportState.value = exportState.value.copy(importPreview = null)
+    }
+
+    fun confirmImport() {
+        val model = pendingImportModel ?: return
+        viewModelScope.launch {
+            exportState.value = exportState.value.copy(isImporting = true)
+            runCatching {
+                importHealthDataUseCase.import(model)
+            }.onSuccess {
+                pendingImportModel = null
+                exportState.value = exportState.value.copy(
+                    isImporting = false,
+                    importPreview = null,
+                    message = UiText.StringResource(R.string.import_success),
+                    isError = false,
+                )
+            }.onFailure {
+                exportState.value = exportState.value.copy(
+                    isImporting = false,
+                    message = UiText.StringResource(R.string.import_failed),
+                    isError = true,
+                )
+            }
+        }
+    }
+
+    fun requestDeleteAllHealthData() {
+        exportState.value = exportState.value.copy(showDeleteConfirmation = true)
+    }
+
+    fun dismissDeleteAllConfirmation() {
+        exportState.value = exportState.value.copy(showDeleteConfirmation = false)
+    }
+
+    fun confirmDeleteAllHealthData() {
+        viewModelScope.launch {
+            exportState.value = exportState.value.copy(
+                isDeleting = true,
+                showDeleteConfirmation = false,
+                message = null,
+                isError = false,
+            )
+            runCatching {
+                deleteAllHealthDataUseCase.deleteAllHealthData()
+            }.onSuccess {
+                exportState.value = exportState.value.copy(
+                    isDeleting = false,
+                    message = UiText.StringResource(R.string.delete_health_data_success),
+                    isError = false,
+                )
+            }.onFailure {
+                exportState.value = exportState.value.copy(
+                    isDeleting = false,
+                    message = UiText.StringResource(R.string.delete_health_data_failed),
                     isError = true,
                 )
             }
@@ -193,6 +315,10 @@ class ProfileViewModel(
                     dashboardRepository = healthApplication().container.dashboardRepository,
                     exportHealthDataUseCase = healthApplication().container.exportHealthDataUseCase,
                     exportFileWriter = healthApplication().container.healthDataExportFileWriter,
+                    importFileReader = healthApplication().container.healthDataImportFileReader,
+                    jsonImporter = healthApplication().container.healthDataJsonImporter,
+                    importHealthDataUseCase = healthApplication().container.importHealthDataUseCase,
+                    deleteAllHealthDataUseCase = healthApplication().container.deleteAllHealthDataUseCase,
                 )
             }
         }
@@ -293,6 +419,15 @@ class ProfileViewModel(
 }
 
 private val DUPLICATE_NAME_ERROR = UiText.StringResource(R.string.error_supplement_duplicate_name)
+
+private fun ImportValidationError.toUiText(): UiText {
+    return when (this) {
+        ImportValidationError.EMPTY_FILE -> UiText.StringResource(R.string.import_error_empty_file)
+        ImportValidationError.INVALID_JSON -> UiText.StringResource(R.string.import_error_invalid_json)
+        ImportValidationError.MISSING_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_missing_schema_version)
+        ImportValidationError.UNSUPPORTED_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_unsupported_schema_version)
+    }
+}
 
 private fun SettingsState.toProfileUiState(
     supplementTemplates: List<SupplementTemplate>,

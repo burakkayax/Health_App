@@ -6,6 +6,21 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Profil > Veri Yönetimi bölümüne JSON içe aktarma ve tüm sağlık verilerini silme aksiyonları eklendi.
+- JSON import için schema validation, desteklenen şema kontrolü ve kayıt sayısı önizleme dialog'u eklendi.
+- Import işlemi Room transaction içinde uygulanacak şekilde veri yönetimi repository/use case katmanı eklendi.
+- Tüm sağlık kayıtlarını silme işlemi onay dialog'u ve transaction tabanlı silme akışıyla eklendi.
+- JSON import validation unit testleri eklendi.
+
+### Korundu
+
+- Profil adı, tema, onboarding ve hedef ayarları delete-all akışında korunur.
+- Import işlemi kullanıcı onayı olmadan veritabanına yazmaz.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Profil ekranına Veri Yönetimi bölümü eklendi.
 - Android Storage Access Framework üzerinden kullanıcı kontrollü JSON dışa aktarma eklendi.
 - `schemaVersion = 1` kullanan versiyonlu sağlık verisi export modeli eklendi.

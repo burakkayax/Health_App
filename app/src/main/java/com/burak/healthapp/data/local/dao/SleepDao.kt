@@ -37,6 +37,9 @@ interface SleepDao {
     @Query("DELETE FROM sleep_sessions WHERE sessionDate = :date")
     suspend fun deleteForDate(date: LocalDate)
 
+    @Query("DELETE FROM sleep_sessions")
+    suspend fun deleteAll()
+
     @Upsert
     suspend fun upsert(session: SleepSessionEntity)
 }

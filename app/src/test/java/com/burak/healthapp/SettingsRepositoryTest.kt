@@ -118,9 +118,13 @@ private object EmptyTemplateDao : SupplementTemplateDao {
 
     override suspend fun getAll(): List<SupplementTemplateEntity> = emptyList()
 
+    override suspend fun insert(template: SupplementTemplateEntity): Long = 1L
+
     override suspend fun upsertAll(templates: List<SupplementTemplateEntity>) = Unit
 
     override suspend fun deactivate(ids: List<Long>) = Unit
+
+    override suspend fun deleteAll() = Unit
 }
 
 private object EmptyMeasurementDao : BodyMeasurementDao {
@@ -150,6 +154,10 @@ private object EmptyMeasurementDao : BodyMeasurementDao {
     ): Flow<List<BodyMeasurementEntity>> = emptyFlow()
 
     override suspend fun deleteById(id: Long) = Unit
+
+    override suspend fun deleteForDate(date: java.time.LocalDate) = Unit
+
+    override suspend fun deleteAll() = Unit
 
     override suspend fun upsert(measurement: BodyMeasurementEntity) = Unit
 }

@@ -2,6 +2,8 @@ package com.burak.healthapp
 
 import android.net.Uri
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
+import com.burak.healthapp.data.export.HealthDataImportFileReader
+import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedUserProfile
@@ -9,6 +11,7 @@ import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.HealthDataExportRepository
+import com.burak.healthapp.domain.repository.HealthDataManagementRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
@@ -30,7 +33,9 @@ import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.feature.profile.ProfileViewModel
+import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
+import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
 import java.time.Instant
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -169,6 +174,10 @@ class ProfileViewModelTest {
                 appVersion = "test",
             ),
             exportFileWriter = NoOpExportFileWriter,
+            importFileReader = EmptyImportFileReader,
+            jsonImporter = JsonHealthDataImporter(),
+            importHealthDataUseCase = ImportHealthDataUseCase(NoOpHealthDataManagementRepository),
+            deleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(NoOpHealthDataManagementRepository),
         )
     }
 }
@@ -346,4 +355,14 @@ private object EmptyHealthDataExportRepository : HealthDataExportRepository {
 
 private object NoOpExportFileWriter : HealthDataExportFileWriter {
     override suspend fun writeJson(uri: Uri, json: String) = Unit
+}
+
+private object EmptyImportFileReader : HealthDataImportFileReader {
+    override suspend fun readText(uri: Uri): String = ""
+}
+
+private object NoOpHealthDataManagementRepository : HealthDataManagementRepository {
+    override suspend fun importHealthData(model: HealthDataExportModel) = Unit
+
+    override suspend fun deleteAllHealthData() = Unit
 }

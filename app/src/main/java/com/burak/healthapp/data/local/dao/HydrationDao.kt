@@ -33,4 +33,7 @@ interface HydrationDao {
 
     @Query("DELETE FROM hydration_entries WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM hydration_entries")
+    suspend fun deleteAll()
 }

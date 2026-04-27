@@ -13,6 +13,7 @@ import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.domain.export.HealthDataImportPreview
 
 data class ProfileGoalSummaryState(
     val title: UiText,
@@ -58,8 +59,12 @@ data class SupplementEditorUiState(
 
 data class ProfileExportUiState(
     val isExporting: Boolean = false,
+    val isImporting: Boolean = false,
+    val isDeleting: Boolean = false,
     val message: UiText? = null,
     val isError: Boolean = false,
+    val importPreview: HealthDataImportPreview? = null,
+    val showDeleteConfirmation: Boolean = false,
 )
 
 data class ProfileUiState(

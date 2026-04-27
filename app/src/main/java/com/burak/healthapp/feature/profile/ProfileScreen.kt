@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
+import com.burak.healthapp.domain.export.HealthDataImportPreview
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.core.ui.components.AvatarBadge
 import com.burak.healthapp.core.ui.components.HealthCard
@@ -67,6 +70,13 @@ fun ProfileRoute(
             viewModel.exportData(uri)
         }
     }
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            viewModel.loadImportPreview(uri)
+        }
+    }
 
     ProfileContent(
         state = uiState,
@@ -75,6 +85,10 @@ fun ProfileRoute(
         onExportData = {
             exportLauncher.launch(defaultExportFileName())
         },
+        onImportData = {
+            importLauncher.launch(arrayOf("application/json", "text/json", "*/*"))
+        },
+        onDeleteAllHealthData = viewModel::requestDeleteAllHealthData,
         onThemeModeChange = viewModel::updateThemeMode,
     )
 
@@ -91,6 +105,23 @@ fun ProfileRoute(
             )
         }
     }
+
+    uiState.exportState.importPreview?.let { preview ->
+        ImportPreviewDialog(
+            preview = preview,
+            isImporting = uiState.exportState.isImporting,
+            onDismiss = viewModel::dismissImportPreview,
+            onConfirm = viewModel::confirmImport,
+        )
+    }
+
+    if (uiState.exportState.showDeleteConfirmation) {
+        DeleteHealthDataConfirmationDialog(
+            isDeleting = uiState.exportState.isDeleting,
+            onDismiss = viewModel::dismissDeleteAllConfirmation,
+            onConfirm = viewModel::confirmDeleteAllHealthData,
+        )
+    }
 }
 
 @Composable
@@ -99,6 +130,8 @@ fun ProfileContent(
     onOpenGoals: () -> Unit,
     onManageSupplements: () -> Unit,
     onExportData: () -> Unit,
+    onImportData: () -> Unit,
+    onDeleteAllHealthData: () -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
 ) {
     LazyColumn(
@@ -274,6 +307,36 @@ fun ProfileContent(
                     contentColor = Color.White,
                     enabled = !state.exportState.isExporting,
                     onClick = onExportData,
+                )
+                RoundedPillButton(
+                    label = if (state.exportState.isImporting) {
+                        stringResource(R.string.common_loading)
+                    } else {
+                        stringResource(R.string.profile_import_data)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = HealthSpacing.xs)
+                        .testTag("profile_import_data_button"),
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    enabled = !state.exportState.isImporting,
+                    onClick = onImportData,
+                )
+                RoundedPillButton(
+                    label = if (state.exportState.isDeleting) {
+                        stringResource(R.string.common_loading)
+                    } else {
+                        stringResource(R.string.profile_delete_all_health_data)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = HealthSpacing.xs)
+                        .testTag("profile_delete_all_health_data_button"),
+                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.14f),
+                    contentColor = MaterialTheme.colorScheme.error,
+                    enabled = !state.exportState.isDeleting,
+                    onClick = onDeleteAllHealthData,
                 )
             }
         }
@@ -491,6 +554,111 @@ private fun formatTemplateAmount(
         String.format(Locale.US, "%.1f", amount)
     }
     return "$value $unitLabel"
+}
+
+@Composable
+private fun ImportPreviewDialog(
+    preview: HealthDataImportPreview,
+    isImporting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.import_preview_title))
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+                Text(
+                    text = stringResource(R.string.import_preview_settings_notice),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                ImportPreviewRow(stringResource(R.string.import_preview_meals), preview.mealCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_hydration), preview.hydrationCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_sleep), preview.sleepCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_exercise), preview.exerciseCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_smoking), preview.smokingCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_steps), preview.stepCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_body_measurements), preview.bodyMeasurementCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_supplement_templates), preview.supplementTemplateCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_supplement_doses), preview.supplementDoseCount)
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !isImporting,
+                onClick = onConfirm,
+            ) {
+                Text(text = stringResource(R.string.profile_import_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isImporting,
+                onClick = onDismiss,
+            ) {
+                Text(text = stringResource(R.string.common_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ImportPreviewRow(label: String, count: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@Composable
+private fun DeleteHealthDataConfirmationDialog(
+    isDeleting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.delete_health_data_title))
+        },
+        text = {
+            Text(text = stringResource(R.string.delete_health_data_message))
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onConfirm,
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_delete_all_health_data),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isDeleting,
+                onClick = onDismiss,
+            ) {
+                Text(text = stringResource(R.string.common_cancel))
+            }
+        },
+    )
 }
 
 private fun defaultExportFileName(): String {

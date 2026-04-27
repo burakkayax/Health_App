@@ -37,6 +37,9 @@ interface StepDao {
     @Query("DELETE FROM step_entries WHERE date = :date")
     suspend fun deleteForDate(date: LocalDate)
 
+    @Query("DELETE FROM step_entries")
+    suspend fun deleteAll()
+
     @Upsert
     suspend fun upsert(entry: StepEntryEntity)
 }

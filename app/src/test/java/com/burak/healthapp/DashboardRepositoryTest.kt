@@ -593,6 +593,10 @@ private class FakeMealDao(
     override suspend fun deleteById(id: Long) {
         entries.value = entries.value.filterNot { it.id == id }
     }
+
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
+    }
 }
 
 private class FakeHydrationDao(
@@ -616,6 +620,10 @@ private class FakeHydrationDao(
 
     override suspend fun deleteById(id: Long) {
         entries.value = entries.value.filterNot { it.id == id }
+    }
+
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
     }
 }
 
@@ -646,6 +654,10 @@ private class FakeSleepDao(
 
     override suspend fun deleteForDate(date: LocalDate) {
         entries.value = entries.value.filterNot { it.sessionDate == date }
+    }
+
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
     }
 
     override suspend fun upsert(session: SleepSessionEntity) {
@@ -696,6 +708,10 @@ private class FakeExerciseDao(
         entries.value = entries.value.filterNot { it.date == date }
     }
 
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
+    }
+
 }
 
 private class FakeSmokingDao(
@@ -729,6 +745,10 @@ private class FakeSmokingDao(
         entries.value = entries.value.filterNot { it.date == date }
     }
 
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
+    }
+
 }
 
 private class FakeStepDao(
@@ -758,6 +778,10 @@ private class FakeStepDao(
         entries.value = entries.value.filterNot { it.date == date }
     }
 
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
+    }
+
     override suspend fun upsert(entry: StepEntryEntity) {
         entries.value = entries.value
             .filterNot { it.date == entry.date || (entry.id != 0L && it.id == entry.id) }
@@ -780,6 +804,12 @@ private class FakeSupplementTemplateDao(
 
     override suspend fun getAll(): List<SupplementTemplateEntity> = templates.value
 
+    override suspend fun insert(template: SupplementTemplateEntity): Long {
+        val inserted = template.copy(id = (templates.value.maxOfOrNull { it.id } ?: 0L) + 1)
+        templates.value = templates.value + inserted
+        return inserted.id
+    }
+
     override suspend fun upsertAll(templates: List<SupplementTemplateEntity>) {
         this.templates.value = templates
     }
@@ -788,6 +818,10 @@ private class FakeSupplementTemplateDao(
         templates.value = templates.value.map { template ->
             if (template.id in ids) template.copy(isActive = false) else template
         }
+    }
+
+    override suspend fun deleteAll() {
+        templates.value = emptyList()
     }
 }
 
@@ -812,6 +846,10 @@ private class FakeSupplementDoseDao(
 
     override suspend fun deleteForTemplateAndDate(templateId: Long, date: LocalDate) {
         entries.value = entries.value.filterNot { it.templateId == templateId && it.date == date }
+    }
+
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
     }
 }
 
@@ -880,6 +918,14 @@ private class FakeBodyMeasurementDao(
 
     override suspend fun deleteById(id: Long) {
         measurements.value = measurements.value.filterNot { it.id == id }
+    }
+
+    override suspend fun deleteForDate(date: LocalDate) {
+        measurements.value = measurements.value.filterNot { it.date == date }
+    }
+
+    override suspend fun deleteAll() {
+        measurements.value = emptyList()
     }
 
     override suspend fun upsert(measurement: BodyMeasurementEntity) {

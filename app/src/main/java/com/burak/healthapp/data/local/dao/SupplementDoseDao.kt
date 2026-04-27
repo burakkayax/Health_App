@@ -34,6 +34,9 @@ interface SupplementDoseDao {
     @Query("DELETE FROM supplement_dose_entries WHERE templateId = :templateId AND date = :date")
     suspend fun deleteForTemplateAndDate(templateId: Long, date: LocalDate)
 
+    @Query("DELETE FROM supplement_dose_entries")
+    suspend fun deleteAll()
+
     @Transaction
     suspend fun replaceForDate(date: LocalDate, entries: List<SupplementDoseEntryEntity>) {
         deleteForDate(date)

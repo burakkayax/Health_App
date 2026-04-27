@@ -37,6 +37,8 @@ class ProfileContentTest {
                     onOpenGoals = { openedGoals = true },
                     onManageSupplements = {},
                     onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -55,6 +57,8 @@ class ProfileContentTest {
                     onOpenGoals = {},
                     onManageSupplements = {},
                     onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -72,6 +76,8 @@ class ProfileContentTest {
                     onOpenGoals = {},
                     onManageSupplements = {},
                     onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -91,6 +97,8 @@ class ProfileContentTest {
                     onOpenGoals = {},
                     onManageSupplements = {},
                     onExportData = { exportClicked = true },
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
                     onThemeModeChange = {},
                 )
             }
@@ -100,6 +108,26 @@ class ProfileContentTest {
         composeRule.onNodeWithTag("profile_export_data_button").assertIsDisplayed()
         composeRule.onNodeWithTag("profile_export_data_button").performClick()
         assertEquals(true, exportClicked)
+    }
+
+    @Test
+    fun dataManagementSection_showsImportAndDeleteActions() {
+        composeRule.setContent {
+            HealthTheme {
+                ProfileContent(
+                    state = sampleProfileState(),
+                    onOpenGoals = {},
+                    onManageSupplements = {},
+                    onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
+                    onThemeModeChange = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_import_data_button").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_delete_all_health_data_button").assertIsDisplayed()
     }
 
     @Test

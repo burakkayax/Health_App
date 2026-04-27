@@ -55,6 +55,12 @@ interface BodyMeasurementDao {
     @Query("DELETE FROM body_measurements WHERE id = :id")
     suspend fun deleteById(id: Long)
 
+    @Query("DELETE FROM body_measurements WHERE date = :date")
+    suspend fun deleteForDate(date: LocalDate)
+
+    @Query("DELETE FROM body_measurements")
+    suspend fun deleteAll()
+
     @Upsert
     suspend fun upsert(measurement: BodyMeasurementEntity)
 }

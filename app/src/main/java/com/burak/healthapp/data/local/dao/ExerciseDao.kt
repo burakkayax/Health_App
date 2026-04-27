@@ -36,4 +36,7 @@ interface ExerciseDao {
 
     @Query("DELETE FROM exercise_entries WHERE date = :date")
     suspend fun deleteForDate(date: LocalDate)
+
+    @Query("DELETE FROM exercise_entries")
+    suspend fun deleteAll()
 }

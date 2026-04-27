@@ -10,17 +10,24 @@ import com.burak.healthapp.core.database.MIGRATION_3_4
 import com.burak.healthapp.core.datastore.settingsDataStore
 import com.burak.healthapp.core.reminder.WaterReminderScheduler
 import com.burak.healthapp.data.export.AndroidHealthDataExportFileWriter
+import com.burak.healthapp.data.export.AndroidHealthDataImportFileReader
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataExportRepositoryImpl
+import com.burak.healthapp.data.export.HealthDataImportFileReader
+import com.burak.healthapp.data.export.HealthDataManagementRepositoryImpl
+import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
 import com.burak.healthapp.data.repository.TrendsRepositoryImpl
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.HealthDataExportRepository
+import com.burak.healthapp.domain.repository.HealthDataManagementRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.repository.TrendsRepository
+import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
+import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
 
 class AppContainer(context: Context) {
     private val database: HealthDatabase = Room.databaseBuilder(
@@ -73,6 +80,11 @@ class AppContainer(context: Context) {
         doseDao = database.supplementDoseDao(),
     )
 
+    private val healthDataManagementRepository: HealthDataManagementRepository = HealthDataManagementRepositoryImpl(
+        database = database,
+        settingsRepository = settingsRepository,
+    )
+
     val exportHealthDataUseCase: ExportHealthDataUseCase = ExportHealthDataUseCase(
         repository = healthDataExportRepository,
         jsonExporter = JsonHealthDataExporter(),
@@ -80,4 +92,16 @@ class AppContainer(context: Context) {
     )
 
     val healthDataExportFileWriter: HealthDataExportFileWriter = AndroidHealthDataExportFileWriter(context)
+
+    val healthDataImportFileReader: HealthDataImportFileReader = AndroidHealthDataImportFileReader(context)
+
+    val healthDataJsonImporter: JsonHealthDataImporter = JsonHealthDataImporter()
+
+    val importHealthDataUseCase: ImportHealthDataUseCase = ImportHealthDataUseCase(
+        repository = healthDataManagementRepository,
+    )
+
+    val deleteAllHealthDataUseCase: DeleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(
+        repository = healthDataManagementRepository,
+    )
 }

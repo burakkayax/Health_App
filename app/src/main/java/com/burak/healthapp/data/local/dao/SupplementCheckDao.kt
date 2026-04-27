@@ -24,4 +24,7 @@ interface SupplementCheckDao {
 
     @Upsert
     suspend fun upsert(check: SupplementCheckEntity)
+
+    @Query("DELETE FROM supplement_checks")
+    suspend fun deleteAll()
 }

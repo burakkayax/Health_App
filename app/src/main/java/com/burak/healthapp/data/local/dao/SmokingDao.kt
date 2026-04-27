@@ -33,4 +33,7 @@ interface SmokingDao {
 
     @Query("DELETE FROM smoking_entries WHERE date = :date")
     suspend fun deleteForDate(date: LocalDate)
+
+    @Query("DELETE FROM smoking_entries")
+    suspend fun deleteAll()
 }
