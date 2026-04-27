@@ -4,6 +4,13 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ## Unreleased - 2026-04-27
 
+### Değiştirildi
+
+- Launcher adaptive icon seti sade kalp + progress ring markasına göre yenilendi.
+- Bildirim small iconları launcher foreground yerine ayrı 24dp tek renk ikonlarla güncellendi.
+
+## Unreleased - 2026-04-27
+
 ### Eklendi
 
 - Aylık metrik halka grid hücrelerine TalkBack açıklamaları, bugün vurgusu ve değer etiketi desteği eklendi.

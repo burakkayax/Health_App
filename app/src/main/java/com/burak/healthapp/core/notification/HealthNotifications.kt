@@ -45,7 +45,7 @@ object HealthNotifications {
     fun stepTrackingNotification(context: Context): Notification {
         ensureChannels(context)
         return NotificationCompat.Builder(context, NotificationConstants.STEP_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification_steps)
             .setContentTitle(context.getString(R.string.notification_steps_title))
             .setContentText(context.getString(R.string.notification_steps_text))
             .setContentIntent(contentIntent(context))
@@ -73,7 +73,7 @@ object HealthNotifications {
         if (!canPostNotifications(context)) return
         ensureChannels(context)
         val notification = NotificationCompat.Builder(context, NotificationConstants.WATER_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification_water)
             .setContentTitle(context.getString(R.string.notification_water_title))
             .setContentText(context.getString(R.string.notification_water_text, currentMl, targetMl))
             .setContentIntent(contentIntent(context))
