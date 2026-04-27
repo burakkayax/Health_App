@@ -48,6 +48,8 @@
     <string name="notification_steps_stop">Durdur</string>
     <string name="notification_water_title">Su zamanı</string>
     <string name="notification_water_text">Bugün %1$d / %2$d ml su kaydettin.</string>
+    <string name="notification_water_add_250">250 ml ekle</string>
+    <string name="notification_water_snooze_today">Bugün hatırlatma</string>
 
     <string name="content_description_date_select">Tarih seç</string>
     <string name="content_description_delete_exercise">Egzersiz kaydını sil</string>
@@ -181,6 +183,7 @@
     <string name="profile_goals_daily_subtitle">Kalori, makro, su ve uyku hedeflerini tek yerde düzenle.</string>
     <string name="profile_goals_water_reminder_title">Su Hatırlatıcısı</string>
     <string name="profile_goals_water_reminder_subtitle">Bildirimler seçtiğin saat aralığında ve hedef tamamlanmadığında gönderilir.</string>
+    <string name="profile_goals_water_reminder_permission_off">Bildirim izni kapalı olduğu için su hatırlatıcısı gösterilemez.</string>
     <string name="profile_goals_step_tracking_title">Adım Takibi</string>
     <string name="profile_goals_step_tracking_subtitle">Adım sayımı yalnız sen etkinleştirdiğinde arka planda çalışır.</string>
     <string name="profile_goals_measurements_title">Mevcut Ölçüler</string>

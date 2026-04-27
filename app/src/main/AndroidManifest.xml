@@ -30,6 +30,9 @@
             android:name=".core.step.StepCounterService"
             android:exported="false"
             android:foregroundServiceType="health" />
+        <receiver
+            android:name=".core.reminder.WaterReminderActionReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

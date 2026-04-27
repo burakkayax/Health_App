@@ -10,6 +10,7 @@ import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.model.GoalSettings
+import java.time.LocalDate
 import java.time.LocalTime
 import java.io.File
 import java.nio.file.Files
@@ -130,6 +131,31 @@ class SettingsRepositoryTest {
         repository.updateStepTrackingEnabled(true)
 
         assertEquals(true, repository.settings.first().stepTrackingEnabled)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun updateWaterReminderSnoozedDate_persistsAndClearsSnooze() = runTest {
+        val tempDir = Files.createTempDirectory("health-water-snooze").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = SettingsRepositoryImpl(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+        val today = LocalDate.of(2026, 4, 27)
+
+        repository.updateWaterReminderSnoozedDate(today)
+
+        assertEquals(today, repository.settings.first().waterReminderSnoozedDate)
+
+        repository.updateWaterReminderSnoozedDate(null)
+
+        assertEquals(null, repository.settings.first().waterReminderSnoozedDate)
         tempDir.deleteRecursively()
     }
 }

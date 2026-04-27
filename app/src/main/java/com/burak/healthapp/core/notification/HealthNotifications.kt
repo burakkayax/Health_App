@@ -14,6 +14,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.burak.healthapp.MainActivity
 import com.burak.healthapp.R
+import com.burak.healthapp.core.reminder.ReminderConstants
+import com.burak.healthapp.core.reminder.WaterReminderActionReceiver
 
 object HealthNotifications {
     const val STEP_NOTIFICATION_ID = NotificationConstants.STEP_NOTIFICATION_ID
@@ -77,6 +79,24 @@ object HealthNotifications {
             .setContentTitle(context.getString(R.string.notification_water_title))
             .setContentText(context.getString(R.string.notification_water_text, currentMl, targetMl))
             .setContentIntent(contentIntent(context))
+            .addAction(
+                R.drawable.ic_notification_water,
+                context.getString(R.string.notification_water_add_250),
+                waterActionIntent(
+                    context = context,
+                    action = ReminderConstants.ACTION_ADD_WATER_250,
+                    requestCode = ReminderConstants.ADD_WATER_REQUEST_CODE,
+                ),
+            )
+            .addAction(
+                R.drawable.ic_notification_health,
+                context.getString(R.string.notification_water_snooze_today),
+                waterActionIntent(
+                    context = context,
+                    action = ReminderConstants.ACTION_SNOOZE_WATER_TODAY,
+                    requestCode = ReminderConstants.SNOOZE_TODAY_REQUEST_CODE,
+                ),
+            )
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
@@ -96,6 +116,20 @@ object HealthNotifications {
         return PendingIntent.getActivity(
             context,
             0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    private fun waterActionIntent(
+        context: Context,
+        action: String,
+        requestCode: Int,
+    ): PendingIntent {
+        val intent = Intent(context, WaterReminderActionReceiver::class.java).setAction(action)
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

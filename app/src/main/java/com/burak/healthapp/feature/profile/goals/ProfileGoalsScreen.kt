@@ -118,6 +118,15 @@ fun ProfileGoalsContent(
     var waterReminderStart by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.startTime.toString()) }
     var waterReminderEnd by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.endTime.toString()) }
     var waterReminderInterval by remember(state.waterReminderSettings) { mutableStateOf(state.waterReminderSettings.intervalMinutes.toString()) }
+    var notificationPermissionGranted by remember { mutableStateOf(context.hasPostNotificationsPermission()) }
+    var notificationPermissionDenied by remember { mutableStateOf(false) }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        notificationPermissionGranted = granted
+        notificationPermissionDenied = !granted
+        waterReminderEnabled = granted
+    }
     var formError by remember(state.goalSettings, latestMeasurement) { mutableStateOf<HealthInputError?>(null) }
     val dailyGoalsTitle = stringResource(R.string.profile_goals_daily_title)
     val dailyGoalsSubtitle = stringResource(R.string.profile_goals_daily_subtitle)
@@ -230,7 +239,27 @@ fun ProfileGoalsContent(
                 )
                 Switch(
                     checked = waterReminderEnabled,
-                    onCheckedChange = { waterReminderEnabled = it },
+                    onCheckedChange = { enabled ->
+                        if (!enabled) {
+                            waterReminderEnabled = false
+                            notificationPermissionDenied = false
+                        } else if (context.hasPostNotificationsPermission()) {
+                            notificationPermissionGranted = true
+                            notificationPermissionDenied = false
+                            waterReminderEnabled = true
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            waterReminderEnabled = true
+                        }
+                    },
+                )
+            }
+            if ((waterReminderEnabled && !notificationPermissionGranted) || notificationPermissionDenied) {
+                Text(
+                    text = stringResource(R.string.profile_goals_water_reminder_permission_off),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
             GoalFieldRow(
@@ -584,6 +613,14 @@ private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.par
 private fun Float?.toEditableText(): String = this?.let {
     if (it % 1f == 0f) it.toInt().toString() else it.toString()
 } ?: ""
+
+private fun Context.hasPostNotificationsPermission(): Boolean {
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+}
 
 private fun Context.hasActivityRecognitionPermission(): Boolean {
     return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||

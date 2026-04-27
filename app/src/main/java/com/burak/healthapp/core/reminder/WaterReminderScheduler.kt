@@ -5,6 +5,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 class WaterReminderScheduler(
@@ -22,6 +23,9 @@ class WaterReminderScheduler(
         val request = PeriodicWorkRequestBuilder<WaterReminderWorker>(
             settings.intervalMinutes.coerceAtLeast(ReminderConstants.MIN_INTERVAL_MINUTES).toLong(),
             TimeUnit.MINUTES,
+        ).setInitialDelay(
+            calculateNextWaterReminderDelay(LocalDateTime.now(), settings).toMillis(),
+            TimeUnit.MILLISECONDS,
         ).build()
 
         workManager.enqueueUniquePeriodicWork(

@@ -54,6 +54,9 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Günlük su hedefi
 - WorkManager tabanlı su hatırlatıcı sistemi
 - Hatırlatıcı başlangıç, bitiş ve aralık ayarları
+- Hatırlatıcılar seçilen zaman penceresindeki bir sonraki uygun aralığa hizalanır
+- Bildirim üzerinden 250 ml su ekleme veya bugünkü hatırlatmaları susturma
+- WorkManager pil dostu çalışır; dakikası dakikasına alarm garantisi vermez
 
 ### Uyku takibi
 
@@ -265,6 +268,7 @@ Health_App, local-first bir uygulamadır.
 * Profil > Veri Yönetimi üzerinden kullanıcı kontrollü JSON dışa/içe aktarma desteği vardır; dışa aktarılan dosya hassas sağlık verisi içerir ve kullanıcının seçtiği konuma yazılır.
 * İçe aktarma onay önizlemesiyle çalışır; kullanıcı onay vermeden veritabanına yazma yapılmaz.
 * Tüm sağlık kayıtlarını silme işlemi ayrı onay ister; profil adı, tema, onboarding ve hedef ayarları korunur.
+* Su hatırlatıcı bildirimleri yalnız kullanıcı etkinleştirirse ve bildirim izni açıksa gösterilir; bildirimden hızlı su ekleme veya gün sonuna kadar susturma yapılabilir.
 * Bu uygulama tıbbi tavsiye vermez ve tıbbi karar destek sistemi olarak kullanılmamalıdır.
 
 ---

@@ -10,6 +10,7 @@ data class SettingsState(
     val userProfile: UserProfile = UserProfile(),
     val goalSettings: GoalSettings = GoalSettings(),
     val waterReminderSettings: WaterReminderSettings = WaterReminderSettings(),
+    val waterReminderSnoozedDate: LocalDate? = null,
     val stepTrackingEnabled: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
 )

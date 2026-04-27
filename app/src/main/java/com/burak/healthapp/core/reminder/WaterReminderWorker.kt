@@ -5,7 +5,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.burak.healthapp.HealthApplication
 import com.burak.healthapp.domain.calculation.calculateHydrationTotal
-import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.notification.HealthNotifications
 import java.time.LocalDate
 import java.time.LocalTime
@@ -20,15 +19,16 @@ class WaterReminderWorker(
         val settings = app.container.settingsRepository.settings.first()
         val reminder = settings.waterReminderSettings
 
-        if (!reminder.enabled || !LocalTime.now().isInside(reminder)) {
+        if (!reminder.enabled || !isInsideWaterReminderWindow(LocalTime.now(), reminder)) {
             return Result.success()
         }
 
-        val snapshot = app.container.dashboardRepository.observeToday(LocalDate.now()).first()
+        val today = LocalDate.now()
+        val snapshot = app.container.dashboardRepository.observeToday(today).first()
         val currentMl = calculateHydrationTotal(snapshot.hydrationEntries)
         val targetMl = settings.goalSettings.waterTargetMl
 
-        if (currentMl >= targetMl) {
+        if (!shouldShowWaterReminder(today, settings.waterReminderSnoozedDate, currentMl, targetMl)) {
             return Result.success()
         }
 
@@ -38,13 +38,5 @@ class WaterReminderWorker(
             targetMl = targetMl,
         )
         return Result.success()
-    }
-}
-
-private fun LocalTime.isInside(settings: WaterReminderSettings): Boolean {
-    return if (settings.startTime <= settings.endTime) {
-        this >= settings.startTime && this <= settings.endTime
-    } else {
-        this >= settings.startTime || this <= settings.endTime
     }
 }

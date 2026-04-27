@@ -4,6 +4,20 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ## Unreleased - 2026-04-27
 
+### Eklendi
+
+- Su hatırlatıcı bildirimlerine “250 ml ekle” ve “Bugün hatırlatma” aksiyonları eklendi.
+- Bugün susturma durumu DataStore içinde tarih bazlı saklanacak şekilde eklendi.
+- Su hatırlatıcı initial delay ve gece aşan saat aralığı hesapları için unit testler eklendi.
+
+### Değiştirildi
+
+- WaterReminderScheduler ilk çalışmayı seçili zaman penceresindeki bir sonraki uygun hatırlatma slotuna hizalar.
+- WaterReminderWorker hedef tamamlandıysa veya bugün susturulduysa bildirim üretmez.
+- Profil hedefleri ekranındaki su hatırlatıcı toggle'ı Android 13+ bildirim iznini kullanıcı aksiyonuyla ister.
+
+## Unreleased - 2026-04-27
+
 ### Değiştirildi
 
 - Launcher adaptive icon seti sade kalp + progress ring markasına göre yenilendi.

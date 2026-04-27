@@ -114,6 +114,7 @@ class SettingsRepositoryImpl(
                     ?: DefaultHealthGoals.WATER_REMINDER_END_TIME,
                 intervalMinutes = preferences[SettingsKeys.waterReminderIntervalMinutes] ?: DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
             ),
+            waterReminderSnoozedDate = preferences[SettingsKeys.waterReminderSnoozedDate]?.let(LocalDate::parse),
             stepTrackingEnabled = preferences[SettingsKeys.stepTrackingEnabled] ?: false,
             themeMode = ThemeMode.entries.firstOrNull { mode ->
                 mode.name == preferences[SettingsKeys.themeMode]
@@ -173,6 +174,16 @@ class SettingsRepositoryImpl(
             preferences[SettingsKeys.waterReminderStartTime] = settings.startTime.toString()
             preferences[SettingsKeys.waterReminderEndTime] = settings.endTime.toString()
             preferences[SettingsKeys.waterReminderIntervalMinutes] = settings.intervalMinutes.coerceAtLeast(DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES)
+        }
+    }
+
+    override suspend fun updateWaterReminderSnoozedDate(date: LocalDate?) {
+        dataStore.edit { preferences ->
+            if (date == null) {
+                preferences.remove(SettingsKeys.waterReminderSnoozedDate)
+            } else {
+                preferences[SettingsKeys.waterReminderSnoozedDate] = date.toString()
+            }
         }
     }
 

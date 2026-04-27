@@ -34,6 +34,8 @@ interface SettingsRepository {
 
     suspend fun updateWaterReminderSettings(settings: WaterReminderSettings)
 
+    suspend fun updateWaterReminderSnoozedDate(date: LocalDate?)
+
     suspend fun updateStepTrackingEnabled(enabled: Boolean)
 
     suspend fun updateProfile(profile: UserProfile)
