@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -305,21 +307,31 @@ private fun HydrationWeekBarChart(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(220.dp),
+            .heightIn(min = 180.dp, max = 220.dp),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
         verticalAlignment = Alignment.Bottom,
     ) {
         days.forEachIndexed { index, day ->
+            val valueLabel = stringResource(R.string.today_format_ml, day.amountMl)
+            val percent = (day.progress.coerceIn(0f, 1f) * 100).toInt()
+            val description = when {
+                day.amountMl <= 0 -> stringResource(R.string.metric_day_ring_no_data, day.label)
+                day.progress >= 1f -> stringResource(R.string.metric_day_ring_target_met, day.label, valueLabel)
+                else -> stringResource(R.string.metric_day_ring_progress, day.label, valueLabel, percent)
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    .semantics {
+                        contentDescription = description
+                    }
                     .testTag("hydration_week_bar_$index"),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = if (day.amountMl == 0) "--" else stringResource(R.string.today_format_ml, day.amountMl),
+                    text = formatCompactWaterAmountMl(day.amountMl),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -424,6 +436,7 @@ internal fun buildHydrationMonthRingDays(
     val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
     val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
     val target = targetMl.toFloat().coerceAtLeast(1f)
+    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
 
     return (0 until dayCount).map { offset ->
         val date = gridStart.plusDays(offset.toLong())
@@ -436,8 +449,19 @@ internal fun buildHydrationMonthRingDays(
             hasData = amount > 0,
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = amount > 0 && progress >= 1f,
+            dateLabel = date.format(dateFormatter),
+            valueLabel = "${amount} ml",
+            isToday = date == LocalDate.now(),
         )
     }
+}
+
+internal fun formatCompactWaterAmountMl(amountMl: Int): String {
+    if (amountMl <= 0) return "--"
+    if (amountMl % 1000 == 0) return "${amountMl / 1000}L"
+
+    val liters = amountMl / 1000f
+    return String.format(Locale.US, "%.1fL", liters)
 }
 
 private fun emptyHydrationDetailUiState(): HydrationDetailUiState {

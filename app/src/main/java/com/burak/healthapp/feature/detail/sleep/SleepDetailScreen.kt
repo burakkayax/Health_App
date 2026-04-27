@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,6 +67,8 @@ import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -279,6 +282,9 @@ private fun SleepMonthlyCalendar(
                     hasData = day.hasData,
                     isInCurrentMonth = day.isInCurrentMonth,
                     isTargetMet = day.isTargetMet,
+                    dateLabel = day.dateLabel,
+                    valueLabel = day.durationLabel,
+                    isToday = day.isToday,
                 )
             }
         },
@@ -359,7 +365,7 @@ private fun SleepConsistencyChart(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(220.dp),
+            .heightIn(min = 180.dp, max = 220.dp),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -501,6 +507,7 @@ internal fun buildSleepCalendarWeeks(
     val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
     val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
     val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
+    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
 
     return (0 until dayCount)
         .map { offset -> gridStart.plusDays(offset.toLong()) }
@@ -521,6 +528,9 @@ internal fun buildSleepCalendarWeeks(
                         hasData = duration > 0,
                         isInCurrentMonth = isInCurrentMonth,
                         isTargetMet = duration > 0 && progress >= 1f,
+                        dateLabel = date.format(dateFormatter),
+                        durationLabel = if (duration == 0) "--" else formatMinutesAsSleepLabel(duration),
+                        isToday = date == LocalDate.now(),
                     )
                 },
             )

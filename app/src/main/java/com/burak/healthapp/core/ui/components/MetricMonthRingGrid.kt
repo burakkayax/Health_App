@@ -1,6 +1,7 @@
 package com.burak.healthapp.core.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.burak.healthapp.R
@@ -32,6 +35,10 @@ data class MetricDayRingState(
     val hasData: Boolean,
     val isInCurrentMonth: Boolean,
     val isTargetMet: Boolean,
+    val dateLabel: String? = null,
+    val valueLabel: String? = null,
+    val isToday: Boolean = false,
+    val contentDescription: String? = null,
 )
 
 @Composable
@@ -103,6 +110,27 @@ fun DayRingCell(
     targetMetColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    val percent = (day.progress.coerceIn(0f, 1f) * 100).toInt()
+    val accessibleDayLabel = if (day.isToday) {
+        stringResource(R.string.common_today)
+    } else {
+        day.dateLabel ?: day.dayLabel
+    }
+    val resolvedContentDescription = day.contentDescription ?: when {
+        !day.isInCurrentMonth -> stringResource(R.string.metric_day_ring_outside_month, day.dayLabel)
+        !day.hasData -> stringResource(R.string.metric_day_ring_no_data, accessibleDayLabel)
+        day.isTargetMet -> stringResource(
+            R.string.metric_day_ring_target_met,
+            accessibleDayLabel,
+            day.valueLabel.orEmpty(),
+        )
+        else -> stringResource(
+            R.string.metric_day_ring_progress,
+            accessibleDayLabel,
+            day.valueLabel.orEmpty(),
+            percent,
+        )
+    }
     val resolvedActiveColor = when {
         !day.isInCurrentMonth -> MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
         day.isTargetMet -> targetMetColor
@@ -121,7 +149,22 @@ fun DayRingCell(
     }
 
     Box(
-        modifier = modifier.height(44.dp),
+        modifier = modifier
+            .height(44.dp)
+            .semantics {
+                contentDescription = resolvedContentDescription
+            }
+            .then(
+                if (day.isToday && day.isInCurrentMonth) {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                    )
+                } else {
+                    Modifier
+                },
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.size(36.dp)) {

@@ -6,6 +6,7 @@ import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.detail.hydration.buildHydrationDetailUiState
+import com.burak.healthapp.feature.detail.hydration.formatCompactWaterAmountMl
 import com.burak.healthapp.feature.detail.step.buildStepMonthRingDays
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,6 +33,7 @@ class MetricDetailStateTest {
         assertEquals("1", days.first { it.isInCurrentMonth }.dayLabel)
         assertTrue(days.first { it.dayLabel == "3" && it.isInCurrentMonth }.isTargetMet)
         assertEquals(0.5f, days.first { it.dayLabel == "4" && it.isInCurrentMonth }.progress, 0.001f)
+        assertEquals("4000 adım", days.first { it.dayLabel == "4" && it.isInCurrentMonth }.valueLabel)
         assertFalse(days.first { it.dayLabel == "5" && it.isInCurrentMonth }.hasData)
     }
 
@@ -100,6 +102,17 @@ class MetricDetailStateTest {
         assertTrue(weeklyState.hasPeriodData)
         assertEquals(35, monthlyState.monthDays.size)
         assertEquals(0.6f, monthlyState.monthDays.first { it.dayLabel == "19" }.progress, 0.001f)
+        assertEquals("1200 ml", monthlyState.monthDays.first { it.dayLabel == "19" }.valueLabel)
+    }
+
+    @Test
+    fun compactWaterAmountFormatter_usesLiterLabelsForWeeklyChart() {
+        assertEquals("--", formatCompactWaterAmountMl(0))
+        assertEquals("0.5L", formatCompactWaterAmountMl(500))
+        assertEquals("1L", formatCompactWaterAmountMl(1000))
+        assertEquals("1.5L", formatCompactWaterAmountMl(1500))
+        assertEquals("2.5L", formatCompactWaterAmountMl(2500))
+        assertEquals("3L", formatCompactWaterAmountMl(3000))
     }
 
     @Test

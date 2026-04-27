@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -120,6 +121,7 @@ fun CardHeaderActionButton(
             .clip(RoundedCornerShape(20.dp))
             .background(containerColor)
             .clickable(onClick = onClick)
+            .defaultMinSize(minHeight = 48.dp)
             .padding(horizontal = HealthSpacing.sm, vertical = HealthSpacing.xs),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
         verticalAlignment = Alignment.CenterVertically,

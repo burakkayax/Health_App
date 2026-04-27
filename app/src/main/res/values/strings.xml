@@ -13,6 +13,7 @@
     <string name="common_not_set">Ayarlanmadı</string>
     <string name="common_weekly">Haftalık</string>
     <string name="common_monthly">Aylık</string>
+    <string name="common_today">Bugün</string>
     <string name="common_edit">Düzenle</string>
     <string name="common_manage">Yönet</string>
     <string name="common_saving">Kaydediliyor...</string>
@@ -57,6 +58,10 @@
     <string name="content_description_delete_weight">Kilo kaydını sil</string>
     <string name="content_description_delete_meal">Öğünü sil</string>
     <string name="content_description_remove_supplement">Takviyeyi kaldır</string>
+    <string name="metric_day_ring_outside_month">%1$s, bu ay dışında</string>
+    <string name="metric_day_ring_no_data">%1$s, kayıt yok</string>
+    <string name="metric_day_ring_progress">%1$s, %2$s, hedefin yüzde %3$d’i</string>
+    <string name="metric_day_ring_target_met">%1$s, %2$s, hedef tamamlandı</string>
 
     <string name="today_title_nutrition">Beslenme ve Makrolar</string>
     <string name="today_title_meals">Bugünün Öğünleri</string>

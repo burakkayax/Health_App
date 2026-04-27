@@ -25,6 +25,9 @@ data class SleepCalendarDayState(
     val hasData: Boolean,
     val isInCurrentMonth: Boolean,
     val isTargetMet: Boolean,
+    val dateLabel: String,
+    val durationLabel: String,
+    val isToday: Boolean,
 )
 
 data class SleepCalendarWeekState(

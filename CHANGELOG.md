@@ -6,6 +6,18 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Aylık metrik halka grid hücrelerine TalkBack açıklamaları, bugün vurgusu ve değer etiketi desteği eklendi.
+- Hydration haftalık bar chart için kompakt litre etiketi formatter'ı ve unit testi eklendi.
+
+### Değiştirildi
+
+- Su, adım ve uyku detay grafiklerinin yüksekliği küçük ekranlarda daha esnek olacak şekilde güncellendi.
+- Kart header aksiyon butonları 48dp minimum dokunma hedefini koruyacak şekilde iyileştirildi.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Adım takibi için kullanıcı kontrollü `stepTrackingEnabled` ayarı eklendi; varsayılan kapalıdır.
 - Profil hedefleri ekranına adım takibini etkinleştirme toggle'ı ve sensör/izin durumuna göre açıklama eklendi.
 - Adım sayar foreground bildirimi için “Durdur” aksiyonu eklendi.
