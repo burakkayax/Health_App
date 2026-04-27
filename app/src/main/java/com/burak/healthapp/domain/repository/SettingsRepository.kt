@@ -34,6 +34,8 @@ interface SettingsRepository {
 
     suspend fun updateWaterReminderSettings(settings: WaterReminderSettings)
 
+    suspend fun updateStepTrackingEnabled(enabled: Boolean)
+
     suspend fun updateProfile(profile: UserProfile)
 
     suspend fun updateThemeMode(mode: ThemeMode)

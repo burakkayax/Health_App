@@ -44,6 +44,7 @@
     <string name="notification_channel_water_description">Su içme hedefini hatırlatır.</string>
     <string name="notification_steps_title">Adım sayılıyor</string>
     <string name="notification_steps_text">Günlük adım hedefin otomatik takip ediliyor.</string>
+    <string name="notification_steps_stop">Durdur</string>
     <string name="notification_water_title">Su zamanı</string>
     <string name="notification_water_text">Bugün %1$d / %2$d ml su kaydettin.</string>
 
@@ -175,6 +176,8 @@
     <string name="profile_goals_daily_subtitle">Kalori, makro, su ve uyku hedeflerini tek yerde düzenle.</string>
     <string name="profile_goals_water_reminder_title">Su Hatırlatıcısı</string>
     <string name="profile_goals_water_reminder_subtitle">Bildirimler seçtiğin saat aralığında ve hedef tamamlanmadığında gönderilir.</string>
+    <string name="profile_goals_step_tracking_title">Adım Takibi</string>
+    <string name="profile_goals_step_tracking_subtitle">Adım sayımı yalnız sen etkinleştirdiğinde arka planda çalışır.</string>
     <string name="profile_goals_measurements_title">Mevcut Ölçüler</string>
     <string name="profile_goals_measurements_subtitle">Kilo kartı yalnız ağırlığı günceller; omuz, bel ve kalça ölçülerini buradan güncellersin.</string>
     <string name="profile_goal_calories">Kalori</string>
@@ -193,6 +196,9 @@
     <string name="profile_goal_start">Başlangıç</string>
     <string name="profile_goal_end">Bitiş</string>
     <string name="profile_goal_frequency">Sıklık (dk)</string>
+    <string name="profile_goal_step_tracking">Adım takibini etkinleştir</string>
+    <string name="profile_goal_step_tracking_helper">Foreground service kullanır, bildirim gösterir ve istediğin zaman kapatılabilir.</string>
+    <string name="profile_goal_step_tracking_no_sensor">Bu cihazda adım sayar sensörü bulunmuyor.</string>
     <string name="profile_goal_current_weight">Mevcut Kilo</string>
     <string name="profile_goal_current_shoulder">Mevcut Omuz</string>
     <string name="profile_goal_current_waist">Mevcut Bel</string>

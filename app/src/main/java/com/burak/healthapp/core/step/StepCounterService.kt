@@ -24,10 +24,21 @@ import kotlinx.coroutines.launch
 class StepCounterService : Service(), SensorEventListener {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var sensorManager: SensorManager? = null
+    private var listenerRegistered = false
+    private val writePolicy = StepSensorWritePolicy()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP) {
+            serviceScope.launch {
+                val app = application as? HealthApplication
+                app?.container?.settingsRepository?.updateStepTrackingEnabled(false)
+                stopSelf()
+            }
+            return START_NOT_STICKY
+        }
+
         if (!hasActivityRecognitionPermission()) {
             stopSelf()
             return START_NOT_STICKY
@@ -42,22 +53,30 @@ class StepCounterService : Service(), SensorEventListener {
             return START_NOT_STICKY
         }
 
-        sensorManager = manager
-        manager.registerListener(this, stepCounter, SensorManager.SENSOR_DELAY_NORMAL)
+        if (!listenerRegistered) {
+            sensorManager = manager
+            manager.registerListener(this, stepCounter, SensorManager.SENSOR_DELAY_NORMAL)
+            listenerRegistered = true
+        }
         return START_STICKY
     }
 
     override fun onDestroy() {
+        flushPendingSensorValue()
         sensorManager?.unregisterListener(this)
+        listenerRegistered = false
         serviceScope.cancel()
         super.onDestroy()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
         val sensorValue = event?.values?.firstOrNull()?.toInt() ?: return
+        val nowMillis = System.currentTimeMillis()
+        if (!writePolicy.shouldWrite(sensorValue, nowMillis)) return
         val app = application as? HealthApplication ?: return
         serviceScope.launch {
             app.container.dashboardRepository.recordStepSensorValue(sensorValue)
+            writePolicy.markWritten(sensorValue, nowMillis)
         }
     }
 
@@ -91,6 +110,25 @@ class StepCounterService : Service(), SensorEventListener {
                 context,
                 Intent(context, StepCounterService::class.java),
             )
+        }
+
+        fun stop(context: Context) {
+            context.stopService(Intent(context, StepCounterService::class.java))
+        }
+
+        fun stopIntent(context: Context): Intent {
+            return Intent(context, StepCounterService::class.java).setAction(ACTION_STOP)
+        }
+
+        private const val ACTION_STOP = "com.burak.healthapp.action.STOP_STEP_TRACKING"
+    }
+
+    private fun flushPendingSensorValue() {
+        val sensorValue = writePolicy.pendingFlushValue() ?: return
+        val app = application as? HealthApplication ?: return
+        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
+            app.container.dashboardRepository.recordStepSensorValue(sensorValue)
+            writePolicy.markWritten(sensorValue, System.currentTimeMillis())
         }
     }
 }

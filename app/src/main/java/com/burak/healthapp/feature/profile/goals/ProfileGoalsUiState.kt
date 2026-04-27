@@ -20,4 +20,5 @@ data class ProfileGoalsUiState(
     val latestMeasurement: BodyMeasurementEntry?,
     val heightCm: Float? = null,
     val waterReminderSettings: WaterReminderSettings = WaterReminderSettings(),
+    val stepTrackingEnabled: Boolean = false,
 )

@@ -66,6 +66,8 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 
 - Android `TYPE_STEP_COUNTER` sensörü ile adım sayımı
 - Foreground service tabanlı takip
+- Profil hedeflerinden kullanıcı açıkça etkinleştirirse arka planda çalışır
+- Foreground bildirimindeki “Durdur” aksiyonu ile kapatılabilir
 - Günlük adım hedefi
 - Haftalık ve aylık adım trendleri
 
@@ -420,7 +422,7 @@ Planlanan geliştirmeler:
 ## Bilinen Sınırlamalar
 
 * Uygulama tıbbi karar destek sistemi değildir.
-* Adım sayımı cihazdaki sensör desteğine bağlıdır.
+* Adım sayımı cihazdaki sensör desteğine ve kullanıcının adım takibini etkinleştirmesine bağlıdır.
 * WorkManager tabanlı hatırlatıcılar kesin zamanlı alarm garantisi vermez.
 * Veriler şu an local-first yapıdadır; cihazlar arası senkronizasyon yoktur.
 

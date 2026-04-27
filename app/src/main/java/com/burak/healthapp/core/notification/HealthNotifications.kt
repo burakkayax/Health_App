@@ -49,6 +49,16 @@ object HealthNotifications {
             .setContentTitle(context.getString(R.string.notification_steps_title))
             .setContentText(context.getString(R.string.notification_steps_text))
             .setContentIntent(contentIntent(context))
+            .addAction(
+                0,
+                context.getString(R.string.notification_steps_stop),
+                PendingIntent.getService(
+                    context,
+                    NotificationConstants.STEP_NOTIFICATION_ID,
+                    com.burak.healthapp.core.step.StepCounterService.stopIntent(context),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
+            )
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)

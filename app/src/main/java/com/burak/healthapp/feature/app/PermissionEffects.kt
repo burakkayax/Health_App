@@ -16,23 +16,15 @@ import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.core.step.StepCounterService
 
 @Composable
-internal fun StepCounterPermissionEffect() {
+internal fun StepCounterPermissionEffect(stepTrackingEnabled: Boolean) {
     val context = LocalContext.current
-    val activityPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) {
-            StepCounterService.start(context)
-        }
-    }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(stepTrackingEnabled) {
         when {
-            !context.hasStepCounterSensor() -> Unit
+            !stepTrackingEnabled -> StepCounterService.stop(context)
+            !context.hasStepCounterSensor() -> StepCounterService.stop(context)
             context.hasActivityRecognitionPermission() -> StepCounterService.start(context)
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                activityPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
-            }
+            else -> Unit
         }
     }
 }

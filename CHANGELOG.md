@@ -6,6 +6,20 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Adım takibi için kullanıcı kontrollü `stepTrackingEnabled` ayarı eklendi; varsayılan kapalıdır.
+- Profil hedefleri ekranına adım takibini etkinleştirme toggle'ı ve sensör/izin durumuna göre açıklama eklendi.
+- Adım sayar foreground bildirimi için “Durdur” aksiyonu eklendi.
+- Sensor event yazımlarını 60 saniye veya +50 adım farkına göre sınırlayan `StepSensorWritePolicy` eklendi.
+- Adım takip ayarı ve sensor write policy için unit testler eklendi.
+
+### Değiştirildi
+
+- Uygulama açılışında adım servisi artık otomatik izin istemez ve yalnız kullanıcı adım takibini açtıysa başlar.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Öğün, su, uyku, kilo, egzersiz, sigara, takviye dozu ve hedef ayarları için Android bağımsız validator katmanı eklendi.
 - Today sheet akışlarında geçersiz input için kullanıcıya hata metni gösteren form davranışı eklendi.
 - Profil hedefleri kayıt akışında sayı/saat parse hatalarında sessiz fallback yerine hata gösterimi eklendi.

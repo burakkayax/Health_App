@@ -1,5 +1,13 @@
 package com.burak.healthapp.feature.profile.goals
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,9 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
@@ -62,6 +72,7 @@ fun ProfileGoalsRoute(
                 onSaved = onSaved,
             )
         },
+        onStepTrackingChange = viewModel::updateStepTrackingEnabled,
     )
 }
 
@@ -69,7 +80,15 @@ fun ProfileGoalsRoute(
 fun ProfileGoalsContent(
     state: ProfileGoalsUiState,
     onSave: (GoalSettings, BodyMeasurementEntry, Float?, WaterReminderSettings) -> Unit,
+    onStepTrackingChange: (Boolean) -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val hasStepSensor = remember { context.hasStepCounterSensor() }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        onStepTrackingChange(granted)
+    }
     val latestMeasurement = state.latestMeasurement ?: BodyMeasurementEntry(
         date = LocalDate.now(),
         weightKg = state.goalSettings.baselineWeightKg,
@@ -104,6 +123,8 @@ fun ProfileGoalsContent(
     val dailyGoalsSubtitle = stringResource(R.string.profile_goals_daily_subtitle)
     val waterReminderTitle = stringResource(R.string.profile_goals_water_reminder_title)
     val waterReminderSubtitle = stringResource(R.string.profile_goals_water_reminder_subtitle)
+    val stepTrackingTitle = stringResource(R.string.profile_goals_step_tracking_title)
+    val stepTrackingSubtitle = stringResource(R.string.profile_goals_step_tracking_subtitle)
     val measurementsTitle = stringResource(R.string.profile_goals_measurements_title)
     val measurementsSubtitle = stringResource(R.string.profile_goals_measurements_subtitle)
     val stepGoalErrorText = stepGoalError?.asErrorText()
@@ -230,6 +251,49 @@ fun ProfileGoalsContent(
                 onLeftChange = { waterReminderInterval = it },
                 onRightChange = {},
             )
+        }
+        profileGoalsSection(
+            title = stepTrackingTitle,
+            subtitle = stepTrackingSubtitle,
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.profile_goal_step_tracking),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = HealthSpacing.xs),
+                        text = if (hasStepSensor) {
+                            stringResource(R.string.profile_goal_step_tracking_helper)
+                        } else {
+                            stringResource(R.string.profile_goal_step_tracking_no_sensor)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = state.stepTrackingEnabled && hasStepSensor,
+                    enabled = hasStepSensor,
+                    onCheckedChange = { enabled ->
+                        if (!enabled) {
+                            onStepTrackingChange(false)
+                        } else if (context.hasActivityRecognitionPermission()) {
+                            onStepTrackingChange(true)
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            permissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                        } else {
+                            onStepTrackingChange(true)
+                        }
+                    },
+                )
+            }
         }
         profileGoalsSection(
             title = measurementsTitle,
@@ -520,3 +584,16 @@ private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.par
 private fun Float?.toEditableText(): String = this?.let {
     if (it % 1f == 0f) it.toInt().toString() else it.toString()
 } ?: ""
+
+private fun Context.hasActivityRecognitionPermission(): Boolean {
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACTIVITY_RECOGNITION,
+        ) == PackageManager.PERMISSION_GRANTED
+}
+
+private fun Context.hasStepCounterSensor(): Boolean {
+    val sensorManager = getSystemService(SensorManager::class.java)
+    return sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
+}

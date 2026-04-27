@@ -35,6 +35,7 @@ class ProfileGoalsViewModel(
                 latestMeasurement = latestMeasurement,
                 heightCm = settings.userProfile.heightCm,
                 waterReminderSettings = settings.waterReminderSettings,
+                stepTrackingEnabled = settings.stepTrackingEnabled,
             )
     }.stateIn(
         scope = viewModelScope,
@@ -46,6 +47,7 @@ class ProfileGoalsViewModel(
             latestMeasurement = null,
             heightCm = null,
             waterReminderSettings = WaterReminderSettings(),
+            stepTrackingEnabled = false,
         ),
     )
 
@@ -69,6 +71,12 @@ class ProfileGoalsViewModel(
             )
             dashboardRepository.saveBodyMeasurement(measurement)
             onSaved()
+        }
+    }
+
+    fun updateStepTrackingEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateStepTrackingEnabled(enabled)
         }
     }
 

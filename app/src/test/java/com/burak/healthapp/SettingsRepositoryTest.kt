@@ -111,6 +111,27 @@ class SettingsRepositoryTest {
         assertEquals(45, settings.intervalMinutes)
         tempDir.deleteRecursively()
     }
+
+    @Test
+    fun updateStepTrackingEnabled_persistsUserControl() = runTest {
+        val tempDir = Files.createTempDirectory("health-step-tracking").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = SettingsRepositoryImpl(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        assertEquals(false, repository.settings.first().stepTrackingEnabled)
+        repository.updateStepTrackingEnabled(true)
+
+        assertEquals(true, repository.settings.first().stepTrackingEnabled)
+        tempDir.deleteRecursively()
+    }
 }
 
 private object EmptyTemplateDao : SupplementTemplateDao {

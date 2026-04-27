@@ -42,7 +42,7 @@ internal fun MainShell(rootState: RootUiState) {
     val currentTitle = resolveTitle(currentRoute = currentRoute, selectedDate = selectedDate)
     val backgroundColor = MaterialTheme.colorScheme.background
 
-    StepCounterPermissionEffect()
+    StepCounterPermissionEffect(rootState.stepTrackingEnabled)
     WaterReminderNotificationPermissionEffect(rootState.waterReminderEnabled)
 
     if (showDatePicker) {

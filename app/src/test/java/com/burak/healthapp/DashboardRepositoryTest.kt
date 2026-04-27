@@ -562,6 +562,8 @@ private class FakeSettingsRepository : SettingsRepository {
 
     override suspend fun updateWaterReminderSettings(settings: WaterReminderSettings) = Unit
 
+    override suspend fun updateStepTrackingEnabled(enabled: Boolean) = Unit
+
     override suspend fun updateProfile(profile: UserProfile) = Unit
 
     override suspend fun updateThemeMode(mode: ThemeMode) = Unit

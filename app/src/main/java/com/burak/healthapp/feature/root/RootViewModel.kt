@@ -20,6 +20,7 @@ data class RootUiState(
     val avatarInitials: String = "M",
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val waterReminderEnabled: Boolean = false,
+    val stepTrackingEnabled: Boolean = false,
 )
 
 class RootViewModel(
@@ -34,6 +35,7 @@ class RootViewModel(
                 avatarInitials = settings.userProfile.avatarInitials,
                 themeMode = settings.themeMode,
                 waterReminderEnabled = settings.waterReminderSettings.enabled,
+                stepTrackingEnabled = settings.stepTrackingEnabled,
             )
         }
         .stateIn(
