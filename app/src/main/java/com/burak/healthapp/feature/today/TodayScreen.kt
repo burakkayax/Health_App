@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -403,6 +406,8 @@ private fun DashboardCustomizationSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
+            .imePadding()
             .padding(horizontal = HealthSpacing.md, vertical = HealthSpacing.sm)
             .testTag("dashboard_customization_sheet"),
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
@@ -412,59 +417,66 @@ private fun DashboardCustomizationSheet(
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        localCards.forEachIndexed { index, config ->
-            val isDragging = draggingIndex == index
-            val scale by animateFloatAsState(
-                targetValue = if (isDragging) 1.04f else 1f,
-                label = "drag_scale",
-            )
-            val elevation by animateDpAsState(
-                targetValue = if (isDragging) 6.dp else 0.dp,
-                label = "drag_elevation",
-            )
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .testTag("dashboard_customization_sheet_list"),
+            verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            itemsIndexed(localCards, key = { _, config -> config.type.name }) { index, config ->
+                val isDragging = draggingIndex == index
+                val scale by animateFloatAsState(
+                    targetValue = if (isDragging) 1.04f else 1f,
+                    label = "drag_scale",
+                )
+                val elevation by animateDpAsState(
+                    targetValue = if (isDragging) 6.dp else 0.dp,
+                    label = "drag_elevation",
+                )
 
-            HealthCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        shadowElevation = elevation.toPx()
-                    },
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DragHandle(
-                        index = index,
-                        lastIndex = localCards.lastIndex,
-                        onDragStarted = { draggingIndex = it },
-                        onDragEnded = { fromIndex, toIndex ->
-                            draggingIndex = -1
-                            if (fromIndex != toIndex) {
-                                val item = localCards[fromIndex]
-                                val mutable = localCards.toMutableList()
-                                mutable.removeAt(fromIndex)
-                                mutable.add(toIndex.coerceIn(0, mutable.size), item)
-                                localCards = mutable
-                                onMove(item.type, toIndex)
-                            }
+                HealthCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            shadowElevation = elevation.toPx()
                         },
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = config.type.label(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DragHandle(
+                            index = index,
+                            lastIndex = localCards.lastIndex,
+                            onDragStarted = { draggingIndex = it },
+                            onDragEnded = { fromIndex, toIndex ->
+                                draggingIndex = -1
+                                if (fromIndex != toIndex) {
+                                    val item = localCards[fromIndex]
+                                    val mutable = localCards.toMutableList()
+                                    mutable.removeAt(fromIndex)
+                                    mutable.add(toIndex.coerceIn(0, mutable.size), item)
+                                    localCards = mutable
+                                    onMove(item.type, toIndex)
+                                }
+                            },
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = config.type.label(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                        Switch(
+                            modifier = Modifier.testTag("dashboard_card_switch_${config.type.name}"),
+                            checked = config.isVisible,
+                            onCheckedChange = { checked -> onVisibilityChange(config.type, checked) },
                         )
                     }
-                    Switch(
-                        modifier = Modifier.testTag("dashboard_card_switch_${config.type.name}"),
-                        checked = config.isVisible,
-                        onCheckedChange = { checked -> onVisibilityChange(config.type, checked) },
-                    )
                 }
             }
         }
@@ -488,11 +500,15 @@ private fun DragHandle(
     val haptic = LocalHapticFeedback.current
     var accumulatedDrag by remember { mutableFloatStateOf(0f) }
     val itemHeight = 72f
+    val handleDescription = stringResource(R.string.dashboard_drag_handle)
 
     Column(
         modifier = Modifier
             .size(width = 24.dp, height = 24.dp)
-            .testTag("dashboard_drag_handle_${index}")
+            .testTag("dashboard_drag_handle_$index")
+            .semantics {
+                contentDescription = handleDescription
+            }
             .pointerInput(index, lastIndex) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = {
@@ -519,9 +535,6 @@ private fun DragHandle(
     ) {
         Box(
             Modifier
-                .semantics {
-                    contentDescription = ""
-                }
                 .width(20.dp)
                 .height(2.dp)
                 .background(
@@ -553,4 +566,3 @@ private fun DashboardCardType.label(): String = when (this) {
     DashboardCardType.SUPPLEMENTS -> stringResource(R.string.dashboard_card_supplements)
     DashboardCardType.STEPS -> stringResource(R.string.dashboard_card_steps)
 }
-

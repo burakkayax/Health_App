@@ -1,5 +1,15 @@
 # Changelog
 
+## PR16.2 - Dashboard Customization Scroll & Supplements Layout Polish
+
+### Düzeltildi
+- Kartları Özelleştir menüsünde ekran yüksekliğini aşan kartlara erişilememesi düzeltildi.
+- Sigara, Takviyeler ve Adım kartlarının özelleştirme listesinde erişilebilir olması sağlandı.
+- Drag handle erişilebilirlik açıklaması düzeltildi.
+
+### Değiştirildi
+- Takviyeler kartı 1 veya 2 takviye olduğunda içerikleri kart içinde daha dengeli ve ortalı gösterecek şekilde iyileştirildi.
+
 ## PR16.1 - Dashboard Customization Hotfix & Polish
 
 ### Düzeltildi

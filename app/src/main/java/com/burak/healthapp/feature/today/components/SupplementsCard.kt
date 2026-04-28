@@ -2,10 +2,12 @@ package com.burak.healthapp.feature.today.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -58,16 +60,37 @@ internal fun SupplementsCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        } else if (items.size <= 2) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = HealthSpacing.sm)
+                    .testTag("supplements_centered_row"),
+                horizontalArrangement = Arrangement.spacedBy(
+                    space = HealthSpacing.md,
+                    alignment = Alignment.CenterHorizontally,
+                ),
+            ) {
+                items.forEach { item ->
+                    SupplementRingItem(
+                        item = item,
+                        modifier = Modifier.widthIn(min = 112.dp, max = 132.dp),
+                        onDeleteDose = onDeleteDose,
+                    )
+                }
+            }
         } else {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = HealthSpacing.sm),
+                    .padding(top = HealthSpacing.sm)
+                    .testTag("supplements_lazy_row"),
                 horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
             ) {
                 items(items, key = { it.id }) { item ->
                     SupplementRingItem(
                         item = item,
+                        modifier = Modifier.width(112.dp),
                         onDeleteDose = onDeleteDose,
                     )
                 }
@@ -79,10 +102,11 @@ internal fun SupplementsCard(
 @Composable
 private fun SupplementRingItem(
     item: SupplementItemState,
+    modifier: Modifier = Modifier,
     onDeleteDose: (Long) -> Unit,
 ) {
     Column(
-        modifier = Modifier.width(112.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
     ) {

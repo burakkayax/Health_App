@@ -3,6 +3,7 @@ package com.burak.healthapp
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -407,11 +408,31 @@ class TodayContentTest {
             }
         }
 
-        composeRule.onNodeWithTag("today_list").performScrollToNode(hasTestTag("today_customize_dashboard_button"))
+        composeRule.onNodeWithTag("today_list").performScrollToNode(androidx.compose.ui.test.hasTestTag("today_customize_dashboard_button"))
         composeRule.onNodeWithTag("today_customize_dashboard_button").performClick()
 
         composeRule.onNodeWithTag("dashboard_customization_sheet").assertIsDisplayed()
         composeRule.onNodeWithTag("dashboard_card_switch_HYDRATION").assertIsDisplayed()
+
+        // Verify drag handle has content description
+        composeRule.onNodeWithTag("dashboard_drag_handle_0").assertIsDisplayed()
+        composeRule.onAllNodes(
+            hasContentDescription("Sıralamak için basılı tut")
+                .and(hasTestTag("dashboard_drag_handle_0")),
+            useUnmergedTree = true,
+        ).assertCountEquals(1)
+
+        composeRule.onNodeWithTag("dashboard_customization_sheet_list")
+            .performScrollToNode(hasTestTag("dashboard_card_switch_SMOKING"))
+        composeRule.onNodeWithTag("dashboard_card_switch_SMOKING").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("dashboard_customization_sheet_list")
+            .performScrollToNode(hasTestTag("dashboard_card_switch_SUPPLEMENTS"))
+        composeRule.onNodeWithTag("dashboard_card_switch_SUPPLEMENTS").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("dashboard_customization_sheet_list")
+            .performScrollToNode(hasTestTag("dashboard_card_switch_STEPS"))
+        composeRule.onNodeWithTag("dashboard_card_switch_STEPS").assertIsDisplayed()
     }
 
     @Test

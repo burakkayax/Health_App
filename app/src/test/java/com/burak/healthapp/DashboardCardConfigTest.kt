@@ -62,20 +62,22 @@ class DashboardCardConfigTest {
     }
 
     @Test
-    fun sanitizeConfig_addsMissingSmokingAndSupplements() {
+    fun sanitizeConfig_addsMissingSmokingSupplementsAndSteps() {
         val incompleteConfig = listOf(
             DashboardCardConfig(DashboardCardType.NUTRITION, isVisible = true, sortOrder = 0),
             DashboardCardConfig(DashboardCardType.WEIGHT, isVisible = true, sortOrder = 1),
             DashboardCardConfig(DashboardCardType.EXERCISE, isVisible = true, sortOrder = 2),
-            DashboardCardConfig(DashboardCardType.STEPS, isVisible = true, sortOrder = 3),
-            DashboardCardConfig(DashboardCardType.HYDRATION, isVisible = true, sortOrder = 4),
-            DashboardCardConfig(DashboardCardType.SLEEP, isVisible = true, sortOrder = 5),
+            DashboardCardConfig(DashboardCardType.HYDRATION, isVisible = true, sortOrder = 3),
+            DashboardCardConfig(DashboardCardType.SLEEP, isVisible = true, sortOrder = 4),
         )
 
         val result = sanitizeDashboardCardConfig(incompleteConfig)
         val types = result.map(DashboardCardConfig::type)
+
+        assertEquals(8, result.size)
         assertTrue(types.contains(DashboardCardType.SMOKING))
         assertTrue(types.contains(DashboardCardType.SUPPLEMENTS))
+        assertTrue(types.contains(DashboardCardType.STEPS))
         assertEquals(DashboardCardType.entries.size, result.size)
     }
 
