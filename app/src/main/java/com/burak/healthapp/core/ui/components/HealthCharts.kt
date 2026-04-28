@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.core.ui.model.BmiGaugeState
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.core.ui.theme.HealthCarbs
@@ -38,6 +37,7 @@ import com.burak.healthapp.core.ui.theme.HealthFat
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.core.ui.theme.HealthWater
+import com.burak.healthapp.domain.model.TrendPoint
 
 @Composable
 fun SmoothTrendChart(

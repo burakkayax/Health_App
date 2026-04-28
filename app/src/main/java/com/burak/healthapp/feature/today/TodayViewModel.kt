@@ -5,24 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.calculation.calculateHydrationTotal
-import com.burak.healthapp.domain.calculation.calculateNutritionTotals
-import com.burak.healthapp.domain.calculation.calculateSleepDurationMinutes
-import com.burak.healthapp.domain.calculation.clampProgress
-import com.burak.healthapp.domain.calculation.countExerciseDays
-import com.burak.healthapp.domain.calculation.directionAwareProgress
-import com.burak.healthapp.domain.calculation.formatClockRange
-import com.burak.healthapp.domain.calculation.formatMinutesAsSleepLabel
-import com.burak.healthapp.domain.calculation.formatSleepDuration
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
-import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SupplementDoseEntry
-import com.burak.healthapp.domain.model.TodaySnapshot
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
@@ -35,10 +25,6 @@ import com.burak.healthapp.feature.today.SupplementCardState
 import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.WeightCardState
-import com.burak.healthapp.feature.root.healthApplication
-import java.time.LocalDate
-import java.time.LocalTime
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,6 +32,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(

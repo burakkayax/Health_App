@@ -30,11 +30,11 @@ import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.repository.HealthDataManagementRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class HealthDataManagementRepositoryImpl(
     private val database: HealthDatabase,
@@ -212,162 +212,128 @@ private data class SupplementTemplateImport(
     val entity: SupplementTemplateEntity,
 )
 
-private fun HealthDataExportModel.toPreparedImport(): PreparedHealthDataImport {
-    return PreparedHealthDataImport(
-        profile = profile.toDomain(),
-        goals = goals.toDomain(),
-        waterReminderSettings = waterReminderSettings.toDomain(),
-        themeMode = ThemeMode.entries.firstOrNull { it.name == themeMode } ?: ThemeMode.SYSTEM,
-        meals = meals.map(ExportedMealEntry::toEntity),
-        hydration = hydration.map(ExportedHydrationEntry::toEntity),
-        sleep = sleep.map(ExportedSleepSession::toEntity),
-        exercise = exercise.map(ExportedExerciseEntry::toEntity),
-        smoking = smoking.map(ExportedSmokingEntry::toEntity),
-        steps = steps.map(ExportedStepEntry::toEntity),
-        bodyMeasurements = bodyMeasurements.map(ExportedBodyMeasurementEntry::toEntity),
-        supplementTemplates = supplementTemplates.map(ExportedSupplementTemplate::toImport),
-        supplementDoses = supplementDoseEntries.map(ExportedSupplementDoseEntry::toEntity),
-    )
-}
+private fun HealthDataExportModel.toPreparedImport(): PreparedHealthDataImport = PreparedHealthDataImport(
+    profile = profile.toDomain(),
+    goals = goals.toDomain(),
+    waterReminderSettings = waterReminderSettings.toDomain(),
+    themeMode = ThemeMode.entries.firstOrNull { it.name == themeMode } ?: ThemeMode.SYSTEM,
+    meals = meals.map(ExportedMealEntry::toEntity),
+    hydration = hydration.map(ExportedHydrationEntry::toEntity),
+    sleep = sleep.map(ExportedSleepSession::toEntity),
+    exercise = exercise.map(ExportedExerciseEntry::toEntity),
+    smoking = smoking.map(ExportedSmokingEntry::toEntity),
+    steps = steps.map(ExportedStepEntry::toEntity),
+    bodyMeasurements = bodyMeasurements.map(ExportedBodyMeasurementEntry::toEntity),
+    supplementTemplates = supplementTemplates.map(ExportedSupplementTemplate::toImport),
+    supplementDoses = supplementDoseEntries.map(ExportedSupplementDoseEntry::toEntity),
+)
 
-private fun ExportedUserProfile.toDomain(): UserProfile {
-    return UserProfile(
-        name = name.trim().ifBlank { "Misafir" },
-        avatarInitials = avatarInitials.trim().ifBlank { "M" },
-        heightCm = heightCm,
-    )
-}
+private fun ExportedUserProfile.toDomain(): UserProfile = UserProfile(
+    name = name.trim().ifBlank { "Misafir" },
+    avatarInitials = avatarInitials.trim().ifBlank { "M" },
+    heightCm = heightCm,
+)
 
-private fun ExportedGoalSettings.toDomain(): GoalSettings {
-    return GoalSettings(
-        dailyCaloriesTarget = dailyCaloriesTarget,
-        proteinTargetGrams = proteinTargetGrams,
-        carbTargetGrams = carbTargetGrams,
-        fatTargetGrams = fatTargetGrams,
-        waterTargetMl = waterTargetMl,
-        dailyStepTarget = dailyStepTarget,
-        sleepTargetBedtime = LocalTime.parse(sleepTargetBedtime),
-        sleepTargetWakeTime = LocalTime.parse(sleepTargetWakeTime),
-        exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
-        exerciseTargetDurationMinutes = exerciseTargetDurationMinutes,
-        smokeDailyLimit = smokeDailyLimit,
-        baselineWeightKg = baselineWeightKg,
-        targetWeightKg = targetWeightKg,
-        baselineShoulderCm = baselineShoulderCm,
-        baselineWaistCm = baselineWaistCm,
-        baselineHipCm = baselineHipCm,
-    )
-}
+private fun ExportedGoalSettings.toDomain(): GoalSettings = GoalSettings(
+    dailyCaloriesTarget = dailyCaloriesTarget,
+    proteinTargetGrams = proteinTargetGrams,
+    carbTargetGrams = carbTargetGrams,
+    fatTargetGrams = fatTargetGrams,
+    waterTargetMl = waterTargetMl,
+    dailyStepTarget = dailyStepTarget,
+    sleepTargetBedtime = LocalTime.parse(sleepTargetBedtime),
+    sleepTargetWakeTime = LocalTime.parse(sleepTargetWakeTime),
+    exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
+    exerciseTargetDurationMinutes = exerciseTargetDurationMinutes,
+    smokeDailyLimit = smokeDailyLimit,
+    baselineWeightKg = baselineWeightKg,
+    targetWeightKg = targetWeightKg,
+    baselineShoulderCm = baselineShoulderCm,
+    baselineWaistCm = baselineWaistCm,
+    baselineHipCm = baselineHipCm,
+)
 
-private fun ExportedWaterReminderSettings.toDomain(): WaterReminderSettings {
-    return WaterReminderSettings(
-        enabled = enabled,
-        startTime = LocalTime.parse(startTime),
-        endTime = LocalTime.parse(endTime),
-        intervalMinutes = intervalMinutes,
-    )
-}
+private fun ExportedWaterReminderSettings.toDomain(): WaterReminderSettings = WaterReminderSettings(
+    enabled = enabled,
+    startTime = LocalTime.parse(startTime),
+    endTime = LocalTime.parse(endTime),
+    intervalMinutes = intervalMinutes,
+)
 
-private fun ExportedMealEntry.toEntity(): MealEntryEntity {
-    return MealEntryEntity(
-        date = LocalDate.parse(date),
-        mealType = mealType,
-        name = name,
-        calories = calories,
-        carbsGrams = carbsGrams,
-        fatGrams = fatGrams,
-        proteinGrams = proteinGrams,
-        createdAt = LocalDateTime.parse(createdAt),
-    )
-}
+private fun ExportedMealEntry.toEntity(): MealEntryEntity = MealEntryEntity(
+    date = LocalDate.parse(date),
+    mealType = mealType,
+    name = name,
+    calories = calories,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    proteinGrams = proteinGrams,
+    createdAt = LocalDateTime.parse(createdAt),
+)
 
-private fun ExportedHydrationEntry.toEntity(): HydrationEntryEntity {
-    return HydrationEntryEntity(
-        date = LocalDate.parse(date),
-        amountMl = amountMl,
-        createdAt = LocalDateTime.parse(createdAt),
-    )
-}
+private fun ExportedHydrationEntry.toEntity(): HydrationEntryEntity = HydrationEntryEntity(
+    date = LocalDate.parse(date),
+    amountMl = amountMl,
+    createdAt = LocalDateTime.parse(createdAt),
+)
 
-private fun ExportedSleepSession.toEntity(): SleepSessionEntity {
-    return SleepSessionEntity(
-        sessionDate = LocalDate.parse(sessionDate),
-        startTime = LocalDateTime.parse(startTime),
-        endTime = LocalDateTime.parse(endTime),
-    )
-}
+private fun ExportedSleepSession.toEntity(): SleepSessionEntity = SleepSessionEntity(
+    sessionDate = LocalDate.parse(sessionDate),
+    startTime = LocalDateTime.parse(startTime),
+    endTime = LocalDateTime.parse(endTime),
+)
 
-private fun ExportedExerciseEntry.toEntity(): ExerciseEntryEntity {
-    return ExerciseEntryEntity(
-        date = LocalDate.parse(date),
-        type = type,
-        durationMinutes = durationMinutes,
-        intensity = intensity,
-    )
-}
+private fun ExportedExerciseEntry.toEntity(): ExerciseEntryEntity = ExerciseEntryEntity(
+    date = LocalDate.parse(date),
+    type = type,
+    durationMinutes = durationMinutes,
+    intensity = intensity,
+)
 
-private fun ExportedSmokingEntry.toEntity(): SmokingEntryEntity {
-    return SmokingEntryEntity(
-        date = LocalDate.parse(date),
-        count = count,
-    )
-}
+private fun ExportedSmokingEntry.toEntity(): SmokingEntryEntity = SmokingEntryEntity(
+    date = LocalDate.parse(date),
+    count = count,
+)
 
-private fun ExportedStepEntry.toEntity(): StepEntryEntity {
-    return StepEntryEntity(
-        date = LocalDate.parse(date),
-        steps = steps,
-        sensorBaseline = sensorBaseline,
-        lastSensorValue = lastSensorValue,
-        updatedAt = LocalDateTime.parse(updatedAt),
-    )
-}
+private fun ExportedStepEntry.toEntity(): StepEntryEntity = StepEntryEntity(
+    date = LocalDate.parse(date),
+    steps = steps,
+    sensorBaseline = sensorBaseline,
+    lastSensorValue = lastSensorValue,
+    updatedAt = LocalDateTime.parse(updatedAt),
+)
 
-private fun ExportedBodyMeasurementEntry.toEntity(): BodyMeasurementEntity {
-    return BodyMeasurementEntity(
-        date = LocalDate.parse(date),
-        weightKg = weightKg,
-        shoulderCm = shoulderCm,
-        waistCm = waistCm,
-        hipCm = hipCm,
-        recordedAt = LocalDateTime.parse(recordedAt),
-    )
-}
+private fun ExportedBodyMeasurementEntry.toEntity(): BodyMeasurementEntity = BodyMeasurementEntity(
+    date = LocalDate.parse(date),
+    weightKg = weightKg,
+    shoulderCm = shoulderCm,
+    waistCm = waistCm,
+    hipCm = hipCm,
+    recordedAt = LocalDateTime.parse(recordedAt),
+)
 
-private fun ExportedSupplementTemplate.toImport(): SupplementTemplateImport {
-    return SupplementTemplateImport(
-        oldId = id,
-        entity = SupplementTemplateEntity(
-            name = name.trim(),
-            targetAmount = targetAmount,
-            unitLabel = unitLabel.trim(),
-            isActive = isActive,
-            sortOrder = sortOrder,
-        ),
-    )
-}
+private fun ExportedSupplementTemplate.toImport(): SupplementTemplateImport = SupplementTemplateImport(
+    oldId = id,
+    entity = SupplementTemplateEntity(
+        name = name.trim(),
+        targetAmount = targetAmount,
+        unitLabel = unitLabel.trim(),
+        isActive = isActive,
+        sortOrder = sortOrder,
+    ),
+)
 
-private fun ExportedSupplementDoseEntry.toEntity(): SupplementDoseEntryEntity {
-    return SupplementDoseEntryEntity(
-        templateId = templateId,
-        date = LocalDate.parse(date),
-        amount = amount,
-        loggedAt = LocalDateTime.parse(loggedAt),
-    )
-}
+private fun ExportedSupplementDoseEntry.toEntity(): SupplementDoseEntryEntity = SupplementDoseEntryEntity(
+    templateId = templateId,
+    date = LocalDate.parse(date),
+    amount = amount,
+    loggedAt = LocalDateTime.parse(loggedAt),
+)
 
-private fun MealEntryEntity.importKey(): String {
-    return listOf(date, mealType, name.trim(), calories, createdAt).joinToString("|")
-}
+private fun MealEntryEntity.importKey(): String = listOf(date, mealType, name.trim(), calories, createdAt).joinToString("|")
 
-private fun HydrationEntryEntity.importKey(): String {
-    return listOf(date, amountMl, createdAt).joinToString("|")
-}
+private fun HydrationEntryEntity.importKey(): String = listOf(date, amountMl, createdAt).joinToString("|")
 
-private fun SupplementDoseEntryEntity.importKey(): String {
-    return listOf(templateId, date, loggedAt).joinToString("|")
-}
+private fun SupplementDoseEntryEntity.importKey(): String = listOf(templateId, date, loggedAt).joinToString("|")
 
-private fun String.normalizedTemplateName(): String {
-    return trim().lowercase()
-}
+private fun String.normalizedTemplateName(): String = trim().lowercase()

@@ -12,7 +12,5 @@ class JsonHealthDataExporter(
         prettyPrint = true
     },
 ) : HealthDataJsonExporter {
-    override fun encode(model: HealthDataExportModel): String {
-        return json.encodeToString(model)
-    }
+    override fun encode(model: HealthDataExportModel): String = json.encodeToString(model)
 }

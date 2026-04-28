@@ -18,15 +18,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
-import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.SmoothTrendChart
-import com.burak.healthapp.core.ui.components.WeightTrendChart
 import com.burak.healthapp.core.ui.components.WeeklyCaloriesBarChart
-import com.burak.healthapp.feature.trends.TrendsUiState
+import com.burak.healthapp.core.ui.components.WeightTrendChart
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.model.TrendsPeriod
+import com.burak.healthapp.feature.trends.TrendsUiState
 
 @Composable
 fun TrendsRoute(

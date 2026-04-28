@@ -87,74 +87,72 @@ class JsonHealthDataImporterTest {
     }
 }
 
-private fun sampleModel(): HealthDataExportModel {
-    return HealthDataExportModel(
-        exportedAt = "2026-04-27T10:00:00Z",
-        appVersion = "1.0-test",
-        profile = ExportedUserProfile("Burak", "BK", 182f),
-        goals = ExportedGoalSettings(
-            dailyCaloriesTarget = DefaultHealthGoals.DAILY_CALORIES,
-            proteinTargetGrams = DefaultHealthGoals.PROTEIN_GRAMS,
-            carbTargetGrams = DefaultHealthGoals.CARB_GRAMS,
-            fatTargetGrams = DefaultHealthGoals.FAT_GRAMS,
-            waterTargetMl = DefaultHealthGoals.WATER_TARGET_ML,
-            dailyStepTarget = DefaultHealthGoals.DAILY_STEPS,
-            sleepTargetBedtime = DefaultHealthGoals.SLEEP_BEDTIME.toString(),
-            sleepTargetWakeTime = DefaultHealthGoals.SLEEP_WAKE_TIME.toString(),
-            exerciseTargetDaysPerWeek = DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
-            exerciseTargetDurationMinutes = DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
-            smokeDailyLimit = DefaultHealthGoals.SMOKE_DAILY_LIMIT,
-            baselineWeightKg = DefaultHealthGoals.BASELINE_WEIGHT_KG,
-            targetWeightKg = DefaultHealthGoals.TARGET_WEIGHT_KG,
-            baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
-            baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
-            baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
+private fun sampleModel(): HealthDataExportModel = HealthDataExportModel(
+    exportedAt = "2026-04-27T10:00:00Z",
+    appVersion = "1.0-test",
+    profile = ExportedUserProfile("Burak", "BK", 182f),
+    goals = ExportedGoalSettings(
+        dailyCaloriesTarget = DefaultHealthGoals.DAILY_CALORIES,
+        proteinTargetGrams = DefaultHealthGoals.PROTEIN_GRAMS,
+        carbTargetGrams = DefaultHealthGoals.CARB_GRAMS,
+        fatTargetGrams = DefaultHealthGoals.FAT_GRAMS,
+        waterTargetMl = DefaultHealthGoals.WATER_TARGET_ML,
+        dailyStepTarget = DefaultHealthGoals.DAILY_STEPS,
+        sleepTargetBedtime = DefaultHealthGoals.SLEEP_BEDTIME.toString(),
+        sleepTargetWakeTime = DefaultHealthGoals.SLEEP_WAKE_TIME.toString(),
+        exerciseTargetDaysPerWeek = DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
+        exerciseTargetDurationMinutes = DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
+        smokeDailyLimit = DefaultHealthGoals.SMOKE_DAILY_LIMIT,
+        baselineWeightKg = DefaultHealthGoals.BASELINE_WEIGHT_KG,
+        targetWeightKg = DefaultHealthGoals.TARGET_WEIGHT_KG,
+        baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
+        baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
+        baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
+    ),
+    waterReminderSettings = ExportedWaterReminderSettings(
+        enabled = true,
+        startTime = "09:00",
+        endTime = "21:00",
+        intervalMinutes = 60,
+    ),
+    themeMode = ThemeMode.SYSTEM.name,
+    meals = listOf(
+        ExportedMealEntry(
+            id = 1,
+            date = "2026-04-27",
+            mealType = "BREAKFAST",
+            name = "Yulaf",
+            calories = 300,
+            carbsGrams = 40,
+            fatGrams = 8,
+            proteinGrams = 20,
+            createdAt = "2026-04-27T08:00:00",
         ),
-        waterReminderSettings = ExportedWaterReminderSettings(
-            enabled = true,
-            startTime = "09:00",
-            endTime = "21:00",
-            intervalMinutes = 60,
+    ),
+    hydration = listOf(
+        ExportedHydrationEntry(
+            id = 1,
+            date = "2026-04-27",
+            amountMl = 250,
+            createdAt = "2026-04-27T09:00:00",
         ),
-        themeMode = ThemeMode.SYSTEM.name,
-        meals = listOf(
-            ExportedMealEntry(
-                id = 1,
-                date = "2026-04-27",
-                mealType = "BREAKFAST",
-                name = "Yulaf",
-                calories = 300,
-                carbsGrams = 40,
-                fatGrams = 8,
-                proteinGrams = 20,
-                createdAt = "2026-04-27T08:00:00",
-            ),
+    ),
+    sleep = listOf(
+        ExportedSleepSession(
+            id = 1,
+            sessionDate = "2026-04-27",
+            startTime = "2026-04-26T23:00:00",
+            endTime = "2026-04-27T07:00:00",
         ),
-        hydration = listOf(
-            ExportedHydrationEntry(
-                id = 1,
-                date = "2026-04-27",
-                amountMl = 250,
-                createdAt = "2026-04-27T09:00:00",
-            ),
+    ),
+    supplementTemplates = listOf(
+        ExportedSupplementTemplate(
+            id = 10,
+            name = "D3",
+            targetAmount = 25f,
+            unitLabel = "mcg",
+            isActive = true,
+            sortOrder = 0,
         ),
-        sleep = listOf(
-            ExportedSleepSession(
-                id = 1,
-                sessionDate = "2026-04-27",
-                startTime = "2026-04-26T23:00:00",
-                endTime = "2026-04-27T07:00:00",
-            ),
-        ),
-        supplementTemplates = listOf(
-            ExportedSupplementTemplate(
-                id = 10,
-                name = "D3",
-                targetAmount = 25f,
-                unitLabel = "mcg",
-                isActive = true,
-                sortOrder = 0,
-            ),
-        ),
-    )
-}
+    ),
+)

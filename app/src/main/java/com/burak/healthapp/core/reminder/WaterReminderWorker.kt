@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.burak.healthapp.HealthApplication
-import com.burak.healthapp.domain.calculation.calculateHydrationTotal
 import com.burak.healthapp.core.notification.HealthNotifications
+import com.burak.healthapp.domain.calculation.calculateHydrationTotal
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.LocalTime
-import kotlinx.coroutines.flow.first
 
 class WaterReminderWorker(
     appContext: Context,

@@ -5,14 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.calculation.groupMealsByType
 import com.burak.healthapp.domain.model.MealEntry
+import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryEntryState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
 import com.burak.healthapp.feature.root.healthApplication
-import java.time.LocalDate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MealHistoryViewModel(
@@ -58,23 +58,21 @@ class MealHistoryViewModel(
     }
 }
 
-internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState {
-    return MealHistoryUiState(
-        sections = groupMealsByType(entries).map { groupedMeal ->
-            MealHistorySectionState(
-                title = groupedMeal.mealType.label,
-                entries = groupedMeal.entries.map { mealEntry ->
-                    MealHistoryEntryState(
-                        id = mealEntry.id,
-                        mealType = mealEntry.mealType,
-                        name = mealEntry.name,
-                        calories = mealEntry.calories,
-                        proteinGrams = mealEntry.proteinGrams,
-                        carbsGrams = mealEntry.carbsGrams,
-                        fatGrams = mealEntry.fatGrams,
-                    )
-                },
-            )
-        },
-    )
-}
+internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState = MealHistoryUiState(
+    sections = groupMealsByType(entries).map { groupedMeal ->
+        MealHistorySectionState(
+            title = groupedMeal.mealType.label,
+            entries = groupedMeal.entries.map { mealEntry ->
+                MealHistoryEntryState(
+                    id = mealEntry.id,
+                    mealType = mealEntry.mealType,
+                    name = mealEntry.name,
+                    calories = mealEntry.calories,
+                    proteinGrams = mealEntry.proteinGrams,
+                    carbsGrams = mealEntry.carbsGrams,
+                    fatGrams = mealEntry.fatGrams,
+                )
+            },
+        )
+    },
+)

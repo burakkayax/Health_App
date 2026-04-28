@@ -198,20 +198,18 @@ class ProfileContentTest {
         composeRule.onNodeWithTag("supplement_template_save_button").assertIsNotEnabled()
     }
 
-    private fun sampleProfileState(): ProfileUiState {
-        return ProfileUiState(
-            userName = "Burak",
-            avatarInitials = "BK",
-            themeMode = ThemeMode.SYSTEM,
-            goalSummaries = listOf(
-                ProfileGoalSummaryState(
-                    UiText.DynamicString("Kalori / Su"),
-                    UiText.DynamicString("2200 kcal • 2500 ml"),
-                ),
+    private fun sampleProfileState(): ProfileUiState = ProfileUiState(
+        userName = "Burak",
+        avatarInitials = "BK",
+        themeMode = ThemeMode.SYSTEM,
+        goalSummaries = listOf(
+            ProfileGoalSummaryState(
+                UiText.DynamicString("Kalori / Su"),
+                UiText.DynamicString("2200 kcal • 2500 ml"),
             ),
-            supplementTemplates = listOf(
-                ProfileSupplementTemplateState(1, "Magnezyum", 200f, "mg"),
-            ),
-        )
-    }
+        ),
+        supplementTemplates = listOf(
+            ProfileSupplementTemplateState(1, "Magnezyum", 200f, "mg"),
+        ),
+    )
 }

@@ -5,25 +5,25 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.domain.repository.TrendsRepository
+import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
-import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
+import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.domain.repository.TrendsRepository
+import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.feature.trends.InsightCardState
 import com.burak.healthapp.feature.trends.TrendChartState
 import com.burak.healthapp.feature.trends.TrendsUiState
-import com.burak.healthapp.feature.trends.WeightTrendChartCardState
-import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
-import com.burak.healthapp.feature.root.healthApplication
-import java.util.Locale
+import com.burak.healthapp.feature.trends.WeightTrendChartCardState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrendsViewModel(
@@ -135,12 +135,10 @@ private fun TrendsSnapshot.toUiState(
     )
 }
 
-private fun emptyUiState(): TrendsUiState {
-    return TrendsUiState(
-        avatarInitials = "M",
-        selectedPeriod = TrendsPeriod.WEEKLY,
-        insights = emptyList(),
-        weeklyCaloriesCard = null,
-        charts = emptyList(),
-    )
-}
+private fun emptyUiState(): TrendsUiState = TrendsUiState(
+    avatarInitials = "M",
+    selectedPeriod = TrendsPeriod.WEEKLY,
+    insights = emptyList(),
+    weeklyCaloriesCard = null,
+    charts = emptyList(),
+)

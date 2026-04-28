@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.core.ui.components.HealthCard
+import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
-import com.burak.healthapp.core.ui.theme.HealthSpacing
 import java.time.LocalDate
 
 @Composable

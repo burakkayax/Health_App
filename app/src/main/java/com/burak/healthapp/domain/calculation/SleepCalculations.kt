@@ -1,23 +1,11 @@
 package com.burak.healthapp.domain.calculation
 
-import com.burak.healthapp.domain.model.CalorieBarPoint
-import com.burak.healthapp.domain.model.DayNutritionTotal
-import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.HydrationEntry
-import com.burak.healthapp.domain.model.MealEntry
-import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.StepEntry
-import com.burak.healthapp.domain.model.TrendPoint
-import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.util.Locale
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -51,13 +39,9 @@ fun formatClockRange(session: SleepSession?): String {
 fun formatClockRange(
     bedtime: LocalTime,
     wakeTime: LocalTime,
-): String {
-    return "${formatLocalTime(bedtime)} - ${formatLocalTime(wakeTime)}"
-}
+): String = "${formatLocalTime(bedtime)} - ${formatLocalTime(wakeTime)}"
 
-fun formatLocalTime(time: LocalTime): String {
-    return time.format(DateTimeFormatter.ofPattern("HH:mm"))
-}
+fun formatLocalTime(time: LocalTime): String = time.format(DateTimeFormatter.ofPattern("HH:mm"))
 
 fun averageSleepMinutes(sessions: List<SleepSession>, days: List<LocalDate>): Float {
     if (days.isEmpty()) return 0f
@@ -92,9 +76,9 @@ fun buildSleepFeedback(
     val wakeDiff = session.endTime.toLocalTime().toMinuteOfDay() - goals.sleepTargetWakeTime.toMinuteOfDay()
 
     return when {
-        bedtimeDiff > 0 -> "Dün gece hedefine göre ${bedtimeDiff} dakika geç uyudun."
+        bedtimeDiff > 0 -> "Dün gece hedefine göre $bedtimeDiff dakika geç uyudun."
         bedtimeDiff < 0 -> "Dün gece hedefine göre ${-bedtimeDiff} dakika erken uyudun."
-        wakeDiff > 0 -> "Bu sabah hedefinden ${wakeDiff} dakika geç uyandın."
+        wakeDiff > 0 -> "Bu sabah hedefinden $wakeDiff dakika geç uyandın."
         wakeDiff < 0 -> "Bu sabah hedefinden ${-wakeDiff} dakika erken uyandın."
         else -> "Dün gece uyku hedefini tam yakaladın."
     }
@@ -115,6 +99,4 @@ private fun normalizeBedtimeMinutes(time: LocalTime): Int {
     return if (minutes < 12 * 60) minutes + (24 * 60) else minutes
 }
 
-private fun LocalTime.toMinuteOfDay(): Int {
-    return (toSecondOfDay() / 60)
-}
+private fun LocalTime.toMinuteOfDay(): Int = (toSecondOfDay() / 60)

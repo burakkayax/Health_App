@@ -1,10 +1,5 @@
 package com.burak.healthapp.domain.model
 
-import com.burak.healthapp.domain.config.DefaultHealthGoals
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-
 data class TodaySnapshot(
     val settings: SettingsState,
     val meals: List<MealEntry>,

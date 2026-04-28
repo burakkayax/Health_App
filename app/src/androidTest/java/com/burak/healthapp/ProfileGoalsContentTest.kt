@@ -9,15 +9,15 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsContent
-import com.burak.healthapp.core.ui.theme.HealthTheme
-import java.time.LocalDate
+import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 class ProfileGoalsContentTest {
     @get:Rule
@@ -114,19 +114,17 @@ class ProfileGoalsContentTest {
         assertEquals(12000, savedGoals?.dailyStepTarget)
     }
 
-    private fun sampleState(): ProfileGoalsUiState {
-        return ProfileGoalsUiState(
-            userName = "Burak",
-            avatarInitials = "BK",
-            goalSettings = GoalSettings(),
-            latestMeasurement = BodyMeasurementEntry(
-                date = LocalDate.of(2026, 4, 19),
-                weightKg = 77.4f,
-                shoulderCm = 119f,
-                waistCm = 86f,
-                hipCm = 98f,
-            ),
-            heightCm = 175f,
-        )
-    }
+    private fun sampleState(): ProfileGoalsUiState = ProfileGoalsUiState(
+        userName = "Burak",
+        avatarInitials = "BK",
+        goalSettings = GoalSettings(),
+        latestMeasurement = BodyMeasurementEntry(
+            date = LocalDate.of(2026, 4, 19),
+            weightKg = 77.4f,
+            shoulderCm = 119f,
+            waistCm = 86f,
+            hipCm = 98f,
+        ),
+        heightCm = 175f,
+    )
 }

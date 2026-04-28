@@ -1,0 +1,52 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: false
+  warningsAsErrors: false
+
+complexity:
+  CyclomaticComplexMethod:
+    active: false
+  ComplexCondition:
+    active: false
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  TooManyFunctions:
+    active: false
+
+exceptions:
+  SwallowedException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
+
+naming:
+  FunctionNaming:
+    active: false
+  MatchingDeclarationName:
+    active: false
+  TopLevelPropertyNaming:
+    active: false
+
+performance:
+  SpreadOperator:
+    active: false
+
+style:
+  DestructuringDeclarationWithTooManyEntries:
+    active: false
+  ForbiddenComment:
+    active: false
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+  ReturnCount:
+    active: false
+  UnusedPrivateMember:
+    active: false

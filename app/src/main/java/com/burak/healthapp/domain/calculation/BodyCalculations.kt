@@ -1,27 +1,5 @@
 package com.burak.healthapp.domain.calculation
 
-import com.burak.healthapp.domain.model.CalorieBarPoint
-import com.burak.healthapp.domain.model.DayNutritionTotal
-import com.burak.healthapp.domain.model.ExerciseEntry
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.HydrationEntry
-import com.burak.healthapp.domain.model.MealEntry
-import com.burak.healthapp.domain.model.MealType
-import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.StepEntry
-import com.burak.healthapp.domain.model.TrendPoint
-import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.util.Locale
-import kotlin.math.max
-import kotlin.math.pow
-import kotlin.math.sqrt
-
 fun clampProgress(current: Float, target: Float): Float {
     if (target <= 0f) return 0f
     return (current / target).coerceIn(0f, 1f)
@@ -42,13 +20,11 @@ fun calculateBodyMassIndex(weightKg: Float?, heightCm: Float?): Float? {
     return weightKg / (heightMeters * heightMeters)
 }
 
-fun classifyBodyMassIndex(bmi: Float): String {
-    return when {
-        bmi < 18.5f -> "Zayıf"
-        bmi < 25f -> "Normal"
-        bmi < 30f -> "Kilolu"
-        else -> "Yüksek Kilolu"
-    }
+fun classifyBodyMassIndex(bmi: Float): String = when {
+    bmi < 18.5f -> "Zayıf"
+    bmi < 25f -> "Normal"
+    bmi < 30f -> "Kilolu"
+    else -> "Yüksek Kilolu"
 }
 
 fun normalizeBodyMassIndexToGauge(

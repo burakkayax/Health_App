@@ -192,10 +192,6 @@ private fun sleepDurationMinutes(start: LocalTime, end: LocalTime): Int {
     return endMinutes - startMinutes
 }
 
-private fun String.parseOrNull(): LocalTime? {
-    return runCatching { LocalTime.parse(this) }.getOrNull()
-}
+private fun String.parseOrNull(): LocalTime? = runCatching { LocalTime.parse(this) }.getOrNull()
 
-private fun <T> invalid(error: HealthInputError): ValidationResult<T> {
-    return ValidationResult.Invalid(listOf(error))
-}
+private fun <T> invalid(error: HealthInputError): ValidationResult<T> = ValidationResult.Invalid(listOf(error))

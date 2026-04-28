@@ -99,51 +99,43 @@ class MealEditorViewModel : ViewModel() {
         _uiState.value = transform(_uiState.value)
     }
 
-    private fun createDraft(): MealDraftFoodState {
-        return MealDraftFoodState(draftId = nextDraftId++)
-    }
+    private fun createDraft(): MealDraftFoodState = MealDraftFoodState(draftId = nextDraftId++)
 
-    private fun attachValidation(drafts: List<MealDraftFoodState>): List<MealDraftFoodState> {
-        return drafts.map { draft ->
-            if (!draft.hasInput()) {
-                draft.copy(nameError = null, calorieError = null, macroError = null)
-            } else {
-                when (
-                    val result = MealInputValidator.validate(
-                        name = draft.name,
-                        calories = draft.calories,
-                        protein = draft.protein,
-                        carbs = draft.carbs,
-                        fat = draft.fat,
-                    )
-                ) {
-                    is ValidationResult.Valid -> draft.copy(
-                        nameError = null,
-                        calorieError = null,
-                        macroError = null,
-                    )
-                    is ValidationResult.Invalid -> draft.copy(
-                        nameError = result.errors.firstOrNull { it == HealthInputError.REQUIRED },
-                        calorieError = draft.calories.errorFrom(result.errors),
-                        macroError = result.errors.firstOrNull {
-                            it != HealthInputError.REQUIRED && draft.calories.isBlank()
-                        } ?: result.errors.firstOrNull {
-                            it != HealthInputError.REQUIRED && draft.calories.isNotBlank()
-                        },
-                    )
-                }
+    private fun attachValidation(drafts: List<MealDraftFoodState>): List<MealDraftFoodState> = drafts.map { draft ->
+        if (!draft.hasInput()) {
+            draft.copy(nameError = null, calorieError = null, macroError = null)
+        } else {
+            when (
+                val result = MealInputValidator.validate(
+                    name = draft.name,
+                    calories = draft.calories,
+                    protein = draft.protein,
+                    carbs = draft.carbs,
+                    fat = draft.fat,
+                )
+            ) {
+                is ValidationResult.Valid -> draft.copy(
+                    nameError = null,
+                    calorieError = null,
+                    macroError = null,
+                )
+                is ValidationResult.Invalid -> draft.copy(
+                    nameError = result.errors.firstOrNull { it == HealthInputError.REQUIRED },
+                    calorieError = draft.calories.errorFrom(result.errors),
+                    macroError = result.errors.firstOrNull {
+                        it != HealthInputError.REQUIRED && draft.calories.isBlank()
+                    } ?: result.errors.firstOrNull {
+                        it != HealthInputError.REQUIRED && draft.calories.isNotBlank()
+                    },
+                )
             }
         }
     }
 }
 
-private fun MealDraftFoodState.hasInput(): Boolean {
-    return listOf(name, calories, protein, carbs, fat).any { it.isNotBlank() }
-}
+private fun MealDraftFoodState.hasInput(): Boolean = listOf(name, calories, protein, carbs, fat).any { it.isNotBlank() }
 
-private fun MealDraftFoodState.hasValidationError(): Boolean {
-    return nameError != null || calorieError != null || macroError != null
-}
+private fun MealDraftFoodState.hasValidationError(): Boolean = nameError != null || calorieError != null || macroError != null
 
 private fun String.errorFrom(errors: List<HealthInputError>): HealthInputError? {
     if (isBlank()) return null

@@ -27,12 +27,10 @@ fun calculateNextWaterReminderDelay(
 fun isInsideWaterReminderWindow(
     time: LocalTime,
     settings: WaterReminderSettings,
-): Boolean {
-    return if (settings.startTime <= settings.endTime) {
-        time >= settings.startTime && time <= settings.endTime
-    } else {
-        time >= settings.startTime || time <= settings.endTime
-    }
+): Boolean = if (settings.startTime <= settings.endTime) {
+    time >= settings.startTime && time <= settings.endTime
+} else {
+    time >= settings.startTime || time <= settings.endTime
 }
 
 fun shouldShowWaterReminder(
@@ -40,9 +38,7 @@ fun shouldShowWaterReminder(
     snoozedDate: LocalDate?,
     currentMl: Int,
     targetMl: Int,
-): Boolean {
-    return snoozedDate != today && currentMl < targetMl
-}
+): Boolean = snoozedDate != today && currentMl < targetMl
 
 private fun reminderSlotsForWindow(
     date: LocalDate,

@@ -1,19 +1,9 @@
 package com.burak.healthapp.feature.profile
 
-import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.ExerciseIntensity
-import com.burak.healthapp.domain.model.ExerciseType
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.HydrationEntry
-import com.burak.healthapp.domain.model.MealEntry
-import com.burak.healthapp.domain.model.MealType
-import com.burak.healthapp.domain.model.SupplementTemplate
-import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.domain.model.TrendPoint
-import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.export.HealthDataImportPreview
+import com.burak.healthapp.domain.model.SupplementTemplate
+import com.burak.healthapp.domain.model.ThemeMode
 
 data class ProfileGoalSummaryState(
     val title: UiText,
@@ -38,15 +28,13 @@ data class EditableSupplementTemplateState(
     val unitLabelError: UiText? = null,
 )
 
-fun EditableSupplementTemplateState.toDomainTemplate(sortOrder: Int): SupplementTemplate {
-    return SupplementTemplate(
-        id = id,
-        name = name.trim(),
-        targetAmount = targetAmount.toFloatOrNull() ?: 0f,
-        unitLabel = unitLabel.trim(),
-        sortOrder = sortOrder,
-    )
-}
+fun EditableSupplementTemplateState.toDomainTemplate(sortOrder: Int): SupplementTemplate = SupplementTemplate(
+    id = id,
+    name = name.trim(),
+    targetAmount = targetAmount.toFloatOrNull() ?: 0f,
+    unitLabel = unitLabel.trim(),
+    sortOrder = sortOrder,
+)
 
 data class SupplementEditorUiState(
     val isVisible: Boolean = false,

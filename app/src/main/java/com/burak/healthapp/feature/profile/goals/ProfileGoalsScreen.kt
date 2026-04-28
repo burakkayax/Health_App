@@ -37,20 +37,20 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
-import com.burak.healthapp.domain.config.DefaultHealthGoals
-import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.text.asString
-import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.config.DefaultHealthGoals
+import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.validation.GoalSettingsValidator
 import com.burak.healthapp.domain.validation.HealthInputError
 import com.burak.healthapp.domain.validation.ValidationResult
+import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -514,18 +514,14 @@ private fun LazyListScope.profileGoalsSection(
 }
 
 @Composable
-private fun StepGoalInputError.asErrorText(): String {
-    return when (this) {
-        StepGoalInputError.REQUIRED -> stringResource(R.string.error_step_target_required)
-        StepGoalInputError.MUST_BE_NUMBER -> stringResource(R.string.error_step_target_must_be_number)
-        StepGoalInputError.POSITIVE -> stringResource(R.string.error_step_target_positive)
-        StepGoalInputError.TOO_HIGH -> stringResource(R.string.error_step_target_too_high)
-    }
+private fun StepGoalInputError.asErrorText(): String = when (this) {
+    StepGoalInputError.REQUIRED -> stringResource(R.string.error_step_target_required)
+    StepGoalInputError.MUST_BE_NUMBER -> stringResource(R.string.error_step_target_must_be_number)
+    StepGoalInputError.POSITIVE -> stringResource(R.string.error_step_target_positive)
+    StepGoalInputError.TOO_HIGH -> stringResource(R.string.error_step_target_too_high)
 }
 
-private fun StepGoalValidationResult.errorOrNull(): StepGoalInputError? {
-    return (this as? StepGoalValidationResult.Invalid)?.error
-}
+private fun StepGoalValidationResult.errorOrNull(): StepGoalInputError? = (this as? StepGoalValidationResult.Invalid)?.error
 
 @Composable
 private fun GoalFieldRow(
@@ -614,21 +610,17 @@ private fun Float?.toEditableText(): String = this?.let {
     if (it % 1f == 0f) it.toInt().toString() else it.toString()
 } ?: ""
 
-private fun Context.hasPostNotificationsPermission(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-}
+private fun Context.hasPostNotificationsPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+    ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.POST_NOTIFICATIONS,
+    ) == PackageManager.PERMISSION_GRANTED
 
-private fun Context.hasActivityRecognitionPermission(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACTIVITY_RECOGNITION,
-        ) == PackageManager.PERMISSION_GRANTED
-}
+private fun Context.hasActivityRecognitionPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+    ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACTIVITY_RECOGNITION,
+    ) == PackageManager.PERMISSION_GRANTED
 
 private fun Context.hasStepCounterSensor(): Boolean {
     val sensorManager = getSystemService(SensorManager::class.java)

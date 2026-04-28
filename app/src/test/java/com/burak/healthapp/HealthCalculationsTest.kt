@@ -1,5 +1,6 @@
 package com.burak.healthapp
 
+import com.burak.healthapp.domain.calculation.WeightMeasurementSample
 import com.burak.healthapp.domain.calculation.averageCalories
 import com.burak.healthapp.domain.calculation.averageProtein
 import com.burak.healthapp.domain.calculation.averageSleepMinutes
@@ -17,16 +18,15 @@ import com.burak.healthapp.domain.calculation.directionAwareProgress
 import com.burak.healthapp.domain.calculation.formatSleepDuration
 import com.burak.healthapp.domain.calculation.groupMealsByType
 import com.burak.healthapp.domain.calculation.normalizeBodyMassIndexToGauge
-import com.burak.healthapp.domain.calculation.WeightMeasurementSample
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SleepSession
-import java.time.LocalDate
-import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class HealthCalculationsTest {
     @Test

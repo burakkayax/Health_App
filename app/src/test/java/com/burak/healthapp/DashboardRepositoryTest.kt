@@ -1,45 +1,36 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
-import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.dao.ExerciseDao
-import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.dao.HydrationDao
-import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.dao.MealDao
-import com.burak.healthapp.data.local.entity.MealEntryEntity
 import com.burak.healthapp.data.local.dao.SleepDao
-import com.burak.healthapp.data.local.entity.SleepSessionEntity
 import com.burak.healthapp.data.local.dao.SmokingDao
-import com.burak.healthapp.data.local.entity.SmokingEntryEntity
 import com.burak.healthapp.data.local.dao.StepDao
-import com.burak.healthapp.data.local.entity.StepEntryEntity
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
-import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
+import com.burak.healthapp.data.local.entity.HydrationEntryEntity
+import com.burak.healthapp.data.local.entity.MealEntryEntity
+import com.burak.healthapp.data.local.entity.SleepSessionEntity
+import com.burak.healthapp.data.local.entity.SmokingEntryEntity
+import com.burak.healthapp.data.local.entity.StepEntryEntity
+import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.TrendsRepositoryImpl
-import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.ExerciseEntry
-import com.burak.healthapp.domain.model.ExerciseIntensity
-import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SettingsState
-import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.SmokingEntry
-import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.TrendsPeriod
+import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import java.time.LocalDate
-import java.time.LocalDateTime
+import com.burak.healthapp.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -48,6 +39,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class DashboardRepositoryTest {
     @Test
@@ -525,20 +518,18 @@ class DashboardRepositoryTest {
         templateDao: FakeSupplementTemplateDao = FakeSupplementTemplateDao(),
         doseDao: FakeSupplementDoseDao = FakeSupplementDoseDao(),
         measurementDao: FakeBodyMeasurementDao = FakeBodyMeasurementDao(),
-    ): DashboardRepositoryImpl {
-        return DashboardRepositoryImpl(
-            settingsRepository = FakeSettingsRepository(),
-            mealDao = mealDao,
-            hydrationDao = hydrationDao,
-            sleepDao = sleepDao,
-            exerciseDao = exerciseDao,
-            smokingDao = smokingDao,
-            stepDao = stepDao,
-            templateDao = templateDao,
-            doseDao = doseDao,
-            measurementDao = measurementDao,
-        )
-    }
+    ): DashboardRepositoryImpl = DashboardRepositoryImpl(
+        settingsRepository = FakeSettingsRepository(),
+        mealDao = mealDao,
+        hydrationDao = hydrationDao,
+        sleepDao = sleepDao,
+        exerciseDao = exerciseDao,
+        smokingDao = smokingDao,
+        stepDao = stepDao,
+        templateDao = templateDao,
+        doseDao = doseDao,
+        measurementDao = measurementDao,
+    )
 }
 
 private class FakeSettingsRepository : SettingsRepository {
@@ -586,9 +577,7 @@ private class FakeMealDao(
         return entries.map { current -> current.filter { it.date == date } }
     }
 
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<MealEntryEntity>> {
-        return entries.map { current -> current.filter { it.date in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<MealEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
 
     override suspend fun upsert(entry: MealEntryEntity) {
         entries.value = entries.value + entry
@@ -610,13 +599,9 @@ private class FakeHydrationDao(
 
     override suspend fun getAll(): List<HydrationEntryEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<List<HydrationEntryEntity>> {
-        return entries.map { current -> current.filter { it.date == date } }
-    }
+    override fun observeForDate(date: LocalDate): Flow<List<HydrationEntryEntity>> = entries.map { current -> current.filter { it.date == date } }
 
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntryEntity>> {
-        return entries.map { current -> current.filter { it.date in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
 
     override suspend fun upsert(entry: HydrationEntryEntity) {
         entries.value = entries.value + entry
@@ -638,23 +623,15 @@ private class FakeSleepDao(
 
     override suspend fun getAll(): List<SleepSessionEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<SleepSessionEntity?> {
-        return entries.map { current ->
-            current.filter { it.sessionDate == date }.maxByOrNull { it.endTime }
-        }
+    override fun observeForDate(date: LocalDate): Flow<SleepSessionEntity?> = entries.map { current ->
+        current.filter { it.sessionDate == date }.maxByOrNull { it.endTime }
     }
 
-    override fun observeLatest(): Flow<SleepSessionEntity?> {
-        return entries.map { current -> current.maxByOrNull { it.endTime } }
-    }
+    override fun observeLatest(): Flow<SleepSessionEntity?> = entries.map { current -> current.maxByOrNull { it.endTime } }
 
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSessionEntity>> {
-        return entries.map { current -> current.filter { it.sessionDate in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSessionEntity>> = entries.map { current -> current.filter { it.sessionDate in startDate..endDate } }
 
-    override suspend fun getForDate(date: LocalDate): SleepSessionEntity? {
-        return entries.value.filter { it.sessionDate == date }.maxByOrNull { it.endTime }
-    }
+    override suspend fun getForDate(date: LocalDate): SleepSessionEntity? = entries.value.filter { it.sessionDate == date }.maxByOrNull { it.endTime }
 
     override suspend fun deleteForDate(date: LocalDate) {
         entries.value = entries.value.filterNot { it.sessionDate == date }
@@ -684,17 +661,11 @@ private class FakeExerciseDao(
 
     override suspend fun getAll(): List<ExerciseEntryEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<ExerciseEntryEntity?> {
-        return entries.map { current -> current.firstOrNull { it.date == date } }
-    }
+    override fun observeForDate(date: LocalDate): Flow<ExerciseEntryEntity?> = entries.map { current -> current.firstOrNull { it.date == date } }
 
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<ExerciseEntryEntity>> {
-        return entries.map { current -> current.filter { it.date in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<ExerciseEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
 
-    override suspend fun getForDate(date: LocalDate): ExerciseEntryEntity? {
-        return entries.value.firstOrNull { it.date == date }
-    }
+    override suspend fun getForDate(date: LocalDate): ExerciseEntryEntity? = entries.value.firstOrNull { it.date == date }
 
     override suspend fun upsert(entry: ExerciseEntryEntity) {
         entries.value = entries.value
@@ -715,7 +686,6 @@ private class FakeExerciseDao(
     override suspend fun deleteAll() {
         entries.value = emptyList()
     }
-
 }
 
 private class FakeSmokingDao(
@@ -725,13 +695,9 @@ private class FakeSmokingDao(
 
     override suspend fun getAll(): List<SmokingEntryEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?> {
-        return entries.map { current -> current.firstOrNull { it.date == date } }
-    }
+    override fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?> = entries.map { current -> current.firstOrNull { it.date == date } }
 
-    override suspend fun getForDate(date: LocalDate): SmokingEntryEntity? {
-        return entries.value.firstOrNull { it.date == date }
-    }
+    override suspend fun getForDate(date: LocalDate): SmokingEntryEntity? = entries.value.firstOrNull { it.date == date }
 
     override suspend fun upsert(entry: SmokingEntryEntity) {
         entries.value = entries.value
@@ -752,7 +718,6 @@ private class FakeSmokingDao(
     override suspend fun deleteAll() {
         entries.value = emptyList()
     }
-
 }
 
 private class FakeStepDao(
@@ -762,21 +727,13 @@ private class FakeStepDao(
 
     override suspend fun getAll(): List<StepEntryEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<StepEntryEntity?> {
-        return entries.map { current -> current.firstOrNull { it.date == date } }
-    }
+    override fun observeForDate(date: LocalDate): Flow<StepEntryEntity?> = entries.map { current -> current.firstOrNull { it.date == date } }
 
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntryEntity>> {
-        return entries.map { current -> current.filter { it.date in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
 
-    override suspend fun getForDate(date: LocalDate): StepEntryEntity? {
-        return entries.value.firstOrNull { it.date == date }
-    }
+    override suspend fun getForDate(date: LocalDate): StepEntryEntity? = entries.value.firstOrNull { it.date == date }
 
-    override suspend fun getLatest(): StepEntryEntity? {
-        return entries.value.maxWithOrNull(compareBy<StepEntryEntity> { it.date }.thenBy { it.updatedAt })
-    }
+    override suspend fun getLatest(): StepEntryEntity? = entries.value.maxWithOrNull(compareBy<StepEntryEntity> { it.date }.thenBy { it.updatedAt })
 
     override suspend fun deleteForDate(date: LocalDate) {
         entries.value = entries.value.filterNot { it.date == date }
@@ -836,9 +793,7 @@ private class FakeSupplementDoseDao(
 
     override suspend fun getAll(): List<SupplementDoseEntryEntity> = entries.value
 
-    override fun observeForDate(date: LocalDate): Flow<List<SupplementDoseEntryEntity>> {
-        return entries.map { current -> current.filter { it.date == date } }
-    }
+    override fun observeForDate(date: LocalDate): Flow<List<SupplementDoseEntryEntity>> = entries.map { current -> current.filter { it.date == date } }
 
     override suspend fun upsertAll(entries: List<SupplementDoseEntryEntity>) {
         this.entries.value = this.entries.value + entries
@@ -864,61 +819,41 @@ private class FakeBodyMeasurementDao(
 
     override suspend fun getAll(): List<BodyMeasurementEntity> = measurements.value
 
-    override fun observeForDate(date: LocalDate): Flow<BodyMeasurementEntity?> {
-        return measurements.map { current ->
-            current.filter { it.date == date }.maxByOrNull { it.recordedAt }
-        }
+    override fun observeForDate(date: LocalDate): Flow<BodyMeasurementEntity?> = measurements.map { current ->
+        current.filter { it.date == date }.maxByOrNull { it.recordedAt }
     }
 
-    override fun observeLatest(): Flow<BodyMeasurementEntity?> {
-        return measurements.map { current -> current.maxByOrNull { it.recordedAt } }
+    override fun observeLatest(): Flow<BodyMeasurementEntity?> = measurements.map { current -> current.maxByOrNull { it.recordedAt } }
+
+    override fun observeAll(): Flow<List<BodyMeasurementEntity>> = measurements.map { current ->
+        current.sortedWith(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
     }
 
-    override fun observeAll(): Flow<List<BodyMeasurementEntity>> {
-        return measurements.map { current ->
-            current.sortedWith(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
-        }
+    override fun observeEarliest(): Flow<BodyMeasurementEntity?> = measurements.map { current ->
+        current.minWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
     }
 
-    override fun observeEarliest(): Flow<BodyMeasurementEntity?> {
-        return measurements.map { current ->
-            current.minWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
-        }
-    }
+    override suspend fun getLatest(): BodyMeasurementEntity? = measurements.value.maxByOrNull { it.recordedAt }
 
-    override suspend fun getLatest(): BodyMeasurementEntity? {
-        return measurements.value.maxByOrNull { it.recordedAt }
-    }
+    override suspend fun getForDate(date: LocalDate): BodyMeasurementEntity? = measurements.value.filter { it.date == date }.maxByOrNull { it.recordedAt }
 
-    override suspend fun getForDate(date: LocalDate): BodyMeasurementEntity? {
-        return measurements.value.filter { it.date == date }.maxByOrNull { it.recordedAt }
-    }
+    override suspend fun getLatestOnOrBefore(date: LocalDate): BodyMeasurementEntity? = measurements.value
+        .filter { it.date <= date }
+        .maxWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
 
-    override suspend fun getLatestOnOrBefore(date: LocalDate): BodyMeasurementEntity? {
-        return measurements.value
+    override fun observeLatestOnOrBefore(date: LocalDate): Flow<BodyMeasurementEntity?> = measurements.map { current ->
+        current
             .filter { it.date <= date }
             .maxWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
     }
 
-    override fun observeLatestOnOrBefore(date: LocalDate): Flow<BodyMeasurementEntity?> {
-        return measurements.map { current ->
-            current
-                .filter { it.date <= date }
-                .maxWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenBy { it.recordedAt })
-        }
+    override fun observeEarliestOnOrAfter(date: LocalDate): Flow<BodyMeasurementEntity?> = measurements.map { current ->
+        current
+            .filter { it.date >= date }
+            .minWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenByDescending { it.recordedAt })
     }
 
-    override fun observeEarliestOnOrAfter(date: LocalDate): Flow<BodyMeasurementEntity?> {
-        return measurements.map { current ->
-            current
-                .filter { it.date >= date }
-                .minWithOrNull(compareBy<BodyMeasurementEntity> { it.date }.thenByDescending { it.recordedAt })
-        }
-    }
-
-    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<BodyMeasurementEntity>> {
-        return measurements.map { current -> current.filter { it.date in startDate..endDate } }
-    }
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<BodyMeasurementEntity>> = measurements.map { current -> current.filter { it.date in startDate..endDate } }
 
     override suspend fun deleteById(id: Long) {
         measurements.value = measurements.value.filterNot { it.id == id }

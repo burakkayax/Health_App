@@ -6,13 +6,13 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.core.ui.model.BmiGaugeState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
+import com.burak.healthapp.core.ui.theme.HealthTheme
+import com.burak.healthapp.domain.model.TrendPoint
+import com.burak.healthapp.feature.detail.weight.WeightDetailContent
 import com.burak.healthapp.feature.detail.weight.WeightDetailUiState
 import com.burak.healthapp.feature.detail.weight.WeightHistoryItemState
-import com.burak.healthapp.core.ui.theme.HealthTheme
-import com.burak.healthapp.feature.detail.weight.WeightDetailContent
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

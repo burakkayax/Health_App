@@ -10,8 +10,6 @@ import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataImportFileReader
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.calculation.formatClockRange
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.export.HealthDataJsonImporter
@@ -23,25 +21,27 @@ import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
+import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
+import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
 import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
-import com.burak.healthapp.feature.profile.ProfileGoalSummaryState
 import com.burak.healthapp.feature.profile.ProfileExportUiState
+import com.burak.healthapp.feature.profile.ProfileGoalSummaryState
 import com.burak.healthapp.feature.profile.ProfileSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import com.burak.healthapp.feature.profile.toDomainTemplate
 import com.burak.healthapp.feature.root.healthApplication
-import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
-import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
-import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
-import java.time.LocalDate
-import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.util.Locale
 
 class ProfileViewModel(
     private val settingsRepository: SettingsRepository,
@@ -413,20 +413,16 @@ class ProfileViewModel(
         }
     }
 
-    private fun createDraftId(): Long {
-        return nextDraftId++
-    }
+    private fun createDraftId(): Long = nextDraftId++
 }
 
 private val DUPLICATE_NAME_ERROR = UiText.StringResource(R.string.error_supplement_duplicate_name)
 
-private fun ImportValidationError.toUiText(): UiText {
-    return when (this) {
-        ImportValidationError.EMPTY_FILE -> UiText.StringResource(R.string.import_error_empty_file)
-        ImportValidationError.INVALID_JSON -> UiText.StringResource(R.string.import_error_invalid_json)
-        ImportValidationError.MISSING_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_missing_schema_version)
-        ImportValidationError.UNSUPPORTED_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_unsupported_schema_version)
-    }
+private fun ImportValidationError.toUiText(): UiText = when (this) {
+    ImportValidationError.EMPTY_FILE -> UiText.StringResource(R.string.import_error_empty_file)
+    ImportValidationError.INVALID_JSON -> UiText.StringResource(R.string.import_error_invalid_json)
+    ImportValidationError.MISSING_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_missing_schema_version)
+    ImportValidationError.UNSUPPORTED_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_unsupported_schema_version)
 }
 
 private fun SettingsState.toProfileUiState(
@@ -435,7 +431,6 @@ private fun SettingsState.toProfileUiState(
     supplementEditor: SupplementEditorUiState,
     exportState: ProfileExportUiState,
 ): ProfileUiState {
-    val locale = Locale.forLanguageTag("tr")
     val measurement = latestMeasurement ?: BodyMeasurementEntry(
         date = LocalDate.now(),
         weightKg = goalSettings.baselineWeightKg,
@@ -450,7 +445,6 @@ private fun SettingsState.toProfileUiState(
         themeMode = themeMode,
         goalSummaries = goalSettings.toSummaryStates(
             measurement = measurement,
-            locale = locale,
             heightCm = userProfile.heightCm,
             waterReminderSettings = waterReminderSettings,
         ),
@@ -469,88 +463,83 @@ private fun SettingsState.toProfileUiState(
 
 private fun GoalSettings.toSummaryStates(
     measurement: BodyMeasurementEntry,
-    locale: Locale,
     heightCm: Float?,
     waterReminderSettings: WaterReminderSettings,
-): List<ProfileGoalSummaryState> {
-    return listOf(
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_calories_water),
-            value = UiText.StringResource(
-                R.string.format_kcal_water,
-                listOf(dailyCaloriesTarget, waterTargetMl),
-            ),
+): List<ProfileGoalSummaryState> = listOf(
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_calories_water),
+        value = UiText.StringResource(
+            R.string.format_kcal_water,
+            listOf(dailyCaloriesTarget, waterTargetMl),
         ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_macros),
-            value = UiText.StringResource(
-                R.string.format_macros,
-                listOf(proteinTargetGrams, carbTargetGrams, fatTargetGrams),
-            ),
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_macros),
+        value = UiText.StringResource(
+            R.string.format_macros,
+            listOf(proteinTargetGrams, carbTargetGrams, fatTargetGrams),
         ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_sleep_target),
-            value = UiText.DynamicString(formatClockRange(sleepTargetBedtime, sleepTargetWakeTime)),
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_sleep_target),
+        value = UiText.DynamicString(formatClockRange(sleepTargetBedtime, sleepTargetWakeTime)),
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_exercise),
+        value = UiText.StringResource(
+            R.string.format_days_minutes,
+            listOf(exerciseTargetDaysPerWeek, exerciseTargetDurationMinutes),
         ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_exercise),
-            value = UiText.StringResource(
-                R.string.format_days_minutes,
-                listOf(exerciseTargetDaysPerWeek, exerciseTargetDurationMinutes),
-            ),
-        ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_goal_step_target),
-            value = UiText.StringResource(R.string.format_steps, listOf(dailyStepTarget)),
-        ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_water_reminder),
-            value = if (waterReminderSettings.enabled) {
-                UiText.StringResource(
-                    R.string.profile_summary_water_reminder_on,
-                    listOf(
-                        waterReminderSettings.startTime,
-                        waterReminderSettings.endTime,
-                        waterReminderSettings.intervalMinutes,
-                    ),
-                )
-            } else {
-                UiText.StringResource(R.string.common_off)
-            },
-        ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_smoke_limit),
-            value = if (smokeDailyLimit > 0) {
-                UiText.StringResource(R.string.format_count, listOf(smokeDailyLimit))
-            } else {
-                UiText.StringResource(R.string.common_not_set)
-            },
-        ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_height),
-            value = heightCm?.let {
-                UiText.StringResource(R.string.format_cm, listOf(it))
-            } ?: UiText.StringResource(R.string.common_not_added),
-        ),
-        ProfileGoalSummaryState(
-            title = UiText.StringResource(R.string.profile_summary_weight_measurements),
-            value = UiText.StringResource(
-                R.string.format_weight_measurements,
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_goal_step_target),
+        value = UiText.StringResource(R.string.format_steps, listOf(dailyStepTarget)),
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_water_reminder),
+        value = if (waterReminderSettings.enabled) {
+            UiText.StringResource(
+                R.string.profile_summary_water_reminder_on,
                 listOf(
-                    measurement.weightKg,
-                    measurement.shoulderCm,
-                    measurement.waistCm,
-                    measurement.hipCm,
+                    waterReminderSettings.startTime,
+                    waterReminderSettings.endTime,
+                    waterReminderSettings.intervalMinutes,
                 ),
+            )
+        } else {
+            UiText.StringResource(R.string.common_off)
+        },
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_smoke_limit),
+        value = if (smokeDailyLimit > 0) {
+            UiText.StringResource(R.string.format_count, listOf(smokeDailyLimit))
+        } else {
+            UiText.StringResource(R.string.common_not_set)
+        },
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_height),
+        value = heightCm?.let {
+            UiText.StringResource(R.string.format_cm, listOf(it))
+        } ?: UiText.StringResource(R.string.common_not_added),
+    ),
+    ProfileGoalSummaryState(
+        title = UiText.StringResource(R.string.profile_summary_weight_measurements),
+        value = UiText.StringResource(
+            R.string.format_weight_measurements,
+            listOf(
+                measurement.weightKg,
+                measurement.shoulderCm,
+                measurement.waistCm,
+                measurement.hipCm,
             ),
         ),
-    )
-}
+    ),
+)
 
-private fun formatEditableAmount(amount: Float): String {
-    return if (amount % 1f == 0f) {
-        amount.toInt().toString()
-    } else {
-        String.format(Locale.US, "%.1f", amount)
-    }
+private fun formatEditableAmount(amount: Float): String = if (amount % 1f == 0f) {
+    amount.toInt().toString()
+} else {
+    String.format(Locale.US, "%.1f", amount)
 }

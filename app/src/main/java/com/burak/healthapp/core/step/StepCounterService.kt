@@ -21,7 +21,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class StepCounterService : Service(), SensorEventListener {
+class StepCounterService :
+    Service(),
+    SensorEventListener {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var sensorManager: SensorManager? = null
     private var listenerRegistered = false
@@ -95,13 +97,11 @@ class StepCounterService : Service(), SensorEventListener {
         }
     }
 
-    private fun hasActivityRecognitionPermission(): Boolean {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACTIVITY_RECOGNITION,
-            ) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun hasActivityRecognitionPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACTIVITY_RECOGNITION,
+        ) == PackageManager.PERMISSION_GRANTED
 
     companion object {
         fun start(context: Context) {
@@ -116,9 +116,7 @@ class StepCounterService : Service(), SensorEventListener {
             context.stopService(Intent(context, StepCounterService::class.java))
         }
 
-        fun stopIntent(context: Context): Intent {
-            return Intent(context, StepCounterService::class.java).setAction(ACTION_STOP)
-        }
+        fun stopIntent(context: Context): Intent = Intent(context, StepCounterService::class.java).setAction(ACTION_STOP)
 
         private const val ACTION_STOP = "com.burak.healthapp.action.STOP_STEP_TRACKING"
     }
@@ -133,10 +131,8 @@ class StepCounterService : Service(), SensorEventListener {
     }
 }
 
-private fun Context.hasActivityRecognitionPermission(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACTIVITY_RECOGNITION,
-        ) == PackageManager.PERMISSION_GRANTED
-}
+private fun Context.hasActivityRecognitionPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+    ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACTIVITY_RECOGNITION,
+    ) == PackageManager.PERMISSION_GRANTED

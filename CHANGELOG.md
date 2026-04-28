@@ -6,6 +6,19 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Spotless + ktlint, Detekt ve `lintDebug` tabanlı statik analiz kalite kapısı eklendi.
+- Android CI workflow'u format kontrolü, static analysis, lint, compile, unit test, androidTest Kotlin derleme ve debug assemble adımlarını çalıştıracak şekilde güncellendi.
+- CI için unit test, lint ve Detekt rapor artifact upload adımları eklendi.
+
+### Değiştirildi
+
+- Kotlin kaynakları Spotless ile tek seferlik format normalizasyonundan geçirildi.
+- README geliştirme komutları bölümüne format, Detekt ve lint komutları eklendi.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Su hatırlatıcı bildirimlerine “250 ml ekle” ve “Bugün hatırlatma” aksiyonları eklendi.
 - Bugün susturma durumu DataStore içinde tarih bazlı saklanacak şekilde eklendi.
 - Su hatırlatıcı initial delay ve gece aşan saat aralığı hesapları için unit testler eklendi.

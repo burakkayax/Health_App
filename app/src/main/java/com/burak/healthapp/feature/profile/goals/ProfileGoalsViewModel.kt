@@ -5,13 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.core.reminder.WaterReminderScheduler
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import com.burak.healthapp.core.reminder.WaterReminderScheduler
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import com.burak.healthapp.feature.root.healthApplication
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,15 +28,15 @@ class ProfileGoalsViewModel(
         settingsRepository.settings,
         dashboardRepository.observeLatestMeasurement(),
     ) { settings, latestMeasurement ->
-            ProfileGoalsUiState(
-                userName = settings.userProfile.name,
-                avatarInitials = settings.userProfile.avatarInitials,
-                goalSettings = settings.goalSettings,
-                latestMeasurement = latestMeasurement,
-                heightCm = settings.userProfile.heightCm,
-                waterReminderSettings = settings.waterReminderSettings,
-                stepTrackingEnabled = settings.stepTrackingEnabled,
-            )
+        ProfileGoalsUiState(
+            userName = settings.userProfile.name,
+            avatarInitials = settings.userProfile.avatarInitials,
+            goalSettings = settings.goalSettings,
+            latestMeasurement = latestMeasurement,
+            heightCm = settings.userProfile.heightCm,
+            waterReminderSettings = settings.waterReminderSettings,
+            stepTrackingEnabled = settings.stepTrackingEnabled,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

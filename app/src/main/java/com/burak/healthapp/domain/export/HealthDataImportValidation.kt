@@ -12,19 +12,17 @@ data class HealthDataImportPreview(
     val supplementDoseCount: Int,
 ) {
     companion object {
-        fun from(model: HealthDataExportModel): HealthDataImportPreview {
-            return HealthDataImportPreview(
-                mealCount = model.meals.size,
-                hydrationCount = model.hydration.size,
-                sleepCount = model.sleep.size,
-                exerciseCount = model.exercise.size,
-                smokingCount = model.smoking.size,
-                stepCount = model.steps.size,
-                bodyMeasurementCount = model.bodyMeasurements.size,
-                supplementTemplateCount = model.supplementTemplates.size,
-                supplementDoseCount = model.supplementDoseEntries.size,
-            )
-        }
+        fun from(model: HealthDataExportModel): HealthDataImportPreview = HealthDataImportPreview(
+            mealCount = model.meals.size,
+            hydrationCount = model.hydration.size,
+            sleepCount = model.sleep.size,
+            exerciseCount = model.exercise.size,
+            smokingCount = model.smoking.size,
+            stepCount = model.steps.size,
+            bodyMeasurementCount = model.bodyMeasurements.size,
+            supplementTemplateCount = model.supplementTemplates.size,
+            supplementDoseCount = model.supplementDoseEntries.size,
+        )
     }
 }
 

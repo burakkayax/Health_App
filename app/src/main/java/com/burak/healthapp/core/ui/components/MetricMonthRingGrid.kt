@@ -42,17 +42,15 @@ data class MetricDayRingState(
 )
 
 @Composable
-fun metricWeekdayLabels(): List<String> {
-    return listOf(
-        stringResource(R.string.weekday_monday_short),
-        stringResource(R.string.weekday_tuesday_short),
-        stringResource(R.string.weekday_wednesday_short),
-        stringResource(R.string.weekday_thursday_short),
-        stringResource(R.string.weekday_friday_short),
-        stringResource(R.string.weekday_saturday_short),
-        stringResource(R.string.weekday_sunday_short),
-    )
-}
+fun metricWeekdayLabels(): List<String> = listOf(
+    stringResource(R.string.weekday_monday_short),
+    stringResource(R.string.weekday_tuesday_short),
+    stringResource(R.string.weekday_wednesday_short),
+    stringResource(R.string.weekday_thursday_short),
+    stringResource(R.string.weekday_friday_short),
+    stringResource(R.string.weekday_saturday_short),
+    stringResource(R.string.weekday_sunday_short),
+)
 
 @Composable
 fun MetricMonthRingGrid(

@@ -39,8 +39,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.core.ui.components.HealthCard
+import com.burak.healthapp.core.ui.components.MetricDayRingState
+import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
+import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.core.ui.theme.HealthCarbs
+import com.burak.healthapp.core.ui.theme.HealthSleep
+import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.domain.calculation.buildSleepFeedback
 import com.burak.healthapp.domain.calculation.calculateSleepDurationMinutes
 import com.burak.healthapp.domain.calculation.calculateSleepRegularityStandardDeviation
@@ -50,11 +57,8 @@ import com.burak.healthapp.domain.calculation.formatMinutesAsSleepLabel
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.core.ui.components.HealthCard
-import com.burak.healthapp.core.ui.components.MetricDayRingState
-import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
-import com.burak.healthapp.core.ui.components.SegmentedControl
-import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.detail.sleep.SleepBarState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarDayState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
@@ -62,19 +66,15 @@ import com.burak.healthapp.feature.detail.sleep.SleepDetailUiState
 import com.burak.healthapp.feature.detail.sleep.SleepRegularityState
 import com.burak.healthapp.feature.detail.sleep.SleepRegularityStatus
 import com.burak.healthapp.feature.root.healthApplication
-import com.burak.healthapp.core.ui.theme.HealthCarbs
-import com.burak.healthapp.core.ui.theme.HealthSleep
-import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.core.ui.theme.HealthSuccess
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SleepDetailViewModel(
@@ -294,6 +294,7 @@ private fun SleepMonthlyCalendar(
         activeColor = HealthSleep,
     )
 }
+
 @Composable
 private fun SleepCalendarDayCell(
     day: SleepCalendarDayState,
@@ -396,7 +397,7 @@ private fun SleepConsistencyChart(
                             .fillMaxWidth()
                             .fillMaxHeight(bar.progress)
                             .background(
-                            color = HealthSleep,
+                                color = HealthSleep,
                                 shape = RoundedCornerShape(999.dp),
                             ),
                     )
@@ -537,25 +538,23 @@ internal fun buildSleepCalendarWeeks(
         }
 }
 
-private fun emptySleepDetailUiState(): SleepDetailUiState {
-    return SleepDetailUiState(
-        selectedPeriod = TrendsPeriod.WEEKLY,
-        bars = emptyList(),
-        regularity = SleepRegularityState(
-            title = "Uyku Düzeni",
-            subtitle = "Yeterli veri yok",
-            helperLabel = "Daha fazla uyku kaydı ekledikçe analiz görünür.",
-            progress = null,
-            status = SleepRegularityStatus.EMPTY,
-            isEmpty = true,
-        ),
-        hasData = false,
-        targetLabel = "0s 0d",
-        bedtimeLabel = "23:00",
-        wakeLabel = "07:00",
-        calendarWeeks = emptyList(),
-    )
-}
+private fun emptySleepDetailUiState(): SleepDetailUiState = SleepDetailUiState(
+    selectedPeriod = TrendsPeriod.WEEKLY,
+    bars = emptyList(),
+    regularity = SleepRegularityState(
+        title = "Uyku Düzeni",
+        subtitle = "Yeterli veri yok",
+        helperLabel = "Daha fazla uyku kaydı ekledikçe analiz görünür.",
+        progress = null,
+        status = SleepRegularityStatus.EMPTY,
+        isEmpty = true,
+    ),
+    hasData = false,
+    targetLabel = "0s 0d",
+    bedtimeLabel = "23:00",
+    wakeLabel = "07:00",
+    calendarWeeks = emptyList(),
+)
 
 @Composable
 private fun regularityColor(status: SleepRegularityStatus) = when (status) {
@@ -565,14 +564,12 @@ private fun regularityColor(status: SleepRegularityStatus) = when (status) {
     SleepRegularityStatus.IRREGULAR -> MaterialTheme.colorScheme.error
 }
 
-private fun LocalDate.toWeekLabel(): String {
-    return when (dayOfWeek.value) {
-        1 -> "P"
-        2 -> "S"
-        3 -> "Ç"
-        4 -> "P"
-        5 -> "C"
-        6 -> "C"
-        else -> "P"
-    }
+private fun LocalDate.toWeekLabel(): String = when (dayOfWeek.value) {
+    1 -> "P"
+    2 -> "S"
+    3 -> "Ç"
+    4 -> "P"
+    5 -> "C"
+    6 -> "C"
+    else -> "P"
 }

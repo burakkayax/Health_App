@@ -9,13 +9,13 @@ import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.repository.HealthDataExportRepository
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
-import java.time.Instant
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
+import java.time.Instant
 
 class HealthDataExportUseCaseTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -62,17 +62,13 @@ class HealthDataExportUseCaseTest {
         assertEquals("1.0-test", exported.appVersion)
     }
 
-    private fun emptyExportUseCase(): ExportHealthDataUseCase {
-        return ExportHealthDataUseCase(
-            repository = FakeHealthDataExportRepository(emptyExportModel()),
-            jsonExporter = JsonHealthDataExporter(),
-            appVersion = "1.0-test",
-        )
-    }
+    private fun emptyExportUseCase(): ExportHealthDataUseCase = ExportHealthDataUseCase(
+        repository = FakeHealthDataExportRepository(emptyExportModel()),
+        jsonExporter = JsonHealthDataExporter(),
+        appVersion = "1.0-test",
+    )
 
-    private fun decodeExport(jsonString: String): HealthDataExportModel {
-        return json.decodeFromString(jsonString)
-    }
+    private fun decodeExport(jsonString: String): HealthDataExportModel = json.decodeFromString(jsonString)
 }
 
 private class FakeHealthDataExportRepository(
@@ -81,47 +77,43 @@ private class FakeHealthDataExportRepository(
     override suspend fun buildExportModel(
         exportedAt: Instant,
         appVersion: String,
-    ): HealthDataExportModel {
-        return model.copy(
-            exportedAt = exportedAt.toString(),
-            appVersion = appVersion,
-        )
-    }
-}
-
-private fun emptyExportModel(): HealthDataExportModel {
-    return HealthDataExportModel(
-        exportedAt = "",
-        appVersion = "",
-        profile = ExportedUserProfile(
-            name = "Burak",
-            avatarInitials = "BK",
-            heightCm = 182f,
-        ),
-        goals = ExportedGoalSettings(
-            dailyCaloriesTarget = DefaultHealthGoals.DAILY_CALORIES,
-            proteinTargetGrams = DefaultHealthGoals.PROTEIN_GRAMS,
-            carbTargetGrams = DefaultHealthGoals.CARB_GRAMS,
-            fatTargetGrams = DefaultHealthGoals.FAT_GRAMS,
-            waterTargetMl = DefaultHealthGoals.WATER_TARGET_ML,
-            dailyStepTarget = DefaultHealthGoals.DAILY_STEPS,
-            sleepTargetBedtime = DefaultHealthGoals.SLEEP_BEDTIME.toString(),
-            sleepTargetWakeTime = DefaultHealthGoals.SLEEP_WAKE_TIME.toString(),
-            exerciseTargetDaysPerWeek = DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
-            exerciseTargetDurationMinutes = DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
-            smokeDailyLimit = DefaultHealthGoals.SMOKE_DAILY_LIMIT,
-            baselineWeightKg = DefaultHealthGoals.BASELINE_WEIGHT_KG,
-            targetWeightKg = DefaultHealthGoals.TARGET_WEIGHT_KG,
-            baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
-            baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
-            baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
-        ),
-        waterReminderSettings = ExportedWaterReminderSettings(
-            enabled = true,
-            startTime = "09:00",
-            endTime = "21:00",
-            intervalMinutes = DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
-        ),
-        themeMode = ThemeMode.SYSTEM.name,
+    ): HealthDataExportModel = model.copy(
+        exportedAt = exportedAt.toString(),
+        appVersion = appVersion,
     )
 }
+
+private fun emptyExportModel(): HealthDataExportModel = HealthDataExportModel(
+    exportedAt = "",
+    appVersion = "",
+    profile = ExportedUserProfile(
+        name = "Burak",
+        avatarInitials = "BK",
+        heightCm = 182f,
+    ),
+    goals = ExportedGoalSettings(
+        dailyCaloriesTarget = DefaultHealthGoals.DAILY_CALORIES,
+        proteinTargetGrams = DefaultHealthGoals.PROTEIN_GRAMS,
+        carbTargetGrams = DefaultHealthGoals.CARB_GRAMS,
+        fatTargetGrams = DefaultHealthGoals.FAT_GRAMS,
+        waterTargetMl = DefaultHealthGoals.WATER_TARGET_ML,
+        dailyStepTarget = DefaultHealthGoals.DAILY_STEPS,
+        sleepTargetBedtime = DefaultHealthGoals.SLEEP_BEDTIME.toString(),
+        sleepTargetWakeTime = DefaultHealthGoals.SLEEP_WAKE_TIME.toString(),
+        exerciseTargetDaysPerWeek = DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
+        exerciseTargetDurationMinutes = DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
+        smokeDailyLimit = DefaultHealthGoals.SMOKE_DAILY_LIMIT,
+        baselineWeightKg = DefaultHealthGoals.BASELINE_WEIGHT_KG,
+        targetWeightKg = DefaultHealthGoals.TARGET_WEIGHT_KG,
+        baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
+        baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
+        baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
+    ),
+    waterReminderSettings = ExportedWaterReminderSettings(
+        enabled = true,
+        startTime = "09:00",
+        endTime = "21:00",
+        intervalMinutes = DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
+    ),
+    themeMode = ThemeMode.SYSTEM.name,
+)

@@ -10,7 +10,6 @@ import com.burak.healthapp.domain.calculation.formatClockRange
 import com.burak.healthapp.domain.calculation.formatMinutesAsSleepLabel
 import com.burak.healthapp.domain.calculation.formatSleepDuration
 import com.burak.healthapp.domain.config.DefaultHealthGoals
-import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.TodaySnapshot
 import java.util.Locale
@@ -149,69 +148,67 @@ private fun com.burak.healthapp.domain.model.BodyMeasurementEntry?.toWeightCardS
     )
 }
 
-internal fun emptyUiState(): TodayUiState {
-    return TodayUiState(
-        userName = "",
-        avatarInitials = "M",
-        goalSettings = GoalSettings(),
-        latestMeasurement = null,
-        nutrition = NutritionCardState(
-            currentCalories = 0,
-            targetCalories = 0,
-            progress = 0f,
-            macros = emptyList(),
-            entries = emptyList(),
-        ),
-        weight = WeightCardState(
-            currentWeightKg = null,
-            targetWeightKg = 0f,
-            progress = 0f,
-            hasMeasurement = false,
-            headline = "Kayıt yok",
-            supportingLabel = "Bu tarih için kilo eklenmedi",
-            helperLabel = "",
-        ),
-        exercise = ExerciseCardState(
-            type = null,
-            durationMinutes = 0,
-            intensity = null,
-            progress = 0f,
-            title = "Antrenman eklenmedi",
-            durationLabel = "Süre eklenmedi",
-            intensityLabel = "Yoğunluk seçilmedi",
-            helperLabel = "",
-        ),
-        hydration = HydrationCardState(
-            currentMl = 0,
-            targetMl = 0,
-            progress = 0f,
-        ),
-        sleep = SleepCardState(
-            durationLabel = "Henüz kayıt yok",
-            timeRangeLabel = "Saat ekle",
-            targetLabel = "8s 0d",
-            progress = 0f,
-        ),
-        smoking = SmokingCardState(
-            count = 0,
-            limit = 0,
-            progress = 0f,
-            headline = "0 adet",
-            supportingLabel = "Limit ayarlanmadı",
-            helperLabel = "İstersen profilden günlük limit ekleyebilirsin.",
-            status = SmokingStatus.PASSIVE,
-        ),
-        steps = StepCardState(
-            currentSteps = 0,
-            targetSteps = DefaultHealthGoals.DAILY_STEPS,
-            progress = 0f,
-            headline = "0 adım",
-            supportingLabel = "Hedef 8000 adım",
-            helperLabel = "Telefon hareket ettikçe otomatik güncellenir.",
-        ),
-        supplements = SupplementCardState(items = emptyList()),
-    )
-}
+internal fun emptyUiState(): TodayUiState = TodayUiState(
+    userName = "",
+    avatarInitials = "M",
+    goalSettings = GoalSettings(),
+    latestMeasurement = null,
+    nutrition = NutritionCardState(
+        currentCalories = 0,
+        targetCalories = 0,
+        progress = 0f,
+        macros = emptyList(),
+        entries = emptyList(),
+    ),
+    weight = WeightCardState(
+        currentWeightKg = null,
+        targetWeightKg = 0f,
+        progress = 0f,
+        hasMeasurement = false,
+        headline = "Kayıt yok",
+        supportingLabel = "Bu tarih için kilo eklenmedi",
+        helperLabel = "",
+    ),
+    exercise = ExerciseCardState(
+        type = null,
+        durationMinutes = 0,
+        intensity = null,
+        progress = 0f,
+        title = "Antrenman eklenmedi",
+        durationLabel = "Süre eklenmedi",
+        intensityLabel = "Yoğunluk seçilmedi",
+        helperLabel = "",
+    ),
+    hydration = HydrationCardState(
+        currentMl = 0,
+        targetMl = 0,
+        progress = 0f,
+    ),
+    sleep = SleepCardState(
+        durationLabel = "Henüz kayıt yok",
+        timeRangeLabel = "Saat ekle",
+        targetLabel = "8s 0d",
+        progress = 0f,
+    ),
+    smoking = SmokingCardState(
+        count = 0,
+        limit = 0,
+        progress = 0f,
+        headline = "0 adet",
+        supportingLabel = "Limit ayarlanmadı",
+        helperLabel = "İstersen profilden günlük limit ekleyebilirsin.",
+        status = SmokingStatus.PASSIVE,
+    ),
+    steps = StepCardState(
+        currentSteps = 0,
+        targetSteps = DefaultHealthGoals.DAILY_STEPS,
+        progress = 0f,
+        headline = "0 adım",
+        supportingLabel = "Hedef 8000 adım",
+        helperLabel = "Telefon hareket ettikçe otomatik güncellenir.",
+    ),
+    supplements = SupplementCardState(items = emptyList()),
+)
 
 private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
     goals: GoalSettings,

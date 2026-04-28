@@ -6,12 +6,12 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryContent
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryEntryState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
-import com.burak.healthapp.core.ui.theme.HealthTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -54,38 +54,36 @@ class MealHistoryContentTest {
         assertEquals(2L, deletedId)
     }
 
-    private fun sampleMealHistoryState(): MealHistoryUiState {
-        return MealHistoryUiState(
-            sections = listOf(
-                MealHistorySectionState(
-                    title = "Kahvaltı",
-                    entries = listOf(
-                        MealHistoryEntryState(
-                            id = 1,
-                            mealType = MealType.BREAKFAST,
-                            name = "Omlet",
-                            calories = 420,
-                            proteinGrams = 28,
-                            carbsGrams = 16,
-                            fatGrams = 22,
-                        ),
-                    ),
-                ),
-                MealHistorySectionState(
-                    title = "AkÅŸam",
-                    entries = listOf(
-                        MealHistoryEntryState(
-                            id = 2,
-                            mealType = MealType.DINNER,
-                            name = "Somon",
-                            calories = 560,
-                            proteinGrams = 40,
-                            carbsGrams = 24,
-                            fatGrams = 30,
-                        ),
+    private fun sampleMealHistoryState(): MealHistoryUiState = MealHistoryUiState(
+        sections = listOf(
+            MealHistorySectionState(
+                title = "Kahvaltı",
+                entries = listOf(
+                    MealHistoryEntryState(
+                        id = 1,
+                        mealType = MealType.BREAKFAST,
+                        name = "Omlet",
+                        calories = 420,
+                        proteinGrams = 28,
+                        carbsGrams = 16,
+                        fatGrams = 22,
                     ),
                 ),
             ),
-        )
-    }
+            MealHistorySectionState(
+                title = "AkÅŸam",
+                entries = listOf(
+                    MealHistoryEntryState(
+                        id = 2,
+                        mealType = MealType.DINNER,
+                        name = "Somon",
+                        calories = 560,
+                        proteinGrams = 40,
+                        carbsGrams = 24,
+                        fatGrams = 30,
+                    ),
+                ),
+            ),
+        ),
+    )
 }

@@ -13,9 +13,7 @@ sealed interface UiText {
 }
 
 @Composable
-fun UiText.asString(): String {
-    return when (this) {
-        is UiText.DynamicString -> value
-        is UiText.StringResource -> stringResource(resId, *args.toTypedArray())
-    }
+fun UiText.asString(): String = when (this) {
+    is UiText.DynamicString -> value
+    is UiText.StringResource -> stringResource(resId, *args.toTypedArray())
 }

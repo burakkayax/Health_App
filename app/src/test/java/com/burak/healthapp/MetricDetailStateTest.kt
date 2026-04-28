@@ -1,19 +1,19 @@
 package com.burak.healthapp
 
+import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.feature.detail.hydration.buildHydrationDetailUiState
 import com.burak.healthapp.feature.detail.hydration.formatCompactWaterAmountMl
 import com.burak.healthapp.feature.detail.step.buildStepMonthRingDays
-import java.time.LocalDate
-import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MetricDetailStateTest {
     @Test

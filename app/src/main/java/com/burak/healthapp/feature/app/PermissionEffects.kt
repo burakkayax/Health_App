@@ -47,13 +47,11 @@ internal fun WaterReminderNotificationPermissionEffect(waterReminderEnabled: Boo
     }
 }
 
-internal fun Context.hasActivityRecognitionPermission(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACTIVITY_RECOGNITION,
-        ) == PackageManager.PERMISSION_GRANTED
-}
+internal fun Context.hasActivityRecognitionPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+    ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACTIVITY_RECOGNITION,
+    ) == PackageManager.PERMISSION_GRANTED
 
 internal fun Context.hasStepCounterSensor(): Boolean {
     val sensorManager = getSystemService(SensorManager::class.java)

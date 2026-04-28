@@ -15,8 +15,8 @@ import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataExportRepositoryImpl
 import com.burak.healthapp.data.export.HealthDataImportFileReader
 import com.burak.healthapp.data.export.HealthDataManagementRepositoryImpl
-import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.export.JsonHealthDataExporter
+import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
 import com.burak.healthapp.data.repository.TrendsRepositoryImpl

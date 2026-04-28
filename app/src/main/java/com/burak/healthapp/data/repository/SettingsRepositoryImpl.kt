@@ -5,68 +5,26 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.burak.healthapp.core.datastore.SettingsKeys
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
-import com.burak.healthapp.data.local.dao.ExerciseDao
-import com.burak.healthapp.data.local.dao.HydrationDao
-import com.burak.healthapp.data.local.dao.MealDao
-import com.burak.healthapp.data.local.dao.SleepDao
-import com.burak.healthapp.data.local.dao.SmokingDao
-import com.burak.healthapp.data.local.dao.StepDao
-import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
-import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
-import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
-import com.burak.healthapp.data.local.entity.HydrationEntryEntity
-import com.burak.healthapp.data.local.entity.MealEntryEntity
-import com.burak.healthapp.data.local.entity.SleepSessionEntity
-import com.burak.healthapp.data.local.entity.SmokingEntryEntity
-import com.burak.healthapp.data.local.entity.StepEntryEntity
-import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.data.local.mapper.DEFAULT_SUPPLEMENT_NAMES
 import com.burak.healthapp.data.local.mapper.createSupplementTemplatesFromNames
 import com.burak.healthapp.data.local.mapper.toDomain
 import com.burak.healthapp.data.local.mapper.toEntity
-import com.burak.healthapp.domain.calculation.WeightMeasurementSample
-import com.burak.healthapp.domain.calculation.averageCalories
-import com.burak.healthapp.domain.calculation.averageProtein
-import com.burak.healthapp.domain.calculation.averageSleepMinutes
-import com.burak.healthapp.domain.calculation.averageSteps
-import com.burak.healthapp.domain.calculation.averageWaterMl
-import com.burak.healthapp.domain.calculation.buildCalendarWeekDays
-import com.burak.healthapp.domain.calculation.buildInterpolatedWeightTrendPoints
-import com.burak.healthapp.domain.calculation.buildMonthToDateDays
-import com.burak.healthapp.domain.calculation.buildStepTrendPoints
-import com.burak.healthapp.domain.calculation.buildWeeklyCalories
-import com.burak.healthapp.domain.calculation.buildWeekToDateDays
-import com.burak.healthapp.domain.calculation.clipWeightTrendDays
 import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.HydrationEntry
-import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SettingsState
-import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.SmokingEntry
-import com.burak.healthapp.domain.model.StepEntry
-import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.domain.model.TodaySnapshot
-import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.domain.model.TrendsSnapshot
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.domain.repository.TrendsRepository
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
+import java.time.LocalTime
 
 class SettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
@@ -122,10 +80,8 @@ class SettingsRepositoryImpl(
         )
     }
 
-    override fun observeSupplementTemplates(): Flow<List<SupplementTemplate>> {
-        return templateDao.observeActive().map { templates ->
-            templates.map(SupplementTemplateEntity::toDomain)
-        }
+    override fun observeSupplementTemplates(): Flow<List<SupplementTemplate>> = templateDao.observeActive().map { templates ->
+        templates.map(SupplementTemplateEntity::toDomain)
     }
 
     override suspend fun completeOnboarding(

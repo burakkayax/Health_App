@@ -1,28 +1,23 @@
 package com.burak.healthapp
 
 import android.net.Uri
+import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataImportFileReader
-import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.export.JsonHealthDataExporter
+import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.repository.HealthDataExportRepository
-import com.burak.healthapp.domain.repository.HealthDataManagementRepository
-import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
-import com.burak.healthapp.domain.model.ExerciseIntensity
-import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.SmokingEntry
 import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.model.SupplementTemplate
@@ -30,14 +25,14 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.TodaySnapshot
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import com.burak.healthapp.R
-import com.burak.healthapp.core.ui.text.UiText
-import com.burak.healthapp.feature.profile.ProfileViewModel
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.HealthDataExportRepository
+import com.burak.healthapp.domain.repository.HealthDataManagementRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
-import java.time.Instant
-import java.time.LocalDate
+import com.burak.healthapp.feature.profile.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -57,10 +52,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+import java.time.Instant
+import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
@@ -164,22 +161,20 @@ class ProfileViewModelTest {
     private fun createViewModel(
         settingsRepository: FakeProfileSettingsRepository = FakeProfileSettingsRepository(),
         dashboardRepository: DashboardRepository = FakeProfileDashboardRepository(),
-    ): ProfileViewModel {
-        return ProfileViewModel(
-            settingsRepository = settingsRepository,
-            dashboardRepository = dashboardRepository,
-            exportHealthDataUseCase = ExportHealthDataUseCase(
-                repository = EmptyHealthDataExportRepository,
-                jsonExporter = JsonHealthDataExporter(),
-                appVersion = "test",
-            ),
-            exportFileWriter = NoOpExportFileWriter,
-            importFileReader = EmptyImportFileReader,
-            jsonImporter = JsonHealthDataImporter(),
-            importHealthDataUseCase = ImportHealthDataUseCase(NoOpHealthDataManagementRepository),
-            deleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(NoOpHealthDataManagementRepository),
-        )
-    }
+    ): ProfileViewModel = ProfileViewModel(
+        settingsRepository = settingsRepository,
+        dashboardRepository = dashboardRepository,
+        exportHealthDataUseCase = ExportHealthDataUseCase(
+            repository = EmptyHealthDataExportRepository,
+            jsonExporter = JsonHealthDataExporter(),
+            appVersion = "test",
+        ),
+        exportFileWriter = NoOpExportFileWriter,
+        importFileReader = EmptyImportFileReader,
+        jsonImporter = JsonHealthDataImporter(),
+        importHealthDataUseCase = ImportHealthDataUseCase(NoOpHealthDataManagementRepository),
+        deleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(NoOpHealthDataManagementRepository),
+    )
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -239,42 +234,34 @@ private class FakeProfileSettingsRepository(
 }
 
 private class FakeProfileDashboardRepository : DashboardRepository {
-    override fun observeToday(date: LocalDate): Flow<TodaySnapshot> {
-        return flowOf(
-            TodaySnapshot(
-                settings = SettingsState(),
-                meals = emptyList<MealEntry>(),
-                hydrationEntries = emptyList(),
-                sleepSessionForDate = null,
-                exerciseEntryForDate = null,
-                weekExerciseEntries = emptyList(),
-                smokingEntryForDate = null,
-                stepEntryForDate = null,
-                weekStepEntries = emptyList(),
-                supplementTemplates = emptyList(),
-                supplementDoseEntries = emptyList(),
-                measurementForDate = null,
-            ),
-        )
-    }
+    override fun observeToday(date: LocalDate): Flow<TodaySnapshot> = flowOf(
+        TodaySnapshot(
+            settings = SettingsState(),
+            meals = emptyList<MealEntry>(),
+            hydrationEntries = emptyList(),
+            sleepSessionForDate = null,
+            exerciseEntryForDate = null,
+            weekExerciseEntries = emptyList(),
+            smokingEntryForDate = null,
+            stepEntryForDate = null,
+            weekStepEntries = emptyList(),
+            supplementTemplates = emptyList(),
+            supplementDoseEntries = emptyList(),
+            measurementForDate = null,
+        ),
+    )
 
     override fun observeMealsForDate(date: LocalDate): Flow<List<MealEntry>> = flowOf(emptyList())
 
-    override fun observeHydrationBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntry>> {
-        return flowOf(emptyList())
-    }
+    override fun observeHydrationBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<HydrationEntry>> = flowOf(emptyList())
 
     override fun observeLatestMeasurement(): Flow<BodyMeasurementEntry?> = flowOf(null)
 
     override fun observeWeightHistory(): Flow<List<BodyMeasurementEntry>> = flowOf(emptyList())
 
-    override fun observeSleepSessionsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSession>> {
-        return flowOf(emptyList())
-    }
+    override fun observeSleepSessionsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSession>> = flowOf(emptyList())
 
-    override fun observeStepsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntry>> {
-        return flowOf(emptyList())
-    }
+    override fun observeStepsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntry>> = flowOf(emptyList())
 
     override suspend fun saveMealEntry(entry: MealEntry) = Unit
 

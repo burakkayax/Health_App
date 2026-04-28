@@ -39,20 +39,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
-import com.burak.healthapp.domain.export.HealthDataImportPreview
-import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.core.ui.components.AvatarBadge
+import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
-import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.text.asString
+import com.burak.healthapp.core.ui.theme.HealthPrimary
+import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.export.HealthDataImportPreview
+import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
-import com.burak.healthapp.core.ui.theme.HealthPrimary
-import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.core.ui.text.asString
 import java.time.LocalDate
 import java.util.Locale
 
@@ -661,6 +661,4 @@ private fun DeleteHealthDataConfirmationDialog(
     )
 }
 
-private fun defaultExportFileName(): String {
-    return "health_app_export_${LocalDate.now()}.json"
-}
+private fun defaultExportFileName(): String = "health_app_export_${LocalDate.now()}.json"

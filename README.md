@@ -327,6 +327,30 @@ Unit testleri çalıştırma:
 ./gradlew :app:testDebugUnitTest
 ```
 
+Kotlin format kontrolü:
+
+```bash
+./gradlew spotlessCheck
+```
+
+Kotlin format uygulama:
+
+```bash
+./gradlew spotlessApply
+```
+
+Statik analiz:
+
+```bash
+./gradlew detekt
+```
+
+Android lint:
+
+```bash
+./gradlew lintDebug
+```
+
 Android test Kotlin derlemesi:
 
 ```bash

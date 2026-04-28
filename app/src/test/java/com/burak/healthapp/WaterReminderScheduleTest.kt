@@ -4,14 +4,14 @@ import com.burak.healthapp.core.reminder.calculateNextWaterReminderDelay
 import com.burak.healthapp.core.reminder.isInsideWaterReminderWindow
 import com.burak.healthapp.core.reminder.shouldShowWaterReminder
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 class WaterReminderScheduleTest {
     @Test
@@ -70,12 +70,10 @@ class WaterReminderScheduleTest {
         start: LocalTime,
         end: LocalTime,
         interval: Int,
-    ): WaterReminderSettings {
-        return WaterReminderSettings(
-            enabled = true,
-            startTime = start,
-            endTime = end,
-            intervalMinutes = interval,
-        )
-    }
+    ): WaterReminderSettings = WaterReminderSettings(
+        enabled = true,
+        startTime = start,
+        endTime = end,
+        intervalMinutes = interval,
+    )
 }

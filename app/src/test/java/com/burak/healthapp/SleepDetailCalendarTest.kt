@@ -2,12 +2,12 @@ package com.burak.healthapp
 
 import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.feature.detail.sleep.buildSleepCalendarWeeks
-import java.time.LocalDate
-import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class SleepDetailCalendarTest {
     @Test

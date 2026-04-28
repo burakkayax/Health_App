@@ -44,21 +44,21 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.domain.config.DefaultHealthGoals
-import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.core.ui.components.AvatarBadge
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.RoundedPillButton
-import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.config.DefaultHealthGoals
+import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.UserProfile
+import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.root.healthApplication
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
-import kotlinx.coroutines.launch
 
 data class OnboardingFormState(
     val name: String = "",

@@ -11,18 +11,16 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
-import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
-import com.burak.healthapp.feature.today.meal.MealDraftFoodState
-import com.burak.healthapp.feature.today.meal.MealEditorUiState
 import com.burak.healthapp.feature.today.NutritionCardState
 import com.burak.healthapp.feature.today.SleepCardState
 import com.burak.healthapp.feature.today.SmokingCardState
@@ -30,14 +28,15 @@ import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.StepCardState
 import com.burak.healthapp.feature.today.SupplementCardState
 import com.burak.healthapp.feature.today.SupplementItemState
+import com.burak.healthapp.feature.today.TodayContent
 import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.WeightCardState
-import com.burak.healthapp.core.ui.theme.HealthTheme
-import com.burak.healthapp.feature.today.TodayContent
-import java.time.LocalDate
+import com.burak.healthapp.feature.today.meal.MealDraftFoodState
+import com.burak.healthapp.feature.today.meal.MealEditorUiState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 class TodayContentTest {
     @get:Rule
@@ -545,13 +544,11 @@ class TodayContentTest {
         )
     }
 
-    private fun sampleMealEditorState(): MealEditorUiState {
-        return MealEditorUiState(
-            mealType = MealType.BREAKFAST,
-            draftFoods = listOf(
-                MealDraftFoodState(draftId = 1L),
-            ),
-            canSave = false,
-        )
-    }
+    private fun sampleMealEditorState(): MealEditorUiState = MealEditorUiState(
+        mealType = MealType.BREAKFAST,
+        draftFoods = listOf(
+            MealDraftFoodState(draftId = 1L),
+        ),
+        canSave = false,
+    )
 }

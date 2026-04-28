@@ -2,35 +2,18 @@ package com.burak.healthapp.domain.calculation
 
 import com.burak.healthapp.domain.model.CalorieBarPoint
 import com.burak.healthapp.domain.model.DayNutritionTotal
-import com.burak.healthapp.domain.model.ExerciseEntry
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
-import com.burak.healthapp.domain.model.SleepSession
-import com.burak.healthapp.domain.model.StepEntry
-import com.burak.healthapp.domain.model.TrendPoint
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.util.Locale
-import kotlin.math.max
-import kotlin.math.pow
-import kotlin.math.sqrt
 
-fun calculateNutritionTotals(entries: List<MealEntry>): DayNutritionTotal {
-    return entries.fold(DayNutritionTotal()) { total, entry ->
-        total.copy(
-            calories = total.calories + entry.calories,
-            carbsGrams = total.carbsGrams + entry.carbsGrams,
-            fatGrams = total.fatGrams + entry.fatGrams,
-            proteinGrams = total.proteinGrams + entry.proteinGrams,
-        )
-    }
+fun calculateNutritionTotals(entries: List<MealEntry>): DayNutritionTotal = entries.fold(DayNutritionTotal()) { total, entry ->
+    total.copy(
+        calories = total.calories + entry.calories,
+        carbsGrams = total.carbsGrams + entry.carbsGrams,
+        fatGrams = total.fatGrams + entry.fatGrams,
+        proteinGrams = total.proteinGrams + entry.proteinGrams,
+    )
 }
 
 fun averageProtein(entries: List<MealEntry>, days: List<LocalDate>): Float {
@@ -67,17 +50,15 @@ fun buildWeeklyCalories(
     }
 }
 
-fun groupMealsByType(entries: List<MealEntry>): List<GroupedMealEntries> {
-    return MealType.entries.mapNotNull { mealType ->
-        val groupedEntries = entries.filter { it.mealType == mealType }
-        if (groupedEntries.isEmpty()) {
-            null
-        } else {
-            GroupedMealEntries(
-                mealType = mealType,
-                entries = groupedEntries,
-            )
-        }
+fun groupMealsByType(entries: List<MealEntry>): List<GroupedMealEntries> = MealType.entries.mapNotNull { mealType ->
+    val groupedEntries = entries.filter { it.mealType == mealType }
+    if (groupedEntries.isEmpty()) {
+        null
+    } else {
+        GroupedMealEntries(
+            mealType = mealType,
+            entries = groupedEntries,
+        )
     }
 }
 
@@ -86,14 +67,12 @@ data class GroupedMealEntries(
     val entries: List<MealEntry>,
 )
 
-private fun LocalDate.toTurkishWeekLetter(): String {
-    return when (dayOfWeek) {
-        DayOfWeek.MONDAY -> "P"
-        DayOfWeek.TUESDAY -> "S"
-        DayOfWeek.WEDNESDAY -> "Ç"
-        DayOfWeek.THURSDAY -> "P"
-        DayOfWeek.FRIDAY -> "C"
-        DayOfWeek.SATURDAY -> "C"
-        DayOfWeek.SUNDAY -> "P"
-    }
+private fun LocalDate.toTurkishWeekLetter(): String = when (dayOfWeek) {
+    DayOfWeek.MONDAY -> "P"
+    DayOfWeek.TUESDAY -> "S"
+    DayOfWeek.WEDNESDAY -> "Ç"
+    DayOfWeek.THURSDAY -> "P"
+    DayOfWeek.FRIDAY -> "C"
+    DayOfWeek.SATURDAY -> "C"
+    DayOfWeek.SUNDAY -> "P"
 }

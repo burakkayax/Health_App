@@ -2,24 +2,24 @@ package com.burak.healthapp
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
-import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
-import com.burak.healthapp.domain.model.UserProfile
-import com.burak.healthapp.domain.model.ThemeMode
-import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.model.GoalSettings
-import java.time.LocalDate
-import java.time.LocalTime
-import java.io.File
-import java.nio.file.Files
+import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.model.UserProfile
+import com.burak.healthapp.domain.model.WaterReminderSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.File
+import java.nio.file.Files
+import java.time.LocalDate
+import java.time.LocalTime
 
 class SettingsRepositoryTest {
     @Test

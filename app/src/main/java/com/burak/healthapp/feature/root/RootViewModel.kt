@@ -2,13 +2,13 @@ package com.burak.healthapp.feature.root
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.HealthApplication
-import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -55,6 +55,4 @@ class RootViewModel(
     }
 }
 
-fun CreationExtras.healthApplication(): HealthApplication {
-    return this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as HealthApplication
-}
+fun CreationExtras.healthApplication(): HealthApplication = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as HealthApplication

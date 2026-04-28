@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.burak.healthapp.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,32 +32,33 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.domain.config.DefaultHealthGoals
-import com.burak.healthapp.domain.repository.DashboardRepository
-import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.domain.calculation.clampProgress
-import com.burak.healthapp.domain.model.StepEntry
-import com.burak.healthapp.domain.model.TrendsPeriod
+import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.core.ui.theme.HealthPrimary
+import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.calculation.clampProgress
+import com.burak.healthapp.domain.config.DefaultHealthGoals
+import com.burak.healthapp.domain.model.StepEntry
+import com.burak.healthapp.domain.model.TrendsPeriod
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.detail.step.StepBarState
 import com.burak.healthapp.feature.detail.step.StepDetailUiState
 import com.burak.healthapp.feature.root.healthApplication
-import com.burak.healthapp.core.ui.theme.HealthPrimary
-import com.burak.healthapp.core.ui.theme.HealthSpacing
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class StepDetailViewModel(
@@ -317,17 +317,15 @@ private fun List<StepEntry>.toStepDetailUiState(
     )
 }
 
-private fun emptyStepDetailUiState(): StepDetailUiState {
-    return StepDetailUiState(
-        selectedPeriod = TrendsPeriod.WEEKLY,
-        bars = emptyList(),
-        monthDays = emptyList(),
-        totalStepsLabel = "0 adım",
-        averageStepsLabel = "0 adım",
-        targetLabel = "${DefaultHealthGoals.DAILY_STEPS} adım",
-        hasData = false,
-    )
-}
+private fun emptyStepDetailUiState(): StepDetailUiState = StepDetailUiState(
+    selectedPeriod = TrendsPeriod.WEEKLY,
+    bars = emptyList(),
+    monthDays = emptyList(),
+    totalStepsLabel = "0 adım",
+    averageStepsLabel = "0 adım",
+    targetLabel = "${DefaultHealthGoals.DAILY_STEPS} adım",
+    hasData = false,
+)
 
 internal fun buildStepMonthRingDays(
     anchorDate: LocalDate,
@@ -360,14 +358,12 @@ internal fun buildStepMonthRingDays(
     }
 }
 
-private fun LocalDate.toWeekLabel(): String {
-    return when (dayOfWeek.value) {
-        1 -> "P"
-        2 -> "S"
-        3 -> "Ç"
-        4 -> "P"
-        5 -> "C"
-        6 -> "C"
-        else -> "P"
-    }
+private fun LocalDate.toWeekLabel(): String = when (dayOfWeek.value) {
+    1 -> "P"
+    2 -> "S"
+    3 -> "Ç"
+    4 -> "P"
+    5 -> "C"
+    6 -> "C"
+    else -> "P"
 }

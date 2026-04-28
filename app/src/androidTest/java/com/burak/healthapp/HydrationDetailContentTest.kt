@@ -65,27 +65,25 @@ class HydrationDetailContentTest {
         composeRule.onNodeWithTag("hydration_month_ring_grid").assertIsDisplayed()
     }
 
-    private fun sampleWeeklyState(): HydrationDetailUiState {
-        return HydrationDetailUiState(
-            selectedPeriod = TrendsPeriod.WEEKLY,
-            targetMl = 2_500,
-            totalMl = 1_600,
-            averageMl = 1_200,
-            progress = 0.64f,
-            entries = listOf(
-                HydrationHistoryItemState(id = 1, amountMl = 500, timeLabel = "09:00"),
-            ),
-            periodDays = listOf(
-                HydrationSummaryDayState("P", 0, 0f),
-                HydrationSummaryDayState("S", 800, 0.32f),
-                HydrationSummaryDayState("Ç", 1_200, 0.48f),
-                HydrationSummaryDayState("P", 1_600, 0.64f),
-                HydrationSummaryDayState("C", 2_500, 1f),
-                HydrationSummaryDayState("C", 1_000, 0.4f),
-                HydrationSummaryDayState("P", 500, 0.2f),
-            ),
-            monthDays = emptyList(),
-            hasPeriodData = true,
-        )
-    }
+    private fun sampleWeeklyState(): HydrationDetailUiState = HydrationDetailUiState(
+        selectedPeriod = TrendsPeriod.WEEKLY,
+        targetMl = 2_500,
+        totalMl = 1_600,
+        averageMl = 1_200,
+        progress = 0.64f,
+        entries = listOf(
+            HydrationHistoryItemState(id = 1, amountMl = 500, timeLabel = "09:00"),
+        ),
+        periodDays = listOf(
+            HydrationSummaryDayState("P", 0, 0f),
+            HydrationSummaryDayState("S", 800, 0.32f),
+            HydrationSummaryDayState("Ç", 1_200, 0.48f),
+            HydrationSummaryDayState("P", 1_600, 0.64f),
+            HydrationSummaryDayState("C", 2_500, 1f),
+            HydrationSummaryDayState("C", 1_000, 0.4f),
+            HydrationSummaryDayState("P", 500, 0.2f),
+        ),
+        monthDays = emptyList(),
+        hasPeriodData = true,
+    )
 }

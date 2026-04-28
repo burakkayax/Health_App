@@ -37,10 +37,10 @@ import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.repository.HealthDataExportRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
-import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 class HealthDataExportRepositoryImpl(
     private val settingsRepository: SettingsRepository,
@@ -81,134 +81,110 @@ class HealthDataExportRepositoryImpl(
     }
 }
 
-private fun UserProfile.toExported(): ExportedUserProfile {
-    return ExportedUserProfile(
-        name = name,
-        avatarInitials = avatarInitials,
-        heightCm = heightCm,
-    )
-}
+private fun UserProfile.toExported(): ExportedUserProfile = ExportedUserProfile(
+    name = name,
+    avatarInitials = avatarInitials,
+    heightCm = heightCm,
+)
 
-private fun GoalSettings.toExported(): ExportedGoalSettings {
-    return ExportedGoalSettings(
-        dailyCaloriesTarget = dailyCaloriesTarget,
-        proteinTargetGrams = proteinTargetGrams,
-        carbTargetGrams = carbTargetGrams,
-        fatTargetGrams = fatTargetGrams,
-        waterTargetMl = waterTargetMl,
-        dailyStepTarget = dailyStepTarget,
-        sleepTargetBedtime = sleepTargetBedtime.toString(),
-        sleepTargetWakeTime = sleepTargetWakeTime.toString(),
-        exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
-        exerciseTargetDurationMinutes = exerciseTargetDurationMinutes,
-        smokeDailyLimit = smokeDailyLimit,
-        baselineWeightKg = baselineWeightKg,
-        targetWeightKg = targetWeightKg,
-        baselineShoulderCm = baselineShoulderCm,
-        baselineWaistCm = baselineWaistCm,
-        baselineHipCm = baselineHipCm,
-    )
-}
+private fun GoalSettings.toExported(): ExportedGoalSettings = ExportedGoalSettings(
+    dailyCaloriesTarget = dailyCaloriesTarget,
+    proteinTargetGrams = proteinTargetGrams,
+    carbTargetGrams = carbTargetGrams,
+    fatTargetGrams = fatTargetGrams,
+    waterTargetMl = waterTargetMl,
+    dailyStepTarget = dailyStepTarget,
+    sleepTargetBedtime = sleepTargetBedtime.toString(),
+    sleepTargetWakeTime = sleepTargetWakeTime.toString(),
+    exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
+    exerciseTargetDurationMinutes = exerciseTargetDurationMinutes,
+    smokeDailyLimit = smokeDailyLimit,
+    baselineWeightKg = baselineWeightKg,
+    targetWeightKg = targetWeightKg,
+    baselineShoulderCm = baselineShoulderCm,
+    baselineWaistCm = baselineWaistCm,
+    baselineHipCm = baselineHipCm,
+)
 
-private fun WaterReminderSettings.toExported(): ExportedWaterReminderSettings {
-    return ExportedWaterReminderSettings(
-        enabled = enabled,
-        startTime = startTime.toString(),
-        endTime = endTime.toString(),
-        intervalMinutes = intervalMinutes,
-    )
-}
+private fun WaterReminderSettings.toExported(): ExportedWaterReminderSettings = ExportedWaterReminderSettings(
+    enabled = enabled,
+    startTime = startTime.toString(),
+    endTime = endTime.toString(),
+    intervalMinutes = intervalMinutes,
+)
 
-private fun MealEntry.toExported(): ExportedMealEntry {
-    return ExportedMealEntry(
-        id = id,
-        date = date.toString(),
-        mealType = mealType.name,
-        name = name,
-        calories = calories,
-        carbsGrams = carbsGrams,
-        fatGrams = fatGrams,
-        proteinGrams = proteinGrams,
-        createdAt = createdAt.toString(),
-    )
-}
+private fun MealEntry.toExported(): ExportedMealEntry = ExportedMealEntry(
+    id = id,
+    date = date.toString(),
+    mealType = mealType.name,
+    name = name,
+    calories = calories,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    proteinGrams = proteinGrams,
+    createdAt = createdAt.toString(),
+)
 
-private fun HydrationEntry.toExported(): ExportedHydrationEntry {
-    return ExportedHydrationEntry(
-        id = id,
-        date = date.toString(),
-        amountMl = amountMl,
-        createdAt = createdAt.toString(),
-    )
-}
+private fun HydrationEntry.toExported(): ExportedHydrationEntry = ExportedHydrationEntry(
+    id = id,
+    date = date.toString(),
+    amountMl = amountMl,
+    createdAt = createdAt.toString(),
+)
 
-private fun SleepSession.toExported(): ExportedSleepSession {
-    return ExportedSleepSession(
-        id = id,
-        sessionDate = sessionDate.toString(),
-        startTime = startTime.toString(),
-        endTime = endTime.toString(),
-    )
-}
+private fun SleepSession.toExported(): ExportedSleepSession = ExportedSleepSession(
+    id = id,
+    sessionDate = sessionDate.toString(),
+    startTime = startTime.toString(),
+    endTime = endTime.toString(),
+)
 
-private fun ExerciseEntry.toExported(): ExportedExerciseEntry {
-    return ExportedExerciseEntry(
-        id = id,
-        date = date.toString(),
-        type = type.name,
-        durationMinutes = durationMinutes,
-        intensity = intensity.name,
-    )
-}
+private fun ExerciseEntry.toExported(): ExportedExerciseEntry = ExportedExerciseEntry(
+    id = id,
+    date = date.toString(),
+    type = type.name,
+    durationMinutes = durationMinutes,
+    intensity = intensity.name,
+)
 
-private fun SmokingEntry.toExported(): ExportedSmokingEntry {
-    return ExportedSmokingEntry(
-        id = id,
-        date = date.toString(),
-        count = count,
-    )
-}
+private fun SmokingEntry.toExported(): ExportedSmokingEntry = ExportedSmokingEntry(
+    id = id,
+    date = date.toString(),
+    count = count,
+)
 
-private fun StepEntry.toExported(): ExportedStepEntry {
-    return ExportedStepEntry(
-        id = id,
-        date = date.toString(),
-        steps = steps,
-        sensorBaseline = sensorBaseline,
-        lastSensorValue = lastSensorValue,
-        updatedAt = updatedAt.toString(),
-    )
-}
+private fun StepEntry.toExported(): ExportedStepEntry = ExportedStepEntry(
+    id = id,
+    date = date.toString(),
+    steps = steps,
+    sensorBaseline = sensorBaseline,
+    lastSensorValue = lastSensorValue,
+    updatedAt = updatedAt.toString(),
+)
 
-private fun BodyMeasurementEntry.toExported(): ExportedBodyMeasurementEntry {
-    return ExportedBodyMeasurementEntry(
-        id = id,
-        date = date.toString(),
-        weightKg = weightKg,
-        shoulderCm = shoulderCm,
-        waistCm = waistCm,
-        hipCm = hipCm,
-        recordedAt = recordedAt.toString(),
-    )
-}
+private fun BodyMeasurementEntry.toExported(): ExportedBodyMeasurementEntry = ExportedBodyMeasurementEntry(
+    id = id,
+    date = date.toString(),
+    weightKg = weightKg,
+    shoulderCm = shoulderCm,
+    waistCm = waistCm,
+    hipCm = hipCm,
+    recordedAt = recordedAt.toString(),
+)
 
-private fun SupplementTemplate.toExported(): ExportedSupplementTemplate {
-    return ExportedSupplementTemplate(
-        id = id,
-        name = name,
-        targetAmount = targetAmount,
-        unitLabel = unitLabel,
-        isActive = isActive,
-        sortOrder = sortOrder,
-    )
-}
+private fun SupplementTemplate.toExported(): ExportedSupplementTemplate = ExportedSupplementTemplate(
+    id = id,
+    name = name,
+    targetAmount = targetAmount,
+    unitLabel = unitLabel,
+    isActive = isActive,
+    sortOrder = sortOrder,
+)
 
-private fun SupplementDoseEntry.toExported(): ExportedSupplementDoseEntry {
-    return ExportedSupplementDoseEntry(
-        id = id,
-        templateId = templateId,
-        date = date.toString(),
-        amount = amount,
-        loggedAt = loggedAt.toString(),
-    )
-}
+private fun SupplementDoseEntry.toExported(): ExportedSupplementDoseEntry = ExportedSupplementDoseEntry(
+    id = id,
+    templateId = templateId,
+    date = date.toString(),
+    amount = amount,
+    loggedAt = loggedAt.toString(),
+)

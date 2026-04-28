@@ -52,9 +52,6 @@ import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.root.healthApplication
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -62,6 +59,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HydrationDetailViewModel(
@@ -450,7 +450,7 @@ internal fun buildHydrationMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = amount > 0 && progress >= 1f,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "${amount} ml",
+            valueLabel = "$amount ml",
             isToday = date == LocalDate.now(),
         )
     }
@@ -464,28 +464,24 @@ internal fun formatCompactWaterAmountMl(amountMl: Int): String {
     return String.format(Locale.US, "%.1fL", liters)
 }
 
-private fun emptyHydrationDetailUiState(): HydrationDetailUiState {
-    return HydrationDetailUiState(
-        selectedPeriod = TrendsPeriod.WEEKLY,
-        targetMl = 0,
-        totalMl = 0,
-        averageMl = 0,
-        progress = 0f,
-        entries = emptyList(),
-        periodDays = emptyList(),
-        monthDays = emptyList(),
-        hasPeriodData = false,
-    )
-}
+private fun emptyHydrationDetailUiState(): HydrationDetailUiState = HydrationDetailUiState(
+    selectedPeriod = TrendsPeriod.WEEKLY,
+    targetMl = 0,
+    totalMl = 0,
+    averageMl = 0,
+    progress = 0f,
+    entries = emptyList(),
+    periodDays = emptyList(),
+    monthDays = emptyList(),
+    hasPeriodData = false,
+)
 
-private fun LocalDate.toWeekLabel(): String {
-    return when (dayOfWeek.value) {
-        1 -> "P"
-        2 -> "S"
-        3 -> "Ç"
-        4 -> "P"
-        5 -> "C"
-        6 -> "C"
-        else -> "P"
-    }
+private fun LocalDate.toWeekLabel(): String = when (dayOfWeek.value) {
+    1 -> "P"
+    2 -> "S"
+    3 -> "Ç"
+    4 -> "P"
+    5 -> "C"
+    6 -> "C"
+    else -> "P"
 }
