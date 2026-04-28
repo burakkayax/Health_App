@@ -45,6 +45,20 @@ class HealthInputValidationTest {
     }
 
     @Test
+    fun mealValidator_rejectsNonIntegerAndTooHighValues() {
+        val result = MealInputValidator.validate(
+            name = "Bowl",
+            calories = "5001",
+            protein = "10.5",
+            carbs = "1200",
+            fat = "8",
+        )
+
+        assertInvalidContains(result, HealthInputError.TOO_HIGH)
+        assertInvalidContains(result, HealthInputError.MUST_BE_INTEGER)
+    }
+
+    @Test
     fun hydrationValidator_rejectsInvalidValues() {
         assertInvalidContains(HydrationInputValidator.validate(""), HealthInputError.REQUIRED)
         assertInvalidContains(HydrationInputValidator.validate("abc"), HealthInputError.MUST_BE_INTEGER)
@@ -103,6 +117,24 @@ class HealthInputValidationTest {
             GoalSettingsValidator.validate(GoalSettings(waterTargetMl = 0)),
             HealthInputError.MUST_BE_POSITIVE,
         )
+    }
+
+    @Test
+    fun goalSettingsValidator_rejectsInvalidBusinessRanges() {
+        val result = GoalSettingsValidator.validate(
+            GoalSettings(
+                dailyCaloriesTarget = 0,
+                proteinTargetGrams = -1,
+                exerciseTargetDaysPerWeek = 8,
+                exerciseTargetDurationMinutes = 0,
+                smokeDailyLimit = -1,
+                baselineWeightKg = 0f,
+            ),
+        )
+
+        assertInvalidContains(result, HealthInputError.MUST_BE_POSITIVE)
+        assertInvalidContains(result, HealthInputError.MUST_NOT_BE_NEGATIVE)
+        assertInvalidContains(result, HealthInputError.TOO_HIGH)
     }
 
     private fun assertInvalidContains(

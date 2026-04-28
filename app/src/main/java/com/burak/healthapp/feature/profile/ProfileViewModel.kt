@@ -206,38 +206,44 @@ class ProfileViewModel(
 
     fun loadImportPreview(uri: Uri) {
         viewModelScope.launch {
-            pendingImportModel = null
-            exportState.value = exportState.value.copy(
-                isImporting = true,
-                importPreview = null,
-                message = null,
-                isError = false,
-            )
-
-            runCatching {
+            try {
                 val rawJson = importFileReader.readText(uri)
-                jsonImporter.validate(rawJson)
-            }.onSuccess { result ->
-                when (result) {
-                    is ImportValidationResult.Valid -> {
-                        pendingImportModel = result.model
-                        exportState.value = exportState.value.copy(
-                            isImporting = false,
-                            importPreview = result.preview,
-                        )
-                    }
-                    is ImportValidationResult.Invalid -> {
-                        exportState.value = exportState.value.copy(
-                            isImporting = false,
-                            message = result.error.toUiText(),
-                            isError = true,
-                        )
-                    }
-                }
-            }.onFailure {
+                handleImportPreviewJson(rawJson)
+            } catch (_: Exception) {
                 exportState.value = exportState.value.copy(
                     isImporting = false,
                     message = UiText.StringResource(R.string.import_failed),
+                    isError = true,
+                )
+            }
+        }
+    }
+
+    internal fun loadImportPreviewJson(rawJson: String) = viewModelScope.launch {
+        handleImportPreviewJson(rawJson)
+    }
+
+    private fun handleImportPreviewJson(rawJson: String) {
+        pendingImportModel = null
+        exportState.value = exportState.value.copy(
+            isImporting = true,
+            importPreview = null,
+            message = null,
+            isError = false,
+        )
+
+        when (val result = jsonImporter.validate(rawJson)) {
+            is ImportValidationResult.Valid -> {
+                pendingImportModel = result.model
+                exportState.value = exportState.value.copy(
+                    isImporting = false,
+                    importPreview = result.preview,
+                )
+            }
+            is ImportValidationResult.Invalid -> {
+                exportState.value = exportState.value.copy(
+                    isImporting = false,
+                    message = result.error.toUiText(),
                     isError = true,
                 )
             }

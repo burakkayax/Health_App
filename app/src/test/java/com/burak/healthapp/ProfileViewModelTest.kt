@@ -8,6 +8,7 @@ import com.burak.healthapp.data.export.HealthDataImportFileReader
 import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.domain.export.ExportedGoalSettings
+import com.burak.healthapp.domain.export.ExportedMealEntry
 import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
@@ -51,6 +52,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -152,6 +154,79 @@ class ProfileViewModelTest {
         assertNotNull(settingsRepository.lastReplaceAttempt)
     }
 
+    @Test
+    fun loadImportPreview_withValidJsonStoresPreviewAndConfirmImportsModel() = runTest {
+        val managementRepository = RecordingHealthDataManagementRepository()
+        val viewModel = createViewModel(
+            healthDataManagementRepository = managementRepository,
+        )
+        collectUiState(viewModel)
+
+        viewModel.loadImportPreviewJson(JsonHealthDataExporter().encode(profileImportModel()))
+        advanceUntilIdle()
+
+        val preview = viewModel.uiState.value.exportState.importPreview
+        assertNotNull(preview)
+        assertEquals(1, preview?.mealCount)
+        assertNull(viewModel.uiState.value.exportState.message)
+
+        viewModel.confirmImport()
+        advanceUntilIdle()
+
+        val exportState = viewModel.uiState.value.exportState
+        assertEquals(1, managementRepository.importedModels.size)
+        assertNull(exportState.importPreview)
+        assertEquals(
+            UiText.StringResource(R.string.import_success),
+            exportState.message,
+        )
+    }
+
+    @Test
+    fun loadImportPreview_withInvalidJsonShowsErrorAndDoesNotStorePreview() = runTest {
+        val viewModel = createViewModel()
+        collectUiState(viewModel)
+
+        viewModel.loadImportPreviewJson("{not-json")
+        advanceUntilIdle()
+
+        val exportState = viewModel.uiState.value.exportState
+        assertNull(exportState.importPreview)
+        assertTrue(exportState.isError)
+        assertEquals(
+            UiText.StringResource(R.string.import_error_invalid_json),
+            exportState.message,
+        )
+    }
+
+    @Test
+    fun deleteAllHealthData_requiresConfirmationAndReportsSuccess() = runTest {
+        val managementRepository = RecordingHealthDataManagementRepository()
+        val viewModel = createViewModel(healthDataManagementRepository = managementRepository)
+        collectUiState(viewModel)
+
+        viewModel.requestDeleteAllHealthData()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.exportState.showDeleteConfirmation)
+
+        viewModel.dismissDeleteAllConfirmation()
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.exportState.showDeleteConfirmation)
+        assertEquals(0, managementRepository.deleteCount)
+
+        viewModel.requestDeleteAllHealthData()
+        viewModel.confirmDeleteAllHealthData()
+        advanceUntilIdle()
+
+        val exportState = viewModel.uiState.value.exportState
+        assertEquals(1, managementRepository.deleteCount)
+        assertFalse(exportState.showDeleteConfirmation)
+        assertEquals(
+            UiText.StringResource(R.string.delete_health_data_success),
+            exportState.message,
+        )
+    }
+
     private fun TestScope.collectUiState(viewModel: ProfileViewModel) {
         backgroundScope.launch {
             viewModel.uiState.collect { }
@@ -161,6 +236,8 @@ class ProfileViewModelTest {
     private fun createViewModel(
         settingsRepository: FakeProfileSettingsRepository = FakeProfileSettingsRepository(),
         dashboardRepository: DashboardRepository = FakeProfileDashboardRepository(),
+        importFileReader: HealthDataImportFileReader = EmptyImportFileReader,
+        healthDataManagementRepository: HealthDataManagementRepository = NoOpHealthDataManagementRepository,
     ): ProfileViewModel = ProfileViewModel(
         settingsRepository = settingsRepository,
         dashboardRepository = dashboardRepository,
@@ -170,10 +247,10 @@ class ProfileViewModelTest {
             appVersion = "test",
         ),
         exportFileWriter = NoOpExportFileWriter,
-        importFileReader = EmptyImportFileReader,
+        importFileReader = importFileReader,
         jsonImporter = JsonHealthDataImporter(),
-        importHealthDataUseCase = ImportHealthDataUseCase(NoOpHealthDataManagementRepository),
-        deleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(NoOpHealthDataManagementRepository),
+        importHealthDataUseCase = ImportHealthDataUseCase(healthDataManagementRepository),
+        deleteAllHealthDataUseCase = DeleteAllHealthDataUseCase(healthDataManagementRepository),
     )
 }
 
@@ -356,4 +433,69 @@ private object NoOpHealthDataManagementRepository : HealthDataManagementReposito
     override suspend fun importHealthData(model: HealthDataExportModel) = Unit
 
     override suspend fun deleteAllHealthData() = Unit
+}
+
+private class RecordingHealthDataManagementRepository : HealthDataManagementRepository {
+    val importedModels = mutableListOf<HealthDataExportModel>()
+    var deleteCount = 0
+
+    override suspend fun importHealthData(model: HealthDataExportModel) {
+        importedModels += model
+    }
+
+    override suspend fun deleteAllHealthData() {
+        deleteCount++
+    }
+}
+
+private fun profileImportModel(): HealthDataExportModel {
+    val goals = GoalSettings()
+    val reminder = WaterReminderSettings()
+    return HealthDataExportModel(
+        exportedAt = "2026-04-27T10:15:30Z",
+        appVersion = "1.0-test",
+        profile = ExportedUserProfile(
+            name = "Burak",
+            avatarInitials = "BK",
+            heightCm = 182f,
+        ),
+        goals = ExportedGoalSettings(
+            dailyCaloriesTarget = goals.dailyCaloriesTarget,
+            proteinTargetGrams = goals.proteinTargetGrams,
+            carbTargetGrams = goals.carbTargetGrams,
+            fatTargetGrams = goals.fatTargetGrams,
+            waterTargetMl = goals.waterTargetMl,
+            dailyStepTarget = goals.dailyStepTarget,
+            sleepTargetBedtime = goals.sleepTargetBedtime.toString(),
+            sleepTargetWakeTime = goals.sleepTargetWakeTime.toString(),
+            exerciseTargetDaysPerWeek = goals.exerciseTargetDaysPerWeek,
+            exerciseTargetDurationMinutes = goals.exerciseTargetDurationMinutes,
+            smokeDailyLimit = goals.smokeDailyLimit,
+            baselineWeightKg = goals.baselineWeightKg,
+            targetWeightKg = goals.targetWeightKg,
+            baselineShoulderCm = goals.baselineShoulderCm,
+            baselineWaistCm = goals.baselineWaistCm,
+            baselineHipCm = goals.baselineHipCm,
+        ),
+        waterReminderSettings = ExportedWaterReminderSettings(
+            enabled = reminder.enabled,
+            startTime = reminder.startTime.toString(),
+            endTime = reminder.endTime.toString(),
+            intervalMinutes = reminder.intervalMinutes,
+        ),
+        themeMode = ThemeMode.SYSTEM.name,
+        meals = listOf(
+            ExportedMealEntry(
+                id = 10,
+                date = "2026-04-27",
+                mealType = "BREAKFAST",
+                name = "Yulaf",
+                calories = 300,
+                carbsGrams = 40,
+                fatGrams = 8,
+                proteinGrams = 20,
+                createdAt = "2026-04-27T08:00:00",
+            ),
+        ),
+    )
 }

@@ -44,4 +44,16 @@ class StepSensorWritePolicyTest {
 
         assertTrue(policy.shouldWrite(sensorValue = 101, nowMillis = 60_000))
     }
+
+    @Test
+    fun sensorResetBeforeInterval_isThrottledUntilFlushOrInterval() {
+        val policy = StepSensorWritePolicy()
+
+        assertTrue(policy.shouldWrite(sensorValue = 1_000, nowMillis = 0))
+        policy.markWritten(sensorValue = 1_000, nowMillis = 0)
+
+        assertFalse(policy.shouldWrite(sensorValue = 10, nowMillis = 10_000))
+        assertEquals(10, policy.pendingFlushValue())
+        assertTrue(policy.shouldWrite(sensorValue = 10, nowMillis = 60_000))
+    }
 }

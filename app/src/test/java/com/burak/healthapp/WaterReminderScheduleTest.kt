@@ -58,6 +58,26 @@ class WaterReminderScheduleTest {
     }
 
     @Test
+    fun initialDelay_usesMinimumIntervalWhenConfiguredBelowLimit() {
+        val delay = calculateNextWaterReminderDelay(
+            now = LocalDateTime.of(2026, 4, 27, 9, 5),
+            settings = settings(start = LocalTime.of(9, 0), end = LocalTime.of(21, 0), interval = 1),
+        )
+
+        assertEquals(Duration.ofMinutes(10), delay)
+    }
+
+    @Test
+    fun initialDelay_keepsExactWindowStartAtZeroDelay() {
+        val delay = calculateNextWaterReminderDelay(
+            now = LocalDateTime.of(2026, 4, 27, 9, 0),
+            settings = settings(start = LocalTime.of(9, 0), end = LocalTime.of(21, 0), interval = 60),
+        )
+
+        assertEquals(Duration.ZERO, delay)
+    }
+
+    @Test
     fun shouldShowReminder_respectsSnoozeAndCompletedTarget() {
         val today = LocalDate.of(2026, 4, 27)
 

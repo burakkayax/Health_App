@@ -378,6 +378,8 @@ Projede aşağıdaki test türleri hedeflenir:
 * Domain calculation unit testleri
 * Repository testleri
 * Room migration testleri
+* Import/export ve veri yönetimi testleri
+* Validation ve form hata yönetimi unit testleri
 * ViewModel testleri
 * Compose UI testleri
 
