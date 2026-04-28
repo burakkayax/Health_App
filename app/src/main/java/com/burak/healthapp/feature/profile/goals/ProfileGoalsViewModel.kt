@@ -5,11 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.core.reminder.WaterReminderScheduler
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.UserProfile
-import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
@@ -22,7 +20,6 @@ import kotlinx.coroutines.launch
 class ProfileGoalsViewModel(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
-    private val waterReminderScheduler: WaterReminderScheduler,
 ) : ViewModel() {
     val uiState = combine(
         settingsRepository.settings,
@@ -34,8 +31,6 @@ class ProfileGoalsViewModel(
             goalSettings = settings.goalSettings,
             latestMeasurement = latestMeasurement,
             heightCm = settings.userProfile.heightCm,
-            waterReminderSettings = settings.waterReminderSettings,
-            stepTrackingEnabled = settings.stepTrackingEnabled,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -46,8 +41,6 @@ class ProfileGoalsViewModel(
             goalSettings = GoalSettings(),
             latestMeasurement = null,
             heightCm = null,
-            waterReminderSettings = WaterReminderSettings(),
-            stepTrackingEnabled = false,
         ),
     )
 
@@ -55,13 +48,10 @@ class ProfileGoalsViewModel(
         goals: GoalSettings,
         measurement: BodyMeasurementEntry,
         heightCm: Float?,
-        waterReminderSettings: WaterReminderSettings,
         onSaved: () -> Unit,
     ) {
         viewModelScope.launch {
             settingsRepository.updateGoalSettings(goals)
-            settingsRepository.updateWaterReminderSettings(waterReminderSettings)
-            waterReminderScheduler.apply(waterReminderSettings)
             settingsRepository.updateProfile(
                 UserProfile(
                     name = uiState.value.userName,
@@ -74,19 +64,12 @@ class ProfileGoalsViewModel(
         }
     }
 
-    fun updateStepTrackingEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateStepTrackingEnabled(enabled)
-        }
-    }
-
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 ProfileGoalsViewModel(
                     settingsRepository = healthApplication().container.settingsRepository,
                     dashboardRepository = healthApplication().container.dashboardRepository,
-                    waterReminderScheduler = healthApplication().container.waterReminderScheduler,
                 )
             }
         }

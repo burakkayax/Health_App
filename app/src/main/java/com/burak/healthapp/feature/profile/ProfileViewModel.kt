@@ -52,6 +52,7 @@ class ProfileViewModel(
     private val jsonImporter: HealthDataJsonImporter,
     private val importHealthDataUseCase: ImportHealthDataUseCase,
     private val deleteAllHealthDataUseCase: DeleteAllHealthDataUseCase,
+    private val applyWaterReminderSettings: (WaterReminderSettings) -> Unit = {},
 ) : ViewModel() {
     private var nextDraftId = 1L
     private var latestTemplates: List<SupplementTemplate> = emptyList()
@@ -175,6 +176,19 @@ class ProfileViewModel(
     fun updateThemeMode(themeMode: ThemeMode) {
         viewModelScope.launch {
             settingsRepository.updateThemeMode(themeMode)
+        }
+    }
+
+    fun updateStepTrackingEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateStepTrackingEnabled(enabled)
+        }
+    }
+
+    fun updateWaterReminderSettings(settings: WaterReminderSettings) {
+        viewModelScope.launch {
+            settingsRepository.updateWaterReminderSettings(settings)
+            applyWaterReminderSettings(settings)
         }
     }
 
@@ -325,6 +339,7 @@ class ProfileViewModel(
                     jsonImporter = healthApplication().container.healthDataJsonImporter,
                     importHealthDataUseCase = healthApplication().container.importHealthDataUseCase,
                     deleteAllHealthDataUseCase = healthApplication().container.deleteAllHealthDataUseCase,
+                    applyWaterReminderSettings = healthApplication().container.waterReminderScheduler::apply,
                 )
             }
         }
@@ -449,6 +464,8 @@ private fun SettingsState.toProfileUiState(
         userName = userProfile.name,
         avatarInitials = userProfile.avatarInitials,
         themeMode = themeMode,
+        stepTrackingEnabled = stepTrackingEnabled,
+        waterReminderSettings = waterReminderSettings,
         goalSummaries = goalSettings.toSummaryStates(
             measurement = measurement,
             heightCm = userProfile.heightCm,

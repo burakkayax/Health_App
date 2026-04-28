@@ -1,5 +1,9 @@
 package com.burak.healthapp.feature.detail.step
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +23,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -37,8 +46,11 @@ import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
+import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -47,6 +59,8 @@ import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.app.hasActivityRecognitionPermission
+import com.burak.healthapp.feature.app.hasStepCounterSensor
 import com.burak.healthapp.feature.detail.step.StepBarState
 import com.burak.healthapp.feature.detail.step.StepDetailUiState
 import com.burak.healthapp.feature.root.healthApplication
@@ -56,6 +70,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -85,6 +100,7 @@ class StepDetailViewModel(
                     anchorDate = date,
                     period = period,
                     targetSteps = settings.goalSettings.dailyStepTarget,
+                    stepTrackingEnabled = settings.stepTrackingEnabled,
                 )
             }
         }
@@ -100,6 +116,12 @@ class StepDetailViewModel(
 
     fun selectPeriod(period: TrendsPeriod) {
         selectedPeriod.value = period
+    }
+
+    fun updateStepTrackingEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateStepTrackingEnabled(enabled)
+        }
     }
 
     companion object {
@@ -120,6 +142,20 @@ fun StepDetailRoute(
 ) {
     val viewModel: StepDetailViewModel = viewModel(factory = StepDetailViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val hasStepSensor = remember { context.hasStepCounterSensor() }
+    var stepTrackingMessage by remember { mutableStateOf<UiText?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            stepTrackingMessage = null
+            viewModel.updateStepTrackingEnabled(true)
+        } else {
+            stepTrackingMessage = UiText.StringResource(R.string.profile_step_tracking_permission_required)
+            viewModel.updateStepTrackingEnabled(false)
+        }
+    }
 
     LaunchedEffect(selectedDate) {
         viewModel.setSelectedDate(selectedDate)
@@ -127,7 +163,27 @@ fun StepDetailRoute(
 
     StepDetailContent(
         state = uiState,
+        stepTrackingMessage = stepTrackingMessage,
         onSelectPeriod = viewModel::selectPeriod,
+        onEnableStepTracking = {
+            when {
+                !hasStepSensor -> {
+                    stepTrackingMessage = UiText.StringResource(R.string.profile_step_tracking_no_sensor)
+                    viewModel.updateStepTrackingEnabled(false)
+                }
+                context.hasActivityRecognitionPermission() -> {
+                    stepTrackingMessage = null
+                    viewModel.updateStepTrackingEnabled(true)
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    permissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                }
+                else -> {
+                    stepTrackingMessage = null
+                    viewModel.updateStepTrackingEnabled(true)
+                }
+            }
+        },
     )
 }
 
@@ -135,6 +191,8 @@ fun StepDetailRoute(
 fun StepDetailContent(
     state: StepDetailUiState,
     onSelectPeriod: (TrendsPeriod) -> Unit,
+    stepTrackingMessage: UiText? = null,
+    onEnableStepTracking: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -149,6 +207,14 @@ fun StepDetailContent(
         ),
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
+        if (!state.stepTrackingEnabled) {
+            item {
+                StepTrackingDisabledCard(
+                    message = stepTrackingMessage,
+                    onEnable = onEnableStepTracking,
+                )
+            }
+        }
         item {
             SegmentedControl(
                 modifier = Modifier.fillMaxWidth(),
@@ -225,6 +291,53 @@ fun StepDetailContent(
 }
 
 @Composable
+private fun StepTrackingDisabledCard(
+    message: UiText?,
+    onEnable: () -> Unit,
+) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("step_tracking_disabled_card"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.step_tracking_disabled_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = stringResource(R.string.step_tracking_disabled_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                message?.let {
+                    Text(
+                        modifier = Modifier.padding(top = HealthSpacing.xs),
+                        text = it.asString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            RoundedPillButton(
+                label = stringResource(R.string.step_tracking_enable),
+                modifier = Modifier.testTag("step_tracking_enable_button"),
+                containerColor = HealthPrimary,
+                contentColor = Color.White,
+                onClick = onEnable,
+            )
+        }
+    }
+}
+
+@Composable
 private fun StepBarChart(
     bars: List<StepBarState>,
     modifier: Modifier = Modifier,
@@ -285,6 +398,7 @@ private fun List<StepEntry>.toStepDetailUiState(
     anchorDate: LocalDate,
     period: TrendsPeriod,
     targetSteps: Int,
+    stepTrackingEnabled: Boolean,
 ): StepDetailUiState {
     val entriesByDate = associateBy(StepEntry::date)
     val totalSteps = filter { it.date in days }.sumOf { it.steps }
@@ -314,6 +428,7 @@ private fun List<StepEntry>.toStepDetailUiState(
         averageStepsLabel = "$averageSteps adım",
         targetLabel = "$targetSteps adım",
         hasData = loggedEntries.any { it.steps > 0 },
+        stepTrackingEnabled = stepTrackingEnabled,
     )
 }
 
@@ -325,6 +440,7 @@ private fun emptyStepDetailUiState(): StepDetailUiState = StepDetailUiState(
     averageStepsLabel = "0 adım",
     targetLabel = "${DefaultHealthGoals.DAILY_STEPS} adım",
     hasData = false,
+    stepTrackingEnabled = false,
 )
 
 internal fun buildStepMonthRingDays(

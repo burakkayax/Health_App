@@ -1,5 +1,11 @@
 package com.burak.healthapp.feature.profile
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -16,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.AlertDialog
@@ -25,35 +32,47 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
+import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.core.ui.components.AvatarBadge
 import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.export.HealthDataImportPreview
 import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import java.time.LocalDate
+import java.time.LocalTime
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +82,10 @@ fun ProfileRoute(
 ) {
     val viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val hasStepSensor = remember { context.hasStepCounterSensor() }
+    var stepPreferenceMessage by remember { mutableStateOf<UiText?>(null) }
+    var waterPreferenceMessage by remember { mutableStateOf<UiText?>(null) }
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
     ) { uri ->
@@ -77,9 +100,35 @@ fun ProfileRoute(
             viewModel.loadImportPreview(uri)
         }
     }
+    val stepPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            stepPreferenceMessage = null
+            viewModel.updateStepTrackingEnabled(true)
+        } else {
+            stepPreferenceMessage = UiText.StringResource(R.string.profile_step_tracking_permission_required)
+            viewModel.updateStepTrackingEnabled(false)
+        }
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            waterPreferenceMessage = null
+            viewModel.updateWaterReminderSettings(uiState.waterReminderSettings.copy(enabled = true))
+        } else {
+            waterPreferenceMessage = UiText.StringResource(R.string.profile_water_reminder_permission_off)
+            viewModel.updateWaterReminderSettings(uiState.waterReminderSettings.copy(enabled = false))
+        }
+    }
 
     ProfileContent(
         state = uiState,
+        hasStepSensor = hasStepSensor,
+        canPostNotifications = HealthNotifications.canPostNotifications(context),
+        stepPreferenceMessage = stepPreferenceMessage,
+        waterPreferenceMessage = waterPreferenceMessage,
         onOpenGoals = onOpenGoals,
         onManageSupplements = viewModel::openSupplementEditor,
         onExportData = {
@@ -90,6 +139,52 @@ fun ProfileRoute(
         },
         onDeleteAllHealthData = viewModel::requestDeleteAllHealthData,
         onThemeModeChange = viewModel::updateThemeMode,
+        onStepTrackingToggle = { enabled ->
+            when {
+                !enabled -> {
+                    stepPreferenceMessage = null
+                    viewModel.updateStepTrackingEnabled(false)
+                }
+                !hasStepSensor -> {
+                    stepPreferenceMessage = UiText.StringResource(R.string.profile_step_tracking_no_sensor)
+                    viewModel.updateStepTrackingEnabled(false)
+                }
+                context.hasActivityRecognitionPermission() -> {
+                    stepPreferenceMessage = null
+                    viewModel.updateStepTrackingEnabled(true)
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    stepPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                }
+                else -> {
+                    stepPreferenceMessage = null
+                    viewModel.updateStepTrackingEnabled(true)
+                }
+            }
+        },
+        onWaterReminderToggle = { enabled ->
+            when {
+                !enabled -> {
+                    waterPreferenceMessage = null
+                    viewModel.updateWaterReminderSettings(uiState.waterReminderSettings.copy(enabled = false))
+                }
+                HealthNotifications.canPostNotifications(context) -> {
+                    waterPreferenceMessage = null
+                    viewModel.updateWaterReminderSettings(uiState.waterReminderSettings.copy(enabled = true))
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                else -> {
+                    waterPreferenceMessage = null
+                    viewModel.updateWaterReminderSettings(uiState.waterReminderSettings.copy(enabled = true))
+                }
+            }
+        },
+        onWaterReminderSettingsSave = { settings ->
+            waterPreferenceMessage = null
+            viewModel.updateWaterReminderSettings(settings)
+        },
     )
 
     if (uiState.supplementEditor.isVisible) {
@@ -127,12 +222,19 @@ fun ProfileRoute(
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
+    hasStepSensor: Boolean = true,
+    canPostNotifications: Boolean = true,
+    stepPreferenceMessage: UiText? = null,
+    waterPreferenceMessage: UiText? = null,
     onOpenGoals: () -> Unit,
     onManageSupplements: () -> Unit,
     onExportData: () -> Unit,
     onImportData: () -> Unit,
     onDeleteAllHealthData: () -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
+    onStepTrackingToggle: (Boolean) -> Unit = {},
+    onWaterReminderToggle: (Boolean) -> Unit = {},
+    onWaterReminderSettingsSave: (WaterReminderSettings) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier
@@ -212,6 +314,23 @@ fun ProfileContent(
                     }
                 }
             }
+        }
+        item {
+            StepTrackingPreferenceCard(
+                enabled = state.stepTrackingEnabled,
+                hasStepSensor = hasStepSensor,
+                message = stepPreferenceMessage,
+                onToggle = onStepTrackingToggle,
+            )
+        }
+        item {
+            WaterReminderPreferenceCard(
+                settings = state.waterReminderSettings,
+                canPostNotifications = canPostNotifications,
+                message = waterPreferenceMessage,
+                onToggle = onWaterReminderToggle,
+                onSave = onWaterReminderSettingsSave,
+            )
         }
         item {
             HealthCard(
@@ -381,6 +500,201 @@ fun ProfileContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StepTrackingPreferenceCard(
+    enabled: Boolean,
+    hasStepSensor: Boolean,
+    message: UiText?,
+    onToggle: (Boolean) -> Unit,
+) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("profile_step_tracking_card"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.profile_step_tracking_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = when {
+                        !hasStepSensor -> stringResource(R.string.profile_step_tracking_no_sensor)
+                        enabled -> stringResource(R.string.profile_step_tracking_status_on)
+                        else -> stringResource(R.string.profile_step_tracking_status_off)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = stringResource(R.string.profile_step_tracking_helper),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(
+                modifier = Modifier.testTag("profile_step_tracking_toggle"),
+                checked = enabled && hasStepSensor,
+                enabled = hasStepSensor,
+                onCheckedChange = onToggle,
+            )
+        }
+        message?.let {
+            Text(
+                modifier = Modifier.padding(top = HealthSpacing.xs),
+                text = it.asString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WaterReminderPreferenceCard(
+    settings: WaterReminderSettings,
+    canPostNotifications: Boolean,
+    message: UiText?,
+    onToggle: (Boolean) -> Unit,
+    onSave: (WaterReminderSettings) -> Unit,
+) {
+    var startTime by remember(settings) { mutableStateOf(settings.startTime.toString()) }
+    var endTime by remember(settings) { mutableStateOf(settings.endTime.toString()) }
+    var interval by remember(settings) { mutableStateOf(settings.intervalMinutes.toString()) }
+    var formError by remember(settings) { mutableStateOf<UiText?>(null) }
+
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("profile_water_reminder_card"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.profile_water_reminder_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = if (settings.enabled) {
+                        stringResource(R.string.profile_water_reminder_status_on)
+                    } else {
+                        stringResource(R.string.profile_water_reminder_status_off)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(
+                modifier = Modifier.testTag("profile_water_reminder_toggle"),
+                checked = settings.enabled,
+                onCheckedChange = onToggle,
+            )
+        }
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.xs),
+            text = stringResource(R.string.profile_water_reminder_helper),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (settings.enabled && !canPostNotifications) {
+            Text(
+                modifier = Modifier.padding(top = HealthSpacing.xs),
+                text = stringResource(R.string.profile_water_reminder_permission_off),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        message?.let {
+            Text(
+                modifier = Modifier.padding(top = HealthSpacing.xs),
+                text = it.asString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = HealthSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+        ) {
+            HealthPillTextField(
+                modifier = Modifier.weight(1f),
+                value = startTime,
+                onValueChange = { startTime = it },
+                label = stringResource(R.string.profile_goal_start),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+            HealthPillTextField(
+                modifier = Modifier.weight(1f),
+                value = endTime,
+                onValueChange = { endTime = it },
+                label = stringResource(R.string.profile_goal_end),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+        }
+        HealthPillTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = HealthSpacing.xs),
+            value = interval,
+            onValueChange = { interval = it },
+            label = stringResource(R.string.profile_goal_frequency),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = formError != null,
+        )
+        formError?.let {
+            Text(
+                modifier = Modifier.padding(top = HealthSpacing.xs),
+                text = it.asString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        RoundedPillButton(
+            label = stringResource(R.string.common_save),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = HealthSpacing.sm)
+                .testTag("profile_water_reminder_save_button"),
+            containerColor = HealthPrimary.copy(alpha = 0.12f),
+            contentColor = HealthPrimary,
+            onClick = {
+                val parsedStart = startTime.toLocalTimeOrNull()
+                val parsedEnd = endTime.toLocalTimeOrNull()
+                val parsedInterval = interval.toIntOrNull()
+                if (parsedStart == null || parsedEnd == null || parsedInterval == null || parsedInterval <= 0) {
+                    formError = UiText.StringResource(R.string.profile_water_reminder_invalid_settings)
+                    return@RoundedPillButton
+                }
+                formError = null
+                onSave(
+                    settings.copy(
+                        startTime = parsedStart,
+                        endTime = parsedEnd,
+                        intervalMinutes = parsedInterval
+                            .coerceAtLeast(DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES),
+                    ),
+                )
+            },
+        )
     }
 }
 
@@ -662,3 +976,16 @@ private fun DeleteHealthDataConfirmationDialog(
 }
 
 private fun defaultExportFileName(): String = "health_app_export_${LocalDate.now()}.json"
+
+private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.parse(this.trim()) }.getOrNull()
+
+private fun Context.hasActivityRecognitionPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+    ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACTIVITY_RECOGNITION,
+    ) == PackageManager.PERMISSION_GRANTED
+
+private fun Context.hasStepCounterSensor(): Boolean {
+    val sensorManager = getSystemService(SensorManager::class.java)
+    return sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
+}

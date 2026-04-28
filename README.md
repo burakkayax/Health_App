@@ -69,7 +69,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 
 - Android `TYPE_STEP_COUNTER` sensörü ile adım sayımı
 - Foreground service tabanlı takip
-- Profil hedeflerinden kullanıcı açıkça etkinleştirirse arka planda çalışır
+- Profil sekmesinden kullanıcı açıkça etkinleştirirse arka planda çalışır
 - Foreground bildirimindeki “Durdur” aksiyonu ile kapatılabilir
 - Günlük adım hedefi
 - Haftalık ve aylık adım trendleri
@@ -268,6 +268,7 @@ Health_App, local-first bir uygulamadır.
 * Profil > Veri Yönetimi üzerinden kullanıcı kontrollü JSON dışa/içe aktarma desteği vardır; dışa aktarılan dosya hassas sağlık verisi içerir ve kullanıcının seçtiği konuma yazılır.
 * İçe aktarma onay önizlemesiyle çalışır; kullanıcı onay vermeden veritabanına yazma yapılmaz.
 * Tüm sağlık kayıtlarını silme işlemi ayrı onay ister; profil adı, tema, onboarding ve hedef ayarları korunur.
+* Su hatırlatıcı ve adımsayar tercihleri Profil sekmesinden yönetilir; bildirim izni yalnız kullanıcı hatırlatıcıyı açtığında istenir.
 * Su hatırlatıcı bildirimleri yalnız kullanıcı etkinleştirirse ve bildirim izni açıksa gösterilir; bildirimden hızlı su ekleme veya gün sonuna kadar susturma yapılabilir.
 * Bu uygulama tıbbi tavsiye vermez ve tıbbi karar destek sistemi olarak kullanılmamalıdır.
 

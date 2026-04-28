@@ -4,6 +4,19 @@
 
 ### Eklendi
 
+- Profil sekmesine adimsayar ve su hatirlatici tercih kartlari eklendi.
+- Adim detay ekranina adimsayar kapaliyken gosterilen etkinlestirme karti eklendi.
+- Profil ve adim detay tercih kartlari icin Compose test kapsami eklendi.
+
+### Degistirildi
+
+- Hedefleri Duzenle ekrani yalniz hedef/olcu degerlerini duzenleyecek sekilde sadeleştirildi.
+- Su hatirlatici bildirim izni artik uygulama acilisinda otomatik istenmez; yalniz Profil sekmesindeki kullanici aksiyonuyla istenir.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Validation, import/export, ViewModel import/delete state ve adim/su hatirlatici saf fonksiyon testleri genisletildi.
 - Health data import/delete akisi icin in-memory Room instrumentation testleri eklendi.
 - Import duplicate engelleme, tarih bazli replace/upsert, takviye template ID mapping ve delete-all davranisi test kapsamina alindi.

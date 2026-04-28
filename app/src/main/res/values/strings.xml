@@ -131,6 +131,9 @@
     <string name="weight_chart_progress">Hedef ilerleme %1$d%%</string>
     <string name="trends_weight_chart_title">Kilo Trendi</string>
     <string name="trends_weight_chart_subtitle">Başlangıç, hedef ve mevcut kilo birlikte izlenir.</string>
+    <string name="step_tracking_disabled_title">Adımsayar kapalı</string>
+    <string name="step_tracking_disabled_description">Adımsayarı kullanmak için etkinleştirin</string>
+    <string name="step_tracking_enable">Aç</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
     <string name="profile_goals_title">Hedefler</string>
@@ -154,6 +157,18 @@
     <string name="profile_import_data">Verileri i&#231;e aktar</string>
     <string name="profile_import_confirm">&#304;&#231;e aktar</string>
     <string name="profile_delete_all_health_data">T&#252;m verileri sil</string>
+    <string name="profile_step_tracking_title">Adımsayar</string>
+    <string name="profile_step_tracking_status_on">Arka planda adım takibi açık</string>
+    <string name="profile_step_tracking_status_off">Adım takibi kapalı</string>
+    <string name="profile_step_tracking_helper">Foreground service kullanır, bildirim gösterir ve istediğin zaman kapatılabilir.</string>
+    <string name="profile_step_tracking_no_sensor">Bu cihazda adım sayar sensörü bulunamadı</string>
+    <string name="profile_step_tracking_permission_required">Adım takibi için hareket izni gerekiyor</string>
+    <string name="profile_water_reminder_title">Su Hatırlatıcı</string>
+    <string name="profile_water_reminder_status_on">Su hatırlatıcı açık</string>
+    <string name="profile_water_reminder_status_off">Su hatırlatıcı kapalı</string>
+    <string name="profile_water_reminder_helper">WorkManager ile pil dostu çalışır; dakikası dakikasına alarm garantisi vermez.</string>
+    <string name="profile_water_reminder_permission_off">Bildirim izni kapalı olduğu için su hatırlatıcısı gösterilemez.</string>
+    <string name="profile_water_reminder_invalid_settings">Saatleri HH:mm, sıklığı pozitif dakika olarak gir.</string>
     <string name="export_success">Veriler ba&#351;ar&#305;yla d&#305;&#351;a aktar&#305;ld&#305;.</string>
     <string name="export_failed">Veriler d&#305;&#351;a aktar&#305;lamad&#305;. Tekrar dene.</string>
     <string name="export_file_picker_title">D&#305;&#351;a aktarma dosyas&#305;n&#305; se&#231;</string>

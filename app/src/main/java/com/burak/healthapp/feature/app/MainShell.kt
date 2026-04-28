@@ -43,7 +43,6 @@ internal fun MainShell(rootState: RootUiState) {
     val backgroundColor = MaterialTheme.colorScheme.background
 
     StepCounterPermissionEffect(rootState.stepTrackingEnabled)
-    WaterReminderNotificationPermissionEffect(rootState.waterReminderEnabled)
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(

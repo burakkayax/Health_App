@@ -31,7 +31,7 @@ class ProfileGoalsContentTest {
             HealthTheme {
                 ProfileGoalsContent(
                     state = sampleState(),
-                    onSave = { _, _, _, _ -> saveCount++ },
+                    onSave = { _, _, _ -> saveCount++ },
                 )
             }
         }
@@ -47,7 +47,7 @@ class ProfileGoalsContentTest {
             HealthTheme {
                 ProfileGoalsContent(
                     state = sampleState(),
-                    onSave = { _, _, _, _ -> },
+                    onSave = { _, _, _ -> },
                 )
             }
         }
@@ -59,20 +59,21 @@ class ProfileGoalsContentTest {
     }
 
     @Test
-    fun stepGoalAndWaterReminderFields_areVisible() {
+    fun servicePreferenceFields_areNotShownInGoalsEditor() {
         composeRule.setContent {
             HealthTheme {
                 ProfileGoalsContent(
                     state = sampleState(),
-                    onSave = { _, _, _, _ -> },
+                    onSave = { _, _, _ -> },
                 )
             }
         }
 
         composeRule.onNodeWithText("Adım Hedefi").assertIsDisplayed()
         composeRule.onNodeWithTag("profile_goal_step_target_field").assertIsDisplayed()
-        composeRule.onNodeWithText("Su Hatırlatıcısı").assertIsDisplayed()
-        composeRule.onNodeWithText("Sıklık (dk)").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Su Hatırlatıcısı").assertCountEquals(0)
+        composeRule.onAllNodesWithText("Sıklık (dk)").assertCountEquals(0)
+        composeRule.onAllNodesWithText("Adım Takibi").assertCountEquals(0)
     }
 
     @Test
@@ -83,7 +84,7 @@ class ProfileGoalsContentTest {
             HealthTheme {
                 ProfileGoalsContent(
                     state = sampleState(),
-                    onSave = { _, _, _, _ -> saveCount++ },
+                    onSave = { _, _, _ -> saveCount++ },
                 )
             }
         }
@@ -103,7 +104,7 @@ class ProfileGoalsContentTest {
             HealthTheme {
                 ProfileGoalsContent(
                     state = sampleState(),
-                    onSave = { goals, _, _, _ -> savedGoals = goals },
+                    onSave = { goals, _, _ -> savedGoals = goals },
                 )
             }
         }

@@ -131,6 +131,26 @@ class ProfileContentTest {
     }
 
     @Test
+    fun preferenceCards_areVisibleOnProfile() {
+        composeRule.setContent {
+            HealthTheme {
+                ProfileContent(
+                    state = sampleProfileState(),
+                    onOpenGoals = {},
+                    onManageSupplements = {},
+                    onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
+                    onThemeModeChange = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_step_tracking_card").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_water_reminder_card").assertIsDisplayed()
+    }
+
+    @Test
     fun supplementEditor_keepsActionButtonsVisibleForMultipleDrafts() {
         composeRule.setContent {
             HealthTheme {

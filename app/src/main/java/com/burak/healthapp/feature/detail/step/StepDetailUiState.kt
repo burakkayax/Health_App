@@ -17,4 +17,5 @@ data class StepDetailUiState(
     val averageStepsLabel: String,
     val targetLabel: String,
     val hasData: Boolean,
+    val stepTrackingEnabled: Boolean,
 )

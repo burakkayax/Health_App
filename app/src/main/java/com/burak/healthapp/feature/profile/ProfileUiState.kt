@@ -4,6 +4,7 @@ import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.export.HealthDataImportPreview
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.model.WaterReminderSettings
 
 data class ProfileGoalSummaryState(
     val title: UiText,
@@ -59,6 +60,8 @@ data class ProfileUiState(
     val userName: String,
     val avatarInitials: String,
     val themeMode: ThemeMode,
+    val stepTrackingEnabled: Boolean = false,
+    val waterReminderSettings: WaterReminderSettings = WaterReminderSettings(),
     val goalSummaries: List<ProfileGoalSummaryState>,
     val supplementTemplates: List<ProfileSupplementTemplateState>,
     val supplementEditor: SupplementEditorUiState = SupplementEditorUiState(),
