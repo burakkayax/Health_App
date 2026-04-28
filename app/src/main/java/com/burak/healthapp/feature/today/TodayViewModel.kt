@@ -25,10 +25,13 @@ import com.burak.healthapp.feature.today.SupplementCardState
 import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.WeightCardState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -43,8 +46,12 @@ class TodayViewModel(
 
     val uiState = selectedDate
         .flatMapLatest { date ->
-            dashboardRepository.observeToday(date).map(::snapshotToUiState)
+            dashboardRepository.observeToday(date)
+                .map(::snapshotToUiState)
+                .flowOn(Dispatchers.Default)
+                .distinctUntilChanged()
         }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

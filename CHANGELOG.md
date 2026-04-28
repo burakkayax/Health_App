@@ -2,6 +2,14 @@
 
 ## Unreleased - 2026-04-27
 
+### Degistirildi
+
+- Today, Trends, Meal History, Profile ve Step Detail state akislarinda gereksiz ayni state yayinlari azaltildi.
+- Bazi UI mapping islemleri Default dispatcher uzerine alindi.
+- Meal history listesine stable section key eklendi ve ring grid/detail state modellerine Compose immutable ipuclari eklendi.
+
+## Unreleased - 2026-04-27
+
 ### Eklendi
 
 - Profil sekmesine adimsayar ve su hatirlatici tercih kartlari eklendi.

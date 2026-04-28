@@ -17,11 +17,14 @@ import com.burak.healthapp.feature.trends.TrendChartState
 import com.burak.healthapp.feature.trends.TrendsUiState
 import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
 import com.burak.healthapp.feature.trends.WeightTrendChartCardState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.util.Locale
 
@@ -43,7 +46,10 @@ class TrendsViewModel(
                     targetWeightKg = settings.goalSettings.targetWeightKg,
                 )
             }
+                .flowOn(Dispatchers.Default)
+                .distinctUntilChanged()
         }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

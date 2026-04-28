@@ -14,6 +14,7 @@ import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import com.burak.healthapp.feature.root.healthApplication
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -32,17 +33,19 @@ class ProfileGoalsViewModel(
             latestMeasurement = latestMeasurement,
             heightCm = settings.userProfile.heightCm,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ProfileGoalsUiState(
-            userName = "Misafir",
-            avatarInitials = "M",
-            goalSettings = GoalSettings(),
-            latestMeasurement = null,
-            heightCm = null,
-        ),
-    )
+    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ProfileGoalsUiState(
+                userName = "Misafir",
+                avatarInitials = "M",
+                goalSettings = GoalSettings(),
+                latestMeasurement = null,
+                heightCm = null,
+            ),
+        )
 
     fun saveGoalsAndMeasurement(
         goals: GoalSettings,

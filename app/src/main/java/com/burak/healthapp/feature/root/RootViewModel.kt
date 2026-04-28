@@ -10,6 +10,7 @@ import com.burak.healthapp.HealthApplication
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -38,6 +39,7 @@ class RootViewModel(
                 stepTrackingEnabled = settings.stepTrackingEnabled,
             )
         }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

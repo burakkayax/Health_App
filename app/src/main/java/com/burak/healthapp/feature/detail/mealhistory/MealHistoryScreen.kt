@@ -82,7 +82,7 @@ fun MealHistoryContent(
                 }
             }
         } else {
-            items(state.sections) { section ->
+            items(state.sections, key = MealHistorySectionState::title) { section ->
                 MealHistorySection(
                     section = section,
                     onDeleteMeal = onDeleteMeal,

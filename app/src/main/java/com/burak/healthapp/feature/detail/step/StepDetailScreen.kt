@@ -68,6 +68,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -84,6 +85,7 @@ class StepDetailViewModel(
     private val selectedPeriod = MutableStateFlow(TrendsPeriod.WEEKLY)
 
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
+        .distinctUntilChanged()
         .flatMapLatest { (date, period) ->
             val displayDays = if (period == TrendsPeriod.WEEKLY) {
                 (6L downTo 0L).map(date::minusDays)
@@ -103,7 +105,9 @@ class StepDetailViewModel(
                     stepTrackingEnabled = settings.stepTrackingEnabled,
                 )
             }
+                .distinctUntilChanged()
         }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -454,7 +458,6 @@ internal fun buildStepMonthRingDays(
     val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
     val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
     val target = targetSteps.toFloat().coerceAtLeast(1f)
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
 
     return (0 until dayCount).map { offset ->
         val date = gridStart.plusDays(offset.toLong())
@@ -467,12 +470,17 @@ internal fun buildStepMonthRingDays(
             hasData = steps > 0,
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = steps > 0 && progress >= 1f,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(stepMonthDateFormatter),
             valueLabel = "$steps adım",
             isToday = date == LocalDate.now(),
         )
     }
 }
+
+private val stepMonthDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM",
+    Locale.forLanguageTag("tr"),
+)
 
 private fun LocalDate.toWeekLabel(): String = when (dayOfWeek.value) {
     1 -> "P"

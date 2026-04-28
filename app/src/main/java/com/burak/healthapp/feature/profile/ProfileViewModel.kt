@@ -37,6 +37,7 @@ import com.burak.healthapp.feature.root.healthApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -81,19 +82,21 @@ class ProfileViewModel(
             supplementEditor = editor,
             exportState = export,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ProfileUiState(
-            userName = "Misafir",
-            avatarInitials = "M",
-            themeMode = ThemeMode.SYSTEM,
-            goalSummaries = emptyList(),
-            supplementTemplates = emptyList(),
-            supplementEditor = SupplementEditorUiState(),
-            exportState = ProfileExportUiState(),
-        ),
-    )
+    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ProfileUiState(
+                userName = "Misafir",
+                avatarInitials = "M",
+                themeMode = ThemeMode.SYSTEM,
+                goalSummaries = emptyList(),
+                supplementTemplates = emptyList(),
+                supplementEditor = SupplementEditorUiState(),
+                exportState = ProfileExportUiState(),
+            ),
+        )
 
     fun openSupplementEditor() {
         val drafts = latestTemplates.map { template ->
