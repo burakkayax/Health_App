@@ -11,6 +11,7 @@
     <string name="common_off">Kapalı</string>
     <string name="common_not_added">Eklenmedi</string>
     <string name="common_not_set">Ayarlanmadı</string>
+    <string name="common_empty_dash">--</string>
     <string name="common_weekly">Haftalık</string>
     <string name="common_monthly">Aylık</string>
     <string name="common_today">Bugün</string>
@@ -154,6 +155,15 @@
     <string name="step_tracking_disabled_title">Adım takibi kapalı</string>
     <string name="step_tracking_disabled_description">Adım takibini etkinleştirmek için aç</string>
     <string name="step_tracking_enable">Aç</string>
+    <string name="step_detail_statistics_title">Adım İstatistikleri</string>
+    <string name="step_detail_daily_target_format">Günlük hedef %1$d adım</string>
+    <string name="step_detail_steps_format">%1$d adım</string>
+    <string name="step_detail_no_data">Bu dönem için henüz adım verisi yok.</string>
+    <string name="step_detail_total_steps">Toplam Adım</string>
+    <string name="step_detail_average_steps">Ortalama Adım</string>
+    <string name="step_detail_last_7_days">Son 7 gün</string>
+    <string name="step_detail_last_30_days">Son 30 gün</string>
+    <string name="step_detail_logged_days_subtitle">Kayıt olan günlere göre</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
     <string name="profile_goals_title">Hedefler</string>
@@ -164,6 +174,7 @@
     <string name="profile_theme_system">Sistem</string>
     <string name="profile_supplements_title">Takviyeler</string>
     <string name="profile_empty_supplements">Henüz takviye eklenmedi.</string>
+    <string name="profile_supplement_summary_format">%1$s • %2$s</string>
     <string name="profile_supplements_sheet_title">Takviyeleri Yönet</string>
     <string name="profile_supplements_sheet_helper">Ad, günlük hedef doz ve birim bilgisini buradan düzenleyebilirsin.</string>
     <string name="profile_supplement_name">Takviye Adı</string>

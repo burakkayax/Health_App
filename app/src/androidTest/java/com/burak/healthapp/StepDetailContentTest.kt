@@ -56,9 +56,9 @@ class StepDetailContentTest {
         selectedPeriod = TrendsPeriod.WEEKLY,
         bars = emptyList(),
         monthDays = emptyList(),
-        totalStepsLabel = "0 adım",
-        averageStepsLabel = "0 adım",
-        targetLabel = "8000 adım",
+        totalSteps = 0,
+        averageSteps = 0,
+        targetSteps = 8000,
         hasData = false,
         stepTrackingEnabled = stepTrackingEnabled,
     )

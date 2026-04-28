@@ -239,20 +239,20 @@ fun StepDetailContent(
                     .testTag("step_detail_chart_card"),
             ) {
                 Text(
-                    text = "Adım İstatistikleri",
+                    text = stringResource(R.string.step_detail_statistics_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     modifier = Modifier.padding(top = HealthSpacing.xs),
-                    text = "Günlük hedef ${state.targetLabel}",
+                    text = stringResource(R.string.step_detail_daily_target_format, state.targetSteps),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (!state.hasData) {
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.sm),
-                        text = "Bu dönem için henüz adım verisi yok.",
+                        text = stringResource(R.string.step_detail_no_data),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -278,17 +278,21 @@ fun StepDetailContent(
         item {
             InsightCard(
                 modifier = Modifier.fillMaxWidth(),
-                title = "Toplam Adım",
-                value = state.totalStepsLabel,
-                subtitle = if (state.selectedPeriod == TrendsPeriod.WEEKLY) "Son 7 gün" else "Son 30 gün",
+                title = stringResource(R.string.step_detail_total_steps),
+                value = stringResource(R.string.step_detail_steps_format, state.totalSteps),
+                subtitle = if (state.selectedPeriod == TrendsPeriod.WEEKLY) {
+                    stringResource(R.string.step_detail_last_7_days)
+                } else {
+                    stringResource(R.string.step_detail_last_30_days)
+                },
             )
         }
         item {
             InsightCard(
                 modifier = Modifier.fillMaxWidth(),
-                title = "Ortalama Adım",
-                value = state.averageStepsLabel,
-                subtitle = "Kayıt olan günlere göre",
+                title = stringResource(R.string.step_detail_average_steps),
+                value = stringResource(R.string.step_detail_steps_format, state.averageSteps),
+                subtitle = stringResource(R.string.step_detail_logged_days_subtitle),
             )
         }
     }
@@ -360,7 +364,11 @@ private fun StepBarChart(
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = if (bar.steps == 0) "--" else bar.steps.toString(),
+                    text = if (bar.steps == 0) {
+                        stringResource(R.string.common_empty_dash)
+                    } else {
+                        stringResource(R.string.step_detail_steps_format, bar.steps)
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -428,9 +436,9 @@ private fun List<StepEntry>.toStepDetailUiState(
         } else {
             emptyList()
         },
-        totalStepsLabel = "$totalSteps adım",
-        averageStepsLabel = "$averageSteps adım",
-        targetLabel = "$targetSteps adım",
+        totalSteps = totalSteps,
+        averageSteps = averageSteps,
+        targetSteps = targetSteps,
         hasData = loggedEntries.any { it.steps > 0 },
         stepTrackingEnabled = stepTrackingEnabled,
     )
@@ -440,9 +448,9 @@ private fun emptyStepDetailUiState(): StepDetailUiState = StepDetailUiState(
     selectedPeriod = TrendsPeriod.WEEKLY,
     bars = emptyList(),
     monthDays = emptyList(),
-    totalStepsLabel = "0 adım",
-    averageStepsLabel = "0 adım",
-    targetLabel = "${DefaultHealthGoals.DAILY_STEPS} adım",
+    totalSteps = 0,
+    averageSteps = 0,
+    targetSteps = DefaultHealthGoals.DAILY_STEPS,
     hasData = false,
     stepTrackingEnabled = false,
 )

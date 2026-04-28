@@ -34,6 +34,7 @@ import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayContent
 import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.WeightCardState
+import com.burak.healthapp.feature.today.components.SupplementsCard
 import com.burak.healthapp.feature.today.meal.MealDraftFoodState
 import com.burak.healthapp.feature.today.meal.MealEditorUiState
 import org.junit.Assert.assertEquals
@@ -262,6 +263,55 @@ class TodayContentTest {
         composeRule.onNodeWithTag("supplements_add_button").performClick()
         composeRule.onNodeWithText("Takviye Dozu Ekle").assertIsDisplayed()
         composeRule.onNodeWithText("D3 Vitamini").assertIsDisplayed()
+    }
+
+    @Test
+    fun supplementsCard_emptyItemsShowsEmptyText() {
+        composeRule.setContent {
+            HealthTheme {
+                SupplementsCard(
+                    items = emptyList(),
+                    onAdd = {},
+                    onDeleteDose = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.today_empty_supplements)).assertIsDisplayed()
+        composeRule.onAllNodesWithTag("supplements_centered_row").assertCountEquals(0)
+        composeRule.onAllNodesWithTag("supplements_lazy_row").assertCountEquals(0)
+    }
+
+    @Test
+    fun supplementsCard_oneOrTwoItemsUseCenteredRow() {
+        composeRule.setContent {
+            HealthTheme {
+                SupplementsCard(
+                    items = sampleSupplementItems().take(2),
+                    onAdd = {},
+                    onDeleteDose = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("supplements_centered_row").assertIsDisplayed()
+        composeRule.onAllNodesWithTag("supplements_lazy_row").assertCountEquals(0)
+    }
+
+    @Test
+    fun supplementsCard_threeOrMoreItemsUseLazyRow() {
+        composeRule.setContent {
+            HealthTheme {
+                SupplementsCard(
+                    items = sampleSupplementItems(),
+                    onAdd = {},
+                    onDeleteDose = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("supplements_lazy_row").assertIsDisplayed()
+        composeRule.onAllNodesWithTag("supplements_centered_row").assertCountEquals(0)
     }
 
     @Test
@@ -586,6 +636,12 @@ class TodayContentTest {
         composeRule.onNodeWithTag("today_list").performScrollToNode(hasTestTag("supplements_card"))
         composeRule.onNodeWithTag("supplements_card").assertIsDisplayed()
     }
+
+    private fun sampleSupplementItems(): List<SupplementItemState> = listOf(
+        SupplementItemState(1, "D3 Vitamini", 25f, 25f, "mcg", 1f),
+        SupplementItemState(2, "Omega 3", 600f, 1000f, "mg", 0.6f),
+        SupplementItemState(3, "Magnezyum", 200f, 300f, "mg", 0.66f),
+    )
 
     private fun sampleTodayState(): TodayUiState {
         val goals = GoalSettings()

@@ -1,5 +1,13 @@
 # Changelog
 
+## PR16.4 - Profile and Localization Micro Polish
+
+### Değiştirildi
+
+- Step detail ekranındaki kullanıcı metinleri string resource yapısına taşındı.
+- Profil ekranındaki büyük componentler daha küçük dosyalara ayrıldı.
+- Dashboard customization ve takviyeler kartı test kapsamı güçlendirildi.
+
 ## PR16.3 - Live Drag Reorder for Dashboard Customization
 
 ### Değiştirildi

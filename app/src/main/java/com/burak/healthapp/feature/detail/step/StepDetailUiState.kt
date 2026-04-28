@@ -16,9 +16,9 @@ data class StepDetailUiState(
     val selectedPeriod: TrendsPeriod,
     val bars: List<StepBarState>,
     val monthDays: List<MetricDayRingState>,
-    val totalStepsLabel: String,
-    val averageStepsLabel: String,
-    val targetLabel: String,
+    val totalSteps: Int,
+    val averageSteps: Int,
+    val targetSteps: Int,
     val hasData: Boolean,
     val stepTrackingEnabled: Boolean,
 )
