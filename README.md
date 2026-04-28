@@ -40,7 +40,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Takviye/doz takibi
 - Kilo ve vücut ölçüsü takibi
 - Günlük adım takibi
-- Ana ekran kartlarını göster/gizle ve sıralama desteği
+- Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Su, Uyku, Sigara, Takviyeler)
 
 ### Beslenme ve makro takibi
 
@@ -213,7 +213,7 @@ Uygulama genelinde kullanılan altyapı bileşenlerini içerir.
 * Navigation destination tanımları
 * Bildirim altyapısı
 * WorkManager hatırlatıcıları
-* Adım sayar foreground service
+* Adım takibi foreground service
 * DataStore kurulumu
 * Manuel dependency container
 
@@ -269,7 +269,7 @@ Health_App, local-first bir uygulamadır.
 * Profil > Veri Yönetimi üzerinden kullanıcı kontrollü JSON dışa/içe aktarma desteği vardır; dışa aktarılan dosya hassas sağlık verisi içerir ve kullanıcının seçtiği konuma yazılır.
 * İçe aktarma onay önizlemesiyle çalışır; kullanıcı onay vermeden veritabanına yazma yapılmaz.
 * Tüm sağlık kayıtlarını silme işlemi ayrı onay ister; profil adı, tema, onboarding ve hedef ayarları korunur.
-* Su hatırlatıcı ve adımsayar tercihleri Profil sekmesinden yönetilir; bildirim izni yalnız kullanıcı hatırlatıcıyı açtığında istenir.
+* Su hatırlatıcı ve adım takibi tercihleri Profil sekmesinden yönetilir; bildirim izni yalnız kullanıcı hatırlatıcıyı açtığında istenir.
 * Su hatırlatıcı bildirimleri yalnız kullanıcı etkinleştirirse ve bildirim izni açıksa gösterilir; bildirimden hızlı su ekleme veya gün sonuna kadar susturma yapılabilir.
 * Bu uygulama tıbbi tavsiye vermez ve tıbbi karar destek sistemi olarak kullanılmamalıdır.
 

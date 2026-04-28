@@ -68,7 +68,7 @@ class MealHistoryViewModel(
 internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState = MealHistoryUiState(
     sections = groupMealsByType(entries).map { groupedMeal ->
         MealHistorySectionState(
-            title = groupedMeal.mealType.label,
+            titleResId = groupedMeal.mealType.labelResId,
             entries = groupedMeal.entries.map { mealEntry ->
                 MealHistoryEntryState(
                     id = mealEntry.id,

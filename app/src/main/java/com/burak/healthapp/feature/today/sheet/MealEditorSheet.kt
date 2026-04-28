@@ -76,7 +76,7 @@ internal fun MealEditorSheet(
                     FilterChip(
                         selected = state.mealType == mealType,
                         onClick = { onMealTypeChange(mealType) },
-                        label = { Text(mealType.label) },
+                        label = { Text(stringResource(mealType.labelResId)) },
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.burak.healthapp.feature.detail.mealhistory
 
+import androidx.annotation.StringRes
 import com.burak.healthapp.domain.model.MealType
 
 data class MealHistoryEntryState(
@@ -13,7 +14,7 @@ data class MealHistoryEntryState(
 )
 
 data class MealHistorySectionState(
-    val title: String,
+    @StringRes val titleResId: Int,
     val entries: List<MealHistoryEntryState>,
 )
 

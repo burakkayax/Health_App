@@ -39,7 +39,7 @@
     <string name="route_today_meals">Bugünün Öğünleri</string>
     <string name="route_date_meals">%1$s Öğünleri</string>
 
-    <string name="notification_channel_steps_name">Adım sayar</string>
+    <string name="notification_channel_steps_name">Adım takibi</string>
     <string name="notification_channel_steps_description">Adım sayımının arka planda çalışması için kullanılır.</string>
     <string name="notification_channel_water_name">Su hatırlatıcıları</string>
     <string name="notification_channel_water_description">Su içme hedefini hatırlatır.</string>
@@ -69,7 +69,7 @@
     <string name="today_title_meals">Bugünün Öğünleri</string>
     <string name="today_title_weight">Kilo</string>
     <string name="today_title_exercise">Egzersiz</string>
-    <string name="today_title_steps">Adım Sayar</string>
+    <string name="today_title_steps">Adım</string>
     <string name="today_title_hydration">Su Tüketimi</string>
     <string name="today_title_sleep">Uyku Takibi</string>
     <string name="today_title_smoking">Sigara</string>
@@ -109,6 +109,11 @@
     <string name="dashboard_customize_reset">Varsayılana dön</string>
     <string name="dashboard_move_up">Yukarı</string>
     <string name="dashboard_move_down">Aşağı</string>
+    <string name="dashboard_drag_handle">Sıralamak için basılı tut</string>
+    <string name="meal_type_breakfast">Kahvaltı</string>
+    <string name="meal_type_lunch">Öğle</string>
+    <string name="meal_type_dinner">Akşam</string>
+    <string name="meal_type_snack">Ara Öğün</string>
     <string name="dashboard_empty_title">Henüz gösterilecek kart yok.</string>
     <string name="dashboard_empty_helper">Özelleştir’den kart ekleyebilirsin.</string>
     <string name="dashboard_card_nutrition">Beslenme</string>
@@ -146,8 +151,8 @@
     <string name="weight_chart_progress">Hedef ilerleme %1$d%%</string>
     <string name="trends_weight_chart_title">Kilo Trendi</string>
     <string name="trends_weight_chart_subtitle">Başlangıç, hedef ve mevcut kilo birlikte izlenir.</string>
-    <string name="step_tracking_disabled_title">Adımsayar kapalı</string>
-    <string name="step_tracking_disabled_description">Adımsayarı kullanmak için etkinleştirin</string>
+    <string name="step_tracking_disabled_title">Adım takibi kapalı</string>
+    <string name="step_tracking_disabled_description">Adım takibini etkinleştirmek için aç</string>
     <string name="step_tracking_enable">Aç</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
@@ -172,7 +177,7 @@
     <string name="profile_import_data">Verileri i&#231;e aktar</string>
     <string name="profile_import_confirm">&#304;&#231;e aktar</string>
     <string name="profile_delete_all_health_data">T&#252;m verileri sil</string>
-    <string name="profile_step_tracking_title">Adımsayar</string>
+    <string name="profile_step_tracking_title">Adım Takibi</string>
     <string name="profile_step_tracking_status_on">Arka planda adım takibi açık</string>
     <string name="profile_step_tracking_status_off">Adım takibi kapalı</string>
     <string name="profile_step_tracking_helper">Foreground service kullanır, bildirim gösterir ve istediğin zaman kapatılabilir.</string>

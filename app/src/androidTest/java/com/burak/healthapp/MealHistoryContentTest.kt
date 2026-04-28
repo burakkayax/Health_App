@@ -33,7 +33,7 @@ class MealHistoryContentTest {
 
         composeRule.onNodeWithText("Kahvaltı").assertIsDisplayed()
         composeRule.onNodeWithText("Omlet").assertIsDisplayed()
-        composeRule.onNodeWithText("AkÅŸam").assertIsDisplayed()
+        composeRule.onNodeWithText("Akşam").assertIsDisplayed()
         composeRule.onNodeWithText("Somon").assertIsDisplayed()
     }
 
@@ -57,7 +57,7 @@ class MealHistoryContentTest {
     private fun sampleMealHistoryState(): MealHistoryUiState = MealHistoryUiState(
         sections = listOf(
             MealHistorySectionState(
-                title = "Kahvaltı",
+                titleResId = R.string.meal_type_breakfast,
                 entries = listOf(
                     MealHistoryEntryState(
                         id = 1,
@@ -71,7 +71,7 @@ class MealHistoryContentTest {
                 ),
             ),
             MealHistorySectionState(
-                title = "AkÅŸam",
+                titleResId = R.string.meal_type_dinner,
                 entries = listOf(
                     MealHistoryEntryState(
                         id = 2,

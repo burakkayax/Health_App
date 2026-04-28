@@ -1,31 +1,46 @@
 package com.burak.healthapp.feature.today
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.RoundedPillButton
@@ -382,6 +397,9 @@ private fun DashboardCustomizationSheet(
     onMove: (DashboardCardType, Int) -> Unit,
     onReset: () -> Unit,
 ) {
+    var localCards by remember(cards) { mutableStateOf(cards) }
+    var draggingIndex by remember { mutableStateOf(-1) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -394,33 +412,53 @@ private fun DashboardCustomizationSheet(
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        cards.forEachIndexed { index, config ->
-            HealthCard(modifier = Modifier.fillMaxWidth()) {
+        localCards.forEachIndexed { index, config ->
+            val isDragging = draggingIndex == index
+            val scale by animateFloatAsState(
+                targetValue = if (isDragging) 1.04f else 1f,
+                label = "drag_scale",
+            )
+            val elevation by animateDpAsState(
+                targetValue = if (isDragging) 6.dp else 0.dp,
+                label = "drag_elevation",
+            )
+
+            HealthCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        shadowElevation = elevation.toPx()
+                    },
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    DragHandle(
+                        index = index,
+                        lastIndex = localCards.lastIndex,
+                        onDragStarted = { draggingIndex = it },
+                        onDragEnded = { fromIndex, toIndex ->
+                            draggingIndex = -1
+                            if (fromIndex != toIndex) {
+                                val item = localCards[fromIndex]
+                                val mutable = localCards.toMutableList()
+                                mutable.removeAt(fromIndex)
+                                mutable.add(toIndex.coerceIn(0, mutable.size), item)
+                                localCards = mutable
+                                onMove(item.type, toIndex)
+                            }
+                        },
+                    )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = config.type.label(),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                    }
-                    TextButton(
-                        enabled = index > 0,
-                        modifier = Modifier.testTag("dashboard_card_up_${config.type.name}"),
-                        onClick = { onMove(config.type, index - 1) },
-                    ) {
-                        Text(text = stringResource(R.string.dashboard_move_up))
-                    }
-                    TextButton(
-                        enabled = index < cards.lastIndex,
-                        modifier = Modifier.testTag("dashboard_card_down_${config.type.name}"),
-                        onClick = { onMove(config.type, index + 1) },
-                    ) {
-                        Text(text = stringResource(R.string.dashboard_move_down))
                     }
                     Switch(
                         modifier = Modifier.testTag("dashboard_card_switch_${config.type.name}"),
@@ -441,6 +479,70 @@ private fun DashboardCustomizationSheet(
 }
 
 @Composable
+private fun DragHandle(
+    index: Int,
+    lastIndex: Int,
+    onDragStarted: (Int) -> Unit,
+    onDragEnded: (fromIndex: Int, toIndex: Int) -> Unit,
+) {
+    val haptic = LocalHapticFeedback.current
+    var accumulatedDrag by remember { mutableFloatStateOf(0f) }
+    val itemHeight = 72f
+
+    Column(
+        modifier = Modifier
+            .size(width = 24.dp, height = 24.dp)
+            .testTag("dashboard_drag_handle_${index}")
+            .pointerInput(index, lastIndex) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = {
+                        accumulatedDrag = 0f
+                        onDragStarted(index)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    onDragEnd = {
+                        val steps = (accumulatedDrag / itemHeight).toInt()
+                        val targetIndex = (index + steps).coerceIn(0, lastIndex)
+                        onDragEnded(index, targetIndex)
+                    },
+                    onDragCancel = {
+                        onDragEnded(index, index)
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        accumulatedDrag += dragAmount.y
+                    },
+                )
+            },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            Modifier
+                .semantics {
+                    contentDescription = ""
+                }
+                .width(20.dp)
+                .height(2.dp)
+                .background(
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    RoundedCornerShape(1.dp),
+                ),
+        )
+        Spacer(Modifier.height(4.dp))
+        Box(
+            Modifier
+                .width(20.dp)
+                .height(2.dp)
+                .background(
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    RoundedCornerShape(1.dp),
+                ),
+        )
+    }
+}
+
+@Composable
 private fun DashboardCardType.label(): String = when (this) {
     DashboardCardType.NUTRITION -> stringResource(R.string.dashboard_card_nutrition)
     DashboardCardType.WEIGHT -> stringResource(R.string.dashboard_card_weight)
@@ -451,3 +553,4 @@ private fun DashboardCardType.label(): String = when (this) {
     DashboardCardType.SUPPLEMENTS -> stringResource(R.string.dashboard_card_supplements)
     DashboardCardType.STEPS -> stringResource(R.string.dashboard_card_steps)
 }
+

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -82,7 +83,7 @@ fun MealHistoryContent(
                 }
             }
         } else {
-            items(state.sections, key = MealHistorySectionState::title) { section ->
+            items(state.sections, key = MealHistorySectionState::titleResId) { section ->
                 MealHistorySection(
                     section = section,
                     onDeleteMeal = onDeleteMeal,
@@ -99,7 +100,7 @@ private fun MealHistorySection(
 ) {
     HealthCard(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = section.title,
+            text = stringResource(section.titleResId),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
