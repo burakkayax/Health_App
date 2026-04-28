@@ -13,16 +13,22 @@ import com.burak.healthapp.data.local.mapper.toDomain
 import com.burak.healthapp.data.local.mapper.toEntity
 import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardConfig
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.model.defaultDashboardCardConfig
+import com.burak.healthapp.domain.model.sanitizeDashboardCardConfig
 import com.burak.healthapp.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -31,6 +37,9 @@ class SettingsRepositoryImpl(
     private val templateDao: SupplementTemplateDao,
     private val measurementDao: BodyMeasurementDao,
 ) : SettingsRepository {
+    private val json = Json { ignoreUnknownKeys = true }
+    private val dashboardCardConfigSerializer = ListSerializer(DashboardCardConfig.serializer())
+
     override val settings: Flow<SettingsState> = dataStore.data.map { preferences ->
         val legacySleepTarget = preferences[SettingsKeys.sleepTarget] ?: DefaultHealthGoals.LEGACY_SLEEP_TARGET_MINUTES
         val fallbackSleepSchedule = deriveSleepScheduleFromLegacy(legacySleepTarget)
@@ -74,6 +83,9 @@ class SettingsRepositoryImpl(
             ),
             waterReminderSnoozedDate = preferences[SettingsKeys.waterReminderSnoozedDate]?.let(LocalDate::parse),
             stepTrackingEnabled = preferences[SettingsKeys.stepTrackingEnabled] ?: false,
+            dashboardCards = preferences[SettingsKeys.dashboardCardConfig]
+                ?.let(::decodeDashboardCardConfig)
+                ?: defaultDashboardCardConfig(),
             themeMode = ThemeMode.entries.firstOrNull { mode ->
                 mode.name == preferences[SettingsKeys.themeMode]
             } ?: ThemeMode.SYSTEM,
@@ -149,6 +161,32 @@ class SettingsRepositoryImpl(
         }
     }
 
+    override suspend fun updateDashboardCardVisibility(
+        type: DashboardCardType,
+        isVisible: Boolean,
+    ) {
+        val updated = settings.first().dashboardCards.map { config ->
+            if (config.type == type) config.copy(isVisible = isVisible) else config
+        }
+        saveDashboardCardConfig(updated)
+    }
+
+    override suspend fun moveDashboardCard(type: DashboardCardType, newIndex: Int) {
+        val current = settings.first().dashboardCards
+            .sortedBy(DashboardCardConfig::sortOrder)
+            .toMutableList()
+        val currentIndex = current.indexOfFirst { it.type == type }
+        if (currentIndex == -1) return
+
+        val item = current.removeAt(currentIndex)
+        current.add(newIndex.coerceIn(0, current.size), item)
+        saveDashboardCardConfig(current)
+    }
+
+    override suspend fun resetDashboardCardsToDefault() {
+        saveDashboardCardConfig(defaultDashboardCardConfig())
+    }
+
     override suspend fun updateProfile(profile: UserProfile) {
         dataStore.edit { preferences ->
             preferences[SettingsKeys.userName] = profile.name
@@ -214,6 +252,19 @@ class SettingsRepositoryImpl(
 
         if (deactivateIds.isNotEmpty()) {
             templateDao.deactivate(deactivateIds)
+        }
+    }
+
+    private fun decodeDashboardCardConfig(raw: String): List<DashboardCardConfig>? = runCatching {
+        sanitizeDashboardCardConfig(json.decodeFromString(dashboardCardConfigSerializer, raw))
+    }.getOrNull()
+
+    private suspend fun saveDashboardCardConfig(config: List<DashboardCardConfig>) {
+        val sanitized = sanitizeDashboardCardConfig(
+            config.mapIndexed { index, item -> item.copy(sortOrder = index) },
+        )
+        dataStore.edit { preferences ->
+            preferences[SettingsKeys.dashboardCardConfig] = json.encodeToString(dashboardCardConfigSerializer, sanitized)
         }
     }
 }

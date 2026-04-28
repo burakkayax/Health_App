@@ -28,6 +28,7 @@ import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SettingsState
@@ -240,6 +241,18 @@ private class RecordingManagementSettingsRepository : SettingsRepository {
     override suspend fun updateStepTrackingEnabled(enabled: Boolean) {
         state.value = state.value.copy(stepTrackingEnabled = enabled)
     }
+
+    override suspend fun updateDashboardCardVisibility(
+        type: DashboardCardType,
+        isVisible: Boolean,
+    ) = Unit
+
+    override suspend fun moveDashboardCard(
+        type: DashboardCardType,
+        newIndex: Int,
+    ) = Unit
+
+    override suspend fun resetDashboardCardsToDefault() = Unit
 
     override suspend fun updateProfile(profile: UserProfile) {
         state.value = state.value.copy(userProfile = profile)

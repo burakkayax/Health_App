@@ -1,11 +1,13 @@
 package com.burak.healthapp.feature.today
 
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
+import com.burak.healthapp.domain.model.defaultDashboardCardConfig
 
 data class MacroRingState(
     val label: String,
@@ -110,4 +112,5 @@ data class TodayUiState(
     val smoking: SmokingCardState,
     val steps: StepCardState,
     val supplements: SupplementCardState,
+    val dashboardCards: List<DashboardCardConfig> = defaultDashboardCardConfig(),
 )

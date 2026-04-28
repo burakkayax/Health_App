@@ -40,6 +40,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Takviye/doz takibi
 - Kilo ve vücut ölçüsü takibi
 - Günlük adım takibi
+- Ana ekran kartlarını göster/gizle ve sıralama desteği
 
 ### Beslenme ve makro takibi
 

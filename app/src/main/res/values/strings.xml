@@ -104,6 +104,21 @@
     <string name="today_format_target_ml">/ %1$d ml</string>
     <string name="today_format_quick_add_ml">+%1$d ml</string>
     <string name="today_format_supplement_amount">%1$s/%2$s%3$s</string>
+    <string name="today_customize_dashboard">Özelleştir</string>
+    <string name="dashboard_customize_title">Kartları Özelleştir</string>
+    <string name="dashboard_customize_reset">Varsayılana dön</string>
+    <string name="dashboard_move_up">Yukarı</string>
+    <string name="dashboard_move_down">Aşağı</string>
+    <string name="dashboard_empty_title">Henüz gösterilecek kart yok.</string>
+    <string name="dashboard_empty_helper">Özelleştir’den kart ekleyebilirsin.</string>
+    <string name="dashboard_card_nutrition">Beslenme</string>
+    <string name="dashboard_card_weight">Kilo</string>
+    <string name="dashboard_card_hydration">Su</string>
+    <string name="dashboard_card_sleep">Uyku</string>
+    <string name="dashboard_card_exercise">Egzersiz</string>
+    <string name="dashboard_card_smoking">Sigara</string>
+    <string name="dashboard_card_supplements">Takviyeler</string>
+    <string name="dashboard_card_steps">Adım</string>
 
     <string name="hydration_detail_title">Su Geçmişi</string>
     <string name="hydration_detail_target">Günlük hedef %1$s</string>

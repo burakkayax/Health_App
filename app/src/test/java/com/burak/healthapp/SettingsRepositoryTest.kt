@@ -6,6 +6,7 @@ import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
@@ -156,6 +157,35 @@ class SettingsRepositoryTest {
         repository.updateWaterReminderSnoozedDate(null)
 
         assertEquals(null, repository.settings.first().waterReminderSnoozedDate)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun dashboardCardCustomization_persistsVisibilityMoveAndReset() = runTest {
+        val tempDir = Files.createTempDirectory("health-dashboard-config").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        val repository = SettingsRepositoryImpl(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        repository.updateDashboardCardVisibility(DashboardCardType.HYDRATION, false)
+        repository.moveDashboardCard(DashboardCardType.HYDRATION, 0)
+
+        val customized = repository.settings.first().dashboardCards
+        assertEquals(DashboardCardType.HYDRATION, customized.first().type)
+        assertEquals(false, customized.first().isVisible)
+
+        repository.resetDashboardCardsToDefault()
+
+        val reset = repository.settings.first().dashboardCards
+        assertEquals(DashboardCardType.NUTRITION, reset.first().type)
+        assertEquals(true, reset.first { it.type == DashboardCardType.HYDRATION }.isVisible)
         tempDir.deleteRecursively()
     }
 }

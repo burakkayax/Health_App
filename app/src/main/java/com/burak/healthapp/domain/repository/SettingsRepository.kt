@@ -1,6 +1,7 @@
 package com.burak.healthapp.domain.repository
 
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SupplementTemplate
@@ -29,6 +30,12 @@ interface SettingsRepository {
     suspend fun updateWaterReminderSnoozedDate(date: LocalDate?)
 
     suspend fun updateStepTrackingEnabled(enabled: Boolean)
+
+    suspend fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean)
+
+    suspend fun moveDashboardCard(type: DashboardCardType, newIndex: Int)
+
+    suspend fun resetDashboardCardsToDefault()
 
     suspend fun updateProfile(profile: UserProfile)
 

@@ -21,6 +21,7 @@ import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.TrendsRepositoryImpl
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SettingsState
@@ -556,6 +557,12 @@ private class FakeSettingsRepository : SettingsRepository {
     override suspend fun updateWaterReminderSnoozedDate(date: LocalDate?) = Unit
 
     override suspend fun updateStepTrackingEnabled(enabled: Boolean) = Unit
+
+    override suspend fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean) = Unit
+
+    override suspend fun moveDashboardCard(type: DashboardCardType, newIndex: Int) = Unit
+
+    override suspend fun resetDashboardCardsToDefault() = Unit
 
     override suspend fun updateProfile(profile: UserProfile) = Unit
 

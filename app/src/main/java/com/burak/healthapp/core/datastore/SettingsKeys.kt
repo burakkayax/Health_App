@@ -29,6 +29,7 @@ object SettingsKeys {
     val waterReminderIntervalMinutes = intPreferencesKey("water_reminder_interval_minutes")
     val waterReminderSnoozedDate = stringPreferencesKey("water_reminder_snoozed_date")
     val stepTrackingEnabled = booleanPreferencesKey("step_tracking_enabled")
+    val dashboardCardConfig = stringPreferencesKey("dashboard_card_config")
     val baselineWeight = floatPreferencesKey("baseline_weight")
     val targetWeight = floatPreferencesKey("target_weight")
     val baselineShoulder = floatPreferencesKey("baseline_shoulder")

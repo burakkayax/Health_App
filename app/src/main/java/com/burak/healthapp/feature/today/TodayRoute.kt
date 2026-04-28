@@ -60,6 +60,9 @@ fun TodayRoute(
             onMealDraftCarbsChange = mealEditorViewModel::updateDraftCarbs,
             onMealDraftFatChange = mealEditorViewModel::updateDraftFat,
             onResetMealEditor = mealEditorViewModel::reset,
+            onDashboardCardVisibilityChange = viewModel::updateDashboardCardVisibility,
+            onMoveDashboardCard = viewModel::moveDashboardCard,
+            onResetDashboardCards = viewModel::resetDashboardCards,
         ),
     )
 }

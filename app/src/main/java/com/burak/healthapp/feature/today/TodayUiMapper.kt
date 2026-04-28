@@ -114,6 +114,7 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
                 )
             },
         ),
+        dashboardCards = snapshot.settings.dashboardCards,
     )
 }
 
@@ -208,6 +209,7 @@ internal fun emptyUiState(): TodayUiState = TodayUiState(
         helperLabel = "Telefon hareket ettikçe otomatik güncellenir.",
     ),
     supplements = SupplementCardState(items = emptyList()),
+    dashboardCards = com.burak.healthapp.domain.model.defaultDashboardCardConfig(),
 )
 
 private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(

@@ -13,6 +13,7 @@ import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.HydrationEntry
@@ -298,6 +299,12 @@ private class FakeProfileSettingsRepository(
     override suspend fun updateWaterReminderSnoozedDate(date: LocalDate?) = Unit
 
     override suspend fun updateStepTrackingEnabled(enabled: Boolean) = Unit
+
+    override suspend fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean) = Unit
+
+    override suspend fun moveDashboardCard(type: DashboardCardType, newIndex: Int) = Unit
+
+    override suspend fun resetDashboardCardsToDefault() = Unit
 
     override suspend fun updateProfile(profile: UserProfile) = Unit
 

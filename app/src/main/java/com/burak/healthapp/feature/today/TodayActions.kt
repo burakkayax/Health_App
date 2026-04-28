@@ -1,5 +1,6 @@
 package com.burak.healthapp.feature.today
 
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.MealType
@@ -34,4 +35,7 @@ data class TodayActions(
     val onMealDraftCarbsChange: (Long, String) -> Unit,
     val onMealDraftFatChange: (Long, String) -> Unit,
     val onResetMealEditor: () -> Unit,
+    val onDashboardCardVisibilityChange: (DashboardCardType, Boolean) -> Unit = { _, _ -> },
+    val onMoveDashboardCard: (DashboardCardType, Int) -> Unit = { _, _ -> },
+    val onResetDashboardCards: () -> Unit = {},
 )

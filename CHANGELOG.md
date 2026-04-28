@@ -2,6 +2,14 @@
 
 ## Unreleased - 2026-04-27
 
+### Eklendi
+
+- Today dashboard kartlari icin DataStore tabanli goster/gizle ve siralama ayari eklendi.
+- Today ekranina kart ozellestirme bottom sheet'i, varsayilana don ve tum kartlar gizliyken empty state eklendi.
+- Dashboard config sanitization, repository persistence ve Compose customization testleri eklendi.
+
+## Unreleased - 2026-04-27
+
 ### Degistirildi
 
 - Today, Trends, Meal History, Profile ve Step Detail state akislarinda gereksiz ayni state yayinlari azaltildi.

@@ -13,11 +13,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
+import com.burak.healthapp.domain.model.defaultDashboardCardConfig
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
@@ -372,6 +374,118 @@ class TodayContentTest {
 
         composeRule.onNodeWithTag("smoking_quick_add_button").performClick()
         assertEquals(true, incremented)
+    }
+
+    @Test
+    fun customizeButton_opensDashboardCustomizationSheet() {
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState(),
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = {},
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("today_list").performScrollToNode(hasTestTag("today_customize_dashboard_button"))
+        composeRule.onNodeWithTag("today_customize_dashboard_button").performClick()
+
+        composeRule.onNodeWithTag("dashboard_customization_sheet").assertIsDisplayed()
+        composeRule.onNodeWithTag("dashboard_card_switch_HYDRATION").assertIsDisplayed()
+    }
+
+    @Test
+    fun hiddenDashboardCard_isNotRendered() {
+        val hiddenHydration = defaultDashboardCardConfig().map { config ->
+            if (config.type == DashboardCardType.HYDRATION) config.copy(isVisible = false) else config
+        }
+
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState().copy(dashboardCards = hiddenHydration),
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = {},
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onAllNodesWithTag("hydration_card").assertCountEquals(0)
+    }
+
+    @Test
+    fun allHiddenDashboardCards_showEmptyState() {
+        val allHidden = defaultDashboardCardConfig().map { config -> config.copy(isVisible = false) }
+
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState().copy(dashboardCards = allHidden),
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = {},
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("dashboard_empty_state").assertIsDisplayed()
     }
 
     @Test

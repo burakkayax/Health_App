@@ -3,21 +3,36 @@ package com.burak.healthapp.feature.today
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.components.HealthCard
+import com.burak.healthapp.core.ui.components.RoundedPillButton
+import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.model.DashboardCardConfig
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.MealType
@@ -50,6 +65,7 @@ private sealed interface TodaySheet {
     data object Weight : TodaySheet
     data object Smoking : TodaySheet
     data object SupplementDose : TodaySheet
+    data object CustomizeDashboard : TodaySheet
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,6 +104,9 @@ fun TodayContent(
         onMealDraftCarbsChange = actions.onMealDraftCarbsChange,
         onMealDraftFatChange = actions.onMealDraftFatChange,
         onResetMealEditor = actions.onResetMealEditor,
+        onDashboardCardVisibilityChange = actions.onDashboardCardVisibilityChange,
+        onMoveDashboardCard = actions.onMoveDashboardCard,
+        onResetDashboardCards = actions.onResetDashboardCards,
     )
 }
 
@@ -122,8 +141,13 @@ fun TodayContent(
     onMealDraftCarbsChange: (Long, String) -> Unit,
     onMealDraftFatChange: (Long, String) -> Unit,
     onResetMealEditor: () -> Unit,
+    onDashboardCardVisibilityChange: (DashboardCardType, Boolean) -> Unit = { _, _ -> },
+    onMoveDashboardCard: (DashboardCardType, Int) -> Unit = { _, _ -> },
+    onResetDashboardCards: () -> Unit = {},
 ) {
     var activeSheet by remember { mutableStateOf<TodaySheet?>(null) }
+    val orderedCards = state.dashboardCards.sortedBy(DashboardCardConfig::sortOrder)
+    val visibleCards = orderedCards.filter(DashboardCardConfig::isVisible)
 
     Box(
         modifier = Modifier
@@ -142,62 +166,70 @@ fun TodayContent(
             ),
             verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
         ) {
-            item {
-                NutritionCard(
-                    state = state,
-                    onAddMeal = { activeSheet = TodaySheet.Meal },
-                    onOpenMealHistory = onOpenMealHistory,
-                )
+            if (visibleCards.isEmpty()) {
+                item(key = "empty_dashboard") {
+                    EmptyDashboardCard(onCustomize = { activeSheet = TodaySheet.CustomizeDashboard })
+                }
+            } else {
+                items(
+                    items = visibleCards,
+                    key = { config -> config.type.name },
+                ) { config ->
+                    when (config.type) {
+                        DashboardCardType.NUTRITION -> NutritionCard(
+                            state = state,
+                            onAddMeal = { activeSheet = TodaySheet.Meal },
+                            onOpenMealHistory = onOpenMealHistory,
+                        )
+                        DashboardCardType.WEIGHT -> WeightCard(
+                            state = state,
+                            onAddWeight = { activeSheet = TodaySheet.Weight },
+                            onOpenDetails = onOpenWeightDetail,
+                        )
+                        DashboardCardType.HYDRATION -> HydrationCard(
+                            state = state,
+                            onQuickAdd = onAddHydration,
+                            onMore = { activeSheet = TodaySheet.Hydration },
+                            onOpenDetails = onOpenHydrationDetail,
+                        )
+                        DashboardCardType.SLEEP -> SleepCard(
+                            state = state,
+                            onEdit = { activeSheet = TodaySheet.Sleep },
+                            onOpenDetails = onOpenSleepDetail,
+                            onDeleteSleep = onDeleteSleep,
+                        )
+                        DashboardCardType.EXERCISE -> ExerciseCard(
+                            state = state,
+                            onAddExercise = { activeSheet = TodaySheet.Exercise },
+                            onDeleteExercise = onDeleteExercise,
+                        )
+                        DashboardCardType.SMOKING -> SmokingCard(
+                            state = state,
+                            onAddSmoking = { activeSheet = TodaySheet.Smoking },
+                            onQuickIncrement = onIncrementSmoking,
+                            onDeleteSmoking = onDeleteSmoking,
+                        )
+                        DashboardCardType.SUPPLEMENTS -> SupplementsCard(
+                            items = state.supplements.items,
+                            onAdd = { activeSheet = TodaySheet.SupplementDose },
+                            onDeleteDose = onDeleteSupplementDose,
+                        )
+                        DashboardCardType.STEPS -> StepCard(
+                            state = state,
+                            onOpenDetails = onOpenStepDetail,
+                        )
+                    }
+                }
             }
-            item {
-                WeightCard(
-                    state = state,
-                    onAddWeight = { activeSheet = TodaySheet.Weight },
-                    onOpenDetails = onOpenWeightDetail,
-                )
-            }
-            item {
-                ExerciseCard(
-                    state = state,
-                    onAddExercise = { activeSheet = TodaySheet.Exercise },
-                    onDeleteExercise = onDeleteExercise,
-                )
-            }
-            item {
-                StepCard(
-                    state = state,
-                    onOpenDetails = onOpenStepDetail,
-                )
-            }
-            item {
-                HydrationCard(
-                    state = state,
-                    onQuickAdd = onAddHydration,
-                    onMore = { activeSheet = TodaySheet.Hydration },
-                    onOpenDetails = onOpenHydrationDetail,
-                )
-            }
-            item {
-                SleepCard(
-                    state = state,
-                    onEdit = { activeSheet = TodaySheet.Sleep },
-                    onOpenDetails = onOpenSleepDetail,
-                    onDeleteSleep = onDeleteSleep,
-                )
-            }
-            item {
-                SmokingCard(
-                    state = state,
-                    onAddSmoking = { activeSheet = TodaySheet.Smoking },
-                    onQuickIncrement = onIncrementSmoking,
-                    onDeleteSmoking = onDeleteSmoking,
-                )
-            }
-            item {
-                SupplementsCard(
-                    items = state.supplements.items,
-                    onAdd = { activeSheet = TodaySheet.SupplementDose },
-                    onDeleteDose = onDeleteSupplementDose,
+            item(key = "customize_dashboard") {
+                RoundedPillButton(
+                    label = stringResource(R.string.today_customize_dashboard),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("today_customize_dashboard_button"),
+                    containerColor = HealthPrimary.copy(alpha = 0.12f),
+                    contentColor = HealthPrimary,
+                    onClick = { activeSheet = TodaySheet.CustomizeDashboard },
                 )
             }
         }
@@ -300,6 +332,122 @@ fun TodayContent(
             )
         }
 
+        TodaySheet.CustomizeDashboard -> ModalBottomSheet(onDismissRequest = { activeSheet = null }) {
+            DashboardCustomizationSheet(
+                cards = orderedCards,
+                onVisibilityChange = onDashboardCardVisibilityChange,
+                onMove = onMoveDashboardCard,
+                onReset = onResetDashboardCards,
+            )
+        }
+
         null -> Unit
     }
+}
+
+@Composable
+private fun EmptyDashboardCard(onCustomize: () -> Unit) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("dashboard_empty_state"),
+    ) {
+        Text(
+            text = stringResource(R.string.dashboard_empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.xs),
+            text = stringResource(R.string.dashboard_empty_helper),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        RoundedPillButton(
+            label = stringResource(R.string.today_customize_dashboard),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = HealthSpacing.sm),
+            containerColor = HealthPrimary,
+            contentColor = androidx.compose.ui.graphics.Color.White,
+            onClick = onCustomize,
+        )
+    }
+}
+
+@Composable
+private fun DashboardCustomizationSheet(
+    cards: List<DashboardCardConfig>,
+    onVisibilityChange: (DashboardCardType, Boolean) -> Unit,
+    onMove: (DashboardCardType, Int) -> Unit,
+    onReset: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = HealthSpacing.md, vertical = HealthSpacing.sm)
+            .testTag("dashboard_customization_sheet"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+    ) {
+        Text(
+            text = stringResource(R.string.dashboard_customize_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        cards.forEachIndexed { index, config ->
+            HealthCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = config.type.label(),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                    TextButton(
+                        enabled = index > 0,
+                        modifier = Modifier.testTag("dashboard_card_up_${config.type.name}"),
+                        onClick = { onMove(config.type, index - 1) },
+                    ) {
+                        Text(text = stringResource(R.string.dashboard_move_up))
+                    }
+                    TextButton(
+                        enabled = index < cards.lastIndex,
+                        modifier = Modifier.testTag("dashboard_card_down_${config.type.name}"),
+                        onClick = { onMove(config.type, index + 1) },
+                    ) {
+                        Text(text = stringResource(R.string.dashboard_move_down))
+                    }
+                    Switch(
+                        modifier = Modifier.testTag("dashboard_card_switch_${config.type.name}"),
+                        checked = config.isVisible,
+                        onCheckedChange = { checked -> onVisibilityChange(config.type, checked) },
+                    )
+                }
+            }
+        }
+        RoundedPillButton(
+            label = stringResource(R.string.dashboard_customize_reset),
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            onClick = onReset,
+        )
+    }
+}
+
+@Composable
+private fun DashboardCardType.label(): String = when (this) {
+    DashboardCardType.NUTRITION -> stringResource(R.string.dashboard_card_nutrition)
+    DashboardCardType.WEIGHT -> stringResource(R.string.dashboard_card_weight)
+    DashboardCardType.HYDRATION -> stringResource(R.string.dashboard_card_hydration)
+    DashboardCardType.SLEEP -> stringResource(R.string.dashboard_card_sleep)
+    DashboardCardType.EXERCISE -> stringResource(R.string.dashboard_card_exercise)
+    DashboardCardType.SMOKING -> stringResource(R.string.dashboard_card_smoking)
+    DashboardCardType.SUPPLEMENTS -> stringResource(R.string.dashboard_card_supplements)
+    DashboardCardType.STEPS -> stringResource(R.string.dashboard_card_steps)
 }

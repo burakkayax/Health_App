@@ -9,5 +9,6 @@ data class SettingsState(
     val waterReminderSettings: WaterReminderSettings = WaterReminderSettings(),
     val waterReminderSnoozedDate: LocalDate? = null,
     val stepTrackingEnabled: Boolean = false,
+    val dashboardCards: List<DashboardCardConfig> = defaultDashboardCardConfig(),
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
 )

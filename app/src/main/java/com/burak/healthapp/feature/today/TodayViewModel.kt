@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
@@ -12,6 +13,7 @@ import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
@@ -41,6 +43,7 @@ import java.time.LocalTime
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(
     private val dashboardRepository: DashboardRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
     private val selectedDate = MutableStateFlow(LocalDate.now())
 
@@ -200,11 +203,30 @@ class TodayViewModel(
         }
     }
 
+    fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.updateDashboardCardVisibility(type, isVisible)
+        }
+    }
+
+    fun moveDashboardCard(type: DashboardCardType, newIndex: Int) {
+        viewModelScope.launch {
+            settingsRepository.moveDashboardCard(type, newIndex)
+        }
+    }
+
+    fun resetDashboardCards() {
+        viewModelScope.launch {
+            settingsRepository.resetDashboardCardsToDefault()
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 TodayViewModel(
                     dashboardRepository = healthApplication().container.dashboardRepository,
+                    settingsRepository = healthApplication().container.settingsRepository,
                 )
             }
         }
