@@ -4,6 +4,7 @@ import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.defaultDashboardCardConfig
 import com.burak.healthapp.domain.model.sanitizeDashboardCardConfig
+import com.burak.healthapp.feature.today.reorderDashboardCards
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -82,31 +83,43 @@ class DashboardCardConfigTest {
     }
 
     @Test
-    fun reorderLogic_moveItemFromIndexToIndex() {
-        val cards = defaultDashboardCardConfig().toMutableList()
+    fun reorderLogic_movesFirstItemToLaterIndex() {
+        val cards = reorderDashboardCards(defaultDashboardCardConfig(), fromIndex = 0, toIndex = 3)
 
-        // Move STEPS (index 3) to index 1
-        val item = cards.removeAt(3)
-        cards.add(1, item)
+        assertEquals(DashboardCardType.WEIGHT, cards[0].type)
+        assertEquals(DashboardCardType.EXERCISE, cards[1].type)
+        assertEquals(DashboardCardType.STEPS, cards[2].type)
+        assertEquals(DashboardCardType.NUTRITION, cards[3].type)
+    }
 
-        assertEquals(DashboardCardType.NUTRITION, cards[0].type)
-        assertEquals(DashboardCardType.STEPS, cards[1].type)
+    @Test
+    fun reorderLogic_movesLaterItemToFirstIndex() {
+        val cards = reorderDashboardCards(defaultDashboardCardConfig(), fromIndex = 3, toIndex = 0)
+
+        assertEquals(DashboardCardType.STEPS, cards[0].type)
+        assertEquals(DashboardCardType.NUTRITION, cards[1].type)
         assertEquals(DashboardCardType.WEIGHT, cards[2].type)
         assertEquals(DashboardCardType.EXERCISE, cards[3].type)
+    }
+
+    @Test
+    fun reorderLogic_sameIndexIsNoOp() {
+        val cards = defaultDashboardCardConfig()
+
+        assertTrue(reorderDashboardCards(cards, fromIndex = 2, toIndex = 2) === cards)
     }
 
     @Test
     fun reorderLogic_hiddenItemCanBeReordered() {
         val cards = defaultDashboardCardConfig().map { config ->
             if (config.type == DashboardCardType.SMOKING) config.copy(isVisible = false) else config
-        }.toMutableList()
+        }
 
         val smokingIndex = cards.indexOfFirst { it.type == DashboardCardType.SMOKING }
-        val item = cards.removeAt(smokingIndex)
-        cards.add(0, item)
+        val reordered = reorderDashboardCards(cards, fromIndex = smokingIndex, toIndex = 0)
 
-        assertEquals(DashboardCardType.SMOKING, cards[0].type)
-        assertFalse(cards[0].isVisible)
+        assertEquals(DashboardCardType.SMOKING, reordered[0].type)
+        assertFalse(reordered[0].isVisible)
     }
 
     @Test

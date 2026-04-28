@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.RoundedPillButton
@@ -401,7 +405,11 @@ private fun DashboardCustomizationSheet(
     onReset: () -> Unit,
 ) {
     var localCards by remember(cards) { mutableStateOf(cards) }
-    var draggingIndex by remember { mutableStateOf(-1) }
+    val listState = rememberLazyListState()
+    var draggingType by remember { mutableStateOf<DashboardCardType?>(null) }
+    var draggingStartIndex by remember { mutableIntStateOf(-1) }
+    var draggingIndex by remember { mutableIntStateOf(-1) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
 
     Column(
         modifier = Modifier
@@ -418,6 +426,7 @@ private fun DashboardCustomizationSheet(
             color = MaterialTheme.colorScheme.onSurface,
         )
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f, fill = false)
                 .testTag("dashboard_customization_sheet_list"),
@@ -437,10 +446,13 @@ private fun DashboardCustomizationSheet(
                 HealthCard(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateItem()
+                        .zIndex(if (isDragging) 1f else 0f)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
                             shadowElevation = elevation.toPx()
+                            translationY = if (isDragging) dragOffset else 0f
                         },
                 ) {
                     Row(
@@ -449,19 +461,57 @@ private fun DashboardCustomizationSheet(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         DragHandle(
+                            type = config.type,
                             index = index,
-                            lastIndex = localCards.lastIndex,
-                            onDragStarted = { draggingIndex = it },
-                            onDragEnded = { fromIndex, toIndex ->
-                                draggingIndex = -1
-                                if (fromIndex != toIndex) {
-                                    val item = localCards[fromIndex]
-                                    val mutable = localCards.toMutableList()
-                                    mutable.removeAt(fromIndex)
-                                    mutable.add(toIndex.coerceIn(0, mutable.size), item)
-                                    localCards = mutable
-                                    onMove(item.type, toIndex)
+                            onDragStarted = { type ->
+                                val startIndex = localCards.indexOfFirst { it.type == type }
+                                draggingType = type
+                                draggingStartIndex = startIndex
+                                draggingIndex = startIndex
+                                dragOffset = 0f
+                            },
+                            onDrag = { type, dragAmount ->
+                                if (draggingType != type) return@DragHandle
+                                dragOffset += dragAmount
+                                val currentIndex = localCards.indexOfFirst { it.type == type }
+                                if (currentIndex == -1) return@DragHandle
+
+                                val itemInfo = listState.layoutInfo.visibleItemsInfo
+                                    .firstOrNull { it.key == type.name }
+                                    ?: return@DragHandle
+                                val targetIndex = findLiveDashboardReorderTargetIndex(
+                                    visibleItems = listState.layoutInfo.visibleItemsInfo,
+                                    draggingKey = type.name,
+                                    currentIndex = currentIndex,
+                                    dragOffset = dragOffset,
+                                )
+                                if (targetIndex != currentIndex) {
+                                    val targetInfo = listState.layoutInfo.visibleItemsInfo
+                                        .firstOrNull { it.index == targetIndex }
+                                    localCards = reorderDashboardCards(localCards, currentIndex, targetIndex)
+                                    draggingIndex = targetIndex
+                                    if (targetInfo != null) {
+                                        dragOffset += itemInfo.offset - targetInfo.offset
+                                    }
                                 }
+                            },
+                            onDragEnded = { type ->
+                                val finalIndex = localCards.indexOfFirst { it.type == type }
+                                val startIndex = draggingStartIndex
+                                draggingType = null
+                                draggingStartIndex = -1
+                                draggingIndex = -1
+                                dragOffset = 0f
+                                if (startIndex >= 0 && finalIndex >= 0 && startIndex != finalIndex) {
+                                    onMove(type, finalIndex)
+                                }
+                            },
+                            onDragCancelled = {
+                                localCards = cards
+                                draggingType = null
+                                draggingStartIndex = -1
+                                draggingIndex = -1
+                                dragOffset = 0f
                             },
                         )
                         Column(modifier = Modifier.weight(1f)) {
@@ -492,14 +542,14 @@ private fun DashboardCustomizationSheet(
 
 @Composable
 private fun DragHandle(
+    type: DashboardCardType,
     index: Int,
-    lastIndex: Int,
-    onDragStarted: (Int) -> Unit,
-    onDragEnded: (fromIndex: Int, toIndex: Int) -> Unit,
+    onDragStarted: (DashboardCardType) -> Unit,
+    onDrag: (DashboardCardType, Float) -> Unit,
+    onDragEnded: (DashboardCardType) -> Unit,
+    onDragCancelled: (DashboardCardType) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    var accumulatedDrag by remember { mutableFloatStateOf(0f) }
-    val itemHeight = 72f
     val handleDescription = stringResource(R.string.dashboard_drag_handle)
 
     Column(
@@ -509,24 +559,21 @@ private fun DragHandle(
             .semantics {
                 contentDescription = handleDescription
             }
-            .pointerInput(index, lastIndex) {
+            .pointerInput(type) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = {
-                        accumulatedDrag = 0f
-                        onDragStarted(index)
+                        onDragStarted(type)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     onDragEnd = {
-                        val steps = (accumulatedDrag / itemHeight).toInt()
-                        val targetIndex = (index + steps).coerceIn(0, lastIndex)
-                        onDragEnded(index, targetIndex)
+                        onDragEnded(type)
                     },
                     onDragCancel = {
-                        onDragEnded(index, index)
+                        onDragCancelled(type)
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        accumulatedDrag += dragAmount.y
+                        onDrag(type, dragAmount.y)
                     },
                 )
             },
@@ -553,6 +600,30 @@ private fun DragHandle(
                 ),
         )
     }
+}
+
+private fun findLiveDashboardReorderTargetIndex(
+    visibleItems: List<LazyListItemInfo>,
+    draggingKey: String,
+    currentIndex: Int,
+    dragOffset: Float,
+): Int {
+    val draggingInfo = visibleItems.firstOrNull { it.key == draggingKey } ?: return currentIndex
+    val draggingCenter = draggingInfo.offset + draggingInfo.size / 2f + dragOffset
+    val crossedItem = if (dragOffset > 0f) {
+        visibleItems
+            .asSequence()
+            .filter { it.key != draggingKey && it.index > currentIndex }
+            .filter { draggingCenter > it.offset + it.size / 2f }
+            .maxByOrNull(LazyListItemInfo::index)
+    } else {
+        visibleItems
+            .asSequence()
+            .filter { it.key != draggingKey && it.index < currentIndex }
+            .filter { draggingCenter < it.offset + it.size / 2f }
+            .minByOrNull(LazyListItemInfo::index)
+    }
+    return crossedItem?.index ?: currentIndex
 }
 
 @Composable

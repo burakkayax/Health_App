@@ -1,5 +1,13 @@
 # Changelog
 
+## PR16.3 - Live Drag Reorder for Dashboard Customization
+
+### Değiştirildi
+
+- Kartları Özelleştir menüsünde sıralama davranışı canlı drag reorder etkileşimine taşındı.
+- Sürüklenen kart komşu kart sınırlarını geçtikçe liste anlık olarak yeniden sıralanır.
+- Final sıra yalnızca drag tamamlandığında kalıcı ayarlara yazılır.
+
 ## PR16.2 - Dashboard Customization Scroll & Supplements Layout Polish
 
 ### Düzeltildi
