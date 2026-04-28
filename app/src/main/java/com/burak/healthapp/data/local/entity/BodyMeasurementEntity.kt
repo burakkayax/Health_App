@@ -1,11 +1,17 @@
 package com.burak.healthapp.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@Entity(tableName = "body_measurements")
+@Entity(
+    tableName = "body_measurements",
+    indices = [
+        Index(value = ["date"], unique = true),
+    ],
+)
 data class BodyMeasurementEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val date: LocalDate,

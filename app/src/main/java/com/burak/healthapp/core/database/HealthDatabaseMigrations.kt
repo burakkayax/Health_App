@@ -127,3 +127,69 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         )
     }
 }
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        deduplicateDateBasedTables(db)
+
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_hydration_entries_date ON hydration_entries (date)")
+        db.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS index_hydration_entries_date_createdAt
+            ON hydration_entries (date, createdAt)
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_entries_date ON meal_entries (date)")
+        db.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS index_meal_entries_date_mealType_createdAt
+            ON meal_entries (date, mealType, createdAt)
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_body_measurements_date ON body_measurements (date)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_sleep_sessions_sessionDate ON sleep_sessions (sessionDate)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_exercise_entries_date ON exercise_entries (date)")
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_smoking_entries_date ON smoking_entries (date)")
+        db.execSQL(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS index_supplement_dose_entries_templateId_date
+            ON supplement_dose_entries (templateId, date)
+            """.trimIndent(),
+        )
+    }
+
+    private fun deduplicateDateBasedTables(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            DELETE FROM body_measurements
+            WHERE id NOT IN (
+                SELECT kept.id
+                FROM body_measurements AS kept
+                WHERE kept.id = (
+                    SELECT candidate.id
+                    FROM body_measurements AS candidate
+                    WHERE candidate.date = kept.date
+                    ORDER BY candidate.recordedAt DESC, candidate.id DESC
+                    LIMIT 1
+                )
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            """
+            DELETE FROM sleep_sessions
+            WHERE id NOT IN (
+                SELECT kept.id
+                FROM sleep_sessions AS kept
+                WHERE kept.id = (
+                    SELECT candidate.id
+                    FROM sleep_sessions AS candidate
+                    WHERE candidate.sessionDate = kept.sessionDate
+                    ORDER BY candidate.endTime DESC, candidate.id DESC
+                    LIMIT 1
+                )
+            )
+            """.trimIndent(),
+        )
+    }
+}

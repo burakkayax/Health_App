@@ -7,6 +7,7 @@ import com.burak.healthapp.core.database.HealthDatabase
 import com.burak.healthapp.core.database.MIGRATION_1_2
 import com.burak.healthapp.core.database.MIGRATION_2_3
 import com.burak.healthapp.core.database.MIGRATION_3_4
+import com.burak.healthapp.core.database.MIGRATION_4_5
 import com.burak.healthapp.core.datastore.settingsDataStore
 import com.burak.healthapp.core.reminder.WaterReminderScheduler
 import com.burak.healthapp.data.export.AndroidHealthDataExportFileWriter
@@ -34,7 +35,7 @@ class AppContainer(context: Context) {
         context,
         HealthDatabase::class.java,
         "health.db",
-    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
         .build()
 
     val settingsRepository: SettingsRepository = SettingsRepositoryImpl(

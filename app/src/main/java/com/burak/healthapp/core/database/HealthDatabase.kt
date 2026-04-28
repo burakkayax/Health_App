@@ -37,7 +37,7 @@ import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
         BodyMeasurementEntity::class,
         StepEntryEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(DateTimeConverters::class)

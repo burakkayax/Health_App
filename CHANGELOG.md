@@ -6,6 +6,18 @@ Bu dosya projedeki değişiklikleri ve önemli teknik güncellemeleri takip eder
 
 ### Eklendi
 
+- Room database version 5'e yükseltildi ve `MIGRATION_4_5` eklendi.
+- Tarih bazlı sağlık kayıtları ve takviye doz ilişkileri için Room indexleri eklendi.
+- v4 -> v5 migration için instrumentation migration testi eklendi.
+
+### Değiştirildi
+
+- Eski veride aynı tarihli tekil kayıt çakışmaları varsa migration, mevcut repository davranışıyla uyumlu şekilde en güncel kaydı koruyacak şekilde normalize eder.
+
+## Unreleased - 2026-04-27
+
+### Eklendi
+
 - Spotless + ktlint, Detekt ve `lintDebug` tabanlı statik analiz kalite kapısı eklendi.
 - Android CI workflow'u format kontrolü, static analysis, lint, compile, unit test, androidTest Kotlin derleme ve debug assemble adımlarını çalıştıracak şekilde güncellendi.
 - CI için unit test, lint ve Detekt rapor artifact upload adımları eklendi.
