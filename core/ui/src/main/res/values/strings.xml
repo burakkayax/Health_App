@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="route_today">Bugün</string>
+    <string name="route_trends">Trendler</string>
+    <string name="route_meals">Öğün Geçmişi</string>
+    <string name="route_profile">Profil</string>
+    <string name="route_profile_goals">Hedefleri Düzenle</string>
+    <string name="route_weight_detail">Kilo Detayı</string>
+    <string name="route_sleep_detail">Uyku Detayı</string>
+    <string name="route_step_detail">Adım Detayı</string>
+    <string name="route_hydration_detail">Su Detayı</string>
+    <string name="route_caffeine_detail">Kafein Detayı</string>
+
+    <string name="common_today">Bugün</string>
+
+    <string name="weekday_monday_short">Pzt</string>
+    <string name="weekday_tuesday_short">Sal</string>
+    <string name="weekday_wednesday_short">Çar</string>
+    <string name="weekday_thursday_short">Per</string>
+    <string name="weekday_friday_short">Cum</string>
+    <string name="weekday_saturday_short">Cmt</string>
+    <string name="weekday_sunday_short">Paz</string>
+
+    <string name="metric_day_ring_outside_month">%1$s, bu ay dışında</string>
+    <string name="metric_day_ring_no_data">%1$s, kayıt yok</string>
+    <string name="metric_day_ring_progress">%1$s, %2$s, hedefin yüzde %3$d’i</string>
+    <string name="metric_day_ring_target_met">%1$s, %2$s, hedef tamamlandı</string>
+
+    <string name="error_field_required">Bu alan gerekli.</string>
+    <string name="error_field_must_be_number">Sayı olmalı.</string>
+    <string name="error_field_must_be_integer">Tam sayı olmalı.</string>
+    <string name="error_field_positive">0'dan büyük olmalı.</string>
+    <string name="error_field_not_negative">Negatif olamaz.</string>
+    <string name="error_field_too_high">Değer çok yüksek.</string>
+    <string name="error_field_too_low">Değer çok düşük.</string>
+    <string name="error_field_invalid_time">Geçerli bir saat gir.</string>
+    <string name="error_sleep_duration_too_long">Uyku süresi çok uzun.</string>
+</resources>

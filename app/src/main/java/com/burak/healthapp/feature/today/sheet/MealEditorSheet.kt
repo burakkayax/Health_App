@@ -38,6 +38,7 @@ import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.feature.today.meal.MealDraftFoodState
 import com.burak.healthapp.feature.today.meal.MealEditorUiState
+import com.burak.healthapp.feature.today.meal.labelResId
 @Composable
 internal fun MealEditorSheet(
     state: MealEditorUiState,

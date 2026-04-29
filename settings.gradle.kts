@@ -18,5 +18,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Health_App"
+include(":domain")
+include(":data")
+include(":core:ui")
 include(":app")
 include(":benchmark")

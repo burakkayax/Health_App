@@ -196,10 +196,11 @@ class SettingsRepositoryImpl(
 
     override suspend fun updateProfile(profile: UserProfile) {
         dataStore.edit { preferences ->
+            val heightCm = profile.heightCm
             preferences[SettingsKeys.userName] = profile.name
             preferences[SettingsKeys.avatarInitials] = profile.avatarInitials
-            if (profile.heightCm != null) {
-                preferences[SettingsKeys.heightCm] = profile.heightCm
+            if (heightCm != null) {
+                preferences[SettingsKeys.heightCm] = heightCm
             } else {
                 preferences.remove(SettingsKeys.heightCm)
             }

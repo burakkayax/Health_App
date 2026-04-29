@@ -2,7 +2,7 @@ package com.burak.healthapp.core.ui.text
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.R
 import com.burak.healthapp.domain.validation.HealthInputError
 
 @Composable

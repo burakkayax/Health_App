@@ -1,5 +1,14 @@
 # Changelog
 
+## PR21 - Multi-Module Architecture
+
+### Değiştirildi
+
+- Proje `:domain`, `:data` ve `:core:ui` modülleriyle ilk multi-module mimariye taşındı.
+- Domain modelleri, repository interface'leri, use case'ler, validation ve hesaplama kodları app modülünden ayrıldı.
+- Room/DataStore/repository implementasyonları data modülüne taşındı.
+- Ortak Compose bileşenleri, tema, navigation destination tanımları ve UI text helper'ları core:ui modülüne taşındı.
+
 ## PR20 - Hilt Migration
 
 ### Değiştirildi

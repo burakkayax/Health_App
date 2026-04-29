@@ -1,15 +1,13 @@
 package com.burak.healthapp.domain.model
 
-import androidx.annotation.StringRes
-import com.burak.healthapp.R
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-enum class MealType(@StringRes val labelResId: Int) {
-    BREAKFAST(R.string.meal_type_breakfast),
-    LUNCH(R.string.meal_type_lunch),
-    DINNER(R.string.meal_type_dinner),
-    SNACK(R.string.meal_type_snack),
+enum class MealType {
+    BREAKFAST,
+    LUNCH,
+    DINNER,
+    SNACK,
 }
 
 data class MealEntry(

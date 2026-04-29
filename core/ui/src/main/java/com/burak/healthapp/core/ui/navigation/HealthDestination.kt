@@ -5,7 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.R
 
 sealed class HealthDestination(
     val route: String,

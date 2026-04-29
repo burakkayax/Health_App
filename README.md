@@ -134,7 +134,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 
 ## Mimari
 
-Health_App, tek modül içinde temiz ayrılmış katmanlı bir mimari kullanır.
+Health_App, küçük ve stabil bir ilk multi-module mimari kullanır. Feature ekranları `:app` içinde kalırken saf iş kuralları `:domain`, Room/DataStore veri katmanı `:data`, ortak Compose bileşenleri ise `:core:ui` modülüne ayrılmıştır.
 
 Temel veri akışı:
 
@@ -166,62 +166,52 @@ Mimari hedefler:
 ## Proje Yapısı
 
 ```text
-com.burak.healthapp
-├── MainActivity.kt
-├── HealthApplication.kt
-├── core
-│   ├── datastore
-│   ├── di
-│   ├── notification
-│   ├── reminder
-│   ├── step
-│   └── ui
-│       ├── components
-│       ├── navigation
-│       ├── text
-│       └── theme
-├── data
-│   ├── local
-│   │   ├── dao
-│   │   ├── database
-│   │   ├── entity
-│   │   ├── converter
-│   │   └── mapper
-│   └── repository
-├── domain
-│   ├── calculation
-│   ├── config
-│   ├── model
-│   ├── repository
-│   └── usecase
-└── feature
-    ├── app
-    ├── root
-    ├── onboarding
-    ├── today
-    ├── trends
-    ├── profile
-    └── detail
+:app
+├── MainActivity.kt / HealthApplication.kt
+├── core/di, core/notification, core/reminder, core/step
+└── feature/app, root, onboarding, today, trends, profile, detail
+
+:domain
+├── calculation
+├── config
+├── export
+├── model
+├── repository
+├── usecase
+└── validation
+
+:data
+├── core/database
+├── core/datastore
+├── data/export
+├── data/local/dao, entity, mapper
+└── data/repository
+
+:core:ui
+├── components
+├── model
+├── navigation
+├── text
+└── theme
+
+:benchmark
+└── macrobenchmark ve baseline profile senaryoları
 ```
 
 ### Katmanlar
 
-#### `core`
+#### `:app`
 
-Uygulama genelinde kullanılan altyapı bileşenlerini içerir.
+Uygulama giriş noktası, navigation, feature ekranları, platform servisleri ve Hilt module tanımlarını içerir.
 
 Örnekler:
 
-* Ortak Compose bileşenleri
-* Tema sistemi
-* Navigation destination tanımları
 * Bildirim altyapısı
 * WorkManager hatırlatıcıları
 * Adım takibi foreground service
-* DataStore kurulumu
 * Hilt module tanımları
 
-#### `domain`
+#### `:domain`
 
 Android framework bağımlılığı olmayan iş kurallarını içerir.
 
@@ -232,8 +222,9 @@ Android framework bağımlılığı olmayan iş kurallarını içerir.
 * Hesaplama fonksiyonları
 * Varsayılan sağlık hedefleri
 * Use case sınıfları
+* Validation modelleri
 
-#### `data`
+#### `:data`
 
 Veri kaynakları ve repository implementasyonlarını içerir.
 
@@ -242,8 +233,13 @@ Veri kaynakları ve repository implementasyonlarını içerir.
 * Room entity’leri
 * DAO sınıfları
 * Database tanımı
+* DataStore kurulumu
 * Mapper fonksiyonları
 * Repository implementasyonları
+
+#### `:core:ui`
+
+Ortak Compose UI bileşenleri, tema sistemi, route destination tanımları ve UI text helper'larını içerir.
 
 #### `feature`
 
@@ -332,6 +328,18 @@ Unit testleri çalıştırma:
 
 ```bash
 ./gradlew :app:testDebugUnitTest
+```
+
+Domain unit testleri:
+
+```bash
+./gradlew :domain:test
+```
+
+Data module unit testleri:
+
+```bash
+./gradlew :data:test
 ```
 
 Kotlin format kontrolü:

@@ -175,12 +175,13 @@ fun WeightDetailContent(
                         .testTag("weight_detail_bmi_gauge"),
                     state = state.bmiGauge,
                 )
-                if (state.bmiGauge.helperMessage != null) {
+                val helperMessage = state.bmiGauge.helperMessage
+                if (helperMessage != null) {
                     Text(
                         modifier = Modifier
                             .padding(top = HealthSpacing.xs)
                             .testTag("weight_detail_bmi_helper"),
-                        text = state.bmiGauge.helperMessage,
+                        text = helperMessage,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

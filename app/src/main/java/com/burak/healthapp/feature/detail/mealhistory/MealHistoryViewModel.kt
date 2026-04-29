@@ -8,6 +8,7 @@ import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryEntryState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
+import com.burak.healthapp.feature.today.meal.labelResId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
