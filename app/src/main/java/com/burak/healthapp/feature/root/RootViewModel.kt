@@ -1,18 +1,15 @@
 package com.burak.healthapp.feature.root
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.burak.healthapp.HealthApplication
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.repository.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 data class RootUiState(
     val isLoaded: Boolean = false,
@@ -24,7 +21,8 @@ data class RootUiState(
     val stepTrackingEnabled: Boolean = false,
 )
 
-class RootViewModel(
+@HiltViewModel
+class RootViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
 ) : ViewModel() {
     val uiState = settingsRepository.settings
@@ -45,16 +43,4 @@ class RootViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = RootUiState(),
         )
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                RootViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                )
-            }
-        }
-    }
 }
-
-fun CreationExtras.healthApplication(): HealthApplication = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as HealthApplication

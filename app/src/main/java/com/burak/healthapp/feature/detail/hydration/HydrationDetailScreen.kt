@@ -28,13 +28,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
 import com.burak.healthapp.core.ui.components.HealthCard
@@ -51,7 +48,7 @@ import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -62,9 +59,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class HydrationDetailViewModel(
+@HiltViewModel
+class HydrationDetailViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -109,24 +108,13 @@ class HydrationDetailViewModel(
             dashboardRepository.deleteHydrationEntry(id)
         }
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                HydrationDetailViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun HydrationDetailRoute(
     selectedDate: LocalDate,
 ) {
-    val viewModel: HydrationDetailViewModel = viewModel(factory = HydrationDetailViewModel.Factory)
+    val viewModel: HydrationDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedDate) {

@@ -12,8 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.feature.onboarding.OnboardingRoute
@@ -21,7 +21,7 @@ import com.burak.healthapp.feature.root.RootViewModel
 
 @Composable
 fun HealthApp() {
-    val rootViewModel: RootViewModel = viewModel(factory = RootViewModel.Factory)
+    val rootViewModel: RootViewModel = hiltViewModel()
     val rootState by rootViewModel.uiState.collectAsStateWithLifecycle()
 
     HealthTheme(themeMode = rootState.themeMode) {

@@ -13,14 +13,18 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
-import com.burak.healthapp.HealthApplication
 import com.burak.healthapp.core.notification.HealthNotifications
+import com.burak.healthapp.domain.repository.DashboardRepository
+import com.burak.healthapp.domain.repository.SettingsRepository
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class StepCounterService :
     Service(),
     SensorEventListener {
@@ -29,13 +33,18 @@ class StepCounterService :
     private var listenerRegistered = false
     private val writePolicy = StepSensorWritePolicy()
 
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var dashboardRepository: DashboardRepository
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             serviceScope.launch {
-                val app = application as? HealthApplication
-                app?.container?.settingsRepository?.updateStepTrackingEnabled(false)
+                settingsRepository.updateStepTrackingEnabled(false)
                 stopSelf()
             }
             return START_NOT_STICKY
@@ -75,9 +84,8 @@ class StepCounterService :
         val sensorValue = event?.values?.firstOrNull()?.toInt() ?: return
         val nowMillis = System.currentTimeMillis()
         if (!writePolicy.shouldWrite(sensorValue, nowMillis)) return
-        val app = application as? HealthApplication ?: return
         serviceScope.launch {
-            app.container.dashboardRepository.recordStepSensorValue(sensorValue)
+            dashboardRepository.recordStepSensorValue(sensorValue)
             writePolicy.markWritten(sensorValue, nowMillis)
         }
     }
@@ -123,9 +131,8 @@ class StepCounterService :
 
     private fun flushPendingSensorValue() {
         val sensorValue = writePolicy.pendingFlushValue() ?: return
-        val app = application as? HealthApplication ?: return
         kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-            app.container.dashboardRepository.recordStepSensorValue(sensorValue)
+            dashboardRepository.recordStepSensorValue(sensorValue)
             writePolicy.markWritten(sensorValue, System.currentTimeMillis())
         }
     }

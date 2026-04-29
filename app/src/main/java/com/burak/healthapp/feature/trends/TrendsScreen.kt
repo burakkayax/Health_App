@@ -15,8 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
@@ -32,7 +32,7 @@ import com.burak.healthapp.feature.trends.TrendsUiState
 fun TrendsRoute(
     avatarInitials: String,
 ) {
-    val viewModel: TrendsViewModel = viewModel(factory = TrendsViewModel.Factory)
+    val viewModel: TrendsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     TrendsContent(

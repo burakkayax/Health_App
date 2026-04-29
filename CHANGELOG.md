@@ -1,5 +1,13 @@
 # Changelog
 
+## PR20 - Hilt Migration
+
+### Değiştirildi
+
+- Manual dependency container yapısı Hilt tabanlı dependency injection sistemine taşındı.
+- ViewModel oluşturma akışları `@HiltViewModel` ve constructor injection ile sadeleştirildi.
+- Repository, database, DataStore ve use case bağımlılıkları Hilt module'ları üzerinden sağlanır hale getirildi.
+
 ## PR19.1 - Benchmark Signed Target Build Fix
 
 ### Düzeltildi

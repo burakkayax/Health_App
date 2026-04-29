@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
@@ -45,7 +45,7 @@ import java.time.LocalTime
 fun ProfileGoalsRoute(
     onSaved: () -> Unit,
 ) {
-    val viewModel: ProfileGoalsViewModel = viewModel(factory = ProfileGoalsViewModel.Factory)
+    val viewModel: ProfileGoalsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ProfileGoalsContent(

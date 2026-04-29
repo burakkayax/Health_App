@@ -2,11 +2,9 @@ package com.burak.healthapp.feature.profile
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
+import com.burak.healthapp.core.reminder.WaterReminderSettingsApplier
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataImportFileReader
@@ -33,7 +31,7 @@ import com.burak.healthapp.feature.profile.ProfileSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileUiState
 import com.burak.healthapp.feature.profile.SupplementEditorUiState
 import com.burak.healthapp.feature.profile.toDomainTemplate
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -43,8 +41,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Locale
+import javax.inject.Inject
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
     private val exportHealthDataUseCase: ExportHealthDataUseCase,
@@ -53,7 +53,7 @@ class ProfileViewModel(
     private val jsonImporter: HealthDataJsonImporter,
     private val importHealthDataUseCase: ImportHealthDataUseCase,
     private val deleteAllHealthDataUseCase: DeleteAllHealthDataUseCase,
-    private val applyWaterReminderSettings: (WaterReminderSettings) -> Unit = {},
+    private val waterReminderSettingsApplier: WaterReminderSettingsApplier = WaterReminderSettingsApplier {},
 ) : ViewModel() {
     private var nextDraftId = 1L
     private var latestTemplates: List<SupplementTemplate> = emptyList()
@@ -191,7 +191,7 @@ class ProfileViewModel(
     fun updateWaterReminderSettings(settings: WaterReminderSettings) {
         viewModelScope.launch {
             settingsRepository.updateWaterReminderSettings(settings)
-            applyWaterReminderSettings(settings)
+            waterReminderSettingsApplier.apply(settings)
         }
     }
 
@@ -325,24 +325,6 @@ class ProfileViewModel(
                     isDeleting = false,
                     message = UiText.StringResource(R.string.delete_health_data_failed),
                     isError = true,
-                )
-            }
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                ProfileViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                    exportHealthDataUseCase = healthApplication().container.exportHealthDataUseCase,
-                    exportFileWriter = healthApplication().container.healthDataExportFileWriter,
-                    importFileReader = healthApplication().container.healthDataImportFileReader,
-                    jsonImporter = healthApplication().container.healthDataJsonImporter,
-                    importHealthDataUseCase = healthApplication().container.importHealthDataUseCase,
-                    deleteAllHealthDataUseCase = healthApplication().container.deleteAllHealthDataUseCase,
-                    applyWaterReminderSettings = healthApplication().container.waterReminderScheduler::apply,
                 )
             }
         }

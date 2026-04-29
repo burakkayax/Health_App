@@ -32,13 +32,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
@@ -65,7 +62,7 @@ import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
 import com.burak.healthapp.feature.detail.sleep.SleepDetailUiState
 import com.burak.healthapp.feature.detail.sleep.SleepRegularityState
 import com.burak.healthapp.feature.detail.sleep.SleepRegularityStatus
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,9 +72,11 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SleepDetailViewModel(
+@HiltViewModel
+class SleepDetailViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -118,24 +117,13 @@ class SleepDetailViewModel(
     fun selectPeriod(period: TrendsPeriod) {
         selectedPeriod.value = period
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                SleepDetailViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun SleepDetailRoute(
     selectedDate: LocalDate,
 ) {
-    val viewModel: SleepDetailViewModel = viewModel(factory = SleepDetailViewModel.Factory)
+    val viewModel: SleepDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedDate) {

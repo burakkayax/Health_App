@@ -1,22 +1,19 @@
 package com.burak.healthapp.feature.trends
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.repository.TrendsRepository
-import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.feature.trends.InsightCardState
 import com.burak.healthapp.feature.trends.TrendChartState
 import com.burak.healthapp.feature.trends.TrendsUiState
 import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
 import com.burak.healthapp.feature.trends.WeightTrendChartCardState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,9 +24,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.util.Locale
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TrendsViewModel(
+@HiltViewModel
+class TrendsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val trendsRepository: TrendsRepository,
 ) : ViewModel() {
@@ -58,17 +57,6 @@ class TrendsViewModel(
 
     fun selectPeriod(period: TrendsPeriod) {
         selectedPeriod.value = period
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                TrendsViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    trendsRepository = healthApplication().container.trendsRepository,
-                )
-            }
-        }
     }
 }
 

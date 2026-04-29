@@ -38,12 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.core.ui.components.AvatarBadge
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
@@ -55,10 +52,11 @@ import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
+import javax.inject.Inject
 
 data class OnboardingFormState(
     val name: String = "",
@@ -81,7 +79,8 @@ data class OnboardingFormState(
     val supplementsText: String = "D3 Vitamini\nOmega 3\nMultivitamin",
 )
 
-class OnboardingViewModel(
+@HiltViewModel
+class OnboardingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
     var isSaving by mutableStateOf(false)
@@ -136,16 +135,6 @@ class OnboardingViewModel(
             isSaving = false
         }
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                OnboardingViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                )
-            }
-        }
-    }
 }
 
 private val OnboardingFormStateSaver = listSaver<OnboardingFormState, String>(
@@ -197,7 +186,7 @@ private val OnboardingFormStateSaver = listSaver<OnboardingFormState, String>(
 
 @Composable
 fun OnboardingRoute() {
-    val viewModel: OnboardingViewModel = viewModel(factory = OnboardingViewModel.Factory)
+    val viewModel: OnboardingViewModel = hiltViewModel()
     var currentStep by rememberSaveable { mutableIntStateOf(0) }
     var form by rememberSaveable(stateSaver = OnboardingFormStateSaver) {
         mutableStateOf(OnboardingFormState())

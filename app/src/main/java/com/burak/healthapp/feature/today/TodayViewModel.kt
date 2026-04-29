@@ -1,10 +1,7 @@
 package com.burak.healthapp.feature.today
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.domain.model.CaffeineDrinkSize
 import com.burak.healthapp.domain.model.CaffeineDrinkType
 import com.burak.healthapp.domain.model.CaffeineEntry
@@ -17,7 +14,6 @@ import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.feature.root.healthApplication
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
@@ -30,6 +26,7 @@ import com.burak.healthapp.feature.today.SupplementCardState
 import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.WeightCardState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,9 +39,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TodayViewModel(
+@HiltViewModel
+class TodayViewModel @Inject constructor(
     private val dashboardRepository: DashboardRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -242,17 +241,6 @@ class TodayViewModel(
     fun resetDashboardCards() {
         viewModelScope.launch {
             settingsRepository.resetDashboardCardsToDefault()
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                TodayViewModel(
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                    settingsRepository = healthApplication().container.settingsRepository,
-                )
-            }
         }
     }
 }

@@ -18,13 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.BmiGaugeChart
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
@@ -42,15 +39,17 @@ import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.detail.weight.WeightDetailUiState
 import com.burak.healthapp.feature.detail.weight.WeightHistoryItemState
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
-class WeightDetailViewModel(
+@HiltViewModel
+class WeightDetailViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -77,22 +76,11 @@ class WeightDetailViewModel(
             dashboardRepository.deleteBodyMeasurement(id)
         }
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                WeightDetailViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun WeightDetailRoute() {
-    val viewModel: WeightDetailViewModel = viewModel(factory = WeightDetailViewModel.Factory)
+    val viewModel: WeightDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     WeightDetailContent(

@@ -3,9 +3,10 @@ package com.burak.healthapp.core.reminder
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.burak.healthapp.HealthApplication
+import com.burak.healthapp.core.di.AppGraphEntryPoint
 import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.domain.calculation.calculateHydrationTotal
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.LocalTime
@@ -15,8 +16,11 @@ class WaterReminderWorker(
     params: WorkerParameters,
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
-        val app = applicationContext as? HealthApplication ?: return Result.success()
-        val settings = app.container.settingsRepository.settings.first()
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext,
+            AppGraphEntryPoint::class.java,
+        )
+        val settings = entryPoint.settingsRepository().settings.first()
         val reminder = settings.waterReminderSettings
 
         if (!reminder.enabled || !isInsideWaterReminderWindow(LocalTime.now(), reminder)) {
@@ -24,7 +28,7 @@ class WaterReminderWorker(
         }
 
         val today = LocalDate.now()
-        val snapshot = app.container.dashboardRepository.observeToday(today).first()
+        val snapshot = entryPoint.dashboardRepository().observeToday(today).first()
         val currentMl = calculateHydrationTotal(snapshot.hydrationEntries)
         val targetMl = settings.goalSettings.waterTargetMl
 

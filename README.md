@@ -123,6 +123,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - **WorkManager**
 - **Kotlin Coroutines / Flow**
 - **Lifecycle ViewModel**
+- **Hilt**
 - **KSP**
 - **Vico Charts**
 - **JUnit**
@@ -155,6 +156,7 @@ Mimari hedefler:
 
 * UI, domain ve data sorumluluklarını ayırmak
 * ViewModel içinde Android `Context` bağımlılığını azaltmak
+* Repository, database, DataStore ve use case bağımlılıklarını Hilt üzerinden sağlamak
 * Uygulama metinlerini lokalizasyona hazır hale getirmek
 * Varsayılan hedef değerlerini merkezi sabitler üzerinden yönetmek
 * Test edilebilir, okunabilir ve sürdürülebilir bir yapı kurmak
@@ -217,7 +219,7 @@ Uygulama genelinde kullanılan altyapı bileşenlerini içerir.
 * WorkManager hatırlatıcıları
 * Adım takibi foreground service
 * DataStore kurulumu
-* Manuel dependency container
+* Hilt module tanımları
 
 #### `domain`
 
@@ -478,7 +480,7 @@ Bu değerler doğrudan ViewModel veya repository içinde tekrar edilmez; domain/
 
 Planlanan geliştirmeler:
 
-* [ ] Hilt tabanlı dependency injection
+* [x] Hilt tabanlı dependency injection
 * [ ] Multi-module mimariye geçiş
 * [ ] Health Connect entegrasyonu
 * [ ] CSV/PDF raporlar

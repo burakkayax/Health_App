@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 @Composable
 fun MealHistoryRoute(selectedDate: LocalDate) {
-    val viewModel: MealHistoryViewModel = viewModel(factory = MealHistoryViewModel.Factory)
+    val viewModel: MealHistoryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedDate) {

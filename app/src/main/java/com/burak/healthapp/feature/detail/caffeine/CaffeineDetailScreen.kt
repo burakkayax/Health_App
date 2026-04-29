@@ -28,13 +28,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
@@ -45,7 +42,7 @@ import com.burak.healthapp.domain.model.CaffeineDrinkType
 import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,6 +52,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
 @Immutable
 data class CaffeineBarState(
@@ -74,7 +72,8 @@ data class CaffeineDetailUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class CaffeineDetailViewModel(
+@HiltViewModel
+class CaffeineDetailViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -123,22 +122,11 @@ class CaffeineDetailViewModel(
             dashboardRepository.deleteCaffeine(id)
         }
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                CaffeineDetailViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun CaffeineDetailRoute(selectedDate: LocalDate) {
-    val viewModel: CaffeineDetailViewModel = viewModel(factory = CaffeineDetailViewModel.Factory)
+    val viewModel: CaffeineDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedDate) {

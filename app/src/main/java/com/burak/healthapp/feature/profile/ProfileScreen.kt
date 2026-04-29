@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.core.content.ContextCompat
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.R
 import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.core.ui.text.UiText
@@ -40,7 +40,7 @@ import java.time.LocalDate
 fun ProfileRoute(
     onOpenGoals: () -> Unit,
 ) {
-    val viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    val viewModel: ProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hasStepSensor = remember { context.hasStepCounterSensor() }

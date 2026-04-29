@@ -1,17 +1,14 @@
 package com.burak.healthapp.feature.detail.mealhistory
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.domain.calculation.groupMealsByType
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryEntryState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,9 +20,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MealHistoryViewModel(
+@HiltViewModel
+class MealHistoryViewModel @Inject constructor(
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
     private val selectedDate = MutableStateFlow(LocalDate.now())
@@ -51,16 +50,6 @@ class MealHistoryViewModel(
     fun deleteMeal(id: Long) {
         viewModelScope.launch {
             dashboardRepository.deleteMealEntry(id)
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MealHistoryViewModel(
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
         }
     }
 }

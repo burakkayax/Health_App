@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burak.healthapp.feature.today.SmokingStatus
@@ -21,7 +22,7 @@ fun TodayRoute(
     onOpenHydrationDetail: () -> Unit,
     onOpenCaffeineDetail: () -> Unit,
 ) {
-    val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory)
+    val viewModel: TodayViewModel = hiltViewModel()
     val mealEditorViewModel: MealEditorViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val mealEditorState by mealEditorViewModel.uiState.collectAsStateWithLifecycle()

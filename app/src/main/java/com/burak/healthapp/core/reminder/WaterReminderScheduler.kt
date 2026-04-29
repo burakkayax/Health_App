@@ -10,10 +10,10 @@ import java.util.concurrent.TimeUnit
 
 class WaterReminderScheduler(
     context: Context,
-) {
+) : WaterReminderSettingsApplier {
     private val appContext = context.applicationContext
 
-    fun apply(settings: WaterReminderSettings) {
+    override fun apply(settings: WaterReminderSettings) {
         val workManager = WorkManager.getInstance(appContext)
         if (!settings.enabled) {
             workManager.cancelUniqueWork(ReminderConstants.WATER_REMINDER_WORK_NAME)

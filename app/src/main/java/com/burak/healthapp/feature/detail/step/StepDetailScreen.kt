@@ -34,13 +34,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
@@ -63,7 +60,7 @@ import com.burak.healthapp.feature.app.hasActivityRecognitionPermission
 import com.burak.healthapp.feature.app.hasStepCounterSensor
 import com.burak.healthapp.feature.detail.step.StepBarState
 import com.burak.healthapp.feature.detail.step.StepDetailUiState
-import com.burak.healthapp.feature.root.healthApplication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,9 +72,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class StepDetailViewModel(
+@HiltViewModel
+class StepDetailViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -127,24 +126,13 @@ class StepDetailViewModel(
             settingsRepository.updateStepTrackingEnabled(enabled)
         }
     }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                StepDetailViewModel(
-                    settingsRepository = healthApplication().container.settingsRepository,
-                    dashboardRepository = healthApplication().container.dashboardRepository,
-                )
-            }
-        }
-    }
 }
 
 @Composable
 fun StepDetailRoute(
     selectedDate: LocalDate,
 ) {
-    val viewModel: StepDetailViewModel = viewModel(factory = StepDetailViewModel.Factory)
+    val viewModel: StepDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hasStepSensor = remember { context.hasStepCounterSensor() }
