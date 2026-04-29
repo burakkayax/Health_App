@@ -418,6 +418,8 @@ Connected benchmark çalıştırma:
 ./gradlew :benchmark:connectedBenchmarkAndroidTest
 ```
 
+Connected benchmark için emulator veya fiziksel cihaz gerekir. Benchmark hedef uygulama varyantı release'e yakın optimize edilir, ancak test cihazına kurulabilmesi için yalnızca benchmark build type debug key ile imzalanır; production release imzası değişmez.
+
 Baseline profile üretimi:
 
 ```bash

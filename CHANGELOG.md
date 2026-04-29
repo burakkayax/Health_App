@@ -1,5 +1,12 @@
 # Changelog
 
+## PR19.1 - Benchmark Signed Target Build Fix
+
+### Düzeltildi
+
+- Connected macrobenchmark testinin unsigned release APK kurmaya çalışması engellendi.
+- Benchmark için release'e yakın, debug key ile imzalanmış ayrı target build type eklendi.
+
 ## PR19 - Baseline Profile & Macrobenchmark
 
 ### Eklendi
