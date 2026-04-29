@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.DashboardCardType
@@ -580,10 +581,10 @@ class TodayContentTest {
                             durationMinutes = 0,
                             intensity = null,
                             progress = 0f,
-                            title = "Antrenman eklenmedi",
-                            durationLabel = "Süre eklenmedi",
-                            intensityLabel = "Yoğunluk seçilmedi",
-                            helperLabel = "Bu hafta 0 / hedef 4 gün",
+                            title = UiText.DynamicString("Antrenman eklenmedi"),
+                            durationLabel = UiText.DynamicString("Süre eklenmedi"),
+                            intensityLabel = UiText.DynamicString("Yoğunluk seçilmedi"),
+                            helperLabel = UiText.DynamicString("Bu hafta 0 / hedef 4 gün"),
                         ),
                         sleep = SleepCardState(
                             durationLabel = "Henüz kayıt yok",
@@ -694,10 +695,10 @@ class TodayContentTest {
                 durationMinutes = 45,
                 intensity = ExerciseIntensity.MEDIUM,
                 progress = 1f,
-                title = "Ağırlık",
-                durationLabel = "45 dk",
-                intensityLabel = "Orta yoÄŸunluk",
-                helperLabel = "Bu hafta 2 / hedef 4 gün",
+                title = UiText.DynamicString("Ağırlık"),
+                durationLabel = UiText.DynamicString("45 dk"),
+                intensityLabel = UiText.DynamicString("Orta yoğunluk"),
+                helperLabel = UiText.DynamicString("Bu hafta 2 / hedef 4 gün"),
             ),
             hydration = HydrationCardState(
                 currentMl = 1600,

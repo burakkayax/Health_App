@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="route_today">Today</string>
+    <string name="route_trends">Trends</string>
+    <string name="route_meals">Meal History</string>
+    <string name="route_profile">Profile</string>
+    <string name="route_profile_goals">Edit Goals</string>
+    <string name="route_weight_detail">Weight Detail</string>
+    <string name="route_sleep_detail">Sleep Detail</string>
+    <string name="route_step_detail">Step Detail</string>
+    <string name="route_hydration_detail">Water Detail</string>
+    <string name="route_caffeine_detail">Caffeine Detail</string>
+
+    <string name="common_today">Today</string>
+
+    <string name="weekday_monday_short">Mon</string>
+    <string name="weekday_tuesday_short">Tue</string>
+    <string name="weekday_wednesday_short">Wed</string>
+    <string name="weekday_thursday_short">Thu</string>
+    <string name="weekday_friday_short">Fri</string>
+    <string name="weekday_saturday_short">Sat</string>
+    <string name="weekday_sunday_short">Sun</string>
+
+    <string name="metric_day_ring_outside_month">%1$s, outside this month</string>
+    <string name="metric_day_ring_no_data">%1$s, no entry</string>
+    <string name="metric_day_ring_progress">%1$s, %2$s, %3$d percent of target</string>
+    <string name="metric_day_ring_target_met">%1$s, %2$s, target completed</string>
+
+    <string name="error_field_required">This field is required.</string>
+    <string name="error_field_must_be_number">Must be a number.</string>
+    <string name="error_field_must_be_integer">Must be an integer.</string>
+    <string name="error_field_positive">Must be greater than 0.</string>
+    <string name="error_field_not_negative">Cannot be negative.</string>
+    <string name="error_field_too_high">Value is too high.</string>
+    <string name="error_field_too_low">Value is too low.</string>
+    <string name="error_field_invalid_time">Enter a valid time.</string>
+    <string name="error_sleep_duration_too_long">Sleep duration is too long.</string>
+</resources>

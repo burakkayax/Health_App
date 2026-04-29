@@ -2,17 +2,14 @@ package com.burak.healthapp.feature.trends
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.repository.TrendsRepository
-import com.burak.healthapp.feature.trends.InsightCardState
-import com.burak.healthapp.feature.trends.TrendChartState
-import com.burak.healthapp.feature.trends.TrendsUiState
-import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
-import com.burak.healthapp.feature.trends.WeightTrendChartCardState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,7 +20,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import java.util.Locale
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,40 +60,49 @@ private fun TrendsSnapshot.toUiState(
     avatarInitials: String,
     targetWeightKg: Float,
 ): TrendsUiState {
-    val locale = Locale.forLanguageTag("tr")
     val sleepHours = averageSleepMinutes.toInt() / 60
     val sleepMinutes = averageSleepMinutes.toInt() % 60
-    val periodSubtitle = if (period == TrendsPeriod.WEEKLY) "Bu hafta" else "Bu ay"
+    val periodSubtitle = stringRes(
+        if (period == TrendsPeriod.WEEKLY) {
+            R.string.trends_period_week
+        } else {
+            R.string.trends_period_month
+        },
+    )
 
     return TrendsUiState(
         avatarInitials = avatarInitials,
         selectedPeriod = period,
         insights = listOf(
             InsightCardState(
-                title = "Günlük Ortalama Protein",
-                value = String.format(locale, "%.0f g", averageProteinGrams),
+                title = stringRes(R.string.trends_insight_avg_protein),
+                value = stringRes(R.string.format_grams_float, averageProteinGrams),
                 subtitle = periodSubtitle,
+                hasData = averageProteinGrams > 0f,
             ),
             InsightCardState(
-                title = "Ortalama Su",
-                value = String.format(locale, "%.0f ml", averageWaterMl),
+                title = stringRes(R.string.trends_insight_avg_water),
+                value = stringRes(R.string.format_ml_float, averageWaterMl),
                 subtitle = periodSubtitle,
+                hasData = averageWaterMl > 0f,
             ),
             InsightCardState(
-                title = "Ortalama Uyku",
-                value = "${sleepHours}s ${sleepMinutes}d",
+                title = stringRes(R.string.trends_insight_avg_sleep),
+                value = stringRes(R.string.format_sleep_short, sleepHours, sleepMinutes),
                 subtitle = periodSubtitle,
+                hasData = averageSleepMinutes > 0f,
             ),
             InsightCardState(
-                title = "Ortalama Adım",
-                value = String.format(locale, "%.0f adım", averageSteps),
+                title = stringRes(R.string.trends_insight_avg_steps),
+                value = stringRes(R.string.format_steps_float, averageSteps),
                 subtitle = periodSubtitle,
+                hasData = averageSteps > 0f,
             ),
         ),
         weeklyCaloriesCard = if (period == TrendsPeriod.WEEKLY) {
             WeeklyCaloriesCardState(
-                averageCaloriesLabel = String.format(locale, "%.0f kcal", averageCalories),
-                subtitle = "Pazartesi - Pazar",
+                averageCaloriesLabel = stringRes(R.string.format_kcal_float, averageCalories),
+                subtitle = stringRes(R.string.trends_week_range),
                 bars = weeklyCalories.map { bar ->
                     WeeklyCalorieBarState(
                         label = bar.label,
@@ -111,8 +116,8 @@ private fun TrendsSnapshot.toUiState(
         },
         charts = listOf(
             TrendChartState(
-                title = "Adım Trendi",
-                subtitle = "Günlük hedefe göre adım akışı.",
+                title = stringRes(R.string.trends_step_chart_title),
+                subtitle = stringRes(R.string.trends_step_chart_subtitle),
                 points = stepPoints,
             ),
         ),
@@ -121,8 +126,8 @@ private fun TrendsSnapshot.toUiState(
             targetWeightKg = targetWeightKg,
         )?.let { chart ->
             WeightTrendChartCardState(
-                title = "Kilo Trendi",
-                subtitle = "Başlangıç, hedef ve mevcut kilo birlikte izlenir.",
+                title = stringRes(R.string.trends_weight_chart_title),
+                subtitle = stringRes(R.string.trends_weight_chart_subtitle),
                 chart = chart,
             )
         },
@@ -136,3 +141,5 @@ private fun emptyUiState(): TrendsUiState = TrendsUiState(
     weeklyCaloriesCard = null,
     charts = emptyList(),
 )
+
+private fun stringRes(resId: Int, vararg args: Any): UiText = UiText.StringResource(resId = resId, args = args.toList())

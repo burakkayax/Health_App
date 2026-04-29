@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation" tools:locale="tr">
     <string name="app_name">Sağlık</string>
     <string name="common_loading">Yükleniyor</string>
     <string name="common_select">Seç</string>
@@ -80,6 +80,19 @@
     <string name="today_empty_supplements">Aktif takviye bulunmuyor. Profil ekranından ekleyebilirsin.</string>
     <string name="today_sheet_meal_title">Öğün Ekle</string>
     <string name="today_sheet_exercise_title">Egzersiz Ekle</string>
+    <string name="today_exercise_not_added">Antrenman eklenmedi</string>
+    <string name="today_exercise_duration_not_added">Süre eklenmedi</string>
+    <string name="today_exercise_intensity_not_selected">Yoğunluk seçilmedi</string>
+    <string name="today_exercise_week_progress">Bu hafta %1$d / %2$d gün</string>
+    <string name="today_exercise_helper_format">%1$s • %2$s</string>
+    <string name="exercise_type_weights">Ağırlık</string>
+    <string name="exercise_type_run">Koşu</string>
+    <string name="exercise_type_walk">Yürüyüş</string>
+    <string name="exercise_type_bike">Bisiklet</string>
+    <string name="exercise_type_yoga">Yoga</string>
+    <string name="exercise_intensity_low">Düşük</string>
+    <string name="exercise_intensity_medium">Orta</string>
+    <string name="exercise_intensity_high">Yüksek</string>
     <string name="today_sheet_hydration_title">Su Ekle</string>
     <string name="today_sheet_sleep_title">Uyku Düzenle</string>
     <string name="today_sheet_sleep_helper">Saatleri 24 saat formatında HH:mm olarak gir.</string>
@@ -142,6 +155,23 @@
     <string name="hydration_detail_record_time">%1$s • %2$s</string>
     <string name="hydration_detail_no_period_data">Bu dönem için henüz su kaydı yok.</string>
     <string name="format_percent">%1$d%%</string>
+    <string name="trends_period_week">Bu hafta</string>
+    <string name="trends_period_month">Bu ay</string>
+    <string name="trends_insight_avg_protein">Günlük Ortalama Protein</string>
+    <string name="trends_insight_avg_water">Ortalama Su</string>
+    <string name="trends_insight_avg_sleep">Ortalama Uyku</string>
+    <string name="trends_insight_avg_steps">Ortalama Adım</string>
+    <string name="trends_week_range">Pazartesi - Pazar</string>
+    <string name="trends_weekly_calories_title">Haftalık Kalori</string>
+    <string name="trends_step_chart_title">Adım Trendi</string>
+    <string name="trends_step_chart_subtitle">Günlük hedefe göre adım akışı.</string>
+    <string name="trends_empty_title">Henüz yeterli veri yok</string>
+    <string name="trends_empty_helper">Bugün ekranından su, uyku, öğün ve kilo girişi yaptığında bu alan otomatik dolacak.</string>
+    <string name="format_grams_float">%1$.0f g</string>
+    <string name="format_ml_float">%1$.0f ml</string>
+    <string name="format_sleep_short">%1$ds %2$dd</string>
+    <string name="format_steps_float">%1$.0f adım</string>
+    <string name="format_kcal_float">%1$.0f kcal</string>
     <string name="weight_detail_chart_title">Kilo Geçmişi Grafiği</string>
     <string name="weight_detail_chart_empty">Henüz kilo kaydı yok. Kilo kartındaki + Ekle aksiyonuyla kayıt oluşturmaya başla.</string>
     <string name="weight_detail_latest_record">Son kayıt %1$s</string>

@@ -2,18 +2,18 @@ package com.burak.healthapp.domain.model
 
 import java.time.LocalDate
 
-enum class ExerciseType(val label: String) {
-    WEIGHTS("Ağırlık"),
-    RUN("KoÅŸu"),
-    WALK("Yürüyüş"),
-    BIKE("Bisiklet"),
-    YOGA("Yoga"),
+enum class ExerciseType {
+    WEIGHTS,
+    RUN,
+    WALK,
+    BIKE,
+    YOGA,
 }
 
-enum class ExerciseIntensity(val label: String) {
-    LOW("Düşük"),
-    MEDIUM("Orta"),
-    HIGH("Yüksek"),
+enum class ExerciseIntensity {
+    LOW,
+    MEDIUM,
+    HIGH,
 }
 
 data class ExerciseEntry(

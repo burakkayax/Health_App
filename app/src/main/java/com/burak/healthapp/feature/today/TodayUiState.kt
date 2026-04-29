@@ -1,5 +1,6 @@
 package com.burak.healthapp.feature.today
 
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.DashboardCardConfig
@@ -55,10 +56,10 @@ data class ExerciseCardState(
     val durationMinutes: Int,
     val intensity: ExerciseIntensity?,
     val progress: Float,
-    val title: String,
-    val durationLabel: String,
-    val intensityLabel: String,
-    val helperLabel: String,
+    val title: UiText,
+    val durationLabel: UiText,
+    val intensityLabel: UiText,
+    val helperLabel: UiText,
 )
 
 data class SmokingCardState(

@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DirectionsBike
-import androidx.compose.material.icons.rounded.DirectionsRun
-import androidx.compose.material.icons.rounded.DirectionsWalk
+import androidx.compose.material.icons.automirrored.rounded.DirectionsBike
+import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
+import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material3.Icon
@@ -24,6 +24,7 @@ import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
+import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.ExerciseType
@@ -67,9 +68,13 @@ internal fun ExerciseCard(
         CompactRingMetricLayout(
             progress = state.exercise.progress,
             color = ringColor,
-            headline = state.exercise.title,
-            supportingLabel = state.exercise.durationLabel,
-            helperLabel = "${state.exercise.intensityLabel} • ${state.exercise.helperLabel}",
+            headline = state.exercise.title.asString(),
+            supportingLabel = state.exercise.durationLabel.asString(),
+            helperLabel = stringResource(
+                R.string.today_exercise_helper_format,
+                state.exercise.intensityLabel.asString(),
+                state.exercise.helperLabel.asString(),
+            ),
         ) {
             Icon(
                 imageVector = state.exercise.type.toExerciseIcon(),
@@ -83,9 +88,9 @@ internal fun ExerciseCard(
 
 internal fun ExerciseType?.toExerciseIcon(): ImageVector = when (this) {
     ExerciseType.WEIGHTS -> Icons.Rounded.FitnessCenter
-    ExerciseType.RUN -> Icons.Rounded.DirectionsRun
-    ExerciseType.WALK -> Icons.Rounded.DirectionsWalk
-    ExerciseType.BIKE -> Icons.Rounded.DirectionsBike
+    ExerciseType.RUN -> Icons.AutoMirrored.Rounded.DirectionsRun
+    ExerciseType.WALK -> Icons.AutoMirrored.Rounded.DirectionsWalk
+    ExerciseType.BIKE -> Icons.AutoMirrored.Rounded.DirectionsBike
     ExerciseType.YOGA -> Icons.Rounded.SelfImprovement
     null -> Icons.Rounded.FitnessCenter
 }

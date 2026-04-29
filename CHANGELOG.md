@@ -1,5 +1,14 @@
 # Changelog
 
+## PR22 - Domain/UI Text Separation & Localization Cleanup
+
+### Değiştirildi
+
+- Domain modellerinden Android resource ve kullanıcı metni bağımlılıkları temiz tutuldu.
+- Trends ekranındaki ViewModel kaynaklı kullanıcı metinleri `UiText` ve string resource yapısına taşındı.
+- İngilizce string kaynakları ve Android per-app language hazırlığı eklendi.
+- UI label mapping Compose/UI katmanında tutulacak şekilde domain/resource ayrımı netleştirildi.
+
 ## PR21 - Multi-Module Architecture
 
 ### Değiştirildi

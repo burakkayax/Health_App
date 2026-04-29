@@ -29,7 +29,7 @@
     <string name="error_field_required">Bu alan gerekli.</string>
     <string name="error_field_must_be_number">Sayı olmalı.</string>
     <string name="error_field_must_be_integer">Tam sayı olmalı.</string>
-    <string name="error_field_positive">0'dan büyük olmalı.</string>
+    <string name="error_field_positive">0\'dan büyük olmalı.</string>
     <string name="error_field_not_negative">Negatif olamaz.</string>
     <string name="error_field_too_high">Değer çok yüksek.</string>
     <string name="error_field_too_low">Değer çok düşük.</string>

@@ -19,6 +19,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - [Proje Yapısı](#proje-yapısı)
 - [Veri Saklama ve Gizlilik](#veri-saklama-ve-gizlilik)
 - [Veri Dışa Aktarma](#veri-dışa-aktarma)
+- [Lokalizasyon](#lokalizasyon)
 - [Kurulum](#kurulum)
 - [Geliştirme Komutları](#geliştirme-komutları)
 - [Testler](#testler)
@@ -291,6 +292,14 @@ Import transaction içinde uygulanır; kısmi import başarısız olursa Room ka
 
 ---
 
+## Lokalizasyon
+
+Varsayılan kaynak dosyası Türkçe metinleri korur. İngilizce metinler `values-en/strings.xml` altında tutulur ve Android 13+ per-app language hazırlığı için `locales_config.xml` içinde `tr` ve `en` tanımlıdır.
+
+Domain modülü Android resource, `Context`, Compose veya `stringResource` bağımlılığı taşımaz. Enum ve domain modelleri kullanıcıya görünen label bilmez; UI tarafı string resource mapper veya `UiText` ile metin üretir.
+
+---
+
 ## Kurulum
 
 Projeyi klonla:
@@ -489,12 +498,12 @@ Bu değerler doğrudan ViewModel veya repository içinde tekrar edilmez; domain/
 Planlanan geliştirmeler:
 
 * [x] Hilt tabanlı dependency injection
-* [ ] Multi-module mimariye geçiş
+* [x] Multi-module mimariye geçiş
 * [ ] Health Connect entegrasyonu
 * [ ] CSV/PDF raporlar
 * [ ] Daha gelişmiş grafik ve trend analizleri
 * [ ] Widget desteği
-* [ ] İngilizce dil desteği
+* [x] İngilizce dil desteği
 * [x] Baseline Profile ve Macrobenchmark
 * [ ] Kullanıcı kontrollü import önizleme geliştirmeleri ve veri yönetimi raporları
 * [x] Release build optimizasyonları

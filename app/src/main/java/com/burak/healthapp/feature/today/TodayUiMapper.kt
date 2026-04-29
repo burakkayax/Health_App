@@ -1,5 +1,7 @@
 package com.burak.healthapp.feature.today
 
+import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.calculation.calculateHydrationTotal
 import com.burak.healthapp.domain.calculation.calculateNutritionTotals
 import com.burak.healthapp.domain.calculation.calculateSleepDurationMinutes
@@ -74,14 +76,18 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
                 (exerciseEntry?.durationMinutes ?: 0).toFloat(),
                 goals.exerciseTargetDurationMinutes.toFloat(),
             ),
-            title = exerciseEntry?.type?.label ?: "Antrenman eklenmedi",
+            title = exerciseEntry?.type?.toUiText() ?: stringRes(R.string.today_exercise_not_added),
             durationLabel = if (exerciseEntry != null) {
-                "${exerciseEntry.durationMinutes} dk"
+                stringRes(R.string.today_format_duration_minutes, exerciseEntry.durationMinutes)
             } else {
-                "Süre eklenmedi"
+                stringRes(R.string.today_exercise_duration_not_added)
             },
-            intensityLabel = exerciseEntry?.intensity?.label ?: "Yoğunluk seçilmedi",
-            helperLabel = "Bu hafta $exerciseDays / ${goals.exerciseTargetDaysPerWeek} gün",
+            intensityLabel = exerciseEntry?.intensity?.toUiText() ?: stringRes(R.string.today_exercise_intensity_not_selected),
+            helperLabel = stringRes(
+                R.string.today_exercise_week_progress,
+                exerciseDays,
+                goals.exerciseTargetDaysPerWeek,
+            ),
         ),
         hydration = HydrationCardState(
             currentMl = hydrationTotal,
@@ -190,10 +196,14 @@ internal fun emptyUiState(): TodayUiState = TodayUiState(
         durationMinutes = 0,
         intensity = null,
         progress = 0f,
-        title = "Antrenman eklenmedi",
-        durationLabel = "Süre eklenmedi",
-        intensityLabel = "Yoğunluk seçilmedi",
-        helperLabel = "",
+        title = stringRes(R.string.today_exercise_not_added),
+        durationLabel = stringRes(R.string.today_exercise_duration_not_added),
+        intensityLabel = stringRes(R.string.today_exercise_intensity_not_selected),
+        helperLabel = stringRes(
+            R.string.today_exercise_week_progress,
+            0,
+            DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
+        ),
     ),
     hydration = HydrationCardState(
         currentMl = 0,
@@ -287,3 +297,5 @@ private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
         )
     }
 }
+
+private fun stringRes(resId: Int, vararg args: Any): UiText = UiText.StringResource(resId = resId, args = args.toList())

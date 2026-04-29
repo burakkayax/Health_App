@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
@@ -80,13 +81,28 @@ class TrendsContentTest {
         avatarInitials = "B",
         selectedPeriod = TrendsPeriod.WEEKLY,
         insights = listOf(
-            InsightCardState("Günlük Ortalama Protein", "128 g", "Bu hafta ortalaması"),
-            InsightCardState("Ortalama Su", "1900 ml", "Bu hafta günlük ortalama"),
-            InsightCardState("Ortalama Uyku", "7s 10d", "Tamamlanan uyku kayıtları baz alınır"),
+            InsightCardState(
+                title = UiText.DynamicString("Günlük Ortalama Protein"),
+                value = UiText.DynamicString("128 g"),
+                subtitle = UiText.DynamicString("Bu hafta ortalaması"),
+                hasData = true,
+            ),
+            InsightCardState(
+                title = UiText.DynamicString("Ortalama Su"),
+                value = UiText.DynamicString("1900 ml"),
+                subtitle = UiText.DynamicString("Bu hafta günlük ortalama"),
+                hasData = true,
+            ),
+            InsightCardState(
+                title = UiText.DynamicString("Ortalama Uyku"),
+                value = UiText.DynamicString("7s 10d"),
+                subtitle = UiText.DynamicString("Tamamlanan uyku kayıtları baz alınır"),
+                hasData = true,
+            ),
         ),
         weeklyCaloriesCard = WeeklyCaloriesCardState(
-            averageCaloriesLabel = "1980 kcal",
-            subtitle = "Pazartesi - Pazar ortalaması",
+            averageCaloriesLabel = UiText.DynamicString("1980 kcal"),
+            subtitle = UiText.DynamicString("Pazartesi - Pazar ortalaması"),
             bars = listOf(
                 WeeklyCalorieBarState("P", 2200, 1f),
                 WeeklyCalorieBarState("S", 1900, 0.86f),
@@ -99,8 +115,8 @@ class TrendsContentTest {
         ),
         charts = listOf(
             TrendChartState(
-                title = "Adım Trendi",
-                subtitle = "Günlük hedefe göre adım akışı.",
+                title = UiText.DynamicString("Adım Trendi"),
+                subtitle = UiText.DynamicString("Günlük hedefe göre adım akışı."),
                 points = listOf(
                     TrendPoint("Pzt", 4200f),
                     TrendPoint("Sal", 5400f),
@@ -109,8 +125,8 @@ class TrendsContentTest {
             ),
         ),
         weightChart = WeightTrendChartCardState(
-            title = "Kilo Trendi",
-            subtitle = "Başlangıç, hedef ve mevcut kilo birlikte izlenir.",
+            title = UiText.DynamicString("Kilo Trendi"),
+            subtitle = UiText.DynamicString("Başlangıç, hedef ve mevcut kilo birlikte izlenir."),
             chart = buildWeightTrendChartState(
                 points = listOf(
                     TrendPoint("Pzt", 78f),

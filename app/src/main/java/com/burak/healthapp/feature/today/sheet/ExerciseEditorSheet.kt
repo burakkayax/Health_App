@@ -40,6 +40,8 @@ import com.burak.healthapp.domain.validation.ExerciseInputValidator
 import com.burak.healthapp.domain.validation.HealthInputError
 import com.burak.healthapp.domain.validation.ValidationResult
 import com.burak.healthapp.feature.today.components.toExerciseIcon
+import com.burak.healthapp.feature.today.labelResId
+
 @Composable
 internal fun ExerciseEditorSheet(
     currentType: ExerciseType?,
@@ -80,7 +82,7 @@ internal fun ExerciseEditorSheet(
                                 imageVector = type.toExerciseIcon(),
                                 contentDescription = null,
                             )
-                            Text(type.label)
+                            Text(stringResource(type.labelResId))
                         }
                     },
                 )
@@ -123,7 +125,7 @@ internal fun ExerciseEditorSheet(
         }
         SegmentedControl(
             modifier = Modifier.fillMaxWidth(),
-            options = ExerciseIntensity.entries.map { it.label },
+            options = ExerciseIntensity.entries.map { stringResource(it.labelResId) },
             selectedIndex = ExerciseIntensity.entries.indexOf(selectedIntensity),
             onSelectionChange = { index ->
                 selectedIntensity = ExerciseIntensity.entries[index]

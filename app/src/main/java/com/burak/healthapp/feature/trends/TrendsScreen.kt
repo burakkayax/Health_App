@@ -24,9 +24,9 @@ import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.SmoothTrendChart
 import com.burak.healthapp.core.ui.components.WeeklyCaloriesBarChart
 import com.burak.healthapp.core.ui.components.WeightTrendChart
+import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.feature.trends.TrendsUiState
 
 @Composable
 fun TrendsRoute(
@@ -49,12 +49,7 @@ fun TrendsContent(
     val hasMeaningfulData = state.weeklyCaloriesCard?.bars?.any { it.calories > 0 } == true ||
         state.weightChart?.chart?.points?.isNotEmpty() == true ||
         state.charts.any { chart -> chart.points.isNotEmpty() } ||
-        state.insights.any { insight ->
-            insight.value != "0 g" &&
-                insight.value != "0 ml" &&
-                insight.value != "0s 0d" &&
-                insight.value != "0 adım"
-        }
+        state.insights.any { insight -> insight.hasData }
 
     LazyColumn(
         modifier = Modifier
@@ -71,7 +66,10 @@ fun TrendsContent(
         item {
             SegmentedControl(
                 modifier = Modifier.fillMaxWidth(),
-                options = listOf("Haftalık", "Aylık"),
+                options = listOf(
+                    stringResource(R.string.common_weekly),
+                    stringResource(R.string.common_monthly),
+                ),
                 selectedIndex = if (state.selectedPeriod == TrendsPeriod.WEEKLY) 0 else 1,
                 onSelectionChange = { index ->
                     onSelectPeriod(if (index == 0) TrendsPeriod.WEEKLY else TrendsPeriod.MONTHLY)
@@ -83,13 +81,13 @@ fun TrendsContent(
             item {
                 HealthCard(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Henüz yeterli veri yok",
+                        text = stringResource(R.string.trends_empty_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.xs),
-                        text = "Bugün ekranından su, uyku, öğün ve kilo girişi yaptığında bu alan otomatik dolacak.",
+                        text = stringResource(R.string.trends_empty_helper),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -104,19 +102,19 @@ fun TrendsContent(
                             .testTag("weekly_calories_card"),
                     ) {
                         Text(
-                            text = "Haftalık Kalori",
+                            text = stringResource(R.string.trends_weekly_calories_title),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             modifier = Modifier.padding(top = HealthSpacing.xs),
-                            text = weeklyCard.averageCaloriesLabel,
+                            text = weeklyCard.averageCaloriesLabel.asString(),
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             modifier = Modifier.padding(top = HealthSpacing.xs),
-                            text = weeklyCard.subtitle,
+                            text = weeklyCard.subtitle.asString(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -127,12 +125,15 @@ fun TrendsContent(
                     }
                 }
             }
-            items(state.insights) { insight ->
+            items(
+                items = state.insights,
+                key = { insight -> insight.title.toString() },
+            ) { insight ->
                 InsightCard(
                     modifier = Modifier.fillMaxWidth(),
-                    title = insight.title,
-                    value = insight.value,
-                    subtitle = insight.subtitle,
+                    title = insight.title.asString(),
+                    value = insight.value.asString(),
+                    subtitle = insight.subtitle.asString(),
                 )
             }
             state.weightChart?.let { weightChart ->
@@ -143,13 +144,13 @@ fun TrendsContent(
                             .testTag("trends_weight_chart_card"),
                     ) {
                         Text(
-                            text = stringResource(R.string.trends_weight_chart_title),
+                            text = weightChart.title.asString(),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             modifier = Modifier.padding(top = HealthSpacing.xs),
-                            text = stringResource(R.string.trends_weight_chart_subtitle),
+                            text = weightChart.subtitle.asString(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -178,16 +179,19 @@ fun TrendsContent(
                     }
                 }
             }
-            items(state.charts) { chart ->
+            items(
+                items = state.charts,
+                key = { chart -> chart.title.toString() },
+            ) { chart ->
                 HealthCard(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = chart.title,
+                        text = chart.title.asString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.xs),
-                        text = chart.subtitle,
+                        text = chart.subtitle.asString(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
