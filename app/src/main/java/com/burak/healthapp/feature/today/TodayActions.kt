@@ -1,8 +1,8 @@
 package com.burak.healthapp.feature.today
 
-import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.CaffeineDrinkSize
 import com.burak.healthapp.domain.model.CaffeineDrinkType
+import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.MealType

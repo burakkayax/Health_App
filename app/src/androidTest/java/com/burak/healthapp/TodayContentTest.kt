@@ -21,11 +21,11 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.defaultDashboardCardConfig
+import com.burak.healthapp.feature.today.CaffeineCardState
 import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
 import com.burak.healthapp.feature.today.NutritionCardState
-import com.burak.healthapp.feature.today.CaffeineCardState
 import com.burak.healthapp.feature.today.SleepCardState
 import com.burak.healthapp.feature.today.SmokingCardState
 import com.burak.healthapp.feature.today.SmokingStatus
