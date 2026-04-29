@@ -1,6 +1,7 @@
 package com.burak.healthapp.data.export
 
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
+import com.burak.healthapp.data.local.dao.CaffeineDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -11,6 +12,7 @@ import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.mapper.toDomain
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
+import com.burak.healthapp.domain.export.ExportedCaffeineEntry
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -24,6 +26,7 @@ import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.HydrationEntry
@@ -50,6 +53,7 @@ class HealthDataExportRepositoryImpl(
     private val exerciseDao: ExerciseDao,
     private val smokingDao: SmokingDao,
     private val stepDao: StepDao,
+    private val caffeineDao: CaffeineDao,
     private val measurementDao: BodyMeasurementDao,
     private val templateDao: SupplementTemplateDao,
     private val doseDao: SupplementDoseDao,
@@ -74,6 +78,7 @@ class HealthDataExportRepositoryImpl(
             exercise = exerciseDao.getAll().map { it.toDomain().toExported() },
             smoking = smokingDao.getAll().map { it.toDomain().toExported() },
             steps = stepDao.getAll().map { it.toDomain().toExported() },
+            caffeineEntries = caffeineDao.getAll().map { it.toDomain().toExported() },
             bodyMeasurements = measurementDao.getAll().map { it.toDomain().toExported() },
             supplementTemplates = templateDao.getAll().map { it.toDomain().toExported() },
             supplementDoseEntries = doseDao.getAll().map { it.toDomain().toExported() },
@@ -94,6 +99,9 @@ private fun GoalSettings.toExported(): ExportedGoalSettings = ExportedGoalSettin
     fatTargetGrams = fatTargetGrams,
     waterTargetMl = waterTargetMl,
     dailyStepTarget = dailyStepTarget,
+    dailyCaffeineLimitMg = dailyCaffeineLimitMg,
+    caffeineCutoffTime = caffeineCutoffTime.toString(),
+    caffeineSleepBufferHours = caffeineSleepBufferHours,
     sleepTargetBedtime = sleepTargetBedtime.toString(),
     sleepTargetWakeTime = sleepTargetWakeTime.toString(),
     exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
@@ -160,6 +168,17 @@ private fun StepEntry.toExported(): ExportedStepEntry = ExportedStepEntry(
     sensorBaseline = sensorBaseline,
     lastSensorValue = lastSensorValue,
     updatedAt = updatedAt.toString(),
+)
+
+private fun CaffeineEntry.toExported(): ExportedCaffeineEntry = ExportedCaffeineEntry(
+    id = id,
+    date = date.toString(),
+    time = time.toString(),
+    drinkType = drinkType.name,
+    size = size.name,
+    estimatedMg = estimatedMg,
+    customName = customName,
+    createdAt = createdAt.toString(),
 )
 
 private fun BodyMeasurementEntry.toExported(): ExportedBodyMeasurementEntry = ExportedBodyMeasurementEntry(

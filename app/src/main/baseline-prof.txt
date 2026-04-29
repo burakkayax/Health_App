@@ -1,0 +1,4 @@
+HSPLcom/burak/healthapp/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/burak/healthapp/feature/today/TodayRouteKt;->TodayRoute(Ljava/time/LocalDate;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/burak/healthapp/feature/profile/ProfileScreenKt;->ProfileRoute(Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/burak/healthapp/feature/trends/TrendsScreenKt;->TrendsRoute(Ljava/lang/String;Landroidx/compose/runtime/Composer;I)V

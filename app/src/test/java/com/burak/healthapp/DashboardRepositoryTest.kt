@@ -1,6 +1,7 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
+import com.burak.healthapp.data.local.dao.CaffeineDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -10,6 +11,7 @@ import com.burak.healthapp.data.local.dao.StepDao
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.entity.CaffeineEntryEntity
 import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.entity.MealEntryEntity
@@ -516,6 +518,7 @@ class DashboardRepositoryTest {
         exerciseDao: FakeExerciseDao = FakeExerciseDao(),
         smokingDao: FakeSmokingDao = FakeSmokingDao(),
         stepDao: FakeStepDao = FakeStepDao(),
+        caffeineDao: FakeCaffeineDao = FakeCaffeineDao(),
         templateDao: FakeSupplementTemplateDao = FakeSupplementTemplateDao(),
         doseDao: FakeSupplementDoseDao = FakeSupplementDoseDao(),
         measurementDao: FakeBodyMeasurementDao = FakeBodyMeasurementDao(),
@@ -527,6 +530,7 @@ class DashboardRepositoryTest {
         exerciseDao = exerciseDao,
         smokingDao = smokingDao,
         stepDao = stepDao,
+        caffeineDao = caffeineDao,
         templateDao = templateDao,
         doseDao = doseDao,
         measurementDao = measurementDao,
@@ -760,6 +764,38 @@ private class FakeStepDao(
                     entry
                 },
             )
+    }
+}
+
+private class FakeCaffeineDao(
+    initialEntries: List<CaffeineEntryEntity> = emptyList(),
+) : CaffeineDao {
+    private val entries = MutableStateFlow(initialEntries)
+
+    override suspend fun getAll(): List<CaffeineEntryEntity> = entries.value
+
+    override fun observeForDate(date: LocalDate): Flow<List<CaffeineEntryEntity>> = entries.map { current -> current.filter { it.date == date } }
+
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
+
+    override suspend fun upsert(entry: CaffeineEntryEntity) {
+        entries.value = entries.value
+            .filterNot { entry.id != 0L && it.id == entry.id }
+            .plus(
+                if (entry.id == 0L) {
+                    entry.copy(id = (entries.value.maxOfOrNull { it.id } ?: 0L) + 1)
+                } else {
+                    entry
+                },
+            )
+    }
+
+    override suspend fun deleteById(id: Long) {
+        entries.value = entries.value.filterNot { it.id == id }
+    }
+
+    override suspend fun deleteAll() {
+        entries.value = emptyList()
     }
 }
 

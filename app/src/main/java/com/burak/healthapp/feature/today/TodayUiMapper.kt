@@ -12,6 +12,7 @@ import com.burak.healthapp.domain.calculation.formatSleepDuration
 import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.TodaySnapshot
+import java.time.LocalTime
 import java.util.Locale
 
 internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
@@ -29,6 +30,8 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
     val smokingEntry = snapshot.smokingEntryForDate
     val stepCount = snapshot.stepEntryForDate?.steps ?: 0
     val weekSteps = snapshot.weekStepEntries.sumOf { it.steps }
+    val caffeineTotal = snapshot.caffeineEntries.sumOf { it.estimatedMg }
+    val lastCaffeineTime = snapshot.caffeineEntries.maxByOrNull { it.time }?.time
 
     return TodayUiState(
         userName = snapshot.settings.userProfile.name,
@@ -100,6 +103,18 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
             headline = "$stepCount adım",
             supportingLabel = "Hedef ${goals.dailyStepTarget} adım",
             helperLabel = "Bu hafta $weekSteps adım",
+        ),
+        caffeine = CaffeineCardState(
+            dailyTotalMg = caffeineTotal,
+            limitMg = goals.dailyCaffeineLimitMg,
+            progress = clampProgress(caffeineTotal.toFloat(), goals.dailyCaffeineLimitMg.toFloat()),
+            lastCaffeineTimeLabel = lastCaffeineTime?.toString() ?: "--",
+            overDailyLimit = caffeineTotal > goals.dailyCaffeineLimitMg,
+            afterCutoff = lastCaffeineTime?.let { it > goals.caffeineCutoffTime } ?: false,
+            withinSleepBuffer = lastCaffeineTime?.let { time ->
+                isTimeOnOrAfter(time, goals.sleepTargetBedtime.minusHours(goals.caffeineSleepBufferHours.toLong()))
+            } ?: false,
+            entries = snapshot.caffeineEntries,
         ),
         supplements = SupplementCardState(
             items = snapshot.supplementTemplates.map { template ->
@@ -208,9 +223,21 @@ internal fun emptyUiState(): TodayUiState = TodayUiState(
         supportingLabel = "Hedef 8000 adım",
         helperLabel = "Telefon hareket ettikçe otomatik güncellenir.",
     ),
+    caffeine = CaffeineCardState(
+        dailyTotalMg = 0,
+        limitMg = DefaultHealthGoals.DAILY_CAFFEINE_LIMIT_MG,
+        progress = 0f,
+        lastCaffeineTimeLabel = "--",
+        overDailyLimit = false,
+        afterCutoff = false,
+        withinSleepBuffer = false,
+        entries = emptyList(),
+    ),
     supplements = SupplementCardState(items = emptyList()),
     dashboardCards = com.burak.healthapp.domain.model.defaultDashboardCardConfig(),
 )
+
+private fun isTimeOnOrAfter(time: LocalTime, threshold: LocalTime): Boolean = time == threshold || time.isAfter(threshold)
 
 private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
     goals: GoalSettings,

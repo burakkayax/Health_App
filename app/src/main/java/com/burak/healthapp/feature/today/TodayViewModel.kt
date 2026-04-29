@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.burak.healthapp.domain.model.CaffeineDrinkSize
+import com.burak.healthapp.domain.model.CaffeineDrinkType
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.ExerciseIntensity
@@ -95,6 +98,27 @@ class TodayViewModel(
             dashboardRepository.addHydration(
                 amountMl = amountMl,
                 date = selectedDate.value,
+            )
+        }
+    }
+
+    fun addCaffeine(
+        drinkType: CaffeineDrinkType,
+        size: CaffeineDrinkSize,
+        estimatedMg: Int,
+        customName: String?,
+    ) {
+        if (estimatedMg <= 0) return
+        viewModelScope.launch {
+            dashboardRepository.addCaffeine(
+                CaffeineEntry(
+                    date = selectedDate.value,
+                    time = LocalTime.now(),
+                    drinkType = drinkType,
+                    size = size,
+                    estimatedMg = estimatedMg,
+                    customName = customName,
+                ),
             )
         }
     }

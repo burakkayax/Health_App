@@ -13,6 +13,7 @@ import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.GoalSettings
@@ -329,6 +330,7 @@ private class FakeProfileDashboardRepository : DashboardRepository {
             smokingEntryForDate = null,
             stepEntryForDate = null,
             weekStepEntries = emptyList(),
+            caffeineEntries = emptyList(),
             supplementTemplates = emptyList(),
             supplementDoseEntries = emptyList(),
             measurementForDate = null,
@@ -346,6 +348,10 @@ private class FakeProfileDashboardRepository : DashboardRepository {
     override fun observeSleepSessionsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSession>> = flowOf(emptyList())
 
     override fun observeStepsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntry>> = flowOf(emptyList())
+
+    override fun observeCaffeineForDate(date: LocalDate): Flow<List<CaffeineEntry>> = flowOf(emptyList())
+
+    override fun observeCaffeineBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntry>> = flowOf(emptyList())
 
     override suspend fun saveMealEntry(entry: MealEntry) = Unit
 
@@ -382,6 +388,10 @@ private class FakeProfileDashboardRepository : DashboardRepository {
     override suspend fun saveWeightMeasurement(weightKg: Float, date: LocalDate) = Unit
 
     override suspend fun recordStepSensorValue(sensorValue: Int, date: LocalDate) = Unit
+
+    override suspend fun addCaffeine(entry: CaffeineEntry) = Unit
+
+    override suspend fun deleteCaffeine(id: Long) = Unit
 }
 
 private object EmptyHealthDataExportRepository : HealthDataExportRepository {

@@ -65,6 +65,11 @@ data object HydrationDetailDestination : HealthDestination(
     titleRes = R.string.route_hydration_detail,
 )
 
+data object CaffeineDetailDestination : HealthDestination(
+    route = "caffeine_detail",
+    titleRes = R.string.route_caffeine_detail,
+)
+
 val mainDestinations = listOf(
     TodayDestination,
     TrendsDestination,

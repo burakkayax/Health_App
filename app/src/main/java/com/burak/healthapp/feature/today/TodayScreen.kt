@@ -62,6 +62,7 @@ import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.components.CaffeineCard
 import com.burak.healthapp.feature.today.components.ExerciseCard
 import com.burak.healthapp.feature.today.components.HydrationCard
 import com.burak.healthapp.feature.today.components.NutritionCard
@@ -71,6 +72,7 @@ import com.burak.healthapp.feature.today.components.StepCard
 import com.burak.healthapp.feature.today.components.SupplementsCard
 import com.burak.healthapp.feature.today.components.WeightCard
 import com.burak.healthapp.feature.today.meal.MealEditorUiState
+import com.burak.healthapp.feature.today.sheet.CaffeineSheet
 import com.burak.healthapp.feature.today.sheet.ExerciseEditorSheet
 import com.burak.healthapp.feature.today.sheet.HydrationSheet
 import com.burak.healthapp.feature.today.sheet.MealEditorSheet
@@ -87,6 +89,7 @@ private sealed interface TodaySheet {
     data object Weight : TodaySheet
     data object Smoking : TodaySheet
     data object SupplementDose : TodaySheet
+    data object Caffeine : TodaySheet
     data object CustomizeDashboard : TodaySheet
 }
 
@@ -101,6 +104,7 @@ fun TodayContent(
         state = state,
         onAddMeal = actions.onAddMeal,
         onAddHydration = actions.onAddHydration,
+        onAddCaffeine = actions.onAddCaffeine,
         onSaveSleep = actions.onSaveSleep,
         onSaveWeight = actions.onSaveWeight,
         onSaveExercise = actions.onSaveExercise,
@@ -116,6 +120,7 @@ fun TodayContent(
         onOpenSleepDetail = actions.onOpenSleepDetail,
         onOpenStepDetail = actions.onOpenStepDetail,
         onOpenHydrationDetail = actions.onOpenHydrationDetail,
+        onOpenCaffeineDetail = actions.onOpenCaffeineDetail,
         mealEditorState = mealEditorState,
         onMealTypeChange = actions.onMealTypeChange,
         onAddMealDraft = actions.onAddMealDraft,
@@ -138,6 +143,12 @@ fun TodayContent(
     state: TodayUiState,
     onAddMeal: (MealType, String, Int, Int, Int, Int) -> Unit,
     onAddHydration: (Int) -> Unit,
+    onAddCaffeine: (
+        com.burak.healthapp.domain.model.CaffeineDrinkType,
+        com.burak.healthapp.domain.model.CaffeineDrinkSize,
+        Int,
+        String?,
+    ) -> Unit = { _, _, _, _ -> },
     onSaveSleep: (LocalTime, LocalTime) -> Unit,
     onSaveWeight: (Float) -> Unit,
     onSaveExercise: (ExerciseType, Int, ExerciseIntensity) -> Unit,
@@ -153,6 +164,7 @@ fun TodayContent(
     onOpenSleepDetail: () -> Unit,
     onOpenStepDetail: () -> Unit = {},
     onOpenHydrationDetail: () -> Unit = {},
+    onOpenCaffeineDetail: () -> Unit = {},
     mealEditorState: MealEditorUiState,
     onMealTypeChange: (MealType) -> Unit,
     onAddMealDraft: () -> Unit,
@@ -224,6 +236,11 @@ fun TodayContent(
                             state = state,
                             onAddExercise = { activeSheet = TodaySheet.Exercise },
                             onDeleteExercise = onDeleteExercise,
+                        )
+                        DashboardCardType.CAFFEINE -> CaffeineCard(
+                            state = state.caffeine,
+                            onAdd = { activeSheet = TodaySheet.Caffeine },
+                            onOpenDetails = onOpenCaffeineDetail,
                         )
                         DashboardCardType.SMOKING -> SmokingCard(
                             state = state,
@@ -349,6 +366,15 @@ fun TodayContent(
                 items = state.supplements.items,
                 onSave = { doses ->
                     onSaveSupplementDoses(doses)
+                    activeSheet = null
+                },
+            )
+        }
+
+        TodaySheet.Caffeine -> ModalBottomSheet(onDismissRequest = { activeSheet = null }) {
+            CaffeineSheet(
+                onSave = { type, size, estimatedMg, customName ->
+                    onAddCaffeine(type, size, estimatedMg, customName)
                     activeSheet = null
                 },
             )
@@ -633,6 +659,7 @@ private fun DashboardCardType.label(): String = when (this) {
     DashboardCardType.HYDRATION -> stringResource(R.string.dashboard_card_hydration)
     DashboardCardType.SLEEP -> stringResource(R.string.dashboard_card_sleep)
     DashboardCardType.EXERCISE -> stringResource(R.string.dashboard_card_exercise)
+    DashboardCardType.CAFFEINE -> stringResource(R.string.dashboard_card_caffeine)
     DashboardCardType.SMOKING -> stringResource(R.string.dashboard_card_smoking)
     DashboardCardType.SUPPLEMENTS -> stringResource(R.string.dashboard_card_supplements)
     DashboardCardType.STEPS -> stringResource(R.string.dashboard_card_steps)

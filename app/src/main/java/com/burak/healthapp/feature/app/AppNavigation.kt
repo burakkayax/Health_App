@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.burak.healthapp.core.ui.navigation.CaffeineDetailDestination
 import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
@@ -14,6 +15,7 @@ import com.burak.healthapp.core.ui.navigation.StepDetailDestination
 import com.burak.healthapp.core.ui.navigation.TodayDestination
 import com.burak.healthapp.core.ui.navigation.TrendsDestination
 import com.burak.healthapp.core.ui.navigation.WeightDetailDestination
+import com.burak.healthapp.feature.detail.caffeine.CaffeineDetailRoute
 import com.burak.healthapp.feature.detail.hydration.HydrationDetailRoute
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryRoute
 import com.burak.healthapp.feature.detail.sleep.SleepDetailRoute
@@ -45,6 +47,7 @@ internal fun AppNavigation(
                 onOpenSleepDetail = { navController.navigate(SleepDetailDestination.route) },
                 onOpenStepDetail = { navController.navigate(StepDetailDestination.route) },
                 onOpenHydrationDetail = { navController.navigate(HydrationDetailDestination.route) },
+                onOpenCaffeineDetail = { navController.navigate(CaffeineDetailDestination.route) },
             )
         }
         composable(TrendsDestination.route) {
@@ -74,6 +77,9 @@ internal fun AppNavigation(
         }
         composable(HydrationDetailDestination.route) {
             HydrationDetailRoute(selectedDate = selectedDate)
+        }
+        composable(CaffeineDetailDestination.route) {
+            CaffeineDetailRoute(selectedDate = selectedDate)
         }
     }
 }

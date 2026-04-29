@@ -10,6 +10,7 @@ data class TodaySnapshot(
     val smokingEntryForDate: SmokingEntry?,
     val stepEntryForDate: StepEntry?,
     val weekStepEntries: List<StepEntry>,
+    val caffeineEntries: List<CaffeineEntry>,
     val supplementTemplates: List<SupplementTemplate>,
     val supplementDoseEntries: List<SupplementDoseEntry>,
     val measurementForDate: BodyMeasurementEntry?,

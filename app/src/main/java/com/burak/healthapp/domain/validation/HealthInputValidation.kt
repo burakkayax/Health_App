@@ -143,6 +143,8 @@ object SupplementDoseValidator {
 
 object GoalSettingsValidator {
     private const val MAX_STEP_TARGET = 100_000
+    private const val MAX_CAFFEINE_LIMIT_MG = 1_000
+    private const val MAX_CAFFEINE_SLEEP_BUFFER_HOURS = 24
 
     fun validate(goals: GoalSettings): ValidationResult<GoalSettings> {
         val errors = mutableListOf<HealthInputError>()
@@ -153,6 +155,10 @@ object GoalSettingsValidator {
         if (goals.waterTargetMl <= 0) errors += HealthInputError.MUST_BE_POSITIVE
         if (goals.dailyStepTarget <= 0) errors += HealthInputError.MUST_BE_POSITIVE
         if (goals.dailyStepTarget > MAX_STEP_TARGET) errors += HealthInputError.TOO_HIGH
+        if (goals.dailyCaffeineLimitMg <= 0) errors += HealthInputError.MUST_BE_POSITIVE
+        if (goals.dailyCaffeineLimitMg > MAX_CAFFEINE_LIMIT_MG) errors += HealthInputError.TOO_HIGH
+        if (goals.caffeineSleepBufferHours <= 0) errors += HealthInputError.MUST_BE_POSITIVE
+        if (goals.caffeineSleepBufferHours > MAX_CAFFEINE_SLEEP_BUFFER_HOURS) errors += HealthInputError.TOO_HIGH
         if (goals.exerciseTargetDaysPerWeek !in 0..7) errors += HealthInputError.TOO_HIGH
         if (goals.exerciseTargetDurationMinutes <= 0) errors += HealthInputError.MUST_BE_POSITIVE
         if (goals.smokeDailyLimit < 0) errors += HealthInputError.MUST_NOT_BE_NEGATIVE

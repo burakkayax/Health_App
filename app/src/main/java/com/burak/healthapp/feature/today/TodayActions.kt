@@ -1,6 +1,8 @@
 package com.burak.healthapp.feature.today
 
 import com.burak.healthapp.domain.model.DashboardCardType
+import com.burak.healthapp.domain.model.CaffeineDrinkSize
+import com.burak.healthapp.domain.model.CaffeineDrinkType
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.MealType
@@ -10,6 +12,7 @@ import java.time.LocalTime
 data class TodayActions(
     val onAddMeal: (MealType, String, Int, Int, Int, Int) -> Unit,
     val onAddHydration: (Int) -> Unit,
+    val onAddCaffeine: (CaffeineDrinkType, CaffeineDrinkSize, Int, String?) -> Unit = { _, _, _, _ -> },
     val onSaveSleep: (LocalTime, LocalTime) -> Unit,
     val onSaveWeight: (Float) -> Unit,
     val onSaveExercise: (ExerciseType, Int, ExerciseIntensity) -> Unit,
@@ -26,6 +29,7 @@ data class TodayActions(
     val onOpenSleepDetail: () -> Unit,
     val onOpenStepDetail: () -> Unit = {},
     val onOpenHydrationDetail: () -> Unit = {},
+    val onOpenCaffeineDetail: () -> Unit = {},
     val onMealTypeChange: (MealType) -> Unit,
     val onAddMealDraft: () -> Unit,
     val onRemoveMealDraft: (Long) -> Unit,

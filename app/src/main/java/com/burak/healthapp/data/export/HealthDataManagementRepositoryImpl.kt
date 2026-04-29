@@ -3,6 +3,7 @@ package com.burak.healthapp.data.export
 import androidx.room.withTransaction
 import com.burak.healthapp.core.database.HealthDatabase
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.entity.CaffeineEntryEntity
 import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.entity.MealEntryEntity
@@ -12,6 +13,7 @@ import com.burak.healthapp.data.local.entity.StepEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
+import com.burak.healthapp.domain.export.ExportedCaffeineEntry
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -51,6 +53,7 @@ class HealthDataManagementRepositoryImpl(
                 importExercise(prepared.exercise)
                 importSmoking(prepared.smoking)
                 importSteps(prepared.steps)
+                importCaffeine(prepared.caffeine)
                 importBodyMeasurements(prepared.bodyMeasurements)
                 val templateIdMap = importSupplementTemplates(prepared.supplementTemplates)
                 importSupplementDoses(prepared.supplementDoses, templateIdMap)
@@ -75,6 +78,7 @@ class HealthDataManagementRepositoryImpl(
                 database.exerciseDao().deleteAll()
                 database.smokingDao().deleteAll()
                 database.stepDao().deleteAll()
+                database.caffeineDao().deleteAll()
                 database.bodyMeasurementDao().deleteAll()
             }
         }
@@ -129,6 +133,18 @@ class HealthDataManagementRepositoryImpl(
         entries.forEach { entry ->
             database.stepDao().deleteForDate(entry.date)
             database.stepDao().upsert(entry.copy(id = 0))
+        }
+    }
+
+    private suspend fun importCaffeine(entries: List<CaffeineEntryEntity>) {
+        val seenKeys = database.caffeineDao().getAll()
+            .map { it.importKey() }
+            .toMutableSet()
+        entries.forEach { entry ->
+            val key = entry.importKey()
+            if (seenKeys.add(key)) {
+                database.caffeineDao().upsert(entry.copy(id = 0))
+            }
         }
     }
 
@@ -202,6 +218,7 @@ private data class PreparedHealthDataImport(
     val exercise: List<ExerciseEntryEntity>,
     val smoking: List<SmokingEntryEntity>,
     val steps: List<StepEntryEntity>,
+    val caffeine: List<CaffeineEntryEntity>,
     val bodyMeasurements: List<BodyMeasurementEntity>,
     val supplementTemplates: List<SupplementTemplateImport>,
     val supplementDoses: List<SupplementDoseEntryEntity>,
@@ -223,6 +240,7 @@ private fun HealthDataExportModel.toPreparedImport(): PreparedHealthDataImport =
     exercise = exercise.map(ExportedExerciseEntry::toEntity),
     smoking = smoking.map(ExportedSmokingEntry::toEntity),
     steps = steps.map(ExportedStepEntry::toEntity),
+    caffeine = caffeineEntries.map(ExportedCaffeineEntry::toEntity),
     bodyMeasurements = bodyMeasurements.map(ExportedBodyMeasurementEntry::toEntity),
     supplementTemplates = supplementTemplates.map(ExportedSupplementTemplate::toImport),
     supplementDoses = supplementDoseEntries.map(ExportedSupplementDoseEntry::toEntity),
@@ -241,6 +259,9 @@ private fun ExportedGoalSettings.toDomain(): GoalSettings = GoalSettings(
     fatTargetGrams = fatTargetGrams,
     waterTargetMl = waterTargetMl,
     dailyStepTarget = dailyStepTarget,
+    dailyCaffeineLimitMg = dailyCaffeineLimitMg,
+    caffeineCutoffTime = LocalTime.parse(caffeineCutoffTime),
+    caffeineSleepBufferHours = caffeineSleepBufferHours,
     sleepTargetBedtime = LocalTime.parse(sleepTargetBedtime),
     sleepTargetWakeTime = LocalTime.parse(sleepTargetWakeTime),
     exerciseTargetDaysPerWeek = exerciseTargetDaysPerWeek,
@@ -303,6 +324,16 @@ private fun ExportedStepEntry.toEntity(): StepEntryEntity = StepEntryEntity(
     updatedAt = LocalDateTime.parse(updatedAt),
 )
 
+private fun ExportedCaffeineEntry.toEntity(): CaffeineEntryEntity = CaffeineEntryEntity(
+    date = LocalDate.parse(date),
+    time = LocalTime.parse(time),
+    drinkType = drinkType,
+    size = size,
+    estimatedMg = estimatedMg,
+    customName = customName,
+    createdAt = LocalDateTime.parse(createdAt),
+)
+
 private fun ExportedBodyMeasurementEntry.toEntity(): BodyMeasurementEntity = BodyMeasurementEntity(
     date = LocalDate.parse(date),
     weightKg = weightKg,
@@ -333,6 +364,8 @@ private fun ExportedSupplementDoseEntry.toEntity(): SupplementDoseEntryEntity = 
 private fun MealEntryEntity.importKey(): String = listOf(date, mealType, name.trim(), calories, createdAt).joinToString("|")
 
 private fun HydrationEntryEntity.importKey(): String = listOf(date, amountMl, createdAt).joinToString("|")
+
+private fun CaffeineEntryEntity.importKey(): String = listOf(date, time, drinkType, size, estimatedMg, createdAt).joinToString("|")
 
 private fun SupplementDoseEntryEntity.importKey(): String = listOf(templateId, date, loggedAt).joinToString("|")
 

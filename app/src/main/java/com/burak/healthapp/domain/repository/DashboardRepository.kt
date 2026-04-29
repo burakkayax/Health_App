@@ -1,6 +1,7 @@
 package com.burak.healthapp.domain.repository
 
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
@@ -25,6 +26,10 @@ interface DashboardRepository {
     fun observeSleepSessionsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SleepSession>>
 
     fun observeStepsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntry>>
+
+    fun observeCaffeineForDate(date: LocalDate = LocalDate.now()): Flow<List<CaffeineEntry>>
+
+    fun observeCaffeineBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntry>>
 
     suspend fun saveMealEntry(entry: MealEntry)
 
@@ -64,4 +69,8 @@ interface DashboardRepository {
     suspend fun saveWeightMeasurement(weightKg: Float, date: LocalDate = LocalDate.now())
 
     suspend fun recordStepSensorValue(sensorValue: Int, date: LocalDate = LocalDate.now())
+
+    suspend fun addCaffeine(entry: CaffeineEntry)
+
+    suspend fun deleteCaffeine(id: Long)
 }

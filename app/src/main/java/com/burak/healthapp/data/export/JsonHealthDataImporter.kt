@@ -37,7 +37,7 @@ class JsonHealthDataImporter(
             ?.intOrNull
             ?: return ImportValidationResult.Invalid(ImportValidationError.MISSING_SCHEMA_VERSION)
 
-        if (schemaVersion != HealthDataExportModel.SCHEMA_VERSION) {
+        if (schemaVersion !in SUPPORTED_SCHEMA_VERSIONS) {
             return ImportValidationResult.Invalid(ImportValidationError.UNSUPPORTED_SCHEMA_VERSION)
         }
 
@@ -53,5 +53,9 @@ class JsonHealthDataImporter(
             model = model,
             preview = HealthDataImportPreview.from(model),
         )
+    }
+
+    private companion object {
+        val SUPPORTED_SCHEMA_VERSIONS = setOf(1, HealthDataExportModel.SCHEMA_VERSION)
     }
 }

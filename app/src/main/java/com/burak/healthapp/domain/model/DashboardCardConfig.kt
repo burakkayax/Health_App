@@ -9,6 +9,7 @@ enum class DashboardCardType {
     HYDRATION,
     SLEEP,
     EXERCISE,
+    CAFFEINE,
     SMOKING,
     SUPPLEMENTS,
     STEPS,
@@ -26,6 +27,7 @@ fun defaultDashboardCardConfig(): List<DashboardCardConfig> = listOf(
     DashboardCardType.WEIGHT,
     DashboardCardType.EXERCISE,
     DashboardCardType.STEPS,
+    DashboardCardType.CAFFEINE,
     DashboardCardType.HYDRATION,
     DashboardCardType.SLEEP,
     DashboardCardType.SMOKING,
@@ -33,7 +35,7 @@ fun defaultDashboardCardConfig(): List<DashboardCardConfig> = listOf(
 ).mapIndexed { index, type ->
     DashboardCardConfig(
         type = type,
-        isVisible = true,
+        isVisible = type != DashboardCardType.CAFFEINE,
         sortOrder = index,
     )
 }

@@ -22,6 +22,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - [Kurulum](#kurulum)
 - [Geliştirme Komutları](#geliştirme-komutları)
 - [Testler](#testler)
+- [Release ve Performans](#release-ve-performans)
 - [Yol Haritası](#yol-haritası)
 - [Lisans](#lisans)
 
@@ -40,7 +41,8 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Takviye/doz takibi
 - Kilo ve vücut ölçüsü takibi
 - Günlük adım takibi
-- Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Su, Uyku, Sigara, Takviyeler)
+- Kafein takibi (hızlı ekleme, günlük limit, kesme saati farkındalığı)
+- Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Kafein, Su, Uyku, Sigara, Takviyeler)
 
 ### Beslenme ve makro takibi
 
@@ -279,11 +281,12 @@ Health_App, local-first bir uygulamadır.
 
 Profil ekranındaki Veri Yönetimi bölümü, kullanıcının seçtiği dosya konumuna JSON formatında dışa aktarma ve seçtiği JSON dosyasından içe aktarma yapar.
 
-* Export dosyası `schemaVersion` alanı ile versiyonlanır ve ilk şema sürümü `1` değerini kullanır.
+* Export dosyası `schemaVersion` alanı ile versiyonlanır ve güncel şema sürümü `2` değerini kullanır.
 * `exportedAt` ISO-8601 zaman damgası, `appVersion` ise uygulama sürüm bilgisini içerir.
 * Profil, hedefler, su hatırlatma ayarları, tema modu ve local Room kayıtları tek JSON kök modeli altında toplanır.
 * Uygulama dosya konumunu otomatik seçmez; Android Storage Access Framework ile kullanıcıdan konum seçimi alınır.
-* İçe aktarma yalnız `schemaVersion = 1` dosyalarını kabul eder ve yazmadan önce kayıt sayılarını gösteren bir önizleme sunar.
+* İçe aktarma `schemaVersion = 1` ve `schemaVersion = 2` dosyalarını kabul eder; yazmadan önce kayıt sayılarını gösteren bir önizleme sunar.
+* `schemaVersion = 2` ile kafein kayıtları da export/import kapsamına alınır.
 * JSON export/import dosyası sağlık verisi içerdiği için güvenilir konumlarda saklanmalıdır.
 
 Import transaction içinde uygulanır; kısmi import başarısız olursa Room kayıtları yarım bırakılmaz.
@@ -365,6 +368,12 @@ Debug APK oluşturma:
 ./gradlew :app:assembleDebug
 ```
 
+Release APK oluşturma:
+
+```bash
+./gradlew :app:assembleRelease
+```
+
 Debug APK konumu:
 
 ```text
@@ -396,6 +405,35 @@ Android test derlemesi:
 ```bash
 ./gradlew :app:compileDebugAndroidTestKotlin
 ```
+
+Benchmark derlemesi:
+
+```bash
+./gradlew :benchmark:assembleBenchmark
+```
+
+Connected benchmark çalıştırma:
+
+```bash
+./gradlew :benchmark:connectedBenchmarkAndroidTest
+```
+
+Baseline profile üretimi:
+
+```bash
+./gradlew :benchmark:connectedBenchmarkAndroidTest
+```
+
+---
+
+## Release ve Performans
+
+Release build dağıtım kalitesi için R8 minification ve resource shrinking etkindir.
+
+* Debug build hızlı iterasyon içindir.
+* Release build optimize edilmiş APK üretir.
+* CI, `:app:assembleRelease` adımını da doğrular.
+* Baseline Profile dosyası `app/src/main/baseline-prof.txt` altında tutulur.
 
 ---
 
@@ -445,9 +483,9 @@ Planlanan geliştirmeler:
 * [ ] Daha gelişmiş grafik ve trend analizleri
 * [ ] Widget desteği
 * [ ] İngilizce dil desteği
-* [ ] Baseline Profile ve Macrobenchmark
+* [x] Baseline Profile ve Macrobenchmark
 * [ ] Kullanıcı kontrollü import önizleme geliştirmeleri ve veri yönetimi raporları
-* [ ] Release build optimizasyonları
+* [x] Release build optimizasyonları
 
 ---
 

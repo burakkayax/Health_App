@@ -3,6 +3,7 @@ package com.burak.healthapp.feature.app
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.navigation.CaffeineDetailDestination
 import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
@@ -37,6 +38,7 @@ internal fun resolveTitle(currentRoute: String, selectedDate: LocalDate): String
         SleepDetailDestination.route -> stringResource(SleepDetailDestination.titleRes)
         StepDetailDestination.route -> stringResource(StepDetailDestination.titleRes)
         HydrationDetailDestination.route -> stringResource(HydrationDetailDestination.titleRes)
+        CaffeineDetailDestination.route -> stringResource(CaffeineDetailDestination.titleRes)
         else -> {
             if (selectedDate == today) {
                 stringResource(TodayDestination.titleRes)

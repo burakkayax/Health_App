@@ -25,6 +25,7 @@ import com.burak.healthapp.feature.today.ExerciseCardState
 import com.burak.healthapp.feature.today.HydrationCardState
 import com.burak.healthapp.feature.today.MacroRingState
 import com.burak.healthapp.feature.today.NutritionCardState
+import com.burak.healthapp.feature.today.CaffeineCardState
 import com.burak.healthapp.feature.today.SleepCardState
 import com.burak.healthapp.feature.today.SmokingCardState
 import com.burak.healthapp.feature.today.SmokingStatus
@@ -725,6 +726,16 @@ class TodayContentTest {
                 headline = "4200 adım",
                 supportingLabel = "Hedef 8000 adım",
                 helperLabel = "Bu hafta 18000 adım",
+            ),
+            caffeine = CaffeineCardState(
+                dailyTotalMg = 0,
+                limitMg = 300,
+                progress = 0f,
+                lastCaffeineTimeLabel = "--",
+                overDailyLimit = false,
+                afterCutoff = false,
+                withinSleepBuffer = false,
+                entries = emptyList(),
             ),
             supplements = SupplementCardState(
                 items = listOf(

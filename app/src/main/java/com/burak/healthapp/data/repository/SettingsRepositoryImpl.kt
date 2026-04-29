@@ -62,6 +62,10 @@ class SettingsRepositoryImpl(
                 fatTargetGrams = preferences[SettingsKeys.fatTarget] ?: DefaultHealthGoals.FAT_GRAMS,
                 waterTargetMl = preferences[SettingsKeys.waterTarget] ?: DefaultHealthGoals.WATER_TARGET_ML,
                 dailyStepTarget = preferences[SettingsKeys.dailyStepTarget] ?: DefaultHealthGoals.DAILY_STEPS,
+                dailyCaffeineLimitMg = preferences[SettingsKeys.dailyCaffeineLimitMg] ?: DefaultHealthGoals.DAILY_CAFFEINE_LIMIT_MG,
+                caffeineCutoffTime = preferences[SettingsKeys.caffeineCutoffTime]?.let(LocalTime::parse)
+                    ?: DefaultHealthGoals.CAFFEINE_CUTOFF_TIME,
+                caffeineSleepBufferHours = preferences[SettingsKeys.caffeineSleepBufferHours] ?: DefaultHealthGoals.CAFFEINE_SLEEP_BUFFER_HOURS,
                 sleepTargetBedtime = bedtime,
                 sleepTargetWakeTime = wakeTime,
                 exerciseTargetDaysPerWeek = preferences[SettingsKeys.exerciseTargetDays] ?: DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
@@ -123,6 +127,9 @@ class SettingsRepositoryImpl(
             preferences[SettingsKeys.fatTarget] = goals.fatTargetGrams
             preferences[SettingsKeys.waterTarget] = goals.waterTargetMl
             preferences[SettingsKeys.dailyStepTarget] = goals.dailyStepTarget
+            preferences[SettingsKeys.dailyCaffeineLimitMg] = goals.dailyCaffeineLimitMg
+            preferences[SettingsKeys.caffeineCutoffTime] = goals.caffeineCutoffTime.toString()
+            preferences[SettingsKeys.caffeineSleepBufferHours] = goals.caffeineSleepBufferHours
             preferences[SettingsKeys.sleepTargetBedtime] = goals.sleepTargetBedtime.toString()
             preferences[SettingsKeys.sleepTargetWakeTime] = goals.sleepTargetWakeTime.toString()
             preferences[SettingsKeys.exerciseTargetDays] = goals.exerciseTargetDaysPerWeek

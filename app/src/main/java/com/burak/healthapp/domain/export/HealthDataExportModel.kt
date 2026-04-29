@@ -17,12 +17,13 @@ data class HealthDataExportModel(
     val exercise: List<ExportedExerciseEntry> = emptyList(),
     val smoking: List<ExportedSmokingEntry> = emptyList(),
     val steps: List<ExportedStepEntry> = emptyList(),
+    val caffeineEntries: List<ExportedCaffeineEntry> = emptyList(),
     val bodyMeasurements: List<ExportedBodyMeasurementEntry> = emptyList(),
     val supplementTemplates: List<ExportedSupplementTemplate> = emptyList(),
     val supplementDoseEntries: List<ExportedSupplementDoseEntry> = emptyList(),
 ) {
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
     }
 }
 
@@ -45,6 +46,9 @@ data class ExportedGoalSettings(
     val fatTargetGrams: Int,
     val waterTargetMl: Int,
     val dailyStepTarget: Int,
+    val dailyCaffeineLimitMg: Int = 300,
+    val caffeineCutoffTime: String = "15:00",
+    val caffeineSleepBufferHours: Int = 6,
     val sleepTargetBedtime: String,
     val sleepTargetWakeTime: String,
     val exerciseTargetDaysPerWeek: Int,
@@ -118,6 +122,18 @@ data class ExportedStepEntry(
     val sensorBaseline: Int?,
     val lastSensorValue: Int?,
     val updatedAt: String,
+)
+
+@Serializable
+data class ExportedCaffeineEntry(
+    val id: Long,
+    val date: String,
+    val time: String,
+    val drinkType: String,
+    val size: String,
+    val estimatedMg: Int,
+    val customName: String?,
+    val createdAt: String,
 )
 
 @Serializable

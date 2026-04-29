@@ -37,6 +37,7 @@
     <string name="route_sleep_detail">Uyku Detayı</string>
     <string name="route_step_detail">Adım Detayı</string>
     <string name="route_hydration_detail">Su Detayı</string>
+    <string name="route_caffeine_detail">Kafein Detayı</string>
     <string name="route_today_meals">Bugünün Öğünleri</string>
     <string name="route_date_meals">%1$s Öğünleri</string>
 
@@ -71,6 +72,7 @@
     <string name="today_title_weight">Kilo</string>
     <string name="today_title_exercise">Egzersiz</string>
     <string name="today_title_steps">Adım</string>
+    <string name="today_title_caffeine">Kafein</string>
     <string name="today_title_hydration">Su Tüketimi</string>
     <string name="today_title_sleep">Uyku Takibi</string>
     <string name="today_title_smoking">Sigara</string>
@@ -122,6 +124,7 @@
     <string name="dashboard_card_hydration">Su</string>
     <string name="dashboard_card_sleep">Uyku</string>
     <string name="dashboard_card_exercise">Egzersiz</string>
+    <string name="dashboard_card_caffeine">Kafein</string>
     <string name="dashboard_card_smoking">Sigara</string>
     <string name="dashboard_card_supplements">Takviyeler</string>
     <string name="dashboard_card_steps">Adım</string>
@@ -164,6 +167,32 @@
     <string name="step_detail_last_7_days">Son 7 gün</string>
     <string name="step_detail_last_30_days">Son 30 gün</string>
     <string name="step_detail_logged_days_subtitle">Kayıt olan günlere göre</string>
+    <string name="caffeine_today_total_format">%1$d / %2$d mg</string>
+    <string name="caffeine_last_time_format">Son alım %1$s</string>
+    <string name="caffeine_estimate_notice">Kafein değerleri tahminidir; tıbbi tavsiye değildir.</string>
+    <string name="caffeine_sheet_title">Kafein Ekle</string>
+    <string name="caffeine_estimated_mg">Tahmini mg</string>
+    <string name="caffeine_custom_name">İçecek adı</string>
+    <string name="caffeine_type_turkish_coffee">Türk kahvesi</string>
+    <string name="caffeine_type_filter_coffee">Filtre kahve</string>
+    <string name="caffeine_type_espresso">Espresso</string>
+    <string name="caffeine_type_americano">Americano</string>
+    <string name="caffeine_type_latte">Latte</string>
+    <string name="caffeine_type_cappuccino">Cappuccino</string>
+    <string name="caffeine_type_black_tea">Çay</string>
+    <string name="caffeine_type_green_tea">Yeşil çay</string>
+    <string name="caffeine_type_energy_drink">Enerji içeceği</string>
+    <string name="caffeine_type_cola">Kola</string>
+    <string name="caffeine_type_other">Diğer</string>
+    <string name="caffeine_size_small">Küçük</string>
+    <string name="caffeine_size_medium">Orta</string>
+    <string name="caffeine_size_large">Büyük</string>
+    <string name="caffeine_detail_today_total">Bugünkü toplam</string>
+    <string name="caffeine_detail_weekly_average">Günlük ortalama</string>
+    <string name="caffeine_detail_last_time">Son kafein saati</string>
+    <string name="caffeine_detail_entries">Kayıtlar</string>
+    <string name="caffeine_detail_empty">Henüz kafein kaydı yok.</string>
+    <string name="caffeine_detail_record_format">%1$s • %2$s mg</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
     <string name="profile_goals_title">Hedefler</string>
@@ -218,6 +247,7 @@
     <string name="import_preview_exercise">Egzersiz kayd&#305;</string>
     <string name="import_preview_smoking">Sigara kayd&#305;</string>
     <string name="import_preview_steps">Ad&#305;m kayd&#305;</string>
+    <string name="import_preview_caffeine">Kafein kayd&#305;</string>
     <string name="import_preview_body_measurements">Kilo/&#246;l&#231;&#252;m kayd&#305;</string>
     <string name="import_preview_supplement_templates">Takviye &#351;ablonu</string>
     <string name="import_preview_supplement_doses">Takviye doz kayd&#305;</string>
@@ -241,6 +271,9 @@
     <string name="profile_goal_water">Su (ml)</string>
     <string name="profile_goal_step_target">Adım Hedefi</string>
     <string name="profile_goal_smoke_limit">Sigara Limiti</string>
+    <string name="profile_goal_caffeine_limit">Kafein Limiti (mg)</string>
+    <string name="profile_goal_caffeine_cutoff_time">Kafein Kesme Saati</string>
+    <string name="profile_goal_caffeine_sleep_buffer">Uyku Öncesi Kafein Aralığı (saat)</string>
     <string name="profile_goal_target_weight">Hedef Kilo</string>
     <string name="profile_goal_exercise_days">Egzersiz Gün</string>
     <string name="profile_goal_bedtime">Yatış</string>

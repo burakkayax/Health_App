@@ -27,7 +27,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate(exporter.encode(sampleModel()))
 
         assertTrue(result is ImportValidationResult.Valid)
-        assertEquals(1, (result as ImportValidationResult.Valid).model.schemaVersion)
+        assertEquals(HealthDataExportModel.SCHEMA_VERSION, (result as ImportValidationResult.Valid).model.schemaVersion)
     }
 
     @Test
@@ -82,8 +82,53 @@ class JsonHealthDataImporterTest {
         assertEquals(0, preview.exerciseCount)
         assertEquals(0, preview.smokingCount)
         assertEquals(0, preview.stepCount)
+        assertEquals(0, preview.caffeineCount)
         assertEquals(0, preview.bodyMeasurementCount)
         assertEquals(0, preview.supplementDoseCount)
+    }
+
+    @Test
+    fun validate_supportsSchemaVersion1WithoutCaffeineEntries() {
+        val legacyJson = """
+            {
+              "schemaVersion": 1,
+              "exportedAt": "2026-04-27T10:00:00Z",
+              "appVersion": "1.0-test",
+              "profile": { "name": "Burak", "avatarInitials": "BK", "heightCm": 182.0 },
+              "goals": {
+                "dailyCaloriesTarget": 2200,
+                "proteinTargetGrams": 160,
+                "carbTargetGrams": 220,
+                "fatTargetGrams": 70,
+                "waterTargetMl": 2500,
+                "dailyStepTarget": 8000,
+                "sleepTargetBedtime": "23:00",
+                "sleepTargetWakeTime": "07:00",
+                "exerciseTargetDaysPerWeek": 4,
+                "exerciseTargetDurationMinutes": 45,
+                "smokeDailyLimit": 0,
+                "baselineWeightKg": 78.0,
+                "targetWeightKg": 74.0,
+                "baselineShoulderCm": 118.0,
+                "baselineWaistCm": 88.0,
+                "baselineHipCm": 99.0
+              },
+              "waterReminderSettings": {
+                "enabled": true,
+                "startTime": "09:00",
+                "endTime": "21:00",
+                "intervalMinutes": 60
+              },
+              "themeMode": "SYSTEM"
+            }
+        """.trimIndent()
+
+        val result = importer.validate(legacyJson)
+
+        assertTrue(result is ImportValidationResult.Valid)
+        val model = (result as ImportValidationResult.Valid).model
+        assertEquals(1, model.schemaVersion)
+        assertTrue(model.caffeineEntries.isEmpty())
     }
 }
 

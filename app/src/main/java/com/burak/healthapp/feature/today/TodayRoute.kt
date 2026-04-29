@@ -19,6 +19,7 @@ fun TodayRoute(
     onOpenSleepDetail: () -> Unit,
     onOpenStepDetail: () -> Unit,
     onOpenHydrationDetail: () -> Unit,
+    onOpenCaffeineDetail: () -> Unit,
 ) {
     val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.Factory)
     val mealEditorViewModel: MealEditorViewModel = viewModel()
@@ -35,6 +36,7 @@ fun TodayRoute(
         actions = TodayActions(
             onAddMeal = viewModel::addMeal,
             onAddHydration = viewModel::addHydration,
+            onAddCaffeine = viewModel::addCaffeine,
             onSaveSleep = viewModel::saveSleep,
             onSaveWeight = viewModel::saveWeight,
             onSaveExercise = viewModel::saveExercise,
@@ -51,6 +53,7 @@ fun TodayRoute(
             onOpenSleepDetail = onOpenSleepDetail,
             onOpenStepDetail = onOpenStepDetail,
             onOpenHydrationDetail = onOpenHydrationDetail,
+            onOpenCaffeineDetail = onOpenCaffeineDetail,
             onMealTypeChange = mealEditorViewModel::setMealType,
             onAddMealDraft = mealEditorViewModel::addDraftFood,
             onRemoveMealDraft = mealEditorViewModel::removeDraftFood,

@@ -79,6 +79,9 @@ fun ProfileGoalsContent(
     var fat by remember(state.goalSettings) { mutableStateOf(state.goalSettings.fatTargetGrams.toString()) }
     var water by remember(state.goalSettings) { mutableStateOf(state.goalSettings.waterTargetMl.toString()) }
     var dailySteps by remember(state.goalSettings) { mutableStateOf(state.goalSettings.dailyStepTarget.toString()) }
+    var dailyCaffeineLimit by remember(state.goalSettings) { mutableStateOf(state.goalSettings.dailyCaffeineLimitMg.toString()) }
+    var caffeineCutoffTime by remember(state.goalSettings) { mutableStateOf(state.goalSettings.caffeineCutoffTime.toString()) }
+    var caffeineSleepBufferHours by remember(state.goalSettings) { mutableStateOf(state.goalSettings.caffeineSleepBufferHours.toString()) }
     var stepGoalError by remember(state.goalSettings) { mutableStateOf<StepGoalInputError?>(null) }
     var sleepBedtime by remember(state.goalSettings) { mutableStateOf(state.goalSettings.sleepTargetBedtime.toString()) }
     var sleepWakeTime by remember(state.goalSettings) { mutableStateOf(state.goalSettings.sleepTargetWakeTime.toString()) }
@@ -149,10 +152,10 @@ fun ProfileGoalsContent(
             GoalFieldRow(
                 leftLabel = stringResource(R.string.profile_goal_smoke_limit),
                 leftValue = smokeDailyLimit,
-                rightLabel = "",
-                rightValue = "",
+                rightLabel = stringResource(R.string.profile_goal_caffeine_limit),
+                rightValue = dailyCaffeineLimit,
                 onLeftChange = { smokeDailyLimit = it },
-                onRightChange = {},
+                onRightChange = { dailyCaffeineLimit = it },
             )
             GoalFieldRow(
                 leftLabel = stringResource(R.string.profile_goal_target_weight),
@@ -177,10 +180,19 @@ fun ProfileGoalsContent(
             GoalFieldRow(
                 leftLabel = stringResource(R.string.profile_goal_exercise_duration),
                 leftValue = exerciseTargetDuration,
+                rightLabel = stringResource(R.string.profile_goal_caffeine_sleep_buffer),
+                rightValue = caffeineSleepBufferHours,
+                onLeftChange = { exerciseTargetDuration = it },
+                onRightChange = { caffeineSleepBufferHours = it },
+            )
+            GoalFieldRow(
+                leftLabel = stringResource(R.string.profile_goal_caffeine_cutoff_time),
+                leftValue = caffeineCutoffTime,
                 rightLabel = "",
                 rightValue = "",
-                onLeftChange = { exerciseTargetDuration = it },
+                onLeftChange = { caffeineCutoffTime = it },
                 onRightChange = {},
+                leftKeyboardType = KeyboardType.Text,
             )
         }
         profileGoalsSection(
@@ -238,6 +250,8 @@ fun ProfileGoalsContent(
                     val parsedFat = fat.toIntOrNull()
                     val parsedWater = water.toIntOrNull()
                     val parsedSmokeLimit = smokeDailyLimit.toIntOrNull()
+                    val parsedCaffeineLimit = dailyCaffeineLimit.toIntOrNull()
+                    val parsedCaffeineSleepBuffer = caffeineSleepBufferHours.toIntOrNull()
                     val parsedExerciseDays = exerciseTargetDays.toIntOrNull()
                     val parsedExerciseDuration = exerciseTargetDuration.toIntOrNull()
                     val parsedTargetWeight = targetWeight.toFloatOrNull()
@@ -248,6 +262,7 @@ fun ProfileGoalsContent(
                     val parsedHeight = currentHeight.trim().ifBlank { null }?.toFloatOrNull()
                     val parsedBedtime = sleepBedtime.toLocalTimeOrNull()
                     val parsedWakeTime = sleepWakeTime.toLocalTimeOrNull()
+                    val parsedCaffeineCutoffTime = caffeineCutoffTime.toLocalTimeOrNull()
 
                     if (
                         listOf(
@@ -257,6 +272,8 @@ fun ProfileGoalsContent(
                             parsedFat,
                             parsedWater,
                             parsedSmokeLimit,
+                            parsedCaffeineLimit,
+                            parsedCaffeineSleepBuffer,
                             parsedExerciseDays,
                             parsedExerciseDuration,
                         ).any { it == null } ||
@@ -272,7 +289,7 @@ fun ProfileGoalsContent(
                         formError = HealthInputError.MUST_BE_NUMBER
                         return@RoundedPillButton
                     }
-                    if (parsedBedtime == null || parsedWakeTime == null) {
+                    if (parsedBedtime == null || parsedWakeTime == null || parsedCaffeineCutoffTime == null) {
                         formError = HealthInputError.INVALID_TIME
                         return@RoundedPillButton
                     }
@@ -284,6 +301,9 @@ fun ProfileGoalsContent(
                         fatTargetGrams = parsedFat!!,
                         waterTargetMl = parsedWater!!,
                         dailyStepTarget = validatedDailySteps,
+                        dailyCaffeineLimitMg = parsedCaffeineLimit!!,
+                        caffeineCutoffTime = parsedCaffeineCutoffTime,
+                        caffeineSleepBufferHours = parsedCaffeineSleepBuffer!!,
                         sleepTargetBedtime = parsedBedtime,
                         sleepTargetWakeTime = parsedWakeTime,
                         exerciseTargetDaysPerWeek = parsedExerciseDays!!,

@@ -21,6 +21,7 @@ class DashboardCardConfigTest {
                 DashboardCardType.WEIGHT,
                 DashboardCardType.EXERCISE,
                 DashboardCardType.STEPS,
+                DashboardCardType.CAFFEINE,
                 DashboardCardType.HYDRATION,
                 DashboardCardType.SLEEP,
                 DashboardCardType.SMOKING,
@@ -28,7 +29,7 @@ class DashboardCardConfigTest {
             ),
             config.map(DashboardCardConfig::type),
         )
-        assertEquals((0..7).toList(), config.map(DashboardCardConfig::sortOrder))
+        assertEquals((0..8).toList(), config.map(DashboardCardConfig::sortOrder))
     }
 
     @Test
@@ -40,9 +41,10 @@ class DashboardCardConfigTest {
     }
 
     @Test
-    fun defaultConfig_allCardsVisibleByDefault() {
+    fun defaultConfig_caffeineIsHiddenByDefault() {
         val config = defaultDashboardCardConfig()
-        assertTrue(config.all(DashboardCardConfig::isVisible))
+        assertFalse(config.first { it.type == DashboardCardType.CAFFEINE }.isVisible)
+        assertTrue(config.filterNot { it.type == DashboardCardType.CAFFEINE }.all(DashboardCardConfig::isVisible))
     }
 
     @Test
@@ -59,7 +61,7 @@ class DashboardCardConfigTest {
         assertEquals(DashboardCardType.STEPS, config[1].type)
         assertFalse(config[1].isVisible)
         assertEquals(DashboardCardType.entries.toSet(), config.map(DashboardCardConfig::type).toSet())
-        assertEquals((0..7).toList(), config.map(DashboardCardConfig::sortOrder))
+        assertEquals((0..8).toList(), config.map(DashboardCardConfig::sortOrder))
     }
 
     @Test
@@ -75,10 +77,11 @@ class DashboardCardConfigTest {
         val result = sanitizeDashboardCardConfig(incompleteConfig)
         val types = result.map(DashboardCardConfig::type)
 
-        assertEquals(8, result.size)
+        assertEquals(9, result.size)
         assertTrue(types.contains(DashboardCardType.SMOKING))
         assertTrue(types.contains(DashboardCardType.SUPPLEMENTS))
         assertTrue(types.contains(DashboardCardType.STEPS))
+        assertTrue(types.contains(DashboardCardType.CAFFEINE))
         assertEquals(DashboardCardType.entries.size, result.size)
     }
 

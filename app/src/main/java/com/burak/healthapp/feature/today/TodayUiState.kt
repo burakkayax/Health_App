@@ -1,6 +1,7 @@
 package com.burak.healthapp.feature.today
 
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
@@ -79,6 +80,17 @@ data class StepCardState(
     val helperLabel: String,
 )
 
+data class CaffeineCardState(
+    val dailyTotalMg: Int,
+    val limitMg: Int,
+    val progress: Float,
+    val lastCaffeineTimeLabel: String,
+    val overDailyLimit: Boolean,
+    val afterCutoff: Boolean,
+    val withinSleepBuffer: Boolean,
+    val entries: List<CaffeineEntry>,
+)
+
 enum class SmokingStatus {
     PASSIVE,
     SAFE,
@@ -111,6 +123,7 @@ data class TodayUiState(
     val sleep: SleepCardState,
     val smoking: SmokingCardState,
     val steps: StepCardState,
+    val caffeine: CaffeineCardState,
     val supplements: SupplementCardState,
     val dashboardCards: List<DashboardCardConfig> = defaultDashboardCardConfig(),
 )

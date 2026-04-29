@@ -41,6 +41,7 @@ internal fun ImportPreviewDialog(
                 ImportPreviewRow(stringResource(R.string.import_preview_exercise), preview.exerciseCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_smoking), preview.smokingCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_steps), preview.stepCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_caffeine), preview.caffeineCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_body_measurements), preview.bodyMeasurementCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_supplement_templates), preview.supplementTemplateCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_supplement_doses), preview.supplementDoseCount)

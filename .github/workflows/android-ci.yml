@@ -47,6 +47,14 @@ jobs:
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug
 
+      - name: Assemble release APK
+        run: ./gradlew :app:assembleRelease
+
+      - name: Print APK sizes
+        run: |
+          ls -lh app/build/outputs/apk/debug || true
+          ls -lh app/build/outputs/apk/release || true
+
       - name: Upload unit test reports
         if: always()
         uses: actions/upload-artifact@v4

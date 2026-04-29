@@ -193,3 +193,30 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
         )
     }
 }
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS caffeine_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                date TEXT NOT NULL,
+                time TEXT NOT NULL,
+                drinkType TEXT NOT NULL,
+                size TEXT NOT NULL,
+                estimatedMg INTEGER NOT NULL,
+                customName TEXT,
+                createdAt TEXT NOT NULL
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_caffeine_entries_date ON caffeine_entries (date)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_caffeine_entries_date_time ON caffeine_entries (date, time)")
+        db.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS index_caffeine_entries_date_createdAt
+            ON caffeine_entries (date, createdAt)
+            """.trimIndent(),
+        )
+    }
+}

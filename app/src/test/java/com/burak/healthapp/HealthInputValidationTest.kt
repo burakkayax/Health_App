@@ -117,6 +117,14 @@ class HealthInputValidationTest {
             GoalSettingsValidator.validate(GoalSettings(waterTargetMl = 0)),
             HealthInputError.MUST_BE_POSITIVE,
         )
+        assertInvalidContains(
+            GoalSettingsValidator.validate(GoalSettings(dailyCaffeineLimitMg = 1_001)),
+            HealthInputError.TOO_HIGH,
+        )
+        assertInvalidContains(
+            GoalSettingsValidator.validate(GoalSettings(caffeineSleepBufferHours = 0)),
+            HealthInputError.MUST_BE_POSITIVE,
+        )
     }
 
     @Test

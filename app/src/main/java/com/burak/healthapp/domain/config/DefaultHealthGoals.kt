@@ -10,6 +10,9 @@ object DefaultHealthGoals {
     const val FAT_GRAMS = 70
     const val WATER_TARGET_ML = 2500
     const val DAILY_STEPS = 8000
+    const val DAILY_CAFFEINE_LIMIT_MG = 300
+    val CAFFEINE_CUTOFF_TIME: LocalTime = LocalTime.of(15, 0)
+    const val CAFFEINE_SLEEP_BUFFER_HOURS = 6
     val SLEEP_BEDTIME: LocalTime = LocalTime.of(23, 0)
     val SLEEP_WAKE_TIME: LocalTime = LocalTime.of(7, 0)
     const val LEGACY_SLEEP_TARGET_MINUTES = 480

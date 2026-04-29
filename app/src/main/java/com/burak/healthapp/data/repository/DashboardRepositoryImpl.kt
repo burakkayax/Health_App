@@ -1,6 +1,7 @@
 package com.burak.healthapp.data.repository
 
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
+import com.burak.healthapp.data.local.dao.CaffeineDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -10,6 +11,7 @@ import com.burak.healthapp.data.local.dao.StepDao
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
+import com.burak.healthapp.data.local.entity.CaffeineEntryEntity
 import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.entity.MealEntryEntity
@@ -22,6 +24,7 @@ import com.burak.healthapp.data.local.mapper.toDomain
 import com.burak.healthapp.data.local.mapper.toEntity
 import com.burak.healthapp.domain.calculation.buildWeekToDateDays
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
@@ -48,6 +51,7 @@ class DashboardRepositoryImpl(
     private val exerciseDao: ExerciseDao,
     private val smokingDao: SmokingDao,
     private val stepDao: StepDao,
+    private val caffeineDao: CaffeineDao,
     private val templateDao: SupplementTemplateDao,
     private val doseDao: SupplementDoseDao,
     private val measurementDao: BodyMeasurementDao,
@@ -98,7 +102,8 @@ class DashboardRepositoryImpl(
             templateDao.observeActive(),
             doseDao.observeForDate(date),
             measurementDao.observeForDate(date),
-        ) { base, templates, doses, measurement ->
+            caffeineDao.observeForDate(date),
+        ) { base, templates, doses, measurement, caffeine ->
             TodaySnapshot(
                 settings = base.settings,
                 meals = base.meals,
@@ -109,6 +114,7 @@ class DashboardRepositoryImpl(
                 smokingEntryForDate = base.smokingEntryForDate,
                 stepEntryForDate = base.stepEntryForDate,
                 weekStepEntries = base.weekStepEntries,
+                caffeineEntries = caffeine.map(CaffeineEntryEntity::toDomain),
                 supplementTemplates = templates.map(SupplementTemplateEntity::toDomain),
                 supplementDoseEntries = doses.map(SupplementDoseEntryEntity::toDomain),
                 measurementForDate = measurement?.toDomain(),
@@ -138,6 +144,14 @@ class DashboardRepositoryImpl(
 
     override fun observeStepsBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<StepEntry>> = stepDao.observeBetween(startDate, endDate).map { entries ->
         entries.map(StepEntryEntity::toDomain)
+    }
+
+    override fun observeCaffeineForDate(date: LocalDate): Flow<List<CaffeineEntry>> = caffeineDao.observeForDate(date).map { entries ->
+        entries.map(CaffeineEntryEntity::toDomain)
+    }
+
+    override fun observeCaffeineBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntry>> = caffeineDao.observeBetween(startDate, endDate).map { entries ->
+        entries.map(CaffeineEntryEntity::toDomain)
     }
 
     override suspend fun saveMealEntry(entry: MealEntry) {
@@ -310,6 +324,15 @@ class DashboardRepositoryImpl(
         }
 
         stepDao.upsert(updated)
+    }
+
+    override suspend fun addCaffeine(entry: CaffeineEntry) {
+        if (entry.estimatedMg <= 0) return
+        caffeineDao.upsert(entry.toEntity())
+    }
+
+    override suspend fun deleteCaffeine(id: Long) {
+        caffeineDao.deleteById(id)
     }
 }
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## PR19 - Baseline Profile & Macrobenchmark
+
+### Eklendi
+
+- Baseline Profile ve Macrobenchmark altyapısı eklendi.
+- Startup, Today scroll ve dashboard customization performans senaryoları tanımlandı.
+- README benchmark komutlarıyla güncellendi.
+
+## PR18 - Release Optimization
+
+### Değiştirildi
+
+- Release build için R8 minification ve resource shrinking etkinleştirildi.
+- CI release build doğrulaması eklendi.
+- README release build komutlarıyla güncellendi.
+
+## PR17 - Caffeine Tracking
+
+### Eklendi
+
+- Düşük eforlu kafein takibi eklendi.
+- İçecek türü ve bardak boyuna göre tahmini kafein hesabı eklendi.
+- Kafein kartı ve kafein detay ekranı eklendi.
+- Kafein verileri export/import şemasına dahil edildi.
+- Dashboard customization sistemine Kafein kartı eklendi.
+
 ## PR16.4 - Profile and Localization Micro Polish
 
 ### Değiştirildi
