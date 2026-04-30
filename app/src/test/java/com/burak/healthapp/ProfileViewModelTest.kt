@@ -21,6 +21,7 @@ import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SettingsState
 import com.burak.healthapp.domain.model.SleepSession
+import com.burak.healthapp.domain.model.SmokingEntry
 import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.model.SupplementTemplate
@@ -352,6 +353,10 @@ private class FakeProfileDashboardRepository : DashboardRepository {
     override fun observeCaffeineForDate(date: LocalDate): Flow<List<CaffeineEntry>> = flowOf(emptyList())
 
     override fun observeCaffeineBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntry>> = flowOf(emptyList())
+
+    override fun observeSmokingBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SmokingEntry>> = flowOf(emptyList())
+
+    override fun observeExerciseBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<ExerciseEntry>> = flowOf(emptyList())
 
     override suspend fun saveMealEntry(entry: MealEntry) = Unit
 

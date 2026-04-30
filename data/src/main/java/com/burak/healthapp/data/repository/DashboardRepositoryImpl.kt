@@ -154,6 +154,14 @@ class DashboardRepositoryImpl(
         entries.map(CaffeineEntryEntity::toDomain)
     }
 
+    override fun observeSmokingBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SmokingEntry>> = smokingDao.observeBetween(startDate, endDate).map { entries ->
+        entries.map(SmokingEntryEntity::toDomain)
+    }
+
+    override fun observeExerciseBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<ExerciseEntry>> = exerciseDao.observeBetween(startDate, endDate).map { entries ->
+        entries.map(ExerciseEntryEntity::toDomain)
+    }
+
     override suspend fun saveMealEntry(entry: MealEntry) {
         mealDao.upsert(entry.toEntity())
     }

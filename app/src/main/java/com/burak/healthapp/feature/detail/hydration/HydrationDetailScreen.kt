@@ -43,6 +43,7 @@ import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.ProgressBarRow
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.core.ui.components.weekDayShortLabel
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -160,13 +161,13 @@ fun HydrationDetailContent(
                     )
                 }
                 item {
+                    HydrationPeriodCard(state = state)
+                }
+                item {
                     HydrationSummaryAndAverage(
                         state = state,
                         compact = false,
                     )
-                }
-                item {
-                    HydrationPeriodCard(state = state)
                 }
             }
             LazyColumn(
@@ -202,13 +203,13 @@ fun HydrationDetailContent(
             )
         }
         item {
+            HydrationPeriodCard(state = state)
+        }
+        item {
             HydrationSummaryAndAverage(
                 state = state,
                 compact = windowSizeClass.isCompact,
             )
-        }
-        item {
-            HydrationPeriodCard(state = state)
         }
         hydrationEntriesSection(
             state = state,
@@ -408,7 +409,7 @@ private fun HydrationAverageCard(
         modifier = modifier.fillMaxWidth(),
         title = stringResource(R.string.hydration_detail_average_title),
         value = stringResource(R.string.today_format_ml, state.averageMl),
-        subtitle = stringResource(R.string.hydration_detail_logged_days_subtitle),
+        subtitle = stringResource(R.string.common_average_logged_days),
     )
 }
 
@@ -425,12 +426,13 @@ private fun HydrationWeekBarChart(
         verticalAlignment = Alignment.Bottom,
     ) {
         days.forEachIndexed { index, day ->
+            val dayLabel = day.date?.let { weekDayShortLabel(it) } ?: day.label
             val valueLabel = stringResource(R.string.today_format_ml, day.amountMl)
             val percent = (day.progress.coerceIn(0f, 1f) * 100).toInt()
             val description = when {
-                day.amountMl <= 0 -> stringResource(R.string.metric_day_ring_no_data, day.label)
-                day.progress >= 1f -> stringResource(R.string.metric_day_ring_target_met, day.label, valueLabel)
-                else -> stringResource(R.string.metric_day_ring_progress, day.label, valueLabel, percent)
+                day.amountMl <= 0 -> stringResource(R.string.metric_day_ring_no_data, dayLabel)
+                day.progress >= 1f -> stringResource(R.string.metric_day_ring_target_met, dayLabel, valueLabel)
+                else -> stringResource(R.string.metric_day_ring_progress, dayLabel, valueLabel, percent)
             }
             Column(
                 modifier = Modifier
@@ -471,7 +473,7 @@ private fun HydrationWeekBarChart(
                     )
                 }
                 Text(
-                    text = day.label,
+                    text = dayLabel,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -523,6 +525,7 @@ internal fun buildHydrationDetailUiState(
                 label = if (period == TrendsPeriod.WEEKLY) day.toWeekLabel() else day.dayOfMonth.toString(),
                 amountMl = amount,
                 progress = clampProgress(amount.toFloat(), target),
+                date = day,
             )
         },
         monthDays = if (period == TrendsPeriod.MONTHLY) {
@@ -590,11 +593,11 @@ private fun emptyHydrationDetailUiState(): HydrationDetailUiState = HydrationDet
 )
 
 private fun LocalDate.toWeekLabel(): String = when (dayOfWeek.value) {
-    1 -> "P"
-    2 -> "S"
-    3 -> "Ç"
-    4 -> "P"
-    5 -> "C"
-    6 -> "C"
-    else -> "P"
+    1 -> "Pzt"
+    2 -> "Sal"
+    3 -> "Çar"
+    4 -> "Per"
+    5 -> "Cum"
+    6 -> "Cmt"
+    else -> "Paz"
 }

@@ -395,6 +395,38 @@ fun ProgressBarRow(
 }
 
 @Composable
+fun ThickMetricProgressBar(
+    progress: Float,
+    activeColor: Color,
+    modifier: Modifier = Modifier,
+    trackColor: Color = activeColor.copy(alpha = 0.14f),
+    height: Dp = 12.dp,
+    testTag: String? = null,
+) {
+    val resolvedModifier = if (testTag != null) {
+        modifier.testTag(testTag)
+    } else {
+        modifier
+    }
+
+    Box(
+        modifier = resolvedModifier
+            .fillMaxWidth()
+            .height(height)
+            .clip(RoundedCornerShape(999.dp))
+            .background(trackColor),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                .height(height)
+                .clip(RoundedCornerShape(999.dp))
+                .background(activeColor),
+        )
+    }
+}
+
+@Composable
 fun InsightCard(
     title: String,
     value: String,

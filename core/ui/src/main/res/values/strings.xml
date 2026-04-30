@@ -10,6 +10,8 @@
     <string name="route_step_detail">Adım Detayı</string>
     <string name="route_hydration_detail">Su Detayı</string>
     <string name="route_caffeine_detail">Kafein Detayı</string>
+    <string name="route_smoking_detail">Sigara Detayı</string>
+    <string name="route_exercise_detail">Egzersiz Detayı</string>
 
     <string name="common_today">Bugün</string>
 

@@ -99,7 +99,7 @@ object WeightInputValidator {
     fun validateWeight(weight: String): ValidationResult<Float> {
         val trimmed = weight.trim()
         if (trimmed.isBlank()) return invalid(HealthInputError.REQUIRED)
-        val value = trimmed.toFloatOrNull() ?: return invalid(HealthInputError.MUST_BE_NUMBER)
+        val value = parseLocalizedDecimalInput(trimmed) ?: return invalid(HealthInputError.MUST_BE_NUMBER)
         return when {
             value <= 0f -> invalid(HealthInputError.MUST_BE_POSITIVE)
             value !in 20f..400f -> invalid(if (value < 20f) HealthInputError.TOO_LOW else HealthInputError.TOO_HIGH)
@@ -136,7 +136,7 @@ object SupplementDoseValidator {
     fun validateAmount(amount: String): ValidationResult<Float> {
         val trimmed = amount.trim()
         if (trimmed.isBlank()) return invalid(HealthInputError.REQUIRED)
-        val value = trimmed.toFloatOrNull() ?: return invalid(HealthInputError.MUST_BE_NUMBER)
+        val value = parseLocalizedDecimalInput(trimmed) ?: return invalid(HealthInputError.MUST_BE_NUMBER)
         return if (value <= 0f) invalid(HealthInputError.MUST_BE_POSITIVE) else ValidationResult.Valid(value)
     }
 }
@@ -201,3 +201,17 @@ private fun sleepDurationMinutes(start: LocalTime, end: LocalTime): Int {
 private fun String.parseOrNull(): LocalTime? = runCatching { LocalTime.parse(this) }.getOrNull()
 
 private fun <T> invalid(error: HealthInputError): ValidationResult<T> = ValidationResult.Invalid(listOf(error))
+
+fun parseLocalizedDecimalInput(input: String): Float? {
+    val trimmed = input.trim()
+    if (trimmed.isBlank()) return null
+    if (trimmed.startsWith("-")) return null
+
+    val separatorCount = trimmed.count { it == '.' || it == ',' }
+    if (separatorCount > 1) return null
+    if (!trimmed.all { it.isDigit() || it == '.' || it == ',' }) return null
+
+    val normalized = trimmed.replace(',', '.')
+    if (normalized == ".") return null
+    return normalized.toFloatOrNull()?.takeIf { it >= 0f }
+}

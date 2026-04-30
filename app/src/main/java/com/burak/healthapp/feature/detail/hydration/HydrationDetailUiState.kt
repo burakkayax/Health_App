@@ -3,6 +3,7 @@ package com.burak.healthapp.feature.detail.hydration
 import androidx.compose.runtime.Immutable
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.domain.model.TrendsPeriod
+import java.time.LocalDate
 
 @Immutable
 data class HydrationHistoryItemState(
@@ -16,6 +17,7 @@ data class HydrationSummaryDayState(
     val label: String,
     val amountMl: Int,
     val progress: Float,
+    val date: LocalDate? = null,
 )
 
 @Immutable

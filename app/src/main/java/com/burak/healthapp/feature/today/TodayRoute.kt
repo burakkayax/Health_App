@@ -23,6 +23,8 @@ fun TodayRoute(
     onOpenStepDetail: () -> Unit,
     onOpenHydrationDetail: () -> Unit,
     onOpenCaffeineDetail: () -> Unit,
+    onOpenSmokingDetail: () -> Unit,
+    onOpenExerciseDetail: () -> Unit,
 ) {
     val viewModel: TodayViewModel = hiltViewModel()
     val mealEditorViewModel: MealEditorViewModel = viewModel()
@@ -58,6 +60,8 @@ fun TodayRoute(
             onOpenStepDetail = onOpenStepDetail,
             onOpenHydrationDetail = onOpenHydrationDetail,
             onOpenCaffeineDetail = onOpenCaffeineDetail,
+            onOpenSmokingDetail = onOpenSmokingDetail,
+            onOpenExerciseDetail = onOpenExerciseDetail,
             onMealTypeChange = mealEditorViewModel::setMealType,
             onAddMealDraft = mealEditorViewModel::addDraftFood,
             onRemoveMealDraft = mealEditorViewModel::removeDraftFood,

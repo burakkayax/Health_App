@@ -6,6 +6,7 @@ import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.MealEntry
 import com.burak.healthapp.domain.model.SleepSession
+import com.burak.healthapp.domain.model.SmokingEntry
 import com.burak.healthapp.domain.model.StepEntry
 import com.burak.healthapp.domain.model.SupplementDoseEntry
 import com.burak.healthapp.domain.model.TodaySnapshot
@@ -30,6 +31,10 @@ interface DashboardRepository {
     fun observeCaffeineForDate(date: LocalDate = LocalDate.now()): Flow<List<CaffeineEntry>>
 
     fun observeCaffeineBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<CaffeineEntry>>
+
+    fun observeSmokingBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SmokingEntry>>
+
+    fun observeExerciseBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<ExerciseEntry>>
 
     suspend fun saveMealEntry(entry: MealEntry)
 

@@ -708,6 +708,8 @@ private class FakeSmokingDao(
 
     override fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?> = entries.map { current -> current.firstOrNull { it.date == date } }
 
+    override fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SmokingEntryEntity>> = entries.map { current -> current.filter { it.date in startDate..endDate } }
+
     override suspend fun getForDate(date: LocalDate): SmokingEntryEntity? = entries.value.firstOrNull { it.date == date }
 
     override suspend fun upsert(entry: SmokingEntryEntity) {

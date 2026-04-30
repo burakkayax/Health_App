@@ -1,4 +1,4 @@
-package com.burak.healthapp.feature.detail.caffeine
+package com.burak.healthapp.feature.detail.exercise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,12 +44,13 @@ import com.burak.healthapp.core.ui.components.weekDayShortLabel
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.calculation.clampProgress
-import com.burak.healthapp.domain.calculation.formatHourMinute
-import com.burak.healthapp.domain.model.CaffeineDrinkType
-import com.burak.healthapp.domain.model.CaffeineEntry
+import com.burak.healthapp.domain.model.ExerciseEntry
+import com.burak.healthapp.domain.model.ExerciseIntensity
+import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.today.labelResId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,29 +66,36 @@ import java.util.Locale
 import javax.inject.Inject
 
 @Immutable
-data class CaffeineBarState(
-    val label: String,
-    val totalMg: Int,
+data class ExerciseDayBarState(
+    val date: LocalDate,
+    val durationMinutes: Int,
     val progress: Float,
-    val date: LocalDate? = null,
 )
 
 @Immutable
-data class CaffeineDetailUiState(
+data class ExerciseHistoryItemState(
+    val date: LocalDate,
+    val dateLabel: String,
+    val type: ExerciseType,
+    val intensity: ExerciseIntensity,
+    val durationMinutes: Int,
+)
+
+@Immutable
+data class ExerciseDetailUiState(
     val selectedPeriod: TrendsPeriod = TrendsPeriod.WEEKLY,
-    val entries: List<CaffeineEntry> = emptyList(),
-    val bars: List<CaffeineBarState> = emptyList(),
+    val bars: List<ExerciseDayBarState> = emptyList(),
     val monthDays: List<MetricDayRingState> = emptyList(),
-    val totalTodayMg: Int = 0,
-    val periodAverageMg: Int = 0,
-    val lastTimeLabel: String = "--",
-    val limitMg: Int = 300,
+    val averageDurationMinutes: Int = 0,
+    val totalDurationMinutes: Int = 0,
+    val activeDays: Int = 0,
+    val entries: List<ExerciseHistoryItemState> = emptyList(),
     val hasPeriodData: Boolean = false,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class CaffeineDetailViewModel @Inject constructor(
+class ExerciseDetailViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val dashboardRepository: DashboardRepository,
 ) : ViewModel() {
@@ -103,42 +111,13 @@ class CaffeineDetailViewModel @Inject constructor(
             }
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeCaffeineBetween(startDate, date),
+                dashboardRepository.observeExerciseBetween(startDate, date),
             ) { settings, entries ->
-                val days = if (period == TrendsPeriod.WEEKLY) {
-                    (6L downTo 0L).map(date::minusDays)
-                } else {
-                    (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, date)).map(startDate::plusDays)
-                }
-                val entriesByDate = entries.groupBy(CaffeineEntry::date)
-                val todayEntries = entriesByDate[date].orEmpty()
-                val limit = settings.goalSettings.dailyCaffeineLimitMg
-                val periodTotals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(CaffeineEntry::estimatedMg) }
-                CaffeineDetailUiState(
+                buildExerciseDetailUiState(
+                    selectedDate = date,
                     selectedPeriod = period,
-                    entries = todayEntries.sortedWith(compareBy(CaffeineEntry::time).thenBy(CaffeineEntry::createdAt)),
-                    bars = periodTotals.map { (day, total) ->
-                        CaffeineBarState(
-                            label = day.dayOfMonth.toString(),
-                            totalMg = total,
-                            progress = clampProgress(total.toFloat(), limit.toFloat()),
-                            date = day,
-                        )
-                    },
-                    monthDays = if (period == TrendsPeriod.MONTHLY) {
-                        buildCaffeineMonthRingDays(
-                            anchorDate = date,
-                            entriesByDate = entriesByDate,
-                            dailyLimitMg = limit,
-                        )
-                    } else {
-                        emptyList()
-                    },
-                    totalTodayMg = todayEntries.sumOf(CaffeineEntry::estimatedMg),
-                    periodAverageMg = if (days.isEmpty()) 0 else periodTotals.sumOf { (_, total) -> total } / days.size,
-                    lastTimeLabel = todayEntries.maxByOrNull(CaffeineEntry::time)?.time?.let(::formatHourMinute) ?: "--",
-                    limitMg = limit,
-                    hasPeriodData = periodTotals.any { (_, total) -> total > 0 },
+                    entries = entries,
+                    dailyTargetMinutes = settings.goalSettings.exerciseTargetDurationMinutes,
                 )
             }
         }
@@ -146,7 +125,7 @@ class CaffeineDetailViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = CaffeineDetailUiState(),
+            initialValue = ExerciseDetailUiState(),
         )
 
     fun setSelectedDate(date: LocalDate) {
@@ -157,26 +136,26 @@ class CaffeineDetailViewModel @Inject constructor(
         selectedPeriod.value = period
     }
 
-    fun deleteEntry(id: Long) {
+    fun deleteEntry(date: LocalDate) {
         viewModelScope.launch {
-            dashboardRepository.deleteCaffeine(id)
+            dashboardRepository.deleteExerciseForDate(date)
         }
     }
 }
 
 @Composable
-fun CaffeineDetailRoute(
+fun ExerciseDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
-    val viewModel: CaffeineDetailViewModel = hiltViewModel()
+    val viewModel: ExerciseDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedDate) {
         viewModel.setSelectedDate(selectedDate)
     }
 
-    CaffeineDetailContent(
+    ExerciseDetailContent(
         state = uiState,
         onSelectPeriod = viewModel::selectPeriod,
         onDelete = viewModel::deleteEntry,
@@ -185,10 +164,10 @@ fun CaffeineDetailRoute(
 }
 
 @Composable
-fun CaffeineDetailContent(
-    state: CaffeineDetailUiState,
+fun ExerciseDetailContent(
+    state: ExerciseDetailUiState,
     onSelectPeriod: (TrendsPeriod) -> Unit,
-    onDelete: (Long) -> Unit,
+    onDelete: (LocalDate) -> Unit,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     if (!windowSizeClass.isCompact) {
@@ -197,23 +176,19 @@ fun CaffeineDetailContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(HealthSpacing.sm)
-                .testTag("caffeine_detail_screen")
-                .testTag("caffeine_detail_adaptive_two_pane"),
+                .testTag("exercise_detail_screen")
+                .testTag("exercise_detail_adaptive_two_pane"),
             horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
         ) {
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
             ) {
-                CaffeinePeriodSelector(
-                    selectedPeriod = state.selectedPeriod,
-                    onSelectPeriod = onSelectPeriod,
-                )
-                CaffeinePeriodCard(state = state)
-                CaffeineTodayTotalCard(state = state)
-                CaffeineMetricRow(state = state)
+                ExercisePeriodSelector(state.selectedPeriod, onSelectPeriod)
+                ExerciseChartCard(state)
+                ExerciseSummaryCards(state, compact = false)
             }
-            CaffeineEntryList(
+            ExerciseEntryList(
                 entries = state.entries,
                 onDelete = onDelete,
                 modifier = Modifier.weight(1f),
@@ -226,27 +201,15 @@ fun CaffeineDetailContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .testTag("caffeine_detail_screen"),
+            .testTag("exercise_detail_screen"),
         contentPadding = PaddingValues(HealthSpacing.sm),
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
+        item { ExercisePeriodSelector(state.selectedPeriod, onSelectPeriod) }
+        item { ExerciseChartCard(state) }
+        item { ExerciseSummaryCards(state, compact = true) }
         item {
-            CaffeinePeriodSelector(
-                selectedPeriod = state.selectedPeriod,
-                onSelectPeriod = onSelectPeriod,
-            )
-        }
-        item {
-            CaffeinePeriodCard(state = state)
-        }
-        item {
-            CaffeineTodayTotalCard(state = state)
-        }
-        item {
-            CaffeineMetricRow(state = state)
-        }
-        item {
-            CaffeineEntryList(
+            ExerciseEntryList(
                 entries = state.entries,
                 onDelete = onDelete,
             )
@@ -255,7 +218,7 @@ fun CaffeineDetailContent(
 }
 
 @Composable
-private fun CaffeinePeriodSelector(
+private fun ExercisePeriodSelector(
     selectedPeriod: TrendsPeriod,
     onSelectPeriod: (TrendsPeriod) -> Unit,
 ) {
@@ -273,18 +236,14 @@ private fun CaffeinePeriodSelector(
 }
 
 @Composable
-private fun CaffeinePeriodCard(state: CaffeineDetailUiState) {
-    HealthCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("caffeine_detail_period_card"),
-    ) {
+private fun ExerciseChartCard(state: ExerciseDetailUiState) {
+    HealthCard(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(
                 if (state.selectedPeriod == TrendsPeriod.WEEKLY) {
-                    R.string.caffeine_detail_weekly_chart
+                    R.string.exercise_detail_weekly_chart
                 } else {
-                    R.string.caffeine_detail_monthly_chart
+                    R.string.exercise_detail_monthly_chart
                 },
             ),
             style = MaterialTheme.typography.titleMedium,
@@ -293,7 +252,7 @@ private fun CaffeinePeriodCard(state: CaffeineDetailUiState) {
         if (!state.hasPeriodData) {
             Text(
                 modifier = Modifier.padding(top = HealthSpacing.sm),
-                text = stringResource(R.string.caffeine_detail_no_period_data),
+                text = stringResource(R.string.exercise_detail_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -303,114 +262,21 @@ private fun CaffeinePeriodCard(state: CaffeineDetailUiState) {
                 days = state.monthDays,
                 weekdayLabels = metricWeekdayLabels(),
                 modifier = Modifier.padding(top = HealthSpacing.sm),
-                testTag = "caffeine_month_ring_grid",
+                testTag = "exercise_month_ring_grid",
                 activeColor = HealthPrimary,
             )
         } else {
-            CaffeineWeekChart(
+            ExerciseWeekBarChart(
                 bars = state.bars,
-                modifier = Modifier
-                    .padding(top = HealthSpacing.sm)
-                    .testTag("caffeine_week_bar_chart"),
+                modifier = Modifier.padding(top = HealthSpacing.sm),
             )
         }
     }
 }
 
 @Composable
-private fun CaffeineTodayTotalCard(state: CaffeineDetailUiState) {
-    InsightCard(
-        modifier = Modifier.fillMaxWidth(),
-        title = stringResource(R.string.caffeine_detail_today_total),
-        value = stringResource(R.string.caffeine_today_total_format, state.totalTodayMg, state.limitMg),
-        subtitle = stringResource(R.string.caffeine_estimate_notice),
-    )
-}
-
-@Composable
-private fun CaffeineMetricRow(state: CaffeineDetailUiState) {
-    Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
-        InsightCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.caffeine_detail_weekly_average),
-            value = stringResource(R.string.caffeine_today_total_format, state.periodAverageMg, state.limitMg),
-            subtitle = stringResource(R.string.common_average_selected_period),
-        )
-        InsightCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.caffeine_detail_last_time),
-            value = state.lastTimeLabel,
-            subtitle = stringResource(R.string.caffeine_detail_entries),
-        )
-    }
-}
-
-@Composable
-private fun CaffeineEntryList(
-    entries: List<CaffeineEntry>,
-    onDelete: (Long) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.testTag("caffeine_detail_entry_list"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
-    ) {
-        Text(
-            text = stringResource(R.string.caffeine_detail_entries),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        if (entries.isEmpty()) {
-            Text(
-                text = stringResource(R.string.caffeine_detail_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            entries.forEach { entry ->
-                HealthCard(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                        ) {
-                            Text(
-                                text = entry.customName ?: entry.drinkType.detailLabel(),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = stringResource(
-                                    R.string.caffeine_detail_record_format,
-                                    formatHourMinute(entry.time),
-                                    entry.estimatedMg,
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        CardHeaderDestructiveButton(
-                            label = stringResource(R.string.common_delete),
-                            modifier = Modifier.testTag("caffeine_entry_delete_${entry.id}"),
-                            contentDescription = stringResource(R.string.content_description_delete_caffeine_entry),
-                            onClick = { onDelete(entry.id) },
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CaffeineWeekChart(
-    bars: List<CaffeineBarState>,
+private fun ExerciseWeekBarChart(
+    bars: List<ExerciseDayBarState>,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -421,14 +287,20 @@ private fun CaffeineWeekChart(
         verticalAlignment = Alignment.Bottom,
     ) {
         bars.forEach { bar ->
-            val label = bar.date?.let { weekDayShortLabel(it) } ?: bar.label
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = if (bar.totalMg == 0) "--" else "${bar.totalMg} mg",
+                    text = if (bar.durationMinutes == 0) {
+                        "--"
+                    } else {
+                        stringResource(
+                            R.string.today_format_duration_minutes,
+                            bar.durationMinutes,
+                        )
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -446,7 +318,7 @@ private fun CaffeineWeekChart(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .fillMaxHeight(bar.progress)
+                            .fillMaxHeight(bar.progress.coerceIn(0f, 1f))
                             .background(
                                 color = HealthPrimary,
                                 shape = RoundedCornerShape(999.dp),
@@ -454,9 +326,10 @@ private fun CaffeineWeekChart(
                     )
                 }
                 Text(
-                    text = label,
+                    text = weekDayShortLabel(bar.date),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -464,46 +337,187 @@ private fun CaffeineWeekChart(
 }
 
 @Composable
-private fun CaffeineDrinkType.detailLabel(): String = when (this) {
-    CaffeineDrinkType.TURKISH_COFFEE -> stringResource(R.string.caffeine_type_turkish_coffee)
-    CaffeineDrinkType.FILTER_COFFEE -> stringResource(R.string.caffeine_type_filter_coffee)
-    CaffeineDrinkType.ESPRESSO -> stringResource(R.string.caffeine_type_espresso)
-    CaffeineDrinkType.AMERICANO -> stringResource(R.string.caffeine_type_americano)
-    CaffeineDrinkType.LATTE -> stringResource(R.string.caffeine_type_latte)
-    CaffeineDrinkType.CAPPUCCINO -> stringResource(R.string.caffeine_type_cappuccino)
-    CaffeineDrinkType.BLACK_TEA -> stringResource(R.string.caffeine_type_black_tea)
-    CaffeineDrinkType.GREEN_TEA -> stringResource(R.string.caffeine_type_green_tea)
-    CaffeineDrinkType.ENERGY_DRINK -> stringResource(R.string.caffeine_type_energy_drink)
-    CaffeineDrinkType.COLA -> stringResource(R.string.caffeine_type_cola)
-    CaffeineDrinkType.OTHER -> stringResource(R.string.caffeine_type_other)
+private fun ExerciseSummaryCards(
+    state: ExerciseDetailUiState,
+    compact: Boolean,
+) {
+    val average: @Composable () -> Unit = {
+        InsightCard(
+            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.exercise_detail_average_duration),
+            value = stringResource(R.string.today_format_duration_minutes, state.averageDurationMinutes),
+            subtitle = stringResource(R.string.common_average_selected_period),
+        )
+    }
+    val total: @Composable () -> Unit = {
+        InsightCard(
+            modifier = Modifier.fillMaxWidth(),
+            title = stringResource(R.string.exercise_detail_total_duration),
+            value = stringResource(R.string.today_format_duration_minutes, state.totalDurationMinutes),
+            subtitle = stringResource(R.string.exercise_detail_active_days, state.activeDays),
+        )
+    }
+    if (compact) {
+        Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            average()
+            total()
+        }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            Column(modifier = Modifier.weight(1f)) { average() }
+            Column(modifier = Modifier.weight(1f)) { total() }
+        }
+    }
 }
 
-private fun buildCaffeineMonthRingDays(
+@Composable
+private fun ExerciseEntryList(
+    entries: List<ExerciseHistoryItemState>,
+    onDelete: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.testTag("exercise_detail_entry_list"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+    ) {
+        Text(
+            text = stringResource(R.string.exercise_detail_entries),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (entries.isEmpty()) {
+            HealthCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.exercise_detail_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            entries.forEach { entry ->
+                HealthCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+                        ) {
+                            Text(
+                                text = entry.dateLabel,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = stringResource(entry.type.labelResId),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.exercise_detail_entry_format,
+                                    entry.durationMinutes,
+                                    stringResource(entry.intensity.labelResId),
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        CardHeaderDestructiveButton(
+                            label = stringResource(R.string.common_delete),
+                            modifier = Modifier.testTag("exercise_entry_delete_${entry.date}"),
+                            contentDescription = stringResource(R.string.content_description_delete_exercise_entry),
+                            onClick = { onDelete(entry.date) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal fun buildExerciseDetailUiState(
+    selectedDate: LocalDate,
+    selectedPeriod: TrendsPeriod,
+    entries: List<ExerciseEntry>,
+    dailyTargetMinutes: Int,
+): ExerciseDetailUiState {
+    val startDate = if (selectedPeriod == TrendsPeriod.WEEKLY) {
+        selectedDate.minusDays(6)
+    } else {
+        selectedDate.withDayOfMonth(1)
+    }
+    val days = if (selectedPeriod == TrendsPeriod.WEEKLY) {
+        (6L downTo 0L).map(selectedDate::minusDays)
+    } else {
+        (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, selectedDate)).map(startDate::plusDays)
+    }
+    val entriesByDate = entries.groupBy(ExerciseEntry::date)
+    val target = dailyTargetMinutes.coerceAtLeast(1)
+    val totals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(ExerciseEntry::durationMinutes) }
+    val activeDays = totals.count { (_, duration) -> duration > 0 }
+    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("tr"))
+
+    return ExerciseDetailUiState(
+        selectedPeriod = selectedPeriod,
+        bars = totals.map { (day, duration) ->
+            ExerciseDayBarState(
+                date = day,
+                durationMinutes = duration,
+                progress = clampProgress(duration.toFloat(), target.toFloat()),
+            )
+        },
+        monthDays = if (selectedPeriod == TrendsPeriod.MONTHLY) {
+            buildExerciseMonthRingDays(selectedDate, entriesByDate, target)
+        } else {
+            emptyList()
+        },
+        averageDurationMinutes = if (days.isEmpty()) 0 else totals.sumOf { (_, duration) -> duration } / days.size,
+        totalDurationMinutes = totals.sumOf { (_, duration) -> duration },
+        activeDays = activeDays,
+        entries = entries
+            .filter { entry -> entry.date in startDate..selectedDate }
+            .sortedByDescending(ExerciseEntry::date)
+            .map { entry ->
+                ExerciseHistoryItemState(
+                    date = entry.date,
+                    dateLabel = entry.date.format(dateFormatter),
+                    type = entry.type,
+                    intensity = entry.intensity,
+                    durationMinutes = entry.durationMinutes,
+                )
+            },
+        hasPeriodData = totals.any { (_, duration) -> duration > 0 },
+    )
+}
+
+private fun buildExerciseMonthRingDays(
     anchorDate: LocalDate,
-    entriesByDate: Map<LocalDate, List<CaffeineEntry>>,
-    dailyLimitMg: Int,
+    entriesByDate: Map<LocalDate, List<ExerciseEntry>>,
+    targetMinutes: Int,
 ): List<MetricDayRingState> {
     val monthStart = anchorDate.withDayOfMonth(1)
     val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
     val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
     val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
     val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
-    val target = dailyLimitMg.toFloat().coerceAtLeast(1f)
     val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
 
     return (0 until dayCount).map { offset ->
         val date = gridStart.plusDays(offset.toLong())
         val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
-        val amount = if (isInCurrentMonth) entriesByDate[date].orEmpty().sumOf(CaffeineEntry::estimatedMg) else 0
-        val progress = clampProgress(amount.toFloat(), target)
+        val duration = if (isInCurrentMonth) entriesByDate[date].orEmpty().sumOf(ExerciseEntry::durationMinutes) else 0
+        val progress = clampProgress(duration.toFloat(), targetMinutes.toFloat())
         MetricDayRingState(
             dayLabel = date.dayOfMonth.toString(),
             progress = progress,
-            hasData = amount > 0,
+            hasData = duration > 0,
             isInCurrentMonth = isInCurrentMonth,
-            isTargetMet = amount > 0 && progress >= 1f,
+            isTargetMet = duration > 0 && progress >= 1f,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "$amount mg",
+            valueLabel = "$duration dk",
             isToday = date == LocalDate.now(),
         )
     }

@@ -131,6 +131,8 @@ fun TodayContent(
         onOpenStepDetail = actions.onOpenStepDetail,
         onOpenHydrationDetail = actions.onOpenHydrationDetail,
         onOpenCaffeineDetail = actions.onOpenCaffeineDetail,
+        onOpenSmokingDetail = actions.onOpenSmokingDetail,
+        onOpenExerciseDetail = actions.onOpenExerciseDetail,
         mealEditorState = mealEditorState,
         onMealTypeChange = actions.onMealTypeChange,
         onAddMealDraft = actions.onAddMealDraft,
@@ -176,6 +178,8 @@ fun TodayContent(
     onOpenStepDetail: () -> Unit = {},
     onOpenHydrationDetail: () -> Unit = {},
     onOpenCaffeineDetail: () -> Unit = {},
+    onOpenSmokingDetail: () -> Unit = {},
+    onOpenExerciseDetail: () -> Unit = {},
     mealEditorState: MealEditorUiState,
     onMealTypeChange: (MealType) -> Unit,
     onAddMealDraft: () -> Unit,
@@ -261,6 +265,7 @@ fun TodayContent(
                         state = state,
                         onAddExercise = { activeSheet = TodaySheet.Exercise },
                         onDeleteExercise = onDeleteExercise,
+                        onOpenDetails = onOpenExerciseDetail,
                     )
                     DashboardCardType.CAFFEINE -> CaffeineCard(
                         state = state.caffeine,
@@ -272,6 +277,7 @@ fun TodayContent(
                         onAddSmoking = { activeSheet = TodaySheet.Smoking },
                         onQuickIncrement = onIncrementSmoking,
                         onDeleteSmoking = onDeleteSmoking,
+                        onOpenDetails = onOpenSmokingDetail,
                     )
                     DashboardCardType.SUPPLEMENTS -> SupplementsCard(
                         items = state.supplements.items,

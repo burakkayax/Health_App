@@ -15,6 +15,9 @@ interface SmokingDao {
     @Query("SELECT * FROM smoking_entries WHERE date = :date ORDER BY id DESC LIMIT 1")
     fun observeForDate(date: LocalDate): Flow<SmokingEntryEntity?>
 
+    @Query("SELECT * FROM smoking_entries WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
+    fun observeBetween(startDate: LocalDate, endDate: LocalDate): Flow<List<SmokingEntryEntity>>
+
     @Query("SELECT * FROM smoking_entries WHERE date = :date LIMIT 1")
     suspend fun getForDate(date: LocalDate): SmokingEntryEntity?
 

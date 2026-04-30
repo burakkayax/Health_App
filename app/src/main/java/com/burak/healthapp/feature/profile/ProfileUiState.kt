@@ -5,6 +5,7 @@ import com.burak.healthapp.domain.export.HealthDataImportPreview
 import com.burak.healthapp.domain.model.SupplementTemplate
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
 
 data class ProfileGoalSummaryState(
     val title: UiText,
@@ -32,7 +33,7 @@ data class EditableSupplementTemplateState(
 fun EditableSupplementTemplateState.toDomainTemplate(sortOrder: Int): SupplementTemplate = SupplementTemplate(
     id = id,
     name = name.trim(),
-    targetAmount = targetAmount.toFloatOrNull() ?: 0f,
+    targetAmount = parseLocalizedDecimalInput(targetAmount) ?: 0f,
     unitLabel = unitLabel.trim(),
     sortOrder = sortOrder,
 )

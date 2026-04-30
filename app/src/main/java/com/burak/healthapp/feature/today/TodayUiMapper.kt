@@ -9,6 +9,7 @@ import com.burak.healthapp.domain.calculation.clampProgress
 import com.burak.healthapp.domain.calculation.countExerciseDays
 import com.burak.healthapp.domain.calculation.directionAwareProgress
 import com.burak.healthapp.domain.calculation.formatClockRange
+import com.burak.healthapp.domain.calculation.formatHourMinute
 import com.burak.healthapp.domain.calculation.formatMinutesAsSleepLabel
 import com.burak.healthapp.domain.calculation.formatSleepDuration
 import com.burak.healthapp.domain.config.DefaultHealthGoals
@@ -114,7 +115,7 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
             dailyTotalMg = caffeineTotal,
             limitMg = goals.dailyCaffeineLimitMg,
             progress = clampProgress(caffeineTotal.toFloat(), goals.dailyCaffeineLimitMg.toFloat()),
-            lastCaffeineTimeLabel = lastCaffeineTime?.toString() ?: "--",
+            lastCaffeineTimeLabel = lastCaffeineTime?.let(::formatHourMinute) ?: "--",
             overDailyLimit = caffeineTotal > goals.dailyCaffeineLimitMg,
             afterCutoff = lastCaffeineTime?.let { it > goals.caffeineCutoffTime } ?: false,
             withinSleepBuffer = lastCaffeineTime?.let { time ->

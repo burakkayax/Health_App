@@ -18,13 +18,16 @@
     <string name="common_edit">Düzenle</string>
     <string name="common_manage">Yönet</string>
     <string name="common_saving">Kaydediliyor...</string>
-    <string name="weekday_monday_short">P</string>
-    <string name="weekday_tuesday_short">S</string>
-    <string name="weekday_wednesday_short">Ç</string>
-    <string name="weekday_thursday_short">P</string>
-    <string name="weekday_friday_short">C</string>
-    <string name="weekday_saturday_short">C</string>
-    <string name="weekday_sunday_short">P</string>
+    <string name="common_average_logged_days">Kayıt olan günlere göre</string>
+    <string name="common_average_selected_period">Seçili döneme göre günlük ortalama</string>
+    <string name="common_average_last_7_days">Son 7 gün günlük ortalama</string>
+    <string name="weekday_monday_short">Pzt</string>
+    <string name="weekday_tuesday_short">Sal</string>
+    <string name="weekday_wednesday_short">Çar</string>
+    <string name="weekday_thursday_short">Per</string>
+    <string name="weekday_friday_short">Cum</string>
+    <string name="weekday_saturday_short">Cmt</string>
+    <string name="weekday_sunday_short">Paz</string>
     <string name="default_guest_name">Misafir</string>
     <string name="default_avatar_initials">M</string>
 
@@ -38,6 +41,8 @@
     <string name="route_step_detail">Adım Detayı</string>
     <string name="route_hydration_detail">Su Detayı</string>
     <string name="route_caffeine_detail">Kafein Detayı</string>
+    <string name="route_smoking_detail">Sigara Detayı</string>
+    <string name="route_exercise_detail">Egzersiz Detayı</string>
     <string name="route_today_meals">Bugünün Öğünleri</string>
     <string name="route_date_meals">%1$s Öğünleri</string>
 
@@ -58,9 +63,12 @@
     <string name="content_description_delete_hydration">Su kaydını sil</string>
     <string name="content_description_delete_sleep">Uyku kaydını sil</string>
     <string name="content_description_delete_smoking">Sigara kaydını sil</string>
+    <string name="content_description_delete_smoking_entry">Sigara kaydını sil</string>
+    <string name="content_description_delete_exercise_entry">Egzersiz kaydını sil</string>
     <string name="content_description_delete_supplement_dose">Takviye dozunu sil</string>
     <string name="content_description_delete_weight">Kilo kaydını sil</string>
     <string name="content_description_delete_meal">Öğünü sil</string>
+    <string name="content_description_delete_caffeine_entry">Kafein kaydını sil</string>
     <string name="content_description_remove_supplement">Takviyeyi kaldır</string>
     <string name="metric_day_ring_outside_month">%1$s, bu ay dışında</string>
     <string name="metric_day_ring_no_data">%1$s, kayıt yok</string>
@@ -223,6 +231,28 @@
     <string name="caffeine_detail_entries">Kayıtlar</string>
     <string name="caffeine_detail_empty">Henüz kafein kaydı yok.</string>
     <string name="caffeine_detail_record_format">%1$s • %2$s mg</string>
+    <string name="caffeine_detail_weekly_chart">Son 7 gün</string>
+    <string name="caffeine_detail_monthly_chart">Bu ay</string>
+    <string name="caffeine_detail_no_period_data">Bu dönem için henüz kafein kaydı yok.</string>
+
+    <string name="smoking_detail_title">Sigara Detayı</string>
+    <string name="smoking_detail_average_count">Günlük ortalama</string>
+    <string name="smoking_detail_total_count">Seçili dönem toplamı</string>
+    <string name="smoking_detail_limit">Günlük limit %1$d adet</string>
+    <string name="smoking_detail_entries">Kayıtlar</string>
+    <string name="smoking_detail_empty">Henüz sigara kaydı yok.</string>
+    <string name="smoking_detail_weekly_chart">Son 7 gün</string>
+    <string name="smoking_detail_monthly_chart">Bu ay</string>
+
+    <string name="exercise_detail_title">Egzersiz Detayı</string>
+    <string name="exercise_detail_average_duration">Ortalama süre</string>
+    <string name="exercise_detail_total_duration">Toplam süre</string>
+    <string name="exercise_detail_active_days">%1$d aktif gün</string>
+    <string name="exercise_detail_entries">Kayıtlar</string>
+    <string name="exercise_detail_empty">Henüz egzersiz kaydı yok.</string>
+    <string name="exercise_detail_weekly_chart">Son 7 gün</string>
+    <string name="exercise_detail_monthly_chart">Bu ay</string>
+    <string name="exercise_detail_entry_format">%1$d dk • %2$s</string>
 
     <string name="profile_summary_helper">Hedefler, tema ve takviyeler bu ekrandan yönetilir.</string>
     <string name="profile_goals_title">Hedefler</string>

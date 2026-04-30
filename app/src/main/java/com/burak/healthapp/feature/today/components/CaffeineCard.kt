@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +15,7 @@ import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
+import com.burak.healthapp.core.ui.components.ThickMetricProgressBar
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.feature.today.CaffeineCardState
@@ -51,11 +51,10 @@ internal fun CaffeineCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            LinearProgressIndicator(
-                progress = { state.progress.coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth(),
-                color = HealthPrimary,
-                trackColor = HealthPrimary.copy(alpha = 0.14f),
+            ThickMetricProgressBar(
+                progress = state.progress,
+                activeColor = HealthPrimary,
+                testTag = "caffeine_progress_bar",
             )
             Text(
                 text = stringResource(R.string.caffeine_last_time_format, state.lastCaffeineTimeLabel),

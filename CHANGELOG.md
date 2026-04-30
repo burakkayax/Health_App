@@ -1,5 +1,42 @@
 # Changelog
 
+## PR23.3 - Smoking and Exercise Detail Screens
+
+### Eklendi
+
+- Sigara detay sayfası eklendi.
+- Egzersiz detay sayfası eklendi.
+- Sigara ve egzersiz için haftalık/aylık grafikler, özet kartları ve geçmiş listeleri eklendi.
+
+### Değiştirildi
+
+- Ana ekrandaki Sigara ve Egzersiz kartlarından detay sayfalarına geçiş eklendi.
+
+## PR23.2 - Caffeine and Hydration Detail Standardization
+
+### Eklendi
+
+- Kafein detay ekranına haftalık ve aylık sekmeli grafik yapısı eklendi.
+
+### Değiştirildi
+
+- Kafein ve su detay ekranlarında grafikler üst bölüme taşındı.
+- Kafein ve su progress bar görsel dili ortaklaştırıldı.
+- Haftalık grafiklerde gün etiketleri daha okunabilir hale getirildi.
+
+## PR23.1 - Metric Input, Formatting and UI Safety Hotfix
+
+### Düzeltildi
+
+- Ondalıklı metrik girişlerinde virgül desteği eklendi.
+- Kafein saatlerinin saniye/nanosaniye ile görünmesi düzeltildi.
+- Kafein kayıtlarının kart gövdesine dokununca yanlışlıkla silinmesi engellendi.
+
+### Değiştirildi
+
+- Ortalama açıklamaları daha net hale getirildi.
+- Haftalık grafik gün etiketleri Türkçe/İngilizce kaynaklara taşındı.
+
 ## PR23 - Adaptive Layout & Large Screen Support
 
 ### Eklendi

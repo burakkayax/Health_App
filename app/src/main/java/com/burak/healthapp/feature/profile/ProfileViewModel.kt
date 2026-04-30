@@ -24,6 +24,7 @@ import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.domain.usecase.DeleteAllHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ExportHealthDataUseCase
 import com.burak.healthapp.domain.usecase.ImportHealthDataUseCase
+import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
 import com.burak.healthapp.feature.profile.EditableSupplementTemplateState
 import com.burak.healthapp.feature.profile.ProfileExportUiState
 import com.burak.healthapp.feature.profile.ProfileGoalSummaryState
@@ -393,7 +394,7 @@ class ProfileViewModel @Inject constructor(
             val trimmedName = draft.name.trim()
             val trimmedAmount = draft.targetAmount.trim()
             val trimmedUnit = draft.unitLabel.trim()
-            val parsedAmount = trimmedAmount.toFloatOrNull()
+            val parsedAmount = parseLocalizedDecimalInput(trimmedAmount)
 
             draft.copy(
                 name = trimmedName,

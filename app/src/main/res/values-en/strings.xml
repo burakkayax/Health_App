@@ -17,6 +17,16 @@
     <string name="common_edit">Edit</string>
     <string name="common_manage">Manage</string>
     <string name="common_saving">Saving...</string>
+    <string name="common_average_logged_days">Based on logged days</string>
+    <string name="common_average_selected_period">Daily average for selected period</string>
+    <string name="common_average_last_7_days">Daily average for last 7 days</string>
+    <string name="weekday_monday_short">Mon</string>
+    <string name="weekday_tuesday_short">Tue</string>
+    <string name="weekday_wednesday_short">Wed</string>
+    <string name="weekday_thursday_short">Thu</string>
+    <string name="weekday_friday_short">Fri</string>
+    <string name="weekday_saturday_short">Sat</string>
+    <string name="weekday_sunday_short">Sun</string>
     <string name="default_guest_name">Guest</string>
 
     <string name="route_today">Today</string>
@@ -29,6 +39,8 @@
     <string name="route_step_detail">Step Detail</string>
     <string name="route_hydration_detail">Water Detail</string>
     <string name="route_caffeine_detail">Caffeine Detail</string>
+    <string name="route_smoking_detail">Smoking Detail</string>
+    <string name="route_exercise_detail">Exercise Detail</string>
 
     <string name="notification_channel_steps_name">Step tracking</string>
     <string name="notification_channel_steps_description">Used for background step tracking.</string>
@@ -41,6 +53,9 @@
     <string name="notification_water_text">You logged %1$d / %2$d ml water today.</string>
     <string name="notification_water_add_250">Add 250 ml</string>
     <string name="notification_water_snooze_today">Skip today</string>
+    <string name="content_description_delete_caffeine_entry">Delete caffeine entry</string>
+    <string name="content_description_delete_smoking_entry">Delete smoking entry</string>
+    <string name="content_description_delete_exercise_entry">Delete exercise entry</string>
 
     <string name="today_title_nutrition">Nutrition and Macros</string>
     <string name="today_title_meals">Today\'s Meals</string>
@@ -114,6 +129,29 @@
     <string name="caffeine_detail_last_time">Last caffeine time</string>
     <string name="caffeine_detail_entries">Entries</string>
     <string name="caffeine_detail_empty">No caffeine entries yet.</string>
+    <string name="caffeine_detail_record_format">%1$s • %2$s mg</string>
+    <string name="caffeine_detail_weekly_chart">Last 7 days</string>
+    <string name="caffeine_detail_monthly_chart">This month</string>
+    <string name="caffeine_detail_no_period_data">No caffeine entries for this period yet.</string>
+
+    <string name="smoking_detail_title">Smoking Detail</string>
+    <string name="smoking_detail_average_count">Daily average</string>
+    <string name="smoking_detail_total_count">Selected period total</string>
+    <string name="smoking_detail_limit">Daily limit %1$d count</string>
+    <string name="smoking_detail_entries">Entries</string>
+    <string name="smoking_detail_empty">No smoking entries yet.</string>
+    <string name="smoking_detail_weekly_chart">Last 7 days</string>
+    <string name="smoking_detail_monthly_chart">This month</string>
+
+    <string name="exercise_detail_title">Exercise Detail</string>
+    <string name="exercise_detail_average_duration">Average duration</string>
+    <string name="exercise_detail_total_duration">Total duration</string>
+    <string name="exercise_detail_active_days">%1$d active days</string>
+    <string name="exercise_detail_entries">Entries</string>
+    <string name="exercise_detail_empty">No exercise entries yet.</string>
+    <string name="exercise_detail_weekly_chart">Last 7 days</string>
+    <string name="exercise_detail_monthly_chart">This month</string>
+    <string name="exercise_detail_entry_format">%1$d min • %2$s</string>
 
     <string name="profile_summary_helper">Manage goals, theme, and supplements here.</string>
     <string name="profile_goals_title">Goals</string>

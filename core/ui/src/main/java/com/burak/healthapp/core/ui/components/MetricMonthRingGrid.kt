@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import com.burak.healthapp.core.ui.R
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 @Immutable
 data class MetricDayRingState(
@@ -53,6 +55,17 @@ fun metricWeekdayLabels(): List<String> = listOf(
     stringResource(R.string.weekday_saturday_short),
     stringResource(R.string.weekday_sunday_short),
 )
+
+@Composable
+fun weekDayShortLabel(date: LocalDate): String = when (date.dayOfWeek) {
+    DayOfWeek.MONDAY -> stringResource(R.string.weekday_monday_short)
+    DayOfWeek.TUESDAY -> stringResource(R.string.weekday_tuesday_short)
+    DayOfWeek.WEDNESDAY -> stringResource(R.string.weekday_wednesday_short)
+    DayOfWeek.THURSDAY -> stringResource(R.string.weekday_thursday_short)
+    DayOfWeek.FRIDAY -> stringResource(R.string.weekday_friday_short)
+    DayOfWeek.SATURDAY -> stringResource(R.string.weekday_saturday_short)
+    DayOfWeek.SUNDAY -> stringResource(R.string.weekday_sunday_short)
+}
 
 @Composable
 fun MetricMonthRingGrid(

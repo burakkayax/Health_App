@@ -1,6 +1,7 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.calculation.formatHourMinute
 import com.burak.healthapp.domain.validation.ExerciseInputValidator
 import com.burak.healthapp.domain.validation.GoalSettingsValidator
 import com.burak.healthapp.domain.validation.HealthInputError
@@ -11,11 +12,34 @@ import com.burak.healthapp.domain.validation.SmokingInputValidator
 import com.burak.healthapp.domain.validation.SupplementDoseValidator
 import com.burak.healthapp.domain.validation.ValidationResult
 import com.burak.healthapp.domain.validation.WeightInputValidator
+import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalTime
 
 class HealthInputValidationTest {
+    @Test
+    fun parseLocalizedDecimalInput_acceptsCommaDotAndWholeNumber() {
+        assertEquals(62.5f, parseLocalizedDecimalInput("62,5") ?: -1f, 0.001f)
+        assertEquals(62.5f, parseLocalizedDecimalInput("62.5") ?: -1f, 0.001f)
+        assertEquals(62f, parseLocalizedDecimalInput("62") ?: -1f, 0.001f)
+    }
+
+    @Test
+    fun parseLocalizedDecimalInput_rejectsBlankRepeatedSeparatorsAndNegativeValues() {
+        assertNull(parseLocalizedDecimalInput(""))
+        assertNull(parseLocalizedDecimalInput("62,5,1"))
+        assertNull(parseLocalizedDecimalInput("-62,5"))
+    }
+
+    @Test
+    fun formatHourMinute_omitsSecondsAndNanos() {
+        assertEquals("19:52", formatHourMinute(LocalTime.of(19, 52, 5, 37_076_000)))
+        assertEquals("08:03", formatHourMinute(LocalTime.of(8, 3)))
+    }
+
     @Test
     fun mealValidator_rejectsBlankNameAndNegativeMacros() {
         val result = MealInputValidator.validate(

@@ -4,11 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.navigation.CaffeineDetailDestination
+import com.burak.healthapp.core.ui.navigation.ExerciseDetailDestination
 import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
 import com.burak.healthapp.core.ui.navigation.ProfileGoalsDestination
 import com.burak.healthapp.core.ui.navigation.SleepDetailDestination
+import com.burak.healthapp.core.ui.navigation.SmokingDetailDestination
 import com.burak.healthapp.core.ui.navigation.StepDetailDestination
 import com.burak.healthapp.core.ui.navigation.TodayDestination
 import com.burak.healthapp.core.ui.navigation.TrendsDestination
@@ -39,6 +41,8 @@ internal fun resolveTitle(currentRoute: String, selectedDate: LocalDate): String
         StepDetailDestination.route -> stringResource(StepDetailDestination.titleRes)
         HydrationDetailDestination.route -> stringResource(HydrationDetailDestination.titleRes)
         CaffeineDetailDestination.route -> stringResource(CaffeineDetailDestination.titleRes)
+        SmokingDetailDestination.route -> stringResource(SmokingDetailDestination.titleRes)
+        ExerciseDetailDestination.route -> stringResource(ExerciseDetailDestination.titleRes)
         else -> {
             if (selectedDate == today) {
                 stringResource(TodayDestination.titleRes)

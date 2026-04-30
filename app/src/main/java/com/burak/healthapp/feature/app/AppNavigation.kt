@@ -7,19 +7,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.navigation.CaffeineDetailDestination
+import com.burak.healthapp.core.ui.navigation.ExerciseDetailDestination
 import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
 import com.burak.healthapp.core.ui.navigation.ProfileGoalsDestination
 import com.burak.healthapp.core.ui.navigation.SleepDetailDestination
+import com.burak.healthapp.core.ui.navigation.SmokingDetailDestination
 import com.burak.healthapp.core.ui.navigation.StepDetailDestination
 import com.burak.healthapp.core.ui.navigation.TodayDestination
 import com.burak.healthapp.core.ui.navigation.TrendsDestination
 import com.burak.healthapp.core.ui.navigation.WeightDetailDestination
 import com.burak.healthapp.feature.detail.caffeine.CaffeineDetailRoute
+import com.burak.healthapp.feature.detail.exercise.ExerciseDetailRoute
 import com.burak.healthapp.feature.detail.hydration.HydrationDetailRoute
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryRoute
 import com.burak.healthapp.feature.detail.sleep.SleepDetailRoute
+import com.burak.healthapp.feature.detail.smoking.SmokingDetailRoute
 import com.burak.healthapp.feature.detail.step.StepDetailRoute
 import com.burak.healthapp.feature.detail.weight.WeightDetailRoute
 import com.burak.healthapp.feature.profile.ProfileRoute
@@ -51,6 +55,8 @@ internal fun AppNavigation(
                 onOpenStepDetail = { navController.navigate(StepDetailDestination.route) },
                 onOpenHydrationDetail = { navController.navigate(HydrationDetailDestination.route) },
                 onOpenCaffeineDetail = { navController.navigate(CaffeineDetailDestination.route) },
+                onOpenSmokingDetail = { navController.navigate(SmokingDetailDestination.route) },
+                onOpenExerciseDetail = { navController.navigate(ExerciseDetailDestination.route) },
             )
         }
         composable(TrendsDestination.route) {
@@ -93,6 +99,18 @@ internal fun AppNavigation(
         }
         composable(CaffeineDetailDestination.route) {
             CaffeineDetailRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
+        }
+        composable(SmokingDetailDestination.route) {
+            SmokingDetailRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
+        }
+        composable(ExerciseDetailDestination.route) {
+            ExerciseDetailRoute(
                 selectedDate = selectedDate,
                 windowSizeClass = windowSizeClass,
             )

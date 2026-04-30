@@ -43,6 +43,10 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Kilo ve vücut ölçüsü takibi
 - Günlük adım takibi
 - Kafein takibi (hızlı ekleme, günlük limit, kesme saati farkındalığı)
+- Kafein detay ekranında haftalık/aylık grafikler ve kayıt listesi
+- Sigara detay ekranında haftalık/aylık grafikler, özetler ve dönem geçmişi
+- Egzersiz detay ekranında haftalık/aylık grafikler, toplam süre ve dönem geçmişi
+- Su ve kafein kartlarında tutarlı kalın progress göstergeleri
 - Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Kafein, Su, Uyku, Sigara, Takviyeler)
 - Compact telefon, landscape ve tablet ekranlar için adaptive dashboard, profil ve detay ekran düzenleri
 
@@ -518,6 +522,8 @@ Planlanan geliştirmeler:
 * Adım sayımı cihazdaki sensör desteğine ve kullanıcının adım takibini etkinleştirmesine bağlıdır.
 * WorkManager tabanlı hatırlatıcılar kesin zamanlı alarm garantisi vermez.
 * Geniş ekran desteği temel adaptive layout seviyesindedir; tam Material Expressive redesign ayrı bir gelecek PR konusu olarak kalır.
+* Kafein kayıt saatini manuel düzenleme sonraki PR konusu olarak bırakılmıştır.
+* Egzersiz ve sigara kayıtlarını düzenleme akışı sonraki PR konusu olarak bırakılmıştır.
 * Veriler şu an local-first yapıdadır; cihazlar arası senkronizasyon yoktur.
 
 ---

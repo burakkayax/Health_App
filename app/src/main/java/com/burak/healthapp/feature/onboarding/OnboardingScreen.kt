@@ -52,6 +52,7 @@ import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -91,7 +92,7 @@ class OnboardingViewModel @Inject constructor(
             isSaving = true
             val profile = UserProfile.fromName(
                 name = form.name,
-                heightCm = form.currentHeight.toFloatOrNull(),
+                heightCm = parseLocalizedDecimalInput(form.currentHeight),
             )
             val currentWeight = form.currentWeight.toFloatOrDefault(DefaultHealthGoals.BASELINE_WEIGHT_KG)
             val currentShoulder = form.currentShoulder.toFloatOrDefault(DefaultHealthGoals.BASELINE_SHOULDER_CM)
@@ -616,5 +617,5 @@ private fun OnboardingPillTextField(
 }
 
 private fun String.toIntOrDefault(fallback: Int): Int = toIntOrNull() ?: fallback
-private fun String.toFloatOrDefault(fallback: Float): Float = toFloatOrNull() ?: fallback
+private fun String.toFloatOrDefault(fallback: Float): Float = parseLocalizedDecimalInput(this) ?: fallback
 private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.parse(this) }.getOrNull()

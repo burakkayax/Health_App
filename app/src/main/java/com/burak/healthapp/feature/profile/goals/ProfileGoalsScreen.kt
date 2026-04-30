@@ -37,6 +37,7 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.validation.GoalSettingsValidator
 import com.burak.healthapp.domain.validation.HealthInputError
 import com.burak.healthapp.domain.validation.ValidationResult
+import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsUiState
 import java.time.LocalDate
 import java.time.LocalTime
@@ -254,12 +255,12 @@ fun ProfileGoalsContent(
                     val parsedCaffeineSleepBuffer = caffeineSleepBufferHours.toIntOrNull()
                     val parsedExerciseDays = exerciseTargetDays.toIntOrNull()
                     val parsedExerciseDuration = exerciseTargetDuration.toIntOrNull()
-                    val parsedTargetWeight = targetWeight.toFloatOrNull()
-                    val parsedCurrentWeight = currentWeight.toFloatOrNull()
-                    val parsedCurrentShoulder = currentShoulder.toFloatOrNull()
-                    val parsedCurrentWaist = currentWaist.toFloatOrNull()
-                    val parsedCurrentHip = currentHip.toFloatOrNull()
-                    val parsedHeight = currentHeight.trim().ifBlank { null }?.toFloatOrNull()
+                    val parsedTargetWeight = parseLocalizedDecimalInput(targetWeight)
+                    val parsedCurrentWeight = parseLocalizedDecimalInput(currentWeight)
+                    val parsedCurrentShoulder = parseLocalizedDecimalInput(currentShoulder)
+                    val parsedCurrentWaist = parseLocalizedDecimalInput(currentWaist)
+                    val parsedCurrentHip = parseLocalizedDecimalInput(currentHip)
+                    val parsedHeight = currentHeight.trim().ifBlank { null }?.let(::parseLocalizedDecimalInput)
                     val parsedBedtime = sleepBedtime.toLocalTimeOrNull()
                     val parsedWakeTime = sleepWakeTime.toLocalTimeOrNull()
                     val parsedCaffeineCutoffTime = caffeineCutoffTime.toLocalTimeOrNull()
