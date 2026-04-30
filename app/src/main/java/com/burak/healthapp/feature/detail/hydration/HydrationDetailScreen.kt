@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
@@ -113,6 +115,7 @@ class HydrationDetailViewModel @Inject constructor(
 @Composable
 fun HydrationDetailRoute(
     selectedDate: LocalDate,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     val viewModel: HydrationDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -125,6 +128,7 @@ fun HydrationDetailRoute(
         state = uiState,
         onSelectPeriod = viewModel::selectPeriod,
         onDeleteHydration = viewModel::deleteHydrationEntry,
+        windowSizeClass = windowSizeClass,
     )
 }
 
@@ -133,7 +137,51 @@ fun HydrationDetailContent(
     state: HydrationDetailUiState,
     onSelectPeriod: (TrendsPeriod) -> Unit,
     onDeleteHydration: (Long) -> Unit,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (!windowSizeClass.isCompact) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(HealthSpacing.sm)
+                .testTag("hydration_detail_screen")
+                .testTag("hydration_detail_adaptive_two_pane"),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            ) {
+                item {
+                    HydrationPeriodSelector(
+                        selectedPeriod = state.selectedPeriod,
+                        onSelectPeriod = onSelectPeriod,
+                    )
+                }
+                item {
+                    HydrationSummaryAndAverage(
+                        state = state,
+                        compact = false,
+                    )
+                }
+                item {
+                    HydrationPeriodCard(state = state)
+                }
+            }
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            ) {
+                hydrationEntriesSection(
+                    state = state,
+                    onDeleteHydration = onDeleteHydration,
+                )
+            }
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -148,143 +196,220 @@ fun HydrationDetailContent(
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         item {
-            SegmentedControl(
-                modifier = Modifier.fillMaxWidth(),
-                options = listOf(
-                    stringResource(R.string.common_weekly),
-                    stringResource(R.string.common_monthly),
-                ),
-                selectedIndex = if (state.selectedPeriod == TrendsPeriod.WEEKLY) 0 else 1,
-                onSelectionChange = { index ->
-                    onSelectPeriod(if (index == 0) TrendsPeriod.WEEKLY else TrendsPeriod.MONTHLY)
-                },
+            HydrationPeriodSelector(
+                selectedPeriod = state.selectedPeriod,
+                onSelectPeriod = onSelectPeriod,
             )
         }
         item {
-            HealthCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("hydration_detail_summary_card"),
-            ) {
-                val targetLabel = stringResource(R.string.today_format_ml, state.targetMl)
-                Text(
-                    text = stringResource(R.string.hydration_detail_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                ProgressBarRow(
-                    modifier = Modifier.padding(top = HealthSpacing.sm),
-                    label = stringResource(R.string.today_format_ml, state.totalMl),
-                    valueLabel = stringResource(R.string.hydration_detail_target, targetLabel),
-                    progress = state.progress,
-                    color = HealthWater,
-                )
-            }
-        }
-        item {
-            InsightCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.hydration_detail_average_title),
-                value = stringResource(R.string.today_format_ml, state.averageMl),
-                subtitle = stringResource(R.string.hydration_detail_logged_days_subtitle),
+            HydrationSummaryAndAverage(
+                state = state,
+                compact = windowSizeClass.isCompact,
             )
         }
         item {
-            HealthCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("hydration_detail_period_card"),
-            ) {
-                Text(
-                    text = stringResource(R.string.hydration_detail_summary_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                if (!state.hasPeriodData) {
-                    Text(
-                        modifier = Modifier.padding(top = HealthSpacing.sm),
-                        text = stringResource(R.string.hydration_detail_no_period_data),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                if (state.selectedPeriod == TrendsPeriod.MONTHLY) {
-                    MetricMonthRingGrid(
-                        days = state.monthDays,
-                        weekdayLabels = metricWeekdayLabels(),
-                        modifier = Modifier.padding(top = HealthSpacing.sm),
-                        testTag = "hydration_month_ring_grid",
-                        activeColor = HealthWater,
-                    )
-                } else {
-                    HydrationWeekBarChart(
-                        days = state.periodDays,
-                        modifier = Modifier
-                            .padding(top = HealthSpacing.sm)
-                            .testTag("hydration_week_bar_chart"),
-                    )
-                }
-            }
+            HydrationPeriodCard(state = state)
         }
-        item {
+        hydrationEntriesSection(
+            state = state,
+            onDeleteHydration = onDeleteHydration,
+        )
+    }
+}
+
+@Composable
+private fun HydrationPeriodSelector(
+    selectedPeriod: TrendsPeriod,
+    onSelectPeriod: (TrendsPeriod) -> Unit,
+) {
+    SegmentedControl(
+        modifier = Modifier.fillMaxWidth(),
+        options = listOf(
+            stringResource(R.string.common_weekly),
+            stringResource(R.string.common_monthly),
+        ),
+        selectedIndex = if (selectedPeriod == TrendsPeriod.WEEKLY) 0 else 1,
+        onSelectionChange = { index ->
+            onSelectPeriod(if (index == 0) TrendsPeriod.WEEKLY else TrendsPeriod.MONTHLY)
+        },
+    )
+}
+
+@Composable
+private fun HydrationPeriodCard(state: HydrationDetailUiState) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("hydration_detail_period_card"),
+    ) {
+        Text(
+            text = stringResource(R.string.hydration_detail_summary_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (!state.hasPeriodData) {
             Text(
-                text = stringResource(R.string.hydration_detail_entries_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = HealthSpacing.sm),
+                text = stringResource(R.string.hydration_detail_no_period_data),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (state.entries.isEmpty()) {
-            item {
-                HealthCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("hydration_detail_empty"),
-                ) {
-                    Text(
-                        text = stringResource(R.string.hydration_detail_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
+        if (state.selectedPeriod == TrendsPeriod.MONTHLY) {
+            MetricMonthRingGrid(
+                days = state.monthDays,
+                weekdayLabels = metricWeekdayLabels(),
+                modifier = Modifier.padding(top = HealthSpacing.sm),
+                testTag = "hydration_month_ring_grid",
+                activeColor = HealthWater,
+            )
         } else {
-            items(state.entries, key = HydrationHistoryItemState::id) { item ->
-                HealthCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("hydration_history_item_${item.id}"),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                        ) {
-                            Text(
-                                text = stringResource(R.string.today_format_ml, item.amountMl),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = item.timeLabel,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        CardHeaderDestructiveButton(
-                            label = stringResource(R.string.common_delete),
-                            modifier = Modifier.testTag("hydration_history_delete_${item.id}"),
-                            contentDescription = stringResource(R.string.content_description_delete_hydration),
-                            onClick = { onDeleteHydration(item.id) },
-                        )
-                    }
-                }
-            }
+            HydrationWeekBarChart(
+                days = state.periodDays,
+                modifier = Modifier
+                    .padding(top = HealthSpacing.sm)
+                    .testTag("hydration_week_bar_chart"),
+            )
         }
     }
+}
+
+private fun androidx.compose.foundation.lazy.LazyListScope.hydrationEntriesSection(
+    state: HydrationDetailUiState,
+    onDeleteHydration: (Long) -> Unit,
+) {
+    item {
+        Text(
+            text = stringResource(R.string.hydration_detail_entries_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+    if (state.entries.isEmpty()) {
+        item {
+            HealthCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("hydration_detail_empty"),
+            ) {
+                Text(
+                    text = stringResource(R.string.hydration_detail_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    } else {
+        items(state.entries, key = HydrationHistoryItemState::id) { item ->
+            HydrationHistoryItem(
+                item = item,
+                onDeleteHydration = onDeleteHydration,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HydrationHistoryItem(
+    item: HydrationHistoryItemState,
+    onDeleteHydration: (Long) -> Unit,
+) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("hydration_history_item_${item.id}"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            ) {
+                Text(
+                    text = stringResource(R.string.today_format_ml, item.amountMl),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = item.timeLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            CardHeaderDestructiveButton(
+                label = stringResource(R.string.common_delete),
+                modifier = Modifier.testTag("hydration_history_delete_${item.id}"),
+                contentDescription = stringResource(R.string.content_description_delete_hydration),
+                onClick = { onDeleteHydration(item.id) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun HydrationSummaryAndAverage(
+    state: HydrationDetailUiState,
+    compact: Boolean,
+) {
+    if (compact) {
+        Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            HydrationSummaryCard(state = state)
+            HydrationAverageCard(state = state)
+        }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            HydrationSummaryCard(
+                state = state,
+                modifier = Modifier.weight(1f),
+            )
+            HydrationAverageCard(
+                state = state,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HydrationSummaryCard(
+    state: HydrationDetailUiState,
+    modifier: Modifier = Modifier,
+) {
+    HealthCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("hydration_detail_summary_card"),
+    ) {
+        val targetLabel = stringResource(R.string.today_format_ml, state.targetMl)
+        Text(
+            text = stringResource(R.string.hydration_detail_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        ProgressBarRow(
+            modifier = Modifier.padding(top = HealthSpacing.sm),
+            label = stringResource(R.string.today_format_ml, state.totalMl),
+            valueLabel = stringResource(R.string.hydration_detail_target, targetLabel),
+            progress = state.progress,
+            color = HealthWater,
+        )
+    }
+}
+
+@Composable
+private fun HydrationAverageCard(
+    state: HydrationDetailUiState,
+    modifier: Modifier = Modifier,
+) {
+    InsightCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.hydration_detail_average_title),
+        value = stringResource(R.string.today_format_ml, state.averageMl),
+        subtitle = stringResource(R.string.hydration_detail_logged_days_subtitle),
+    )
 }
 
 @Composable

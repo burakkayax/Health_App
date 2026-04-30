@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.TrendsPeriod
@@ -63,6 +64,24 @@ class HydrationDetailContentTest {
         }
 
         composeRule.onNodeWithTag("hydration_month_ring_grid").assertIsDisplayed()
+    }
+
+    @Test
+    fun expandedHydrationDetail_usesTwoPaneLayout() {
+        composeRule.setContent {
+            HealthTheme {
+                HydrationDetailContent(
+                    state = sampleWeeklyState(),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onSelectPeriod = {},
+                    onDeleteHydration = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("hydration_detail_adaptive_two_pane").assertIsDisplayed()
+        composeRule.onNodeWithTag("hydration_week_bar_chart").assertIsDisplayed()
+        composeRule.onNodeWithTag("hydration_history_item_1").assertIsDisplayed()
     }
 
     private fun sampleWeeklyState(): HydrationDetailUiState = HydrationDetailUiState(

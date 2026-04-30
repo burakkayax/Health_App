@@ -44,6 +44,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Günlük adım takibi
 - Kafein takibi (hızlı ekleme, günlük limit, kesme saati farkındalığı)
 - Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Kafein, Su, Uyku, Sigara, Takviyeler)
+- Compact telefon, landscape ve tablet ekranlar için adaptive dashboard, profil ve detay ekran düzenleri
 
 ### Beslenme ve makro takibi
 
@@ -159,6 +160,7 @@ Mimari hedefler:
 * ViewModel içinde Android `Context` bağımlılığını azaltmak
 * Repository, database, DataStore ve use case bağımlılıklarını Hilt üzerinden sağlamak
 * Uygulama metinlerini lokalizasyona hazır hale getirmek
+* Compact, medium ve expanded ekranlarda ortak adaptive UI kararları kullanmak
 * Varsayılan hedef değerlerini merkezi sabitler üzerinden yönetmek
 * Test edilebilir, okunabilir ve sürdürülebilir bir yapı kurmak
 
@@ -515,6 +517,7 @@ Planlanan geliştirmeler:
 * Uygulama tıbbi karar destek sistemi değildir.
 * Adım sayımı cihazdaki sensör desteğine ve kullanıcının adım takibini etkinleştirmesine bağlıdır.
 * WorkManager tabanlı hatırlatıcılar kesin zamanlı alarm garantisi vermez.
+* Geniş ekran desteği temel adaptive layout seviyesindedir; tam Material Expressive redesign ayrı bir gelecek PR konusu olarak kalır.
 * Veriler şu an local-first yapıdadır; cihazlar arası senkronizasyon yoktur.
 
 ---

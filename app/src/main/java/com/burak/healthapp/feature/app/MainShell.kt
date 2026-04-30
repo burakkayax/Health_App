@@ -1,6 +1,7 @@
 package com.burak.healthapp.feature.app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
@@ -23,9 +24,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.adaptive.rememberHealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.shouldUseNavigationRail
+import com.burak.healthapp.core.ui.components.HealthNavigationRail
 import com.burak.healthapp.core.ui.navigation.ProfileDestination
 import com.burak.healthapp.core.ui.navigation.TodayDestination
 import com.burak.healthapp.core.ui.navigation.mainDestinations
+import com.burak.healthapp.core.ui.navigation.railDestinations
 import com.burak.healthapp.feature.root.RootUiState
 import java.time.LocalDate
 
@@ -35,7 +40,10 @@ internal fun MainShell(rootState: RootUiState) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: TodayDestination.route
-    val isMainRoute = mainDestinations.any { it.route == currentRoute }
+    val windowSizeClass = rememberHealthWindowSizeClass()
+    val useNavigationRail = windowSizeClass.shouldUseNavigationRail
+    val navigationDestinations = if (useNavigationRail) railDestinations else mainDestinations
+    val isMainRoute = navigationDestinations.any { it.route == currentRoute }
     var selectedEpochDay by rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
     val selectedDate = remember(selectedEpochDay) { LocalDate.ofEpochDay(selectedEpochDay) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -87,7 +95,7 @@ internal fun MainShell(rootState: RootUiState) {
             )
         },
         bottomBar = {
-            if (isMainRoute) {
+            if (!useNavigationRail && isMainRoute) {
                 AppBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { destination ->
@@ -103,14 +111,36 @@ internal fun MainShell(rootState: RootUiState) {
             }
         },
     ) { innerPadding ->
-        AppNavigation(
-            navController = navController,
-            selectedDate = selectedDate,
-            avatarInitials = rootState.avatarInitials,
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .background(backgroundColor)
                 .padding(innerPadding),
-        )
+        ) {
+            if (useNavigationRail) {
+                HealthNavigationRail(
+                    destinations = railDestinations,
+                    currentRoute = currentRoute,
+                    onNavigate = { destination ->
+                        navController.navigate(destination.route) {
+                            popUpTo(TodayDestination.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
+            }
+            AppNavigation(
+                navController = navController,
+                selectedDate = selectedDate,
+                avatarInitials = rootState.avatarInitials,
+                windowSizeClass = windowSizeClass,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+            )
+        }
     }
 }

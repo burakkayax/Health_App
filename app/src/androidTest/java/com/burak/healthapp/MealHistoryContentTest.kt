@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryContent
@@ -52,6 +53,22 @@ class MealHistoryContentTest {
 
         composeRule.onNodeWithTag("meal_history_delete_2").performClick()
         assertEquals(2L, deletedId)
+    }
+
+    @Test
+    fun expandedMealHistory_usesAdaptiveGrid() {
+        composeRule.setContent {
+            HealthTheme {
+                MealHistoryContent(
+                    state = sampleMealHistoryState(),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onDeleteMeal = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("meal_history_adaptive_grid").assertIsDisplayed()
+        composeRule.onNodeWithText("Omlet").assertIsDisplayed()
     }
 
     private fun sampleMealHistoryState(): MealHistoryUiState = MealHistoryUiState(

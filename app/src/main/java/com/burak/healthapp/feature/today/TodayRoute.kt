@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.SupplementItemState
 import com.burak.healthapp.feature.today.TodayUiState
@@ -15,6 +16,7 @@ import java.time.LocalDate
 @Composable
 fun TodayRoute(
     selectedDate: LocalDate,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
     onOpenMealHistory: () -> Unit,
     onOpenWeightDetail: () -> Unit,
     onOpenSleepDetail: () -> Unit,
@@ -34,6 +36,7 @@ fun TodayRoute(
     TodayContent(
         state = uiState,
         mealEditorState = mealEditorState,
+        windowSizeClass = windowSizeClass,
         actions = TodayActions(
             onAddMeal = viewModel::addMeal,
             onAddHydration = viewModel::addHydration,

@@ -29,6 +29,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -470,6 +473,7 @@ fun HealthBottomBar(
     onNavigate: (MainHealthDestination) -> Unit,
 ) {
     NavigationBar(
+        modifier = Modifier.testTag("health_bottom_navigation"),
         containerColor = MaterialTheme.colorScheme.background,
         tonalElevation = 0.dp,
     ) {
@@ -492,6 +496,47 @@ fun HealthBottomBar(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.surface,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+fun HealthNavigationRail(
+    destinations: List<MainHealthDestination>,
+    currentRoute: String?,
+    onNavigate: (MainHealthDestination) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    NavigationRail(
+        modifier = modifier.testTag("health_navigation_rail"),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        destinations.forEach { destination ->
+            val selected = currentRoute == destination.route
+            val title = stringResource(destination.titleRes)
+            NavigationRailItem(
+                selected = selected,
+                onClick = { onNavigate(destination) },
+                icon = {
+                    Icon(
+                        imageVector = destination.icon,
+                        contentDescription = title,
+                    )
+                },
+                label = {
+                    Text(
+                        text = title,
+                        textAlign = TextAlign.Center,
+                    )
+                },
+                colors = NavigationRailItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
                     indicatorColor = MaterialTheme.colorScheme.surface,

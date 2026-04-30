@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.BmiGaugeChart
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
 import com.burak.healthapp.core.ui.components.HealthCard
@@ -79,13 +81,16 @@ class WeightDetailViewModel @Inject constructor(
 }
 
 @Composable
-fun WeightDetailRoute() {
+fun WeightDetailRoute(
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
+) {
     val viewModel: WeightDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     WeightDetailContent(
         state = uiState,
         onDeleteMeasurement = viewModel::deleteMeasurement,
+        windowSizeClass = windowSizeClass,
     )
 }
 
@@ -93,7 +98,34 @@ fun WeightDetailRoute() {
 fun WeightDetailContent(
     state: WeightDetailUiState,
     onDeleteMeasurement: (Long) -> Unit,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (!windowSizeClass.isCompact) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(HealthSpacing.sm)
+                .testTag("weight_detail_screen")
+                .testTag("weight_detail_adaptive_two_pane"),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            ) {
+                item { WeightChartCard(state = state) }
+                item { WeightBmiCard(state = state) }
+            }
+            WeightHistoryList(
+                state = state,
+                onDeleteMeasurement = onDeleteMeasurement,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -108,85 +140,10 @@ fun WeightDetailContent(
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         item {
-            HealthCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("weight_detail_chart_card"),
-            ) {
-                Text(
-                    text = stringResource(R.string.weight_detail_chart_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                if (state.chartPoints.isEmpty()) {
-                    Text(
-                        modifier = Modifier.padding(top = HealthSpacing.sm),
-                        text = stringResource(R.string.weight_detail_chart_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    state.historyItems.firstOrNull()?.let { latestItem ->
-                        Text(
-                            modifier = Modifier.padding(top = HealthSpacing.xs),
-                            text = stringResource(R.string.weight_detail_latest_record, latestItem.weightLabel),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    state.weightChart?.let { chart ->
-                        WeightTrendChart(
-                            state = chart,
-                            startLabel = stringResource(R.string.weight_chart_start, chart.startWeightKg),
-                            targetLabel = stringResource(R.string.weight_chart_target, chart.targetWeightKg),
-                            currentLabel = stringResource(R.string.weight_chart_current, chart.currentWeightKg),
-                            progressLabel = stringResource(
-                                R.string.weight_chart_progress,
-                                (chart.progress * 100).toInt(),
-                            ),
-                            modifier = Modifier
-                                .padding(top = HealthSpacing.sm)
-                                .testTag("weight_detail_chart"),
-                        )
-                    }
-                }
-            }
+            WeightChartCard(state = state)
         }
         item {
-            HealthCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("weight_detail_bmi_card"),
-            ) {
-                Text(
-                    text = stringResource(R.string.weight_detail_bmi_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    modifier = Modifier.padding(top = HealthSpacing.xs),
-                    text = stringResource(R.string.weight_detail_bmi_helper),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                BmiGaugeChart(
-                    modifier = Modifier
-                        .padding(top = HealthSpacing.sm)
-                        .testTag("weight_detail_bmi_gauge"),
-                    state = state.bmiGauge,
-                )
-                val helperMessage = state.bmiGauge.helperMessage
-                if (helperMessage != null) {
-                    Text(
-                        modifier = Modifier
-                            .padding(top = HealthSpacing.xs)
-                            .testTag("weight_detail_bmi_helper"),
-                        text = helperMessage,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
+            WeightBmiCard(state = state)
         }
         item {
             Text(
@@ -245,6 +202,173 @@ fun WeightDetailContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WeightChartCard(state: WeightDetailUiState) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("weight_detail_chart_card"),
+    ) {
+        Text(
+            text = stringResource(R.string.weight_detail_chart_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (state.chartPoints.isEmpty()) {
+            Text(
+                modifier = Modifier.padding(top = HealthSpacing.sm),
+                text = stringResource(R.string.weight_detail_chart_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            state.historyItems.firstOrNull()?.let { latestItem ->
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = stringResource(R.string.weight_detail_latest_record, latestItem.weightLabel),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            state.weightChart?.let { chart ->
+                WeightTrendChart(
+                    state = chart,
+                    startLabel = stringResource(R.string.weight_chart_start, chart.startWeightKg),
+                    targetLabel = stringResource(R.string.weight_chart_target, chart.targetWeightKg),
+                    currentLabel = stringResource(R.string.weight_chart_current, chart.currentWeightKg),
+                    progressLabel = stringResource(
+                        R.string.weight_chart_progress,
+                        (chart.progress * 100).toInt(),
+                    ),
+                    modifier = Modifier
+                        .padding(top = HealthSpacing.sm)
+                        .testTag("weight_detail_chart"),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeightBmiCard(state: WeightDetailUiState) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("weight_detail_bmi_card"),
+    ) {
+        Text(
+            text = stringResource(R.string.weight_detail_bmi_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.xs),
+            text = stringResource(R.string.weight_detail_bmi_helper),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        BmiGaugeChart(
+            modifier = Modifier
+                .padding(top = HealthSpacing.sm)
+                .testTag("weight_detail_bmi_gauge"),
+            state = state.bmiGauge,
+        )
+        val helperMessage = state.bmiGauge.helperMessage
+        if (helperMessage != null) {
+            Text(
+                modifier = Modifier
+                    .padding(top = HealthSpacing.xs)
+                    .testTag("weight_detail_bmi_helper"),
+                text = helperMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeightHistoryList(
+    state: WeightDetailUiState,
+    onDeleteMeasurement: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+    ) {
+        item {
+            Text(
+                text = stringResource(R.string.weight_detail_history_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+        if (state.historyItems.isEmpty()) {
+            item {
+                HealthCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("weight_detail_history_empty"),
+                ) {
+                    Text(
+                        text = stringResource(R.string.weight_detail_history_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            items(state.historyItems, key = WeightHistoryItemState::id) { item ->
+                WeightHistoryItem(
+                    item = item,
+                    onDeleteMeasurement = onDeleteMeasurement,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeightHistoryItem(
+    item: WeightHistoryItemState,
+    onDeleteMeasurement: (Long) -> Unit,
+) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("weight_history_item_${item.id}"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            ) {
+                Text(
+                    text = item.dateLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = item.weightLabel,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            CardHeaderDestructiveButton(
+                label = stringResource(R.string.common_delete),
+                contentDescription = stringResource(R.string.content_description_delete_weight),
+                modifier = Modifier.testTag("weight_history_delete_${item.id}"),
+                onClick = { onDeleteMeasurement(item.id) },
+            )
         }
     }
 }

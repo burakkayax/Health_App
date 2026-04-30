@@ -1,5 +1,18 @@
 # Changelog
 
+## PR23 - Adaptive Layout & Large Screen Support
+
+### Eklendi
+
+- Window size class tabanlı compact, medium ve expanded layout desteği eklendi.
+- Geniş ekranlarda NavigationRail desteği eklendi.
+- Today dashboard, Profile ve Detail ekranları geniş ekranlarda daha verimli alan kullanacak şekilde iyileştirildi.
+
+### Değiştirildi
+
+- Compact telefon düzeni korunurken tablet/landscape ekranlarda çok kolonlu/adaptive düzenler kullanılmaya başlandı.
+- Dashboard customization sheet geniş ekranlarda daha dengeli genişlik ve scroll davranışıyla güncellendi.
+
 ## PR22 - Domain/UI Text Separation & Localization Cleanup
 
 ### Değiştirildi

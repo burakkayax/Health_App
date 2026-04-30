@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
@@ -27,14 +29,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
 import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
 import java.time.LocalDate
+import androidx.compose.foundation.lazy.grid.items as gridItems
 
 @Composable
-fun MealHistoryRoute(selectedDate: LocalDate) {
+fun MealHistoryRoute(
+    selectedDate: LocalDate,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
+) {
     val viewModel: MealHistoryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -45,6 +53,7 @@ fun MealHistoryRoute(selectedDate: LocalDate) {
     MealHistoryContent(
         state = uiState,
         onDeleteMeal = viewModel::deleteMeal,
+        windowSizeClass = windowSizeClass,
     )
 }
 
@@ -52,7 +61,34 @@ fun MealHistoryRoute(selectedDate: LocalDate) {
 fun MealHistoryContent(
     state: MealHistoryUiState,
     onDeleteMeal: (Long) -> Unit,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (!windowSizeClass.isCompact && state.sections.isNotEmpty()) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag("meal_history_adaptive_grid"),
+            contentPadding = PaddingValues(
+                start = HealthSpacing.sm,
+                end = HealthSpacing.sm,
+                top = HealthSpacing.xs,
+                bottom = HealthSpacing.md,
+            ),
+            verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            gridItems(state.sections, key = MealHistorySectionState::titleResId) { section ->
+                MealHistorySection(
+                    section = section,
+                    onDeleteMeal = onDeleteMeal,
+                )
+            }
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

@@ -3,10 +3,13 @@ package com.burak.healthapp
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthTheme
@@ -148,6 +151,31 @@ class ProfileContentTest {
 
         composeRule.onNodeWithTag("profile_step_tracking_card").assertIsDisplayed()
         composeRule.onNodeWithTag("profile_water_reminder_card").assertIsDisplayed()
+    }
+
+    @Test
+    fun expandedProfile_usesAdaptiveGridAndKeepsPreferenceCards() {
+        composeRule.setContent {
+            HealthTheme {
+                ProfileContent(
+                    state = sampleProfileState(),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onOpenGoals = {},
+                    onManageSupplements = {},
+                    onExportData = {},
+                    onImportData = {},
+                    onDeleteAllHealthData = {},
+                    onThemeModeChange = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("profile_adaptive_grid").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_step_tracking_card").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_water_reminder_card").assertIsDisplayed()
+        composeRule.onNodeWithTag("profile_adaptive_grid")
+            .performScrollToNode(hasTestTag("profile_data_management_section"))
+        composeRule.onNodeWithTag("profile_data_management_section").assertIsDisplayed()
     }
 
     @Test

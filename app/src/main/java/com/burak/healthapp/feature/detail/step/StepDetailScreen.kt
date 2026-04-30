@@ -39,6 +39,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
@@ -131,6 +133,7 @@ class StepDetailViewModel @Inject constructor(
 @Composable
 fun StepDetailRoute(
     selectedDate: LocalDate,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     val viewModel: StepDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -157,6 +160,7 @@ fun StepDetailRoute(
         state = uiState,
         stepTrackingMessage = stepTrackingMessage,
         onSelectPeriod = viewModel::selectPeriod,
+        windowSizeClass = windowSizeClass,
         onEnableStepTracking = {
             when {
                 !hasStepSensor -> {
@@ -183,6 +187,7 @@ fun StepDetailRoute(
 fun StepDetailContent(
     state: StepDetailUiState,
     onSelectPeriod: (TrendsPeriod) -> Unit,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
     stepTrackingMessage: UiText? = null,
     onEnableStepTracking: () -> Unit = {},
 ) {
@@ -264,26 +269,69 @@ fun StepDetailContent(
             }
         }
         item {
-            InsightCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.step_detail_total_steps),
-                value = stringResource(R.string.step_detail_steps_format, state.totalSteps),
-                subtitle = if (state.selectedPeriod == TrendsPeriod.WEEKLY) {
-                    stringResource(R.string.step_detail_last_7_days)
-                } else {
-                    stringResource(R.string.step_detail_last_30_days)
-                },
-            )
-        }
-        item {
-            InsightCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.step_detail_average_steps),
-                value = stringResource(R.string.step_detail_steps_format, state.averageSteps),
-                subtitle = stringResource(R.string.step_detail_logged_days_subtitle),
+            StepInsightCards(
+                state = state,
+                compact = windowSizeClass.isCompact,
             )
         }
     }
+}
+
+@Composable
+private fun StepInsightCards(
+    state: StepDetailUiState,
+    compact: Boolean,
+) {
+    val periodSubtitle = if (state.selectedPeriod == TrendsPeriod.WEEKLY) {
+        stringResource(R.string.step_detail_last_7_days)
+    } else {
+        stringResource(R.string.step_detail_last_30_days)
+    }
+    if (compact) {
+        Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            StepTotalInsight(state = state, subtitle = periodSubtitle)
+            StepAverageInsight(state = state)
+        }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+            StepTotalInsight(
+                state = state,
+                subtitle = periodSubtitle,
+                modifier = Modifier.weight(1f),
+            )
+            StepAverageInsight(
+                state = state,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StepTotalInsight(
+    state: StepDetailUiState,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+) {
+    InsightCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.step_detail_total_steps),
+        value = stringResource(R.string.step_detail_steps_format, state.totalSteps),
+        subtitle = subtitle,
+    )
+}
+
+@Composable
+private fun StepAverageInsight(
+    state: StepDetailUiState,
+    modifier: Modifier = Modifier,
+) {
+    InsightCard(
+        modifier = modifier.fillMaxWidth(),
+        title = stringResource(R.string.step_detail_average_steps),
+        value = stringResource(R.string.step_detail_steps_format, state.averageSteps),
+        subtitle = stringResource(R.string.step_detail_logged_days_subtitle),
+    )
 }
 
 @Composable

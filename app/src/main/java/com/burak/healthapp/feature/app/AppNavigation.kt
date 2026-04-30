@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.navigation.CaffeineDetailDestination
 import com.burak.healthapp.core.ui.navigation.HydrationDetailDestination
 import com.burak.healthapp.core.ui.navigation.MealHistoryDestination
@@ -33,6 +34,7 @@ internal fun AppNavigation(
     modifier: Modifier,
     selectedDate: LocalDate,
     avatarInitials: String,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     NavHost(
         navController = navController,
@@ -42,6 +44,7 @@ internal fun AppNavigation(
         composable(TodayDestination.route) {
             TodayRoute(
                 selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
                 onOpenMealHistory = { navController.navigate(MealHistoryDestination.route) },
                 onOpenWeightDetail = { navController.navigate(WeightDetailDestination.route) },
                 onOpenSleepDetail = { navController.navigate(SleepDetailDestination.route) },
@@ -54,10 +57,14 @@ internal fun AppNavigation(
             TrendsRoute(avatarInitials = avatarInitials)
         }
         composable(MealHistoryDestination.route) {
-            MealHistoryRoute(selectedDate = selectedDate)
+            MealHistoryRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
         }
         composable(ProfileDestination.route) {
             ProfileRoute(
+                windowSizeClass = windowSizeClass,
                 onOpenGoals = { navController.navigate(ProfileGoalsDestination.route) },
             )
         }
@@ -67,19 +74,28 @@ internal fun AppNavigation(
             )
         }
         composable(WeightDetailDestination.route) {
-            WeightDetailRoute()
+            WeightDetailRoute(windowSizeClass = windowSizeClass)
         }
         composable(SleepDetailDestination.route) {
             SleepDetailRoute(selectedDate = selectedDate)
         }
         composable(StepDetailDestination.route) {
-            StepDetailRoute(selectedDate = selectedDate)
+            StepDetailRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
         }
         composable(HydrationDetailDestination.route) {
-            HydrationDetailRoute(selectedDate = selectedDate)
+            HydrationDetailRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
         }
         composable(CaffeineDetailDestination.route) {
-            CaffeineDetailRoute(selectedDate = selectedDate)
+            CaffeineDetailRoute(
+                selectedDate = selectedDate,
+                windowSizeClass = windowSizeClass,
+            )
         }
     }
 }

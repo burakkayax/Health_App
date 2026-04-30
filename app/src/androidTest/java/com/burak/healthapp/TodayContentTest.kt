@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
@@ -523,6 +524,42 @@ class TodayContentTest {
         }
 
         composeRule.onAllNodesWithTag("hydration_card").assertCountEquals(0)
+    }
+
+    @Test
+    fun expandedDashboard_keepsConfiguredCardsInAdaptiveList() {
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState(),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = {},
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("today_list").assertIsDisplayed()
+        composeRule.onNodeWithTag("nutrition_card").assertIsDisplayed()
     }
 
     @Test

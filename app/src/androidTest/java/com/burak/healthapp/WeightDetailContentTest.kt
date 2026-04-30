@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.model.BmiGaugeState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.core.ui.theme.HealthTheme
@@ -73,6 +74,23 @@ class WeightDetailContentTest {
 
         composeRule.onNodeWithTag("weight_detail_bmi_helper").assertIsDisplayed()
         composeRule.onNodeWithText("VKİ için boyunu profilinden ekle.").assertIsDisplayed()
+    }
+
+    @Test
+    fun expandedWeightDetail_usesTwoPaneLayout() {
+        composeRule.setContent {
+            HealthTheme {
+                WeightDetailContent(
+                    state = sampleState(),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onDeleteMeasurement = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("weight_detail_adaptive_two_pane").assertIsDisplayed()
+        composeRule.onNodeWithTag("weight_detail_chart_card").assertIsDisplayed()
+        composeRule.onNodeWithTag("weight_history_item_2").assertIsDisplayed()
     }
 
     private fun sampleState(): WeightDetailUiState {

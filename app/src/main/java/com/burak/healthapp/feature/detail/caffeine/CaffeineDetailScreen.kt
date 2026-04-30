@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,6 +32,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.theme.HealthPrimary
@@ -125,7 +126,10 @@ class CaffeineDetailViewModel @Inject constructor(
 }
 
 @Composable
-fun CaffeineDetailRoute(selectedDate: LocalDate) {
+fun CaffeineDetailRoute(
+    selectedDate: LocalDate,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
+) {
     val viewModel: CaffeineDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -136,6 +140,7 @@ fun CaffeineDetailRoute(selectedDate: LocalDate) {
     CaffeineDetailContent(
         state = uiState,
         onDelete = viewModel::deleteEntry,
+        windowSizeClass = windowSizeClass,
     )
 }
 
@@ -143,7 +148,37 @@ fun CaffeineDetailRoute(selectedDate: LocalDate) {
 fun CaffeineDetailContent(
     state: CaffeineDetailUiState,
     onDelete: (Long) -> Unit,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (!windowSizeClass.isCompact) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(HealthSpacing.sm)
+                .testTag("caffeine_detail_screen")
+                .testTag("caffeine_detail_adaptive_two_pane"),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            ) {
+                CaffeineTodayTotalCard(state = state)
+                CaffeineMetricRow(state = state)
+                HealthCard(modifier = Modifier.fillMaxWidth()) {
+                    CaffeineWeekChart(bars = state.bars)
+                }
+            }
+            CaffeineEntryList(
+                entries = state.entries,
+                onDelete = onDelete,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -153,28 +188,10 @@ fun CaffeineDetailContent(
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         item {
-            InsightCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.caffeine_detail_today_total),
-                value = stringResource(R.string.caffeine_today_total_format, state.totalTodayMg, state.limitMg),
-                subtitle = stringResource(R.string.caffeine_estimate_notice),
-            )
+            CaffeineTodayTotalCard(state = state)
         }
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
-                InsightCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.caffeine_detail_weekly_average),
-                    value = stringResource(R.string.caffeine_today_total_format, state.weeklyAverageMg, state.limitMg),
-                    subtitle = stringResource(R.string.common_weekly),
-                )
-                InsightCard(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(R.string.caffeine_detail_last_time),
-                    value = state.lastTimeLabel,
-                    subtitle = stringResource(R.string.caffeine_detail_entries),
-                )
-            }
+            CaffeineMetricRow(state = state)
         }
         item {
             HealthCard(modifier = Modifier.fillMaxWidth()) {
@@ -182,22 +199,65 @@ fun CaffeineDetailContent(
             }
         }
         item {
-            Text(
-                text = stringResource(R.string.caffeine_detail_entries),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+            CaffeineEntryList(
+                entries = state.entries,
+                onDelete = onDelete,
             )
         }
-        if (state.entries.isEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.caffeine_detail_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+    }
+}
+
+@Composable
+private fun CaffeineTodayTotalCard(state: CaffeineDetailUiState) {
+    InsightCard(
+        modifier = Modifier.fillMaxWidth(),
+        title = stringResource(R.string.caffeine_detail_today_total),
+        value = stringResource(R.string.caffeine_today_total_format, state.totalTodayMg, state.limitMg),
+        subtitle = stringResource(R.string.caffeine_estimate_notice),
+    )
+}
+
+@Composable
+private fun CaffeineMetricRow(state: CaffeineDetailUiState) {
+    Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
+        InsightCard(
+            modifier = Modifier.weight(1f),
+            title = stringResource(R.string.caffeine_detail_weekly_average),
+            value = stringResource(R.string.caffeine_today_total_format, state.weeklyAverageMg, state.limitMg),
+            subtitle = stringResource(R.string.common_weekly),
+        )
+        InsightCard(
+            modifier = Modifier.weight(1f),
+            title = stringResource(R.string.caffeine_detail_last_time),
+            value = state.lastTimeLabel,
+            subtitle = stringResource(R.string.caffeine_detail_entries),
+        )
+    }
+}
+
+@Composable
+private fun CaffeineEntryList(
+    entries: List<CaffeineEntry>,
+    onDelete: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.testTag("caffeine_detail_entry_list"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+    ) {
+        Text(
+            text = stringResource(R.string.caffeine_detail_entries),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (entries.isEmpty()) {
+            Text(
+                text = stringResource(R.string.caffeine_detail_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         } else {
-            items(state.entries, key = CaffeineEntry::id) { entry ->
+            entries.forEach { entry ->
                 HealthCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -210,7 +270,11 @@ fun CaffeineDetailContent(
                     )
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.xs),
-                        text = stringResource(R.string.caffeine_detail_record_format, entry.time.toString(), entry.estimatedMg),
+                        text = stringResource(
+                            R.string.caffeine_detail_record_format,
+                            entry.time.toString(),
+                            entry.estimatedMg,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

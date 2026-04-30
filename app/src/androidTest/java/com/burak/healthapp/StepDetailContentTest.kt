@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.theme.HealthTheme
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.feature.detail.step.StepDetailContent
@@ -50,6 +51,21 @@ class StepDetailContentTest {
         }
 
         composeRule.onAllNodesWithTag("step_tracking_disabled_card").assertCountEquals(0)
+    }
+
+    @Test
+    fun expandedStepDetail_keepsDisabledCardVisibleWhenTrackingOff() {
+        composeRule.setContent {
+            HealthTheme {
+                StepDetailContent(
+                    state = sampleState(stepTrackingEnabled = false),
+                    windowSizeClass = HealthWindowSizeClass.EXPANDED,
+                    onSelectPeriod = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("step_tracking_disabled_card").assertIsDisplayed()
     }
 
     private fun sampleState(stepTrackingEnabled: Boolean): StepDetailUiState = StepDetailUiState(

@@ -13,6 +13,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,6 +33,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.burak.healthapp.R
 import com.burak.healthapp.core.notification.HealthNotifications
+import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
+import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.ThemeMode
@@ -38,6 +44,7 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileRoute(
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
     onOpenGoals: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
@@ -89,6 +96,7 @@ fun ProfileRoute(
         canPostNotifications = HealthNotifications.canPostNotifications(context),
         stepPreferenceMessage = stepPreferenceMessage,
         waterPreferenceMessage = waterPreferenceMessage,
+        windowSizeClass = windowSizeClass,
         onOpenGoals = onOpenGoals,
         onManageSupplements = viewModel::openSupplementEditor,
         onExportData = {
@@ -182,6 +190,7 @@ fun ProfileRoute(
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
+    windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
     hasStepSensor: Boolean = true,
     canPostNotifications: Boolean = true,
     stepPreferenceMessage: UiText? = null,
@@ -196,6 +205,56 @@ fun ProfileContent(
     onWaterReminderToggle: (Boolean) -> Unit = {},
     onWaterReminderSettingsSave: (WaterReminderSettings) -> Unit = {},
 ) {
+    val profileCards = listOf(
+        ProfileAdaptiveCard.Header,
+        ProfileAdaptiveCard.Goals,
+        ProfileAdaptiveCard.StepTracking,
+        ProfileAdaptiveCard.WaterReminder,
+        ProfileAdaptiveCard.Theme,
+        ProfileAdaptiveCard.DataManagement,
+        ProfileAdaptiveCard.Supplements,
+    )
+
+    if (!windowSizeClass.isCompact) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag("profile_screen")
+                .testTag("profile_adaptive_grid"),
+            contentPadding = PaddingValues(
+                start = HealthSpacing.sm,
+                end = HealthSpacing.sm,
+                top = HealthSpacing.xs,
+                bottom = HealthSpacing.md,
+            ),
+            verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+        ) {
+            items(profileCards, key = ProfileAdaptiveCard::name) { card ->
+                ProfileAdaptiveCardContent(
+                    card = card,
+                    state = state,
+                    hasStepSensor = hasStepSensor,
+                    canPostNotifications = canPostNotifications,
+                    stepPreferenceMessage = stepPreferenceMessage,
+                    waterPreferenceMessage = waterPreferenceMessage,
+                    onOpenGoals = onOpenGoals,
+                    onManageSupplements = onManageSupplements,
+                    onExportData = onExportData,
+                    onImportData = onImportData,
+                    onDeleteAllHealthData = onDeleteAllHealthData,
+                    onThemeModeChange = onThemeModeChange,
+                    onStepTrackingToggle = onStepTrackingToggle,
+                    onWaterReminderToggle = onWaterReminderToggle,
+                    onWaterReminderSettingsSave = onWaterReminderSettingsSave,
+                )
+            }
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -209,52 +268,89 @@ fun ProfileContent(
         ),
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
-        item {
-            ProfileHeaderCard(state = state)
-        }
-        item {
-            ProfileGoalsSummaryCard(
+        items(profileCards, key = ProfileAdaptiveCard::name) { card ->
+            ProfileAdaptiveCardContent(
+                card = card,
                 state = state,
-                onOpenGoals = onOpenGoals,
-            )
-        }
-        item {
-            StepTrackingPreferenceCard(
-                enabled = state.stepTrackingEnabled,
                 hasStepSensor = hasStepSensor,
-                message = stepPreferenceMessage,
-                onToggle = onStepTrackingToggle,
-            )
-        }
-        item {
-            WaterReminderPreferenceCard(
-                settings = state.waterReminderSettings,
                 canPostNotifications = canPostNotifications,
-                message = waterPreferenceMessage,
-                onToggle = onWaterReminderToggle,
-                onSave = onWaterReminderSettingsSave,
-            )
-        }
-        item {
-            ProfileThemeCard(
-                themeMode = state.themeMode,
-                onThemeModeChange = onThemeModeChange,
-            )
-        }
-        item {
-            ProfileDataManagementCard(
-                exportState = state.exportState,
+                stepPreferenceMessage = stepPreferenceMessage,
+                waterPreferenceMessage = waterPreferenceMessage,
+                onOpenGoals = onOpenGoals,
+                onManageSupplements = onManageSupplements,
                 onExportData = onExportData,
                 onImportData = onImportData,
                 onDeleteAllHealthData = onDeleteAllHealthData,
+                onThemeModeChange = onThemeModeChange,
+                onStepTrackingToggle = onStepTrackingToggle,
+                onWaterReminderToggle = onWaterReminderToggle,
+                onWaterReminderSettingsSave = onWaterReminderSettingsSave,
             )
         }
-        item {
-            ProfileSupplementsCard(
-                templates = state.supplementTemplates,
-                onManageSupplements = onManageSupplements,
-            )
-        }
+    }
+}
+
+private enum class ProfileAdaptiveCard {
+    Header,
+    Goals,
+    StepTracking,
+    WaterReminder,
+    Theme,
+    DataManagement,
+    Supplements,
+}
+
+@Composable
+private fun ProfileAdaptiveCardContent(
+    card: ProfileAdaptiveCard,
+    state: ProfileUiState,
+    hasStepSensor: Boolean,
+    canPostNotifications: Boolean,
+    stepPreferenceMessage: UiText?,
+    waterPreferenceMessage: UiText?,
+    onOpenGoals: () -> Unit,
+    onManageSupplements: () -> Unit,
+    onExportData: () -> Unit,
+    onImportData: () -> Unit,
+    onDeleteAllHealthData: () -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    onStepTrackingToggle: (Boolean) -> Unit,
+    onWaterReminderToggle: (Boolean) -> Unit,
+    onWaterReminderSettingsSave: (WaterReminderSettings) -> Unit,
+) {
+    when (card) {
+        ProfileAdaptiveCard.Header -> ProfileHeaderCard(state = state)
+        ProfileAdaptiveCard.Goals -> ProfileGoalsSummaryCard(
+            state = state,
+            onOpenGoals = onOpenGoals,
+        )
+        ProfileAdaptiveCard.StepTracking -> StepTrackingPreferenceCard(
+            enabled = state.stepTrackingEnabled,
+            hasStepSensor = hasStepSensor,
+            message = stepPreferenceMessage,
+            onToggle = onStepTrackingToggle,
+        )
+        ProfileAdaptiveCard.WaterReminder -> WaterReminderPreferenceCard(
+            settings = state.waterReminderSettings,
+            canPostNotifications = canPostNotifications,
+            message = waterPreferenceMessage,
+            onToggle = onWaterReminderToggle,
+            onSave = onWaterReminderSettingsSave,
+        )
+        ProfileAdaptiveCard.Theme -> ProfileThemeCard(
+            themeMode = state.themeMode,
+            onThemeModeChange = onThemeModeChange,
+        )
+        ProfileAdaptiveCard.DataManagement -> ProfileDataManagementCard(
+            exportState = state.exportState,
+            onExportData = onExportData,
+            onImportData = onImportData,
+            onDeleteAllHealthData = onDeleteAllHealthData,
+        )
+        ProfileAdaptiveCard.Supplements -> ProfileSupplementsCard(
+            templates = state.supplementTemplates,
+            onManageSupplements = onManageSupplements,
+        )
     }
 }
 

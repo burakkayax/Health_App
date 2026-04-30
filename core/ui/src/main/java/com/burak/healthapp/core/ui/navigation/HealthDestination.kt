@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.burak.healthapp.core.ui.R
 
@@ -35,9 +36,10 @@ data object MealHistoryDestination : HealthDestination(
     titleRes = R.string.route_meals,
 )
 
-data object ProfileDestination : HealthDestination(
+data object ProfileDestination : MainHealthDestination(
     route = "profile",
     titleRes = R.string.route_profile,
+    icon = Icons.Outlined.Person,
 )
 
 data object ProfileGoalsDestination : HealthDestination(
@@ -73,4 +75,10 @@ data object CaffeineDetailDestination : HealthDestination(
 val mainDestinations = listOf(
     TodayDestination,
     TrendsDestination,
+)
+
+val railDestinations = listOf(
+    TodayDestination,
+    TrendsDestination,
+    ProfileDestination,
 )
