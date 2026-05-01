@@ -38,6 +38,7 @@ import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
+import com.burak.healthapp.core.ui.components.EmptyGhostChart
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
@@ -54,6 +55,7 @@ import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.buildMonthGridDays
 import com.burak.healthapp.feature.detail.buildPeriodDays
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -110,7 +112,7 @@ class HydrationDetailViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyHydrationDetailUiState(),
+            initialValue = emptyHydrationDetailUiState(isLoading = true),
         )
 
     fun setSelectedDate(date: LocalDate) {
@@ -156,6 +158,11 @@ fun HydrationDetailContent(
     onDeleteHydration: (Long) -> Unit,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (state.isLoading) {
+        DetailSkeletonContent()
+        return
+    }
+
     if (!windowSizeClass.isCompact) {
         Row(
             modifier = Modifier
@@ -314,6 +321,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.hydrationEntriesSecti
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                EmptyGhostChart(modifier = Modifier.padding(top = HealthSpacing.sm))
             }
         }
     } else {
@@ -598,8 +606,9 @@ internal fun formatCompactWaterAmountMl(amountMl: Int): String {
     return String.format(Locale.US, "%.1fL", liters)
 }
 
-private fun emptyHydrationDetailUiState(): HydrationDetailUiState = HydrationDetailUiState(
+private fun emptyHydrationDetailUiState(isLoading: Boolean = false): HydrationDetailUiState = HydrationDetailUiState(
     selectedPeriod = TrendsPeriod.WEEKLY,
+    isLoading = isLoading,
     targetMl = 0,
     totalMl = 0,
     averageMl = 0,

@@ -354,9 +354,13 @@
     <string name="profile_data_management_title">Veri Y&#246;netimi</string>
     <string name="profile_data_management_helper">Sa&#287;l&#305;k verilerini se&#231;ti&#287;in konuma JSON dosyas&#305; olarak d&#305;&#351;a aktarabilirsin.</string>
     <string name="profile_export_data">Verileri d&#305;&#351;a aktar</string>
+    <string name="profile_export_preparing">Yedek dosyası hazırlanıyor...</string>
     <string name="profile_import_data">Verileri i&#231;e aktar</string>
+    <string name="profile_import_reading">Yedek dosyası okunuyor...</string>
     <string name="profile_import_confirm">&#304;&#231;e aktar</string>
+    <string name="profile_import_importing">Veriler içe aktarılıyor...</string>
     <string name="profile_delete_all_health_data">T&#252;m verileri sil</string>
+    <string name="profile_delete_deleting">Sağlık kayıtları siliniyor...</string>
     <string name="profile_step_tracking_title">Adım Takibi</string>
     <string name="profile_step_tracking_status_on">Arka planda adım takibi açık</string>
     <string name="profile_step_tracking_status_off">Adım takibi kapalı</string>

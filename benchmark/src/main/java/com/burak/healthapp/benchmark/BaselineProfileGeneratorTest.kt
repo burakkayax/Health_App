@@ -2,8 +2,6 @@ package com.burak.healthapp.benchmark
 
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,11 +21,10 @@ class BaselineProfileGeneratorTest {
         ) {
             pressHome()
             startActivityAndWait()
-            device.wait(Until.hasObject(By.pkg(packageName).depth(0)), 5_000)
-
-            navigateIfExists("Eğilimler")
-            navigateIfExists("Profil")
-            navigateIfExists("Bugün")
+            waitForAppReady()
+            navigateToTrends()
+            navigateToProfile()
+            navigateToToday()
         }
     }
 }

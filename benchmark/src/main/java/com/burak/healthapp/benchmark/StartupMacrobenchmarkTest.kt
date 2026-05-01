@@ -28,6 +28,7 @@ class StartupMacrobenchmarkTest {
         ) {
             pressHome()
             startActivityAndWait()
+            waitForAppReady()
         }
     }
 
@@ -41,10 +42,11 @@ class StartupMacrobenchmarkTest {
             compilationMode = CompilationMode.Partial(),
         ) {
             startActivityAndWait()
-            scrollTodayListIfExists()
-            navigateIfExists("Eğilimler")
-            navigateIfExists("Profil")
-            navigateIfExists("Bugün")
+            waitForAppReady()
+            scrollTodayList()
+            navigateToTrends()
+            navigateToProfile()
+            navigateToToday()
         }
     }
 }

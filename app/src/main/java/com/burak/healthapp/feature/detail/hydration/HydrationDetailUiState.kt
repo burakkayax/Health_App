@@ -23,6 +23,7 @@ data class HydrationSummaryDayState(
 @Immutable
 data class HydrationDetailUiState(
     val selectedPeriod: TrendsPeriod,
+    val isLoading: Boolean = false,
     val targetMl: Int,
     val totalMl: Int,
     val averageMl: Int,

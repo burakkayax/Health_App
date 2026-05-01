@@ -14,6 +14,7 @@ data class StepBarState(
 @Immutable
 data class StepDetailUiState(
     val selectedPeriod: TrendsPeriod,
+    val isLoading: Boolean = false,
     val bars: List<StepBarState>,
     val monthDays: List<MetricDayRingState>,
     val totalSteps: Int,

@@ -54,6 +54,8 @@ import com.burak.healthapp.core.ui.adaptive.ConstrainedLargeScreenContainer
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.RoundedPillButton
+import com.burak.healthapp.core.ui.components.SkeletonCard
+import com.burak.healthapp.core.ui.components.SkeletonMetricCard
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.DashboardCardConfig
@@ -206,6 +208,10 @@ fun TodayContent(
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     var activeSheet by remember { mutableStateOf<TodaySheet?>(null) }
+    if (state.isLoading) {
+        TodaySkeletonContent(windowSizeClass = windowSizeClass)
+        return
+    }
     val orderedCards = remember(state.dashboardCards) {
         state.dashboardCards.sortedBy(DashboardCardConfig::sortOrder)
     }
@@ -423,6 +429,34 @@ fun TodayContent(
         }
 
         null -> Unit
+    }
+}
+
+@Composable
+private fun TodaySkeletonContent(
+    windowSizeClass: HealthWindowSizeClass,
+) {
+    AdaptiveDashboardGrid(
+        items = listOf("header", "nutrition", "hydration", "sleep", "steps", "caffeine"),
+        key = { item -> "today_skeleton_$item" },
+        windowSizeClass = windowSizeClass,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("today_skeleton"),
+        contentPadding = PaddingValues(
+            start = HealthSpacing.sm,
+            end = HealthSpacing.sm,
+            top = HealthSpacing.xs,
+            bottom = HealthSpacing.md,
+        ),
+        fullSpan = { item -> item == "header" || item == "nutrition" },
+    ) { item ->
+        if (item == "header" || item == "nutrition") {
+            SkeletonCard(lines = if (item == "header") 2 else 4)
+        } else {
+            SkeletonMetricCard()
+        }
     }
 }
 

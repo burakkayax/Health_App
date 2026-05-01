@@ -61,7 +61,7 @@ internal fun ProfileDataManagementCard(
         }
         RoundedPillButton(
             label = if (exportState.isExporting) {
-                stringResource(R.string.common_saving)
+                stringResource(R.string.profile_export_preparing)
             } else {
                 stringResource(R.string.profile_export_data)
             },
@@ -76,7 +76,7 @@ internal fun ProfileDataManagementCard(
         )
         RoundedPillButton(
             label = if (exportState.isImporting) {
-                stringResource(R.string.common_loading)
+                stringResource(R.string.profile_import_reading)
             } else {
                 stringResource(R.string.profile_import_data)
             },
@@ -91,7 +91,7 @@ internal fun ProfileDataManagementCard(
         )
         RoundedPillButton(
             label = if (exportState.isDeleting) {
-                stringResource(R.string.common_loading)
+                stringResource(R.string.profile_delete_deleting)
             } else {
                 stringResource(R.string.profile_delete_all_health_data)
             },

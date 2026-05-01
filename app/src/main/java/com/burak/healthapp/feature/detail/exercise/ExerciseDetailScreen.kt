@@ -36,6 +36,7 @@ import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
+import com.burak.healthapp.core.ui.components.EmptyGhostChart
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
@@ -53,6 +54,7 @@ import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.buildMonthGridDays
 import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.today.labelResId
@@ -106,6 +108,7 @@ data class ExerciseDetailUiState(
     val activeDays: Int = 0,
     val entries: List<ExerciseHistoryItemState> = emptyList(),
     val hasPeriodData: Boolean = false,
+    val isLoading: Boolean = false,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -140,7 +143,7 @@ class ExerciseDetailViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ExerciseDetailUiState(),
+            initialValue = ExerciseDetailUiState(isLoading = true),
         )
 
     fun setSelectedDate(date: LocalDate) {
@@ -186,6 +189,11 @@ fun ExerciseDetailContent(
     onDelete: (LocalDate) -> Unit,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (state.isLoading) {
+        DetailSkeletonContent()
+        return
+    }
+
     if (!windowSizeClass.isCompact) {
         Row(
             modifier = Modifier
@@ -414,6 +422,7 @@ private fun ExerciseEntryList(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                EmptyGhostChart(modifier = Modifier.padding(top = HealthSpacing.sm))
             }
         } else {
             entries.forEach { entry ->

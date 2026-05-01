@@ -513,6 +513,7 @@ fun HealthBottomBar(
             val selected = currentRoute == destination.route
             val title = stringResource(destination.titleRes)
             NavigationBarItem(
+                modifier = Modifier.testTag(destination.navTestTag()),
                 selected = selected,
                 onClick = { onNavigate(destination) },
                 icon = {
@@ -554,6 +555,7 @@ fun HealthNavigationRail(
             val selected = currentRoute == destination.route
             val title = stringResource(destination.titleRes)
             NavigationRailItem(
+                modifier = Modifier.testTag(destination.navTestTag()),
                 selected = selected,
                 onClick = { onNavigate(destination) },
                 icon = {
@@ -579,3 +581,5 @@ fun HealthNavigationRail(
         }
     }
 }
+
+private fun MainHealthDestination.navTestTag(): String = "nav_$route"

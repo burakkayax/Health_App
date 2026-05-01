@@ -41,6 +41,7 @@ enum class SleepRegularityStatus {
 
 data class SleepDetailUiState(
     val selectedPeriod: TrendsPeriod,
+    val isLoading: Boolean = false,
     val bars: List<SleepBarState>,
     val regularity: SleepRegularityState,
     val hasData: Boolean,

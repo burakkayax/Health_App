@@ -396,6 +396,39 @@ Deferred beyond PR23.9:
 - Sleep stability v2 is still deferred.
 - More advanced Trends visualizations and benchmark scenarios should follow after this information architecture has settled.
 
+## PR23.10 Follow-up Notes
+
+Benchmark stabilization changes:
+
+- Connected benchmark navigation now prefers stable Compose testTag resource ids instead of localized tab text.
+- Main navigation exposes `nav_today`, `nav_trends`, and `nav_profile`; compact profile navigation can also use `profile_avatar_button`.
+- `HealthApp` enables `testTagsAsResourceId`, so UiAutomator can find Compose test tags through `By.res(...)`.
+- Startup and baseline profile paths now wait for the main shell before scrolling or tab navigation.
+- `today_list`, `trends_screen`, and `profile_screen` are used as readiness checks where applicable.
+
+Connected benchmark constraints:
+
+- `:benchmark:assembleBenchmark` remains the non-device validation path.
+- `:benchmark:connectedBenchmarkAndroidTest` still requires an unlocked emulator or physical device.
+- Emulator results should be treated as smoke/regression signals; physical devices remain the preferred performance baseline.
+
+## PR23.11 Follow-up Notes
+
+Loading and empty-state changes:
+
+- Root loading no longer renders the plain `Yükleniyor` text between Android splash and app content.
+- Static, low-cost skeleton components were added for cards, metrics, charts, Today, Trends, and detail screens.
+- Today and Trends use skeletons only for initial loading state; normal data updates should not reset the screen to skeleton.
+- Detail screens can use the shared `DetailSkeletonContent`; water, caffeine, smoking, exercise, step, sleep, and weight initial states are now marked as loading.
+- Trends and metric detail empty states use ghost placeholders to communicate where future data will appear.
+- Import/export actions now use more specific loading labels for preparing, reading, importing, and deleting data.
+
+Remaining UX follow-ups:
+
+- Skeleton timing can be tuned later if real devices show visible flicker.
+- Per-detail empty copy can be specialized further without changing the common skeleton system.
+- Onboarding loading polish remains out of scope for this PR.
+
 ## Recommended PR Split
 
 ### PR23.6 Performance & Recomposition Optimization

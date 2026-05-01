@@ -473,6 +473,7 @@ private fun emptyUiState(): TrendsUiState = TrendsUiState(
     metricCards = emptyList(),
     insights = emptyList(),
     dataQuality = emptyList(),
+    isLoading = true,
 )
 
 private fun stringRes(resId: Int, vararg args: Any): UiText = UiText.StringResource(resId = resId, args = args.toList())

@@ -58,6 +58,7 @@ import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.buildMonthGridDays
 import com.burak.healthapp.feature.detail.buildTrailingDays
 import com.burak.healthapp.feature.detail.buildTrailingWeekDays
@@ -119,7 +120,7 @@ class SleepDetailViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptySleepDetailUiState(),
+            initialValue = emptySleepDetailUiState(isLoading = true),
         )
 
     fun setSelectedDate(date: LocalDate) {
@@ -154,6 +155,11 @@ fun SleepDetailContent(
     state: SleepDetailUiState,
     onSelectPeriod: (TrendsPeriod) -> Unit,
 ) {
+    if (state.isLoading) {
+        DetailSkeletonContent()
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -533,8 +539,9 @@ internal fun buildSleepCalendarWeeks(
         }
 }
 
-private fun emptySleepDetailUiState(): SleepDetailUiState = SleepDetailUiState(
+private fun emptySleepDetailUiState(isLoading: Boolean = false): SleepDetailUiState = SleepDetailUiState(
     selectedPeriod = TrendsPeriod.WEEKLY,
+    isLoading = isLoading,
     bars = emptyList(),
     regularity = SleepRegularityState(
         title = "Uyku Düzeni",

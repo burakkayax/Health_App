@@ -52,7 +52,15 @@ internal fun ImportPreviewDialog(
                 enabled = !isImporting,
                 onClick = onConfirm,
             ) {
-                Text(text = stringResource(R.string.profile_import_confirm))
+                Text(
+                    text = stringResource(
+                        if (isImporting) {
+                            R.string.profile_import_importing
+                        } else {
+                            R.string.profile_import_confirm
+                        },
+                    ),
+                )
             }
         },
         dismissButton = {

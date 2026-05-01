@@ -63,6 +63,7 @@ import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.app.hasActivityRecognitionPermission
 import com.burak.healthapp.feature.app.hasStepCounterSensor
+import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.buildMonthGridDays
 import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.detail.step.StepBarState
@@ -114,7 +115,7 @@ class StepDetailViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyStepDetailUiState(),
+            initialValue = emptyStepDetailUiState(isLoading = true),
         )
 
     fun setSelectedDate(date: LocalDate) {
@@ -194,6 +195,11 @@ fun StepDetailContent(
     stepTrackingMessage: UiText? = null,
     onEnableStepTracking: () -> Unit = {},
 ) {
+    if (state.isLoading) {
+        DetailSkeletonContent()
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -496,8 +502,9 @@ private fun List<StepEntry>.toStepDetailUiState(
     )
 }
 
-private fun emptyStepDetailUiState(): StepDetailUiState = StepDetailUiState(
+private fun emptyStepDetailUiState(isLoading: Boolean = false): StepDetailUiState = StepDetailUiState(
     selectedPeriod = TrendsPeriod.WEEKLY,
+    isLoading = isLoading,
     bars = emptyList(),
     monthDays = emptyList(),
     totalSteps = 0,

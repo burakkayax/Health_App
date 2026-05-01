@@ -65,7 +65,7 @@ class TodayViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyUiState(),
+            initialValue = emptyUiState(isLoading = true),
         )
 
     fun setSelectedDate(date: LocalDate) {

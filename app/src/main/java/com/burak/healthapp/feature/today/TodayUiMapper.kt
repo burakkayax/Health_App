@@ -173,7 +173,8 @@ private fun com.burak.healthapp.domain.model.BodyMeasurementEntry?.toWeightCardS
     )
 }
 
-internal fun emptyUiState(): TodayUiState = TodayUiState(
+internal fun emptyUiState(isLoading: Boolean = false): TodayUiState = TodayUiState(
+    isLoading = isLoading,
     userName = "",
     avatarInitials = "M",
     goalSettings = GoalSettings(),

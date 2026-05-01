@@ -24,8 +24,12 @@ import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
 import com.burak.healthapp.core.ui.adaptive.ConstrainedLargeScreenContainer
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
+import com.burak.healthapp.core.ui.components.EmptyGhostChart
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SegmentedControl
+import com.burak.healthapp.core.ui.components.SkeletonCard
+import com.burak.healthapp.core.ui.components.SkeletonChart
+import com.burak.healthapp.core.ui.components.SkeletonMetricCard
 import com.burak.healthapp.core.ui.components.SmoothTrendChart
 import com.burak.healthapp.core.ui.components.ThickMetricProgressBar
 import com.burak.healthapp.core.ui.text.asString
@@ -63,8 +67,14 @@ fun TrendsContent(
         windowSizeClass = windowSizeClass,
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("trends_screen"),
     ) {
+        if (state.isLoading) {
+            TrendsSkeletonContent()
+            return@ConstrainedLargeScreenContainer
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -162,7 +172,11 @@ private fun PeriodSummaryCard(summary: PeriodSummaryState) {
 
 @Composable
 private fun EmptyTrendsCard() {
-    HealthCard(modifier = Modifier.fillMaxWidth()) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("trends_empty_state"),
+    ) {
         Text(
             text = stringResource(R.string.trends_empty_title),
             style = MaterialTheme.typography.titleMedium,
@@ -174,6 +188,33 @@ private fun EmptyTrendsCard() {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        EmptyGhostChart(
+            modifier = Modifier.padding(top = HealthSpacing.sm),
+            testTag = "trends_empty_ghost",
+        )
+    }
+}
+
+@Composable
+private fun TrendsSkeletonContent() {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("trends_skeleton"),
+        contentPadding = PaddingValues(
+            start = HealthSpacing.sm,
+            end = HealthSpacing.sm,
+            top = HealthSpacing.xs,
+            bottom = HealthSpacing.md,
+        ),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
+    ) {
+        item { SkeletonCard(lines = 1) }
+        item { SkeletonCard(lines = 3) }
+        item { SkeletonMetricCard() }
+        item { SkeletonMetricCard() }
+        item { SkeletonChart() }
+        item { SkeletonCard(lines = 2) }
     }
 }
 

@@ -15,4 +15,5 @@ data class WeightDetailUiState(
     val weightChart: WeightTrendChartState? = null,
     val historyItems: List<WeightHistoryItemState>,
     val bmiGauge: BmiGaugeState,
+    val isLoading: Boolean = false,
 )

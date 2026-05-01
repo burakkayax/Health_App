@@ -41,6 +41,7 @@ import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.weight.WeightDetailUiState
 import com.burak.healthapp.feature.detail.weight.WeightHistoryItemState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -83,6 +84,7 @@ class WeightDetailViewModel @Inject constructor(
         initialValue = WeightDetailUiState(
             chartPoints = emptyList(),
             historyItems = emptyList(),
+            isLoading = true,
             bmiGauge = BmiGaugeState(helperMessage = "VKİ için en az bir kilo kaydı gerekli."),
         ),
     )
@@ -115,6 +117,11 @@ fun WeightDetailContent(
     onDeleteMeasurement: (Long) -> Unit,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    if (state.isLoading) {
+        DetailSkeletonContent()
+        return
+    }
+
     if (!windowSizeClass.isCompact) {
         Row(
             modifier = Modifier

@@ -447,6 +447,8 @@ Connected benchmark çalıştırma:
 
 Connected benchmark için emulator veya fiziksel cihaz gerekir. Benchmark hedef uygulama varyantı release'e yakın optimize edilir, ancak test cihazına kurulabilmesi için yalnızca benchmark build type debug key ile imzalanır; production release imzası değişmez.
 
+Benchmark navigation akışları `nav_today`, `nav_trends`, `nav_profile`, `today_list`, `trends_screen` ve `profile_screen` testTag selectorlarını öncelikli kullanır. Emulator sonuçları smoke/regression için uygundur; gerçek performans karşılaştırması için fiziksel cihaz tercih edilir.
+
 Baseline profile üretimi:
 
 ```bash
@@ -467,6 +469,7 @@ Release build dağıtım kalitesi için R8 minification ve resource shrinking et
 * PR23.6 ile dashboard ve detail ekran render maliyetleri azaltılmaya başlanmıştır.
 * Adım takibi ve su hatırlatıcı, kullanıcı tercihi ve izinlere göre pil dostu arka plan guardları içerir.
 * Connected benchmark doğrulaması emulator/fiziksel cihaz gerektirir; gerçek performans ölçümü için fiziksel cihaz tercih edilmelidir.
+* Açılışta root loading metni yerine sakin arka plan, Today/Trends/detail initial yüklemede hafif skeleton yapılar kullanılır.
 
 ---
 

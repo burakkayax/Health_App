@@ -115,6 +115,7 @@ data class SupplementCardState(
 )
 
 data class TodayUiState(
+    val isLoading: Boolean = false,
     val userName: String,
     val avatarInitials: String,
     val goalSettings: GoalSettings,

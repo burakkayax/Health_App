@@ -1,5 +1,29 @@
 # Changelog
 
+## PR23.11 - Loading, Skeleton and Empty State UX Polish
+
+### DeÄŸiÅŸtirildi
+
+- Uygulama aÃ§Ä±lÄ±ÅŸÄ±ndaki root "YÃ¼kleniyor" metni kaldÄ±rÄ±ldÄ±.
+- Today, Trends ve detay ekranlarÄ± iÃ§in initial loading deneyimi skeleton yapÄ±larla iyileÅŸtirildi.
+- Veri olmayan ekranlarda ghost empty state bileÅŸenleri eklendi.
+
+### Eklendi
+
+- Ortak skeleton/ghost UI bileÅŸenleri eklendi.
+- Import/export iÅŸlemleri iÃ§in aÃ§Ä±klamalÄ± loading state metinleri gÃ¼Ã§lendirildi.
+
+## PR23.10 - Benchmark Connected Test Stabilization
+
+### DeÄŸiÅŸtirildi
+
+- Connected benchmark navigation akÄ±ÅŸlarÄ± daha stabil selector/testTag kullanÄ±mÄ±na yaklaÅŸtÄ±rÄ±ldÄ±.
+- Baseline profile ve startup benchmark path'leri connected cihaz/emulator koÅŸullarÄ±na gÃ¶re gÃ¶zden geÃ§irildi.
+
+### Eklendi
+
+- Connected benchmark Ã§alÄ±ÅŸtÄ±rma koÅŸullarÄ± README/performance audit dokÃ¼mantasyonunda netleÅŸtirildi.
+
 ## PR23.9 - Trends Tab Redesign v1
 
 ### Değiştirildi

@@ -179,8 +179,13 @@
     <string name="profile_data_management_title">Data Management</string>
     <string name="profile_data_management_helper">Export your health data to a JSON file at a location you choose.</string>
     <string name="profile_export_data">Export data</string>
+    <string name="profile_export_preparing">Preparing backup file...</string>
     <string name="profile_import_data">Import data</string>
+    <string name="profile_import_reading">Reading backup file...</string>
+    <string name="profile_import_importing">Importing data...</string>
+    <string name="profile_import_confirm">Import</string>
     <string name="profile_delete_all_health_data">Delete all data</string>
+    <string name="profile_delete_deleting">Deleting health records...</string>
     <string name="profile_step_tracking_title">Step Tracking</string>
     <string name="profile_step_tracking_status_on">Background step tracking is on</string>
     <string name="profile_step_tracking_status_off">Step tracking is off</string>
