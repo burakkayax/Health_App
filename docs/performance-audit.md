@@ -94,12 +94,12 @@ The repository combines settings, meals, hydration, sleep, exercise, smoking, st
 ### Finding 2
 
 - Area: Today dashboard / Compose recomposition
-- Symptom: Card order and visibility are sorted and filtered directly inside `TodayContent`.
+- Symptom: Card order and visibility were sorted and filtered directly inside `TodayContent`.
 - Evidence / code location: `app/src/main/java/com/burak/healthapp/feature/today/TodayScreen.kt`, `orderedCards`, `visibleCards`, `dashboardItems`.
 - Risk level: Medium
 - Suggested follow-up PR: PR23.6
 
-`AdaptiveDashboardGrid` uses stable keys, which is good. The next low-risk optimization is to wrap dashboard item derivation in `remember(state.dashboardCards)` or move it into a mapper.
+`AdaptiveDashboardGrid` uses stable keys, which is good. PR23.6 moved dashboard item derivation into a helper and memoized it with `remember`.
 
 ### Finding 3
 
@@ -224,7 +224,7 @@ After PR23.6, add scenarios for dashboard customization, caffeine detail, hydrat
 ## Compose Recomposition Notes
 
 - Today has stable keys through `AdaptiveDashboardGrid`, and compact/expanded paths both use keyed lazy containers.
-- Today still derives `orderedCards`, `visibleCards`, and `dashboardItems` during composition.
+- Today dashboard item derivation is memoized from `dashboardCards`; future work should target the broader repository fan-in instead.
 - Detail screens generally receive already-built UI state, so charts are not doing the heaviest date aggregation in composition.
 - Some detail history lists use stable IDs or dates; this should be kept when PR23.6 touches these screens.
 - UI state classes are mostly immutable data classes, but many contain regular Kotlin lists. This is acceptable for now; a future pass can consider persistent immutable collections only if recomposition evidence justifies it.
@@ -270,6 +270,131 @@ After PR23.6, add scenarios for dashboard customization, caffeine detail, hydrat
 - Local emulator results are useful for regression smoke checks, but they are not representative of real battery, startup, or frame timing behavior.
 - Physical device runs should be preferred for PR23.6 and later optimization validation.
 - Benchmark labels currently target app navigation and Today scroll. After performance work, add detail-screen and dashboard-customization paths.
+
+## PR23.6 Follow-up Notes
+
+Addressed in PR23.6:
+
+- Today dashboard card derivation was moved behind a small helper and `remember`, so card ordering, visibility filtering, empty state, and the customize item are no longer rebuilt on every unrelated recomposition.
+- Today card render boundaries were narrowed: dashboard cards now receive their own `NutritionCardState`, `HydrationCardState`, `ExerciseCardState`, `SmokingCardState`, `StepCardState`, `SleepCardState`, or `WeightCardState` instead of the full `TodayUiState`.
+- Detail state builders now share date-window helpers for trailing week, month-to-date, and month-grid generation.
+- Hydration, caffeine, smoking, exercise, step, sleep, and weight detail builders now reuse formatter instances and avoid repeated `LocalDate.now()` calls inside month-grid loops.
+- Step detail now uses the already-built date map for total/average state instead of repeatedly scanning with `date in days`.
+- Locale-aware whole-number formatting now caches `NumberFormat` instances per locale/thread.
+- Lazy key usage was reviewed; the exercise type picker received stable enum-name keys, and existing dashboard/history keys were retained.
+
+Deferred to PR23.7:
+
+- `StepCounterService` persisted `stepTrackingEnabled` re-check on sticky restarts.
+- Non-blocking/bounded pending sensor flush during service teardown.
+- Earlier `WaterReminderWorker` exit when notifications cannot be shown.
+- Additional tests around service restart and notification-permission no-op paths.
+
+Deferred to PR23.8:
+
+- Typed import/export error model.
+- Field-level import validation for date/time, enum, negative value, and schema mismatch failures.
+- Large JSON size limits or streaming strategy.
+- A clearer Room + DataStore import commit model.
+
+Deferred to PR23.9:
+
+- Trends state decomposition and per-chart rendering redesign.
+- Broader trends chart benchmark coverage after the UI structure is redesigned.
+
+Measurement markers retained:
+
+- Route-level `DebugRoutePerformanceTrace` markers for Today, Trends, and detail routes.
+- State-build `PerformanceLogger.measure(...)` markers for Today, Trends, Weight, Sleep, Step, Hydration, Caffeine, Smoking, and Exercise.
+
+Benchmark notes:
+
+- No connected macrobenchmark scenario was added in PR23.6 because current detail-screen navigation paths are still too UI-text dependent for a low-flake smoke path.
+- `:benchmark:assembleBenchmark` remains the required non-emulator validation.
+- Detail-screen and dashboard-customization benchmark paths should be added after selector/test tags are made more automation-friendly.
+
+Remaining performance risks:
+
+- `DashboardRepositoryImpl.observeToday` remains the largest fan-in and can still rebuild a broad snapshot for single-card data changes.
+- Trends mapping is still intentionally broad.
+- Some history/detail sections are column-based instead of lazy because their expected item count is small today; this should be revisited only with real data showing pressure.
+
+## PR23.7 Follow-up Notes
+
+Step tracking changes:
+
+- `StepCounterService` now reads persisted `stepTrackingEnabled` before starting foreground tracking and before registering the step sensor listener.
+- Sticky service restarts are guarded by the same start-decision path: disabled preference, missing permission, or missing sensor all stop the service without registering the listener.
+- `ACTION_STOP` still persists `stepTrackingEnabled = false`, unregisters any active listener through the normal stop path, and returns `START_NOT_STICKY`.
+- Sensor listener registration is centralized in `registerStepListener(...)`; duplicate registration is skipped when `listenerRegistered` is already true.
+- Listener cleanup is centralized in `unregisterStepListener()`, clears `listenerRegistered`, clears `sensorManager`, and is safe to call repeatedly from stop and destroy paths.
+- Sensor write failures are caught inside the service coroutine so repository errors do not crash the service.
+
+Pending flush changes:
+
+- Pending step sensor flush now uses a bounded 500 ms `withTimeoutOrNull` path instead of unbounded teardown blocking.
+- `flushPendingStepSensorValue(...)` marks a sensor value as written only after the repository write succeeds.
+- Failed or timed-out flushes are debug-logged only in debug builds and do not crash service teardown.
+
+Water reminder changes:
+
+- `WaterReminderWorker` now checks `shouldReadHydrationSnapshotForReminder(...)` before reading Today snapshot data.
+- The worker exits before snapshot reads when the reminder is disabled, the current time is outside the reminder window, or notification permission is unavailable.
+- Existing snooze and completed-target checks are preserved after snapshot read.
+- Notification posting remains double-guarded: the worker checks before doing work, and `HealthNotifications.showWaterReminder(...)` still checks before notifying.
+- Worker exceptions are caught and converted to `Result.success()` with debug-only logging to avoid background retry loops for user-invisible reminders.
+
+Scheduler check:
+
+- `WaterReminderScheduler.apply(...)` already cancels `ReminderConstants.WATER_REMINDER_WORK_NAME` when reminders are disabled.
+- Enabled reminders still use `ExistingPeriodicWorkPolicy.UPDATE`, so settings changes update the same unique periodic work instead of creating duplicates.
+- No scheduler redesign or exact-alarm behavior was introduced.
+
+Deferred to PR23.8:
+
+- Typed import/export error model.
+- Field-level import validation.
+- Large JSON import/export hardening.
+- Room + DataStore import commit consistency.
+
+Remaining battery/background risks:
+
+- Physical-device verification is still needed for service restart and sensor lifecycle behavior.
+- The bounded step flush can still drop the last pending value if the repository write exceeds the timeout.
+- WorkManager may still wake within its normal periodic constraints even when notifications are denied; the worker now exits before expensive snapshot reads.
+
+## PR23.8 Follow-up Notes
+
+Import/export hardening added:
+
+- Import validation now returns typed `ImportValidationError` values for empty files, invalid JSON, unsupported schema, missing required fields, invalid date/time/date-time, invalid enum, invalid number, negative values, oversized files, decode failure, database failure, settings failure, and unknown failures.
+- `JsonHealthDataImporter` now performs a semantic validation pass before preview/confirm import. It checks ISO date, time, and date-time fields, domain enum strings, and negative numeric health values before any Room write.
+- Sleep `startTime` / `endTime` values such as `22:30` now fail preview with an explicit date-time format error instead of falling through to a generic import failure.
+- SAF import reads are capped at 5 MB. Known file sizes are rejected before reading; unknown sizes are read with a max-byte guard.
+- `ProfileViewModel` sets import/export loading states before long work and maps typed import failures to localized user-safe messages.
+- Room import remains transactional. Room and DataStore cannot be made atomic together, so settings write failures are reported as `SettingsFailure` after records are imported.
+
+Remaining PR23.8 risks:
+
+- Export still builds the full JSON in memory; streaming export is deferred until real file-size pressure appears.
+- The import validator reports the first safe error, not a complete field-level error list.
+- Room + DataStore consistency is documented but not fully atomic.
+
+## PR23.9 Follow-up Notes
+
+Trends redesign added:
+
+- Trends now uses a weekly/monthly period selector where weekly is the last 7 days and monthly is the last 30 days.
+- The tab was restructured around a period summary, highlights, goal adherence, metric trend cards, short data-based insights, and data-quality warnings.
+- Trends snapshot data now includes current and previous period averages, caffeine, smoking, exercise, weight, adherence counts, and logged-day counts.
+- Short insights are rule-based and cautious: water adherence, step movement, caffeine after cutoff, smoking limit, exercise activity, and data sufficiency are described without causal claims.
+- Metric cards can navigate to existing detail destinations for water, steps, sleep, exercise, caffeine, smoking, weight, and nutrition.
+
+Deferred beyond PR23.9:
+
+- Full Insight Engine, Correlation Engine, experiments, and weekly reports remain out of scope.
+- Sleep stability v2 is still deferred.
+- More advanced Trends visualizations and benchmark scenarios should follow after this information architecture has settled.
 
 ## Recommended PR Split
 

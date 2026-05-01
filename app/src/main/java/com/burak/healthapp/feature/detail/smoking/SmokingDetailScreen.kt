@@ -53,6 +53,8 @@ import com.burak.healthapp.domain.model.SmokingEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.buildMonthGridDays
+import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.smokingStatusForCount
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,6 +70,16 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+
+private val smokingHistoryDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM yyyy",
+    Locale.forLanguageTag("tr"),
+)
+
+private val smokingMonthDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM",
+    Locale.forLanguageTag("tr"),
+)
 
 @Immutable
 data class SmokingDayBarState(
@@ -108,11 +120,8 @@ class SmokingDetailViewModel @Inject constructor(
 
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
         .flatMapLatest { (date, period) ->
-            val startDate = if (period == TrendsPeriod.WEEKLY) {
-                date.minusDays(6)
-            } else {
-                date.withDayOfMonth(1)
-            }
+            val periodDays = buildPeriodDays(date, period)
+            val startDate = periodDays.firstOrNull() ?: date
             combine(
                 settingsRepository.settings,
                 dashboardRepository.observeSmokingBetween(startDate, date),
@@ -123,6 +132,7 @@ class SmokingDetailViewModel @Inject constructor(
                         selectedPeriod = period,
                         entries = entries,
                         limit = settings.goalSettings.smokeDailyLimit,
+                        periodDays = periodDays,
                     )
                 }
             }
@@ -432,22 +442,15 @@ internal fun buildSmokingDetailUiState(
     selectedPeriod: TrendsPeriod,
     entries: List<SmokingEntry>,
     limit: Int,
+    periodDays: List<LocalDate> = buildPeriodDays(selectedDate, selectedPeriod),
 ): SmokingDetailUiState {
-    val startDate = if (selectedPeriod == TrendsPeriod.WEEKLY) {
-        selectedDate.minusDays(6)
-    } else {
-        selectedDate.withDayOfMonth(1)
-    }
-    val days = if (selectedPeriod == TrendsPeriod.WEEKLY) {
-        (6L downTo 0L).map(selectedDate::minusDays)
-    } else {
-        (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, selectedDate)).map(startDate::plusDays)
-    }
+    val startDate = periodDays.firstOrNull() ?: selectedDate
+    val days = periodDays
     val entriesByDate = entries.groupBy(SmokingEntry::date)
     val safeLimit = limit.coerceAtLeast(1)
     val totals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(SmokingEntry::count) }
+    val totalCount = totals.sumOf { (_, count) -> count }
     val loggedTotals = totals.map { (_, count) -> count }.filter { count -> count > 0 }
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("tr"))
 
     return SmokingDetailUiState(
         selectedPeriod = selectedPeriod,
@@ -464,8 +467,8 @@ internal fun buildSmokingDetailUiState(
         } else {
             emptyList()
         },
-        averageCount = if (days.isEmpty()) 0 else totals.sumOf { (_, count) -> count } / days.size,
-        totalCount = totals.sumOf { (_, count) -> count },
+        averageCount = if (days.isEmpty()) 0 else totalCount / days.size,
+        totalCount = totalCount,
         limit = limit,
         loggedDays = loggedTotals.size,
         entries = entries
@@ -474,7 +477,7 @@ internal fun buildSmokingDetailUiState(
             .map { entry ->
                 SmokingHistoryItemState(
                     date = entry.date,
-                    dateLabel = entry.date.format(dateFormatter),
+                    dateLabel = entry.date.format(smokingHistoryDateFormatter),
                     count = entry.count,
                 )
             },
@@ -487,15 +490,9 @@ private fun buildSmokingMonthRingDays(
     entriesByDate: Map<LocalDate, List<SmokingEntry>>,
     limit: Int,
 ): List<MetricDayRingState> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
-    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
-    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
-    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
+    val today = LocalDate.now()
 
-    return (0 until dayCount).map { offset ->
-        val date = gridStart.plusDays(offset.toLong())
+    return buildMonthGridDays(anchorDate).map { date ->
         val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
         val count = if (isInCurrentMonth) entriesByDate[date].orEmpty().sumOf(SmokingEntry::count) else 0
         MetricDayRingState(
@@ -505,9 +502,9 @@ private fun buildSmokingMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = false,
             isOverLimit = limit > 0 && count > limit,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(smokingMonthDateFormatter),
             valueLabel = "${formatMetricCount(count)} adet",
-            isToday = date == LocalDate.now(),
+            isToday = date == today,
         )
     }
 }

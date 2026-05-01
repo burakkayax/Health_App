@@ -16,11 +16,11 @@ import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
 import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthPrimary
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.StepCardState
 
 @Composable
 internal fun StepCard(
-    state: TodayUiState,
+    state: StepCardState,
     onOpenDetails: () -> Unit,
 ) {
     HealthCard(
@@ -31,19 +31,19 @@ internal fun StepCard(
     ) {
         SectionTitle(title = stringResource(R.string.today_title_steps))
         CompactRingMetricLayout(
-            progress = state.steps.progress,
+            progress = state.progress,
             color = HealthPrimary,
             headline = stringResource(
                 R.string.today_steps_count_format,
-                formatWholeNumber(state.steps.currentSteps),
+                formatWholeNumber(state.currentSteps),
             ),
             supportingLabel = stringResource(
                 R.string.today_steps_target_format,
-                formatWholeNumber(state.steps.targetSteps),
+                formatWholeNumber(state.targetSteps),
             ),
             helperLabel = stringResource(
                 R.string.today_steps_week_format,
-                formatWholeNumber(state.steps.weeklySteps),
+                formatWholeNumber(state.weeklySteps),
             ),
             trackColor = HealthPrimary.copy(alpha = 0.14f),
         ) {

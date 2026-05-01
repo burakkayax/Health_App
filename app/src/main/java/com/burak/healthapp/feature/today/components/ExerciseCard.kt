@@ -27,15 +27,15 @@ import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.ExerciseType
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.ExerciseCardState
 @Composable
 internal fun ExerciseCard(
-    state: TodayUiState,
+    state: ExerciseCardState,
     onAddExercise: () -> Unit,
     onDeleteExercise: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
-    val ringColor = if (state.exercise.type == null) {
+    val ringColor = if (state.type == null) {
         MaterialTheme.colorScheme.onSurfaceVariant
     } else {
         HealthPrimary
@@ -51,7 +51,7 @@ internal fun ExerciseCard(
             title = stringResource(R.string.today_title_exercise),
             trailing = {
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    if (state.exercise.type != null) {
+                    if (state.type != null) {
                         DeleteIconButton(
                             testTag = "exercise_delete_button",
                             contentDescription = stringResource(R.string.content_description_delete_exercise),
@@ -67,18 +67,18 @@ internal fun ExerciseCard(
             },
         )
         CompactRingMetricLayout(
-            progress = state.exercise.progress,
+            progress = state.progress,
             color = ringColor,
-            headline = state.exercise.title.asString(),
-            supportingLabel = state.exercise.durationLabel.asString(),
+            headline = state.title.asString(),
+            supportingLabel = state.durationLabel.asString(),
             helperLabel = stringResource(
                 R.string.today_exercise_helper_format,
-                state.exercise.intensityLabel.asString(),
-                state.exercise.helperLabel.asString(),
+                state.intensityLabel.asString(),
+                state.helperLabel.asString(),
             ),
         ) {
             Icon(
-                imageVector = state.exercise.type.toExerciseIcon(),
+                imageVector = state.type.toExerciseIcon(),
                 contentDescription = null,
                 tint = ringColor,
                 modifier = Modifier.size(32.dp),

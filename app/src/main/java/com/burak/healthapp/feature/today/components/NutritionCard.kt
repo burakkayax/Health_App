@@ -32,10 +32,10 @@ import com.burak.healthapp.core.ui.theme.HealthFat
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthProtein
 import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.NutritionCardState
 @Composable
 internal fun NutritionCard(
-    state: TodayUiState,
+    state: NutritionCardState,
     onAddMeal: () -> Unit,
     onOpenMealHistory: () -> Unit,
 ) {
@@ -68,7 +68,7 @@ internal fun NutritionCard(
             horizontalArrangement = Arrangement.Center,
         ) {
             CircularProgressRing(
-                progress = state.nutrition.progress,
+                progress = state.progress,
                 color = HealthPrimary,
                 modifier = Modifier.width(220.dp).height(220.dp),
                 strokeWidth = 12.dp,
@@ -82,7 +82,7 @@ internal fun NutritionCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = formatWholeNumber(state.nutrition.currentCalories),
+                        text = formatWholeNumber(state.currentCalories),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
@@ -90,7 +90,7 @@ internal fun NutritionCard(
                     Text(
                         text = stringResource(
                             R.string.nutrition_target_kcal_format,
-                            formatWholeNumber(state.nutrition.targetCalories),
+                            formatWholeNumber(state.targetCalories),
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -105,7 +105,7 @@ internal fun NutritionCard(
                 .padding(top = HealthSpacing.sm, bottom = HealthSpacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            state.nutrition.macros.forEach { macro ->
+            state.macros.forEach { macro ->
                 val color = when {
                     macro.label == "Karb" -> HealthCarbs
                     macro.label.startsWith("Ya") -> HealthFat

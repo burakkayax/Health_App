@@ -58,6 +58,9 @@ import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.buildMonthGridDays
+import com.burak.healthapp.feature.detail.buildTrailingDays
+import com.burak.healthapp.feature.detail.buildTrailingWeekDays
 import com.burak.healthapp.feature.detail.sleep.SleepBarState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarDayState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
@@ -75,6 +78,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+
+private val sleepMonthDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM",
+    Locale.forLanguageTag("tr"),
+)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -413,8 +421,8 @@ private fun List<SleepSession>.toSleepDetailUiState(
     val sessionsByDate = groupBy(SleepSession::sessionDate)
         .mapValues { (_, entries) -> entries.maxByOrNull(SleepSession::endTime) }
 
-    val weeklyDays = (6L downTo 0L).map(anchorDate::minusDays)
-    val monthlyDays = (29L downTo 0L).map(anchorDate::minusDays)
+    val weeklyDays = buildTrailingWeekDays(anchorDate)
+    val monthlyDays = buildTrailingDays(anchorDate = anchorDate, dayCount = 30)
     val displayDays = if (period == TrendsPeriod.WEEKLY) weeklyDays else monthlyDays
     val targetMinutes = goals.sleepTargetMinutes.toFloat().coerceAtLeast(1f)
     val calendarWeeks = buildSleepCalendarWeeks(
@@ -496,15 +504,9 @@ internal fun buildSleepCalendarWeeks(
     sessionsByDate: Map<LocalDate, SleepSession?>,
     targetMinutes: Float,
 ): List<SleepCalendarWeekState> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
-    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
-    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
-    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
+    val today = LocalDate.now()
 
-    return (0 until dayCount)
-        .map { offset -> gridStart.plusDays(offset.toLong()) }
+    return buildMonthGridDays(anchorDate)
         .chunked(7)
         .map { days ->
             SleepCalendarWeekState(
@@ -522,9 +524,9 @@ internal fun buildSleepCalendarWeeks(
                         hasData = duration > 0,
                         isInCurrentMonth = isInCurrentMonth,
                         isTargetMet = duration > 0 && progress >= 1f,
-                        dateLabel = date.format(dateFormatter),
+                        dateLabel = date.format(sleepMonthDateFormatter),
                         durationLabel = if (duration == 0) "--" else formatMinutesAsSleepLabel(duration),
-                        isToday = date == LocalDate.now(),
+                        isToday = date == today,
                     )
                 },
             )

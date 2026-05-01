@@ -63,6 +63,8 @@ import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.app.hasActivityRecognitionPermission
 import com.burak.healthapp.feature.app.hasStepCounterSensor
+import com.burak.healthapp.feature.detail.buildMonthGridDays
+import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.detail.step.StepBarState
 import com.burak.healthapp.feature.detail.step.StepDetailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -91,12 +93,7 @@ class StepDetailViewModel @Inject constructor(
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
         .distinctUntilChanged()
         .flatMapLatest { (date, period) ->
-            val displayDays = if (period == TrendsPeriod.WEEKLY) {
-                (6L downTo 0L).map(date::minusDays)
-            } else {
-                val monthStart = date.withDayOfMonth(1)
-                (0L..java.time.temporal.ChronoUnit.DAYS.between(monthStart, date)).map(monthStart::plusDays)
-            }
+            val displayDays = buildPeriodDays(date, period)
             combine(
                 settingsRepository.settings,
                 dashboardRepository.observeStepsBetween(displayDays.first(), date),
@@ -467,8 +464,9 @@ private fun List<StepEntry>.toStepDetailUiState(
     stepTrackingEnabled: Boolean,
 ): StepDetailUiState {
     val entriesByDate = associateBy(StepEntry::date)
-    val totalSteps = filter { it.date in days }.sumOf { it.steps }
-    val loggedEntries = filter { it.date in days }
+    val dayEntries = days.mapNotNull(entriesByDate::get)
+    val totalSteps = dayEntries.sumOf(StepEntry::steps)
+    val loggedEntries = dayEntries
     val averageSteps = if (loggedEntries.isEmpty()) 0 else totalSteps / loggedEntries.size
 
     return StepDetailUiState(
@@ -514,15 +512,10 @@ internal fun buildStepMonthRingDays(
     entriesByDate: Map<LocalDate, StepEntry>,
     targetSteps: Int,
 ): List<MetricDayRingState> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
-    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
-    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
-    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
     val target = targetSteps.toFloat().coerceAtLeast(1f)
+    val today = LocalDate.now()
 
-    return (0 until dayCount).map { offset ->
-        val date = gridStart.plusDays(offset.toLong())
+    return buildMonthGridDays(anchorDate).map { date ->
         val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
         val steps = if (isInCurrentMonth) entriesByDate[date]?.steps ?: 0 else 0
         val progress = clampProgress(steps.toFloat(), target)
@@ -534,7 +527,7 @@ internal fun buildStepMonthRingDays(
             isTargetMet = steps > 0 && progress >= 1f,
             dateLabel = date.format(stepMonthDateFormatter),
             valueLabel = "${formatWholeNumber(steps)} adım",
-            isToday = date == LocalDate.now(),
+            isToday = date == today,
         )
     }
 }

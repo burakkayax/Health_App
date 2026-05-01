@@ -464,6 +464,8 @@ Release build dağıtım kalitesi için R8 minification ve resource shrinking et
 * CI, `:app:assembleRelease` adımını da doğrular.
 * Baseline Profile dosyası `app/src/main/baseline-prof.txt` altında tutulur.
 * Performans, pil ve kararlılık baseline audit notları `docs/performance-audit.md` dosyasında tutulur.
+* PR23.6 ile dashboard ve detail ekran render maliyetleri azaltılmaya başlanmıştır.
+* Adım takibi ve su hatırlatıcı, kullanıcı tercihi ve izinlere göre pil dostu arka plan guardları içerir.
 * Connected benchmark doğrulaması emulator/fiziksel cihaz gerektirir; gerçek performans ölçümü için fiziksel cihaz tercih edilmelidir.
 
 ---

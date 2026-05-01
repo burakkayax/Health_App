@@ -75,6 +75,9 @@ object RepositoryModule {
         hydrationDao: HydrationDao,
         sleepDao: SleepDao,
         stepDao: StepDao,
+        caffeineDao: CaffeineDao,
+        smokingDao: SmokingDao,
+        exerciseDao: ExerciseDao,
         measurementDao: BodyMeasurementDao,
     ): TrendsRepository = TrendsRepositoryImpl(
         settingsRepository = settingsRepository,
@@ -82,6 +85,9 @@ object RepositoryModule {
         hydrationDao = hydrationDao,
         sleepDao = sleepDao,
         stepDao = stepDao,
+        caffeineDao = caffeineDao,
+        smokingDao = smokingDao,
+        exerciseDao = exerciseDao,
         measurementDao = measurementDao,
     )
 }

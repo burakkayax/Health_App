@@ -16,11 +16,11 @@ import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
 import com.burak.healthapp.core.ui.theme.HealthPrimary
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.WeightCardState
 import java.util.Locale
 @Composable
 internal fun WeightCard(
-    state: TodayUiState,
+    state: WeightCardState,
     onAddWeight: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
@@ -43,14 +43,14 @@ internal fun WeightCard(
             },
         )
         CompactRingMetricLayout(
-            progress = state.weight.progress,
+            progress = state.progress,
             color = HealthPrimary,
-            headline = state.weight.headline,
-            supportingLabel = state.weight.supportingLabel,
-            helperLabel = state.weight.helperLabel,
+            headline = state.headline,
+            supportingLabel = state.supportingLabel,
+            helperLabel = state.helperLabel,
         ) {
             Text(
-                text = state.weight.currentWeightKg?.let { String.format(locale, "%.1f", it) } ?: "--",
+                text = state.currentWeightKg?.let { String.format(locale, "%.1f", it) } ?: "--",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

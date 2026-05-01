@@ -18,10 +18,10 @@ import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.SleepCardState
 @Composable
 internal fun SleepCard(
-    state: TodayUiState,
+    state: SleepCardState,
     onEdit: () -> Unit,
     onOpenDetails: () -> Unit,
     onDeleteSleep: () -> Unit,
@@ -36,7 +36,7 @@ internal fun SleepCard(
             title = stringResource(R.string.today_title_sleep),
             trailing = {
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    if (state.sleep.progress > 0f) {
+                    if (state.progress > 0f) {
                         DeleteIconButton(
                             testTag = "sleep_delete_button",
                             contentDescription = stringResource(R.string.content_description_delete_sleep),
@@ -52,15 +52,15 @@ internal fun SleepCard(
             },
         )
         CompactRingMetricLayout(
-            progress = state.sleep.progress,
+            progress = state.progress,
             color = HealthSleep,
-            headline = state.sleep.durationLabel,
-            supportingLabel = state.sleep.timeRangeLabel,
-            helperLabel = stringResource(R.string.today_format_target_text, state.sleep.targetLabel),
+            headline = state.durationLabel,
+            supportingLabel = state.timeRangeLabel,
+            helperLabel = stringResource(R.string.today_format_target_text, state.targetLabel),
             trackColor = HealthSleep.copy(alpha = 0.14f),
         ) {
             Text(
-                text = if (state.sleep.progress > 0f) state.sleep.durationLabel else "--",
+                text = if (state.progress > 0f) state.durationLabel else "--",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,

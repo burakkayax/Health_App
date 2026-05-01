@@ -352,6 +352,9 @@ class DashboardRepositoryTest {
                 ),
             ),
             measurementDao = FakeBodyMeasurementDao(),
+            caffeineDao = FakeCaffeineDao(),
+            smokingDao = FakeSmokingDao(),
+            exerciseDao = FakeExerciseDao(),
         )
 
         val snapshot = repository.observeTrends(
@@ -360,7 +363,7 @@ class DashboardRepositoryTest {
         ).first()
 
         assertEquals(6000f, snapshot.averageSteps, 0.001f)
-        assertEquals(listOf(4000f, 0f, 8000f), snapshot.stepPoints.map { it.value })
+        assertEquals(listOf(0f, 0f, 0f, 0f, 4000f, 0f, 8000f), snapshot.stepPoints.map { it.value })
     }
 
     @Test
@@ -372,6 +375,9 @@ class DashboardRepositoryTest {
             hydrationDao = FakeHydrationDao(),
             sleepDao = FakeSleepDao(),
             stepDao = FakeStepDao(),
+            caffeineDao = FakeCaffeineDao(),
+            smokingDao = FakeSmokingDao(),
+            exerciseDao = FakeExerciseDao(),
             measurementDao = FakeBodyMeasurementDao(
                 initialMeasurements = listOf(
                     BodyMeasurementEntity(
@@ -410,7 +416,7 @@ class DashboardRepositoryTest {
             endDate = anchorDate,
         ).first()
 
-        assertEquals(listOf(71f, 72f, 73f), snapshot.weightPoints.map { it.value })
+        assertEquals(listOf(70f, 71f, 72f, 73f), snapshot.weightPoints.map { it.value })
     }
 
     @Test
@@ -422,6 +428,9 @@ class DashboardRepositoryTest {
             hydrationDao = FakeHydrationDao(),
             sleepDao = FakeSleepDao(),
             stepDao = FakeStepDao(),
+            caffeineDao = FakeCaffeineDao(),
+            smokingDao = FakeSmokingDao(),
+            exerciseDao = FakeExerciseDao(),
             measurementDao = FakeBodyMeasurementDao(
                 initialMeasurements = listOf(
                     BodyMeasurementEntity(
@@ -497,6 +506,9 @@ class DashboardRepositoryTest {
                 ),
             ),
             stepDao = FakeStepDao(),
+            caffeineDao = FakeCaffeineDao(),
+            smokingDao = FakeSmokingDao(),
+            exerciseDao = FakeExerciseDao(),
             measurementDao = FakeBodyMeasurementDao(),
         )
 

@@ -1,8 +1,10 @@
 package com.burak.healthapp.core.reminder
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.burak.healthapp.BuildConfig
 import com.burak.healthapp.core.di.AppGraphEntryPoint
 import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.domain.calculation.calculateHydrationTotal
@@ -15,7 +17,14 @@ class WaterReminderWorker(
     appContext: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(appContext, params) {
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = runCatching {
+        doReminderWork()
+    }.getOrElse { error ->
+        debugLog("Water reminder worker failed", error)
+        Result.success()
+    }
+
+    private suspend fun doReminderWork(): Result {
         val entryPoint = EntryPointAccessors.fromApplication(
             applicationContext,
             AppGraphEntryPoint::class.java,
@@ -23,7 +32,13 @@ class WaterReminderWorker(
         val settings = entryPoint.settingsRepository().settings.first()
         val reminder = settings.waterReminderSettings
 
-        if (!reminder.enabled || !isInsideWaterReminderWindow(LocalTime.now(), reminder)) {
+        if (
+            !shouldReadHydrationSnapshotForReminder(
+                settings = reminder,
+                now = LocalTime.now(),
+                canPostNotifications = HealthNotifications.canPostNotifications(applicationContext),
+            )
+        ) {
             return Result.success()
         }
 
@@ -36,11 +51,31 @@ class WaterReminderWorker(
             return Result.success()
         }
 
-        HealthNotifications.showWaterReminder(
-            context = applicationContext,
-            currentMl = currentMl,
-            targetMl = targetMl,
-        )
+        runCatching {
+            HealthNotifications.showWaterReminder(
+                context = applicationContext,
+                currentMl = currentMl,
+                targetMl = targetMl,
+            )
+        }.onFailure { error ->
+            debugLog("Failed to show water reminder notification", error)
+        }
         return Result.success()
+    }
+
+    private fun debugLog(
+        message: String,
+        error: Throwable? = null,
+    ) {
+        if (!BuildConfig.DEBUG) return
+        if (error == null) {
+            Log.d(TAG, message)
+        } else {
+            Log.d(TAG, message, error)
+        }
+    }
+
+    private companion object {
+        private const val TAG = "WaterReminderWorker"
     }
 }

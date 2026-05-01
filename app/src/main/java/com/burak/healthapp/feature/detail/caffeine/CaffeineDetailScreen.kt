@@ -53,6 +53,8 @@ import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.buildMonthGridDays
+import com.burak.healthapp.feature.detail.buildPeriodDays
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +68,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
+
+private val caffeineMonthDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM",
+    Locale.forLanguageTag("tr"),
+)
 
 @Immutable
 data class CaffeineBarState(
@@ -100,25 +107,18 @@ class CaffeineDetailViewModel @Inject constructor(
 
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
         .flatMapLatest { (date, period) ->
-            val startDate = if (period == TrendsPeriod.WEEKLY) {
-                date.minusDays(6)
-            } else {
-                date.withDayOfMonth(1)
-            }
+            val days = buildPeriodDays(date, period)
+            val startDate = days.firstOrNull() ?: date
             combine(
                 settingsRepository.settings,
                 dashboardRepository.observeCaffeineBetween(startDate, date),
             ) { settings, entries ->
                 PerformanceLogger.measure("CaffeineDetail:state_build") {
-                    val days = if (period == TrendsPeriod.WEEKLY) {
-                        (6L downTo 0L).map(date::minusDays)
-                    } else {
-                        (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, date)).map(startDate::plusDays)
-                    }
                     val entriesByDate = entries.groupBy(CaffeineEntry::date)
                     val todayEntries = entriesByDate[date].orEmpty()
                     val limit = settings.goalSettings.dailyCaffeineLimitMg
                     val periodTotals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(CaffeineEntry::estimatedMg) }
+                    val periodTotalMg = periodTotals.sumOf { (_, total) -> total }
                     CaffeineDetailUiState(
                         selectedPeriod = period,
                         entries = todayEntries.sortedWith(compareBy(CaffeineEntry::time).thenBy(CaffeineEntry::createdAt)),
@@ -141,7 +141,7 @@ class CaffeineDetailViewModel @Inject constructor(
                             emptyList()
                         },
                         totalTodayMg = todayEntries.sumOf(CaffeineEntry::estimatedMg),
-                        periodAverageMg = if (days.isEmpty()) 0 else periodTotals.sumOf { (_, total) -> total } / days.size,
+                        periodAverageMg = if (days.isEmpty()) 0 else periodTotalMg / days.size,
                         lastTimeLabel = todayEntries.maxByOrNull(CaffeineEntry::time)?.time?.let(::formatHourMinute) ?: "--",
                         limitMg = limit,
                         hasPeriodData = periodTotals.any { (_, total) -> total > 0 },
@@ -513,16 +513,10 @@ internal fun buildCaffeineMonthRingDays(
     entriesByDate: Map<LocalDate, List<CaffeineEntry>>,
     dailyLimitMg: Int,
 ): List<MetricDayRingState> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
-    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
-    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
-    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
     val target = dailyLimitMg.toFloat().coerceAtLeast(1f)
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
+    val today = LocalDate.now()
 
-    return (0 until dayCount).map { offset ->
-        val date = gridStart.plusDays(offset.toLong())
+    return buildMonthGridDays(anchorDate).map { date ->
         val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
         val amount = if (isInCurrentMonth) entriesByDate[date].orEmpty().sumOf(CaffeineEntry::estimatedMg) else 0
         val progress = clampProgress(amount.toFloat(), target)
@@ -533,9 +527,9 @@ internal fun buildCaffeineMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = false,
             isOverLimit = amount > dailyLimitMg,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(caffeineMonthDateFormatter),
             valueLabel = "${formatWholeNumber(amount)} mg",
-            isToday = date == LocalDate.now(),
+            isToday = date == today,
         )
     }
 }

@@ -4,6 +4,8 @@ import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.defaultDashboardCardConfig
 import com.burak.healthapp.domain.model.sanitizeDashboardCardConfig
+import com.burak.healthapp.feature.today.TodayDashboardItem
+import com.burak.healthapp.feature.today.buildDashboardItems
 import com.burak.healthapp.feature.today.reorderDashboardCards
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -45,6 +47,34 @@ class DashboardCardConfigTest {
         val config = defaultDashboardCardConfig()
         assertFalse(config.first { it.type == DashboardCardType.CAFFEINE }.isVisible)
         assertTrue(config.filterNot { it.type == DashboardCardType.CAFFEINE }.all(DashboardCardConfig::isVisible))
+    }
+
+    @Test
+    fun buildDashboardItems_preservesVisibleCardOrderAndCustomizeItem() {
+        val config = defaultDashboardCardConfig().map { card ->
+            when (card.type) {
+                DashboardCardType.HYDRATION -> card.copy(sortOrder = 0)
+                DashboardCardType.NUTRITION -> card.copy(sortOrder = 1)
+                else -> card.copy(sortOrder = card.sortOrder + 2)
+            }
+        }
+
+        val items = buildDashboardItems(config)
+        val cardTypes = items.filterIsInstance<TodayDashboardItem.Card>().map { it.config.type }
+
+        assertEquals(DashboardCardType.HYDRATION, cardTypes.first())
+        assertEquals(DashboardCardType.NUTRITION, cardTypes[1])
+        assertFalse(cardTypes.contains(DashboardCardType.CAFFEINE))
+        assertTrue(items.last() is TodayDashboardItem.Customize)
+    }
+
+    @Test
+    fun buildDashboardItems_returnsEmptyItemWhenEveryCardIsHidden() {
+        val config = defaultDashboardCardConfig().map { card -> card.copy(isVisible = false) }
+
+        val items = buildDashboardItems(config)
+
+        assertEquals(listOf(TodayDashboardItem.Empty), items)
     }
 
     @Test

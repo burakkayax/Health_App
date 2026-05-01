@@ -40,6 +40,14 @@ fun shouldShowWaterReminder(
     targetMl: Int,
 ): Boolean = snoozedDate != today && currentMl < targetMl
 
+fun shouldReadHydrationSnapshotForReminder(
+    settings: WaterReminderSettings,
+    now: LocalTime,
+    canPostNotifications: Boolean,
+): Boolean = settings.enabled &&
+    canPostNotifications &&
+    isInsideWaterReminderWindow(now, settings)
+
 private fun reminderSlotsForWindow(
     date: LocalDate,
     settings: WaterReminderSettings,

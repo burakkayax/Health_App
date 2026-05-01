@@ -39,11 +39,43 @@ sealed interface ImportValidationResult {
     ) : ImportValidationResult
 }
 
-enum class ImportValidationError {
-    EMPTY_FILE,
-    INVALID_JSON,
-    MISSING_SCHEMA_VERSION,
-    UNSUPPORTED_SCHEMA_VERSION,
+sealed interface ImportValidationError {
+    data object EmptyFile : ImportValidationError
+    data object InvalidJson : ImportValidationError
+    data object MissingSchemaVersion : ImportValidationError
+    data class UnsupportedSchemaVersion(val schemaVersion: Int? = null) : ImportValidationError
+    data class MissingRequiredField(val fieldPath: String) : ImportValidationError
+    data class InvalidDate(val fieldPath: String) : ImportValidationError
+    data class InvalidTime(val fieldPath: String) : ImportValidationError
+    data class InvalidDateTime(val fieldPath: String) : ImportValidationError
+    data class InvalidEnum(val fieldPath: String) : ImportValidationError
+    data class InvalidNumber(val fieldPath: String) : ImportValidationError
+    data class NegativeValue(val fieldPath: String) : ImportValidationError
+    data class FileTooLarge(val limitBytes: Long) : ImportValidationError
+    data object DecodeFailure : ImportValidationError
+    data object DatabaseFailure : ImportValidationError
+    data object SettingsFailure : ImportValidationError
+    data object Unknown : ImportValidationError
+}
+
+class HealthDataImportException(
+    val error: ImportValidationError,
+    cause: Throwable? = null,
+) : RuntimeException(cause)
+
+typealias HealthDataImportError = ImportValidationError
+
+object HealthDataImportLimits {
+    const val MAX_IMPORT_FILE_BYTES: Long = 5L * 1024L * 1024L
+}
+
+fun validateImportFileSize(
+    sizeBytes: Long?,
+    maxBytes: Long = HealthDataImportLimits.MAX_IMPORT_FILE_BYTES,
+): ImportValidationError? = if (sizeBytes != null && sizeBytes > maxBytes) {
+    ImportValidationError.FileTooLarge(maxBytes)
+} else {
+    null
 }
 
 interface HealthDataJsonImporter {

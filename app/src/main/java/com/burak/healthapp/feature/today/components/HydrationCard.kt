@@ -21,11 +21,11 @@ import com.burak.healthapp.core.ui.components.ThickMetricProgressBar
 import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.HydrationCardState
 
 @Composable
 internal fun HydrationCard(
-    state: TodayUiState,
+    state: HydrationCardState,
     onQuickAdd: (Int) -> Unit,
     onMore: () -> Unit,
     onOpenDetails: () -> Unit,
@@ -54,7 +54,7 @@ internal fun HydrationCard(
                 Text(
                     text = stringResource(
                         R.string.today_format_ml_formatted,
-                        formatWholeNumber(state.hydration.currentMl),
+                        formatWholeNumber(state.currentMl),
                     ),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -62,14 +62,14 @@ internal fun HydrationCard(
                 Text(
                     text = stringResource(
                         R.string.today_format_target_ml_formatted,
-                        formatWholeNumber(state.hydration.targetMl),
+                        formatWholeNumber(state.targetMl),
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             ThickMetricProgressBar(
-                progress = state.hydration.progress,
+                progress = state.progress,
                 activeColor = HealthWater,
                 testTag = "hydration_progress_bar",
             )

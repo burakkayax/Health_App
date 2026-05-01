@@ -3,6 +3,7 @@ package com.burak.healthapp
 import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.domain.config.DefaultHealthGoals
+import com.burak.healthapp.domain.export.ExportedCaffeineEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
 import com.burak.healthapp.domain.export.ExportedMealEntry
@@ -13,6 +14,7 @@ import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.export.ImportValidationError
 import com.burak.healthapp.domain.export.ImportValidationResult
+import com.burak.healthapp.domain.export.validateImportFileSize
 import com.burak.healthapp.domain.model.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -35,7 +37,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate("""{"exportedAt":"2026-04-27T10:00:00Z"}""")
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.MISSING_SCHEMA_VERSION),
+            ImportValidationResult.Invalid(ImportValidationError.MissingSchemaVersion),
             result,
         )
     }
@@ -45,7 +47,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate("""{"schemaVersion":99}""")
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.UNSUPPORTED_SCHEMA_VERSION),
+            ImportValidationResult.Invalid(ImportValidationError.UnsupportedSchemaVersion(99)),
             result,
         )
     }
@@ -55,7 +57,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate("{not-json")
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.INVALID_JSON),
+            ImportValidationResult.Invalid(ImportValidationError.InvalidJson),
             result,
         )
     }
@@ -65,8 +67,130 @@ class JsonHealthDataImporterTest {
         val result = importer.validate("   ")
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.EMPTY_FILE),
+            ImportValidationResult.Invalid(ImportValidationError.EmptyFile),
             result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsSleepDateTimeWithoutDate() {
+        val model = sampleModel().copy(
+            sleep = listOf(
+                ExportedSleepSession(
+                    id = 1,
+                    sessionDate = "2026-04-27",
+                    startTime = "22:30",
+                    endTime = "07:00",
+                ),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.InvalidDateTime("sleep[0].startTime")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsInvalidDate() {
+        val model = sampleModel().copy(
+            hydration = listOf(
+                ExportedHydrationEntry(
+                    id = 1,
+                    date = "2026-99-27",
+                    amountMl = 250,
+                    createdAt = "2026-04-27T09:00:00",
+                ),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.InvalidDate("hydration[0].date")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsNegativeHydration() {
+        val model = sampleModel().copy(
+            hydration = listOf(
+                ExportedHydrationEntry(
+                    id = 1,
+                    date = "2026-04-27",
+                    amountMl = -200,
+                    createdAt = "2026-04-27T09:00:00",
+                ),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("hydration[0].amountMl")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsNegativeCaffeine() {
+        val model = sampleModel().copy(
+            caffeineEntries = listOf(
+                ExportedCaffeineEntry(
+                    id = 1,
+                    date = "2026-04-27",
+                    time = "10:30",
+                    drinkType = "FILTER_COFFEE",
+                    size = "MEDIUM",
+                    estimatedMg = -80,
+                    customName = null,
+                    createdAt = "2026-04-27T10:30:00",
+                ),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("caffeineEntries[0].estimatedMg")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsInvalidEnum() {
+        val model = sampleModel().copy(
+            meals = listOf(
+                ExportedMealEntry(
+                    id = 1,
+                    date = "2026-04-27",
+                    mealType = "BRUNCH",
+                    name = "Yulaf",
+                    calories = 300,
+                    carbsGrams = 40,
+                    fatGrams = 8,
+                    proteinGrams = 20,
+                    createdAt = "2026-04-27T08:00:00",
+                ),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.InvalidEnum("meals[0].mealType")),
+            result,
+        )
+    }
+
+    @Test
+    fun validateImportFileSize_rejectsOversizedFile() {
+        assertEquals(
+            ImportValidationError.FileTooLarge(10),
+            validateImportFileSize(sizeBytes = 11, maxBytes = 10),
         )
     }
 

@@ -54,6 +54,8 @@ import com.burak.healthapp.domain.model.HydrationEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.detail.buildMonthGridDays
+import com.burak.healthapp.feature.detail.buildPeriodDays
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +69,16 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
+private val hydrationHistoryTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "HH:mm",
+    Locale.forLanguageTag("tr"),
+)
+
+private val hydrationMonthDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM",
+    Locale.forLanguageTag("tr"),
+)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HydrationDetailViewModel @Inject constructor(
@@ -78,11 +90,8 @@ class HydrationDetailViewModel @Inject constructor(
 
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
         .flatMapLatest { (date, period) ->
-            val startDate = if (period == TrendsPeriod.WEEKLY) {
-                date.minusDays(6)
-            } else {
-                date.withDayOfMonth(1)
-            }
+            val periodDays = buildPeriodDays(date, period)
+            val startDate = periodDays.firstOrNull() ?: date
             combine(
                 settingsRepository.settings,
                 dashboardRepository.observeHydrationBetween(startDate, date),
@@ -93,6 +102,7 @@ class HydrationDetailViewModel @Inject constructor(
                         selectedDate = date,
                         period = period,
                         targetMl = settings.goalSettings.waterTargetMl,
+                        periodDays = periodDays,
                     )
                 }
             }
@@ -509,15 +519,8 @@ internal fun buildHydrationDetailUiState(
     selectedDate: LocalDate,
     period: TrendsPeriod,
     targetMl: Int,
+    periodDays: List<LocalDate> = buildPeriodDays(selectedDate, period),
 ): HydrationDetailUiState {
-    val locale = Locale.forLanguageTag("tr")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", locale)
-    val periodDays = if (period == TrendsPeriod.WEEKLY) {
-        (6L downTo 0L).map(selectedDate::minusDays)
-    } else {
-        val monthStart = selectedDate.withDayOfMonth(1)
-        (0L..java.time.temporal.ChronoUnit.DAYS.between(monthStart, selectedDate)).map(monthStart::plusDays)
-    }
     val entriesByDate = entries.groupBy(HydrationEntry::date)
     val selectedEntries = entries
         .filter { entry -> entry.date == selectedDate }
@@ -538,7 +541,7 @@ internal fun buildHydrationDetailUiState(
             HydrationHistoryItemState(
                 id = entry.id,
                 amountMl = entry.amountMl,
-                timeLabel = entry.createdAt.toLocalTime().format(timeFormatter),
+                timeLabel = entry.createdAt.toLocalTime().format(hydrationHistoryTimeFormatter),
             )
         },
         periodDays = periodTotals.map { (day, amount) ->
@@ -567,16 +570,10 @@ internal fun buildHydrationMonthRingDays(
     entriesByDate: Map<LocalDate, List<HydrationEntry>>,
     targetMl: Int,
 ): List<MetricDayRingState> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    val monthEnd = anchorDate.withDayOfMonth(anchorDate.lengthOfMonth())
-    val gridStart = monthStart.minusDays((monthStart.dayOfWeek.value - 1).toLong())
-    val gridEnd = monthEnd.plusDays((7 - monthEnd.dayOfWeek.value).toLong())
-    val dayCount = java.time.temporal.ChronoUnit.DAYS.between(gridStart, gridEnd).toInt() + 1
     val target = targetMl.toFloat().coerceAtLeast(1f)
-    val dateFormatter = DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr"))
+    val today = LocalDate.now()
 
-    return (0 until dayCount).map { offset ->
-        val date = gridStart.plusDays(offset.toLong())
+    return buildMonthGridDays(anchorDate).map { date ->
         val isInCurrentMonth = date.month == anchorDate.month && date.year == anchorDate.year
         val amount = if (isInCurrentMonth) entriesByDate[date].orEmpty().sumOf(HydrationEntry::amountMl) else 0
         val progress = clampProgress(amount.toFloat(), target)
@@ -586,9 +583,9 @@ internal fun buildHydrationMonthRingDays(
             hasData = amount > 0,
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = amount > 0 && progress >= 1f,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(hydrationMonthDateFormatter),
             valueLabel = "${formatWholeNumber(amount)} ml",
-            isToday = date == LocalDate.now(),
+            isToday = date == today,
         )
     }
 }

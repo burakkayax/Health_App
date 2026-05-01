@@ -12,7 +12,9 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.content.ContextCompat
+import com.burak.healthapp.BuildConfig
 import com.burak.healthapp.core.notification.HealthNotifications
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
@@ -21,7 +23,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,38 +50,60 @@ class StepCounterService :
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             serviceScope.launch {
-                settingsRepository.updateStepTrackingEnabled(false)
-                stopSelf()
+                runCatching {
+                    settingsRepository.updateStepTrackingEnabled(false)
+                }.onFailure { error ->
+                    debugLog("Failed to persist step tracking stop action", error)
+                }
+                withContext(Dispatchers.Main.immediate) {
+                    stopStepTracking(startId)
+                }
             }
             return START_NOT_STICKY
         }
 
         if (!hasActivityRecognitionPermission()) {
-            stopSelf()
+            stopStepTracking(startId)
             return START_NOT_STICKY
         }
-
-        startForegroundCompat()
 
         val manager = getSystemService(SensorManager::class.java)
         val stepCounter = manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if (stepCounter == null) {
-            stopSelf()
+            stopStepTracking(startId)
             return START_NOT_STICKY
         }
 
-        if (!listenerRegistered) {
-            sensorManager = manager
-            manager.registerListener(this, stepCounter, SensorManager.SENSOR_DELAY_NORMAL)
-            listenerRegistered = true
+        serviceScope.launch {
+            val enabled = runCatching {
+                settingsRepository.settings.first().stepTrackingEnabled
+            }.onFailure { error ->
+                debugLog("Failed to read step tracking preference", error)
+            }.getOrDefault(false)
+
+            val decision = decideStepServiceStart(
+                isStopAction = false,
+                stepTrackingEnabled = enabled,
+                hasPermission = true,
+                hasSensor = true,
+            )
+            withContext(Dispatchers.Main.immediate) {
+                when (decision) {
+                    StepServiceStartDecision.START -> {
+                        startForegroundCompat()
+                        registerStepListener(manager, stepCounter)
+                    }
+
+                    else -> stopStepTracking(startId)
+                }
+            }
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
         flushPendingSensorValue()
-        sensorManager?.unregisterListener(this)
-        listenerRegistered = false
+        unregisterStepListener()
         serviceScope.cancel()
         super.onDestroy()
     }
@@ -85,8 +113,12 @@ class StepCounterService :
         val nowMillis = System.currentTimeMillis()
         if (!writePolicy.shouldWrite(sensorValue, nowMillis)) return
         serviceScope.launch {
-            dashboardRepository.recordStepSensorValue(sensorValue)
-            writePolicy.markWritten(sensorValue, nowMillis)
+            runCatching {
+                dashboardRepository.recordStepSensorValue(sensorValue)
+                writePolicy.markWritten(sensorValue, nowMillis)
+            }.onFailure { error ->
+                debugLog("Failed to record step sensor value", error)
+            }
         }
     }
 
@@ -102,6 +134,36 @@ class StepCounterService :
             )
         } else {
             startForeground(HealthNotifications.STEP_NOTIFICATION_ID, notification)
+        }
+    }
+
+    private fun registerStepListener(
+        manager: SensorManager,
+        stepCounter: Sensor,
+    ) {
+        if (listenerRegistered) return
+        sensorManager = manager
+        listenerRegistered = manager.registerListener(this, stepCounter, SensorManager.SENSOR_DELAY_NORMAL)
+        if (!listenerRegistered) {
+            debugLog("Step sensor listener registration was rejected")
+            stopStepTracking()
+        }
+    }
+
+    private fun unregisterStepListener() {
+        if (listenerRegistered) {
+            sensorManager?.unregisterListener(this)
+        }
+        listenerRegistered = false
+        sensorManager = null
+    }
+
+    private fun stopStepTracking(startId: Int? = null) {
+        unregisterStepListener()
+        if (startId != null) {
+            stopSelf(startId)
+        } else {
+            stopSelf()
         }
     }
 
@@ -127,13 +189,37 @@ class StepCounterService :
         fun stopIntent(context: Context): Intent = Intent(context, StepCounterService::class.java).setAction(ACTION_STOP)
 
         private const val ACTION_STOP = "com.burak.healthapp.action.STOP_STEP_TRACKING"
+        private const val PENDING_FLUSH_TIMEOUT_MILLIS = 500L
+        private const val TAG = "StepCounterService"
     }
 
     private fun flushPendingSensorValue() {
-        val sensorValue = writePolicy.pendingFlushValue() ?: return
-        kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-            dashboardRepository.recordStepSensorValue(sensorValue)
-            writePolicy.markWritten(sensorValue, System.currentTimeMillis())
+        if (writePolicy.pendingFlushValue() == null) return
+        val result = runBlocking(Dispatchers.IO) {
+            withTimeoutOrNull(PENDING_FLUSH_TIMEOUT_MILLIS) {
+                flushPendingStepSensorValue(
+                    writePolicy = writePolicy,
+                    nowMillis = System.currentTimeMillis(),
+                    recordStepSensorValue = dashboardRepository::recordStepSensorValue,
+                )
+            }
+        }
+        when (result) {
+            StepSensorFlushResult.FAILED -> debugLog("Failed to flush pending step sensor value")
+            null -> debugLog("Timed out while flushing pending step sensor value")
+            else -> Unit
+        }
+    }
+
+    private fun debugLog(
+        message: String,
+        error: Throwable? = null,
+    ) {
+        if (!BuildConfig.DEBUG) return
+        if (error == null) {
+            Log.d(TAG, message)
+        } else {
+            Log.d(TAG, message, error)
         }
     }
 }

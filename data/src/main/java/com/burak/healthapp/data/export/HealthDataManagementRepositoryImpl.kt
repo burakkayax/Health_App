@@ -26,6 +26,8 @@ import com.burak.healthapp.domain.export.ExportedSupplementTemplate
 import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
+import com.burak.healthapp.domain.export.HealthDataImportException
+import com.burak.healthapp.domain.export.ImportValidationError
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
@@ -43,27 +45,39 @@ class HealthDataManagementRepositoryImpl(
     private val settingsRepository: SettingsRepository,
 ) : HealthDataManagementRepository {
     override suspend fun importHealthData(model: HealthDataExportModel) {
-        val prepared = model.toPreparedImport()
-
-        withContext(Dispatchers.IO) {
-            database.withTransaction {
-                importMeals(prepared.meals)
-                importHydration(prepared.hydration)
-                importSleep(prepared.sleep)
-                importExercise(prepared.exercise)
-                importSmoking(prepared.smoking)
-                importSteps(prepared.steps)
-                importCaffeine(prepared.caffeine)
-                importBodyMeasurements(prepared.bodyMeasurements)
-                val templateIdMap = importSupplementTemplates(prepared.supplementTemplates)
-                importSupplementDoses(prepared.supplementDoses, templateIdMap)
-            }
+        val prepared = try {
+            model.toPreparedImport()
+        } catch (exception: Exception) {
+            throw HealthDataImportException(ImportValidationError.DecodeFailure, exception)
         }
 
-        settingsRepository.updateProfile(prepared.profile)
-        settingsRepository.updateGoalSettings(prepared.goals)
-        settingsRepository.updateWaterReminderSettings(prepared.waterReminderSettings)
-        settingsRepository.updateThemeMode(prepared.themeMode)
+        try {
+            withContext(Dispatchers.IO) {
+                database.withTransaction {
+                    importMeals(prepared.meals)
+                    importHydration(prepared.hydration)
+                    importSleep(prepared.sleep)
+                    importExercise(prepared.exercise)
+                    importSmoking(prepared.smoking)
+                    importSteps(prepared.steps)
+                    importCaffeine(prepared.caffeine)
+                    importBodyMeasurements(prepared.bodyMeasurements)
+                    val templateIdMap = importSupplementTemplates(prepared.supplementTemplates)
+                    importSupplementDoses(prepared.supplementDoses, templateIdMap)
+                }
+            }
+        } catch (exception: Exception) {
+            throw HealthDataImportException(ImportValidationError.DatabaseFailure, exception)
+        }
+
+        try {
+            settingsRepository.updateProfile(prepared.profile)
+            settingsRepository.updateGoalSettings(prepared.goals)
+            settingsRepository.updateWaterReminderSettings(prepared.waterReminderSettings)
+            settingsRepository.updateThemeMode(prepared.themeMode)
+        } catch (exception: Exception) {
+            throw HealthDataImportException(ImportValidationError.SettingsFailure, exception)
+        }
     }
 
     override suspend fun deleteAllHealthData() {

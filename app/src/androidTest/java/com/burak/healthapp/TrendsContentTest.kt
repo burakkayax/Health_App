@@ -1,25 +1,25 @@
 package com.burak.healthapp
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
-import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.theme.HealthTheme
-import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
-import com.burak.healthapp.feature.trends.InsightCardState
-import com.burak.healthapp.feature.trends.TrendChartState
+import com.burak.healthapp.feature.trends.DataQualityWarningState
+import com.burak.healthapp.feature.trends.GoalAdherenceState
+import com.burak.healthapp.feature.trends.MetricTrendCardState
+import com.burak.healthapp.feature.trends.PeriodSummaryState
+import com.burak.healthapp.feature.trends.ShortInsightState
+import com.burak.healthapp.feature.trends.TrendHighlightState
+import com.burak.healthapp.feature.trends.TrendTone
 import com.burak.healthapp.feature.trends.TrendsContent
+import com.burak.healthapp.feature.trends.TrendsDetailDestination
+import com.burak.healthapp.feature.trends.TrendsMetric
 import com.burak.healthapp.feature.trends.TrendsUiState
-import com.burak.healthapp.feature.trends.WeeklyCaloriesCardState
-import com.burak.healthapp.feature.trends.WeightTrendChartCardState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -46,7 +46,7 @@ class TrendsContentTest {
     }
 
     @Test
-    fun weeklyCaloriesCard_isRendered() {
+    fun redesignedSections_areRendered() {
         composeRule.setContent {
             HealthTheme {
                 TrendsContent(
@@ -56,85 +56,88 @@ class TrendsContentTest {
             }
         }
 
-        composeRule.onNodeWithTag("weekly_calories_card").assertIsDisplayed()
-        composeRule.onNodeWithText("Haftalık Kalori").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_summary_card").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_highlights_section").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_goal_adherence_section").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_metric_cards_section").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_short_insights_section").assertIsDisplayed()
+        composeRule.onNodeWithTag("trends_data_quality_section").assertIsDisplayed()
+        composeRule.onNodeWithText("Dönem Özeti").assertIsDisplayed()
+        composeRule.onNodeWithText("Hedef Uyumu").assertIsDisplayed()
     }
 
     @Test
-    fun trends_showWeightOnly_andNoRatioCards() {
+    fun metricCardClick_invokesDetailNavigation() {
+        var opened: TrendsDetailDestination? = null
+
         composeRule.setContent {
             HealthTheme {
                 TrendsContent(
                     state = sampleTrendsState(),
                     onSelectPeriod = {},
+                    onOpenDetail = { opened = it },
                 )
             }
         }
 
-        composeRule.onNodeWithText("Kilo Trendi").assertIsDisplayed()
-        composeRule.onAllNodesWithText("Omuz-Bel Oranı").assertCountEquals(0)
-        composeRule.onAllNodesWithText("Bel-Kalça Oranı").assertCountEquals(0)
-        composeRule.onNodeWithText("Ortalama Su").assertIsDisplayed()
+        composeRule.onNodeWithText("Adım").performClick()
+        assertEquals(TrendsDetailDestination.STEPS, opened)
     }
 
     private fun sampleTrendsState(): TrendsUiState = TrendsUiState(
         avatarInitials = "B",
         selectedPeriod = TrendsPeriod.WEEKLY,
+        summary = PeriodSummaryState(
+            title = UiText.DynamicString("Dönem Özeti"),
+            body = UiText.DynamicString("Bu hafta su hedefini 5/7 gün tamamladın."),
+            periodLabel = UiText.DynamicString("Son 7 gün"),
+            hasData = true,
+        ),
+        highlights = listOf(
+            TrendHighlightState(
+                title = UiText.DynamicString("En iyi gelişme"),
+                value = UiText.DynamicString("Su"),
+                description = UiText.DynamicString("Su hedefin 5/7 gün tamamlanmış."),
+                tone = TrendTone.POSITIVE,
+            ),
+        ),
+        goalAdherence = listOf(
+            GoalAdherenceState(
+                metric = TrendsMetric.HYDRATION,
+                label = UiText.DynamicString("Su"),
+                completedDays = 5,
+                totalDays = 7,
+                progress = 5f / 7f,
+                tone = TrendTone.POSITIVE,
+            ),
+        ),
+        metricCards = listOf(
+            MetricTrendCardState(
+                metric = TrendsMetric.STEPS,
+                title = UiText.DynamicString("Adım"),
+                primaryValue = UiText.DynamicString("8.200 adım"),
+                secondaryValue = UiText.DynamicString("Hedef 4/7 gün"),
+                changeLabel = UiText.DynamicString("Önceki döneme göre arttı"),
+                chartPoints = emptyList(),
+                tone = TrendTone.POSITIVE,
+                destination = TrendsDetailDestination.STEPS,
+                hasData = true,
+            ),
+        ),
         insights = listOf(
-            InsightCardState(
-                title = UiText.DynamicString("Günlük Ortalama Protein"),
-                value = UiText.DynamicString("128 g"),
-                subtitle = UiText.DynamicString("Bu hafta ortalaması"),
-                hasData = true,
-            ),
-            InsightCardState(
-                title = UiText.DynamicString("Ortalama Su"),
-                value = UiText.DynamicString("1900 ml"),
-                subtitle = UiText.DynamicString("Bu hafta günlük ortalama"),
-                hasData = true,
-            ),
-            InsightCardState(
-                title = UiText.DynamicString("Ortalama Uyku"),
-                value = UiText.DynamicString("7s 10d"),
-                subtitle = UiText.DynamicString("Tamamlanan uyku kayıtları baz alınır"),
-                hasData = true,
+            ShortInsightState(
+                title = UiText.DynamicString("Su hedefi"),
+                body = UiText.DynamicString("Bu dönem su hedefini 5/7 gün tamamladın."),
+                severity = TrendTone.POSITIVE,
             ),
         ),
-        weeklyCaloriesCard = WeeklyCaloriesCardState(
-            averageCaloriesLabel = UiText.DynamicString("1980 kcal"),
-            subtitle = UiText.DynamicString("Pazartesi - Pazar ortalaması"),
-            bars = listOf(
-                WeeklyCalorieBarState("P", 2200, 1f),
-                WeeklyCalorieBarState("S", 1900, 0.86f),
-                WeeklyCalorieBarState("Ç", 2050, 0.93f),
-                WeeklyCalorieBarState("P", 1800, 0.82f),
-                WeeklyCalorieBarState("C", 2100, 0.95f),
-                WeeklyCalorieBarState("C", 2000, 0.91f),
-                WeeklyCalorieBarState("P", 1750, 0.8f),
+        dataQuality = listOf(
+            DataQualityWarningState(
+                metric = TrendsMetric.SLEEP,
+                message = UiText.DynamicString("Uyku verin bu dönem 3/7 gün kayıtlı."),
+                availableDays = 3,
+                expectedDays = 7,
             ),
-        ),
-        charts = listOf(
-            TrendChartState(
-                title = UiText.DynamicString("Adım Trendi"),
-                subtitle = UiText.DynamicString("Günlük hedefe göre adım akışı."),
-                points = listOf(
-                    TrendPoint("Pzt", 4200f),
-                    TrendPoint("Sal", 5400f),
-                    TrendPoint("Çrş", 6100f),
-                ),
-            ),
-        ),
-        weightChart = WeightTrendChartCardState(
-            title = UiText.DynamicString("Kilo Trendi"),
-            subtitle = UiText.DynamicString("Başlangıç, hedef ve mevcut kilo birlikte izlenir."),
-            chart = buildWeightTrendChartState(
-                points = listOf(
-                    TrendPoint("Pzt", 78f),
-                    TrendPoint("Sal", 77.8f),
-                    TrendPoint("Çrş", 77.4f),
-                ),
-                targetWeightKg = 74f,
-            )!!,
         ),
     )
 }

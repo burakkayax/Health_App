@@ -52,6 +52,16 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
+private val weightDetailLocale: Locale = Locale.forLanguageTag("tr")
+private val weightHistoryDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMMM yyyy",
+    weightDetailLocale,
+)
+private val weightChartDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
+    "d MMM",
+    weightDetailLocale,
+)
+
 @HiltViewModel
 class WeightDetailViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
@@ -382,15 +392,12 @@ private fun List<BodyMeasurementEntry>.toWeightDetailUiState(
     heightCm: Float?,
     targetWeightKg: Float,
 ): WeightDetailUiState {
-    val locale = Locale.forLanguageTag("tr")
-    val historyFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", locale)
-    val chartFormatter = DateTimeFormatter.ofPattern("d MMM", locale)
     val chartMeasurements = groupBy(BodyMeasurementEntry::date)
         .mapNotNull { (_, entries) -> entries.maxByOrNull(BodyMeasurementEntry::recordedAt) }
         .sortedBy(BodyMeasurementEntry::date)
     val chartPoints = chartMeasurements.map { measurement ->
         TrendPoint(
-            label = measurement.date.format(chartFormatter),
+            label = measurement.date.format(weightChartDateFormatter),
             value = measurement.weightKg,
         )
     }
@@ -410,8 +417,8 @@ private fun List<BodyMeasurementEntry>.toWeightDetailUiState(
         ).map { measurement ->
             WeightHistoryItemState(
                 id = measurement.id,
-                dateLabel = measurement.date.format(historyFormatter),
-                weightLabel = String.format(locale, "%.1f kg", measurement.weightKg),
+                dateLabel = measurement.date.format(weightHistoryDateFormatter),
+                weightLabel = String.format(weightDetailLocale, "%.1f kg", measurement.weightKg),
             )
         },
         bmiGauge = when {
@@ -425,7 +432,7 @@ private fun List<BodyMeasurementEntry>.toWeightDetailUiState(
 
             else -> BmiGaugeState(
                 indicatorFraction = normalizeBodyMassIndexToGauge(bmi),
-                valueLabel = String.format(locale, "%.1f • %s", bmi, classifyBodyMassIndex(bmi)),
+                valueLabel = String.format(weightDetailLocale, "%.1f • %s", bmi, classifyBodyMassIndex(bmi)),
             )
         },
     )

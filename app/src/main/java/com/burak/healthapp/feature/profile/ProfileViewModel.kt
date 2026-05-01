@@ -10,6 +10,7 @@ import com.burak.healthapp.data.export.HealthDataExportFileWriter
 import com.burak.healthapp.data.export.HealthDataImportFileReader
 import com.burak.healthapp.domain.calculation.formatClockRange
 import com.burak.healthapp.domain.export.HealthDataExportModel
+import com.burak.healthapp.domain.export.HealthDataImportException
 import com.burak.healthapp.domain.export.HealthDataJsonImporter
 import com.burak.healthapp.domain.export.ImportValidationError
 import com.burak.healthapp.domain.export.ImportValidationResult
@@ -224,13 +225,19 @@ class ProfileViewModel @Inject constructor(
 
     fun loadImportPreview(uri: Uri) {
         viewModelScope.launch {
+            exportState.value = exportState.value.copy(
+                isImporting = true,
+                importPreview = null,
+                message = null,
+                isError = false,
+            )
             try {
                 val rawJson = importFileReader.readText(uri)
                 handleImportPreviewJson(rawJson)
-            } catch (_: Exception) {
+            } catch (exception: Exception) {
                 exportState.value = exportState.value.copy(
                     isImporting = false,
-                    message = UiText.StringResource(R.string.import_failed),
+                    message = exception.toImportUiText(),
                     isError = true,
                 )
             }
@@ -287,10 +294,10 @@ class ProfileViewModel @Inject constructor(
                     message = UiText.StringResource(R.string.import_success),
                     isError = false,
                 )
-            }.onFailure {
+            }.onFailure { exception ->
                 exportState.value = exportState.value.copy(
                     isImporting = false,
-                    message = UiText.StringResource(R.string.import_failed),
+                    message = exception.toImportUiText(),
                     isError = true,
                 )
             }
@@ -425,11 +432,32 @@ class ProfileViewModel @Inject constructor(
 
 private val DUPLICATE_NAME_ERROR = UiText.StringResource(R.string.error_supplement_duplicate_name)
 
+private fun Throwable.toImportUiText(): UiText = (this as? HealthDataImportException)
+    ?.error
+    ?.toUiText()
+    ?: UiText.StringResource(R.string.import_failed)
+
 private fun ImportValidationError.toUiText(): UiText = when (this) {
-    ImportValidationError.EMPTY_FILE -> UiText.StringResource(R.string.import_error_empty_file)
-    ImportValidationError.INVALID_JSON -> UiText.StringResource(R.string.import_error_invalid_json)
-    ImportValidationError.MISSING_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_missing_schema_version)
-    ImportValidationError.UNSUPPORTED_SCHEMA_VERSION -> UiText.StringResource(R.string.import_error_unsupported_schema_version)
+    ImportValidationError.EmptyFile -> UiText.StringResource(R.string.import_error_empty_file)
+    ImportValidationError.InvalidJson -> UiText.StringResource(R.string.import_error_invalid_json)
+    ImportValidationError.MissingSchemaVersion -> UiText.StringResource(R.string.import_error_missing_schema_version)
+    is ImportValidationError.UnsupportedSchemaVersion -> UiText.StringResource(R.string.import_error_unsupported_schema_version)
+    is ImportValidationError.MissingRequiredField -> UiText.StringResource(R.string.import_error_missing_required_field)
+    is ImportValidationError.InvalidDate -> UiText.StringResource(R.string.import_error_invalid_date)
+    is ImportValidationError.InvalidTime -> UiText.StringResource(R.string.import_error_invalid_time)
+    is ImportValidationError.InvalidDateTime -> if (fieldPath.startsWith("sleep")) {
+        UiText.StringResource(R.string.import_validation_expected_datetime_format)
+    } else {
+        UiText.StringResource(R.string.import_error_invalid_datetime)
+    }
+    is ImportValidationError.InvalidEnum -> UiText.StringResource(R.string.import_error_invalid_enum)
+    is ImportValidationError.InvalidNumber -> UiText.StringResource(R.string.import_error_invalid_number)
+    is ImportValidationError.NegativeValue -> UiText.StringResource(R.string.import_error_negative_value)
+    is ImportValidationError.FileTooLarge -> UiText.StringResource(R.string.import_error_file_too_large)
+    ImportValidationError.DecodeFailure -> UiText.StringResource(R.string.import_error_decode_failure)
+    ImportValidationError.DatabaseFailure -> UiText.StringResource(R.string.import_error_database_failure)
+    ImportValidationError.SettingsFailure -> UiText.StringResource(R.string.import_error_settings_failure)
+    ImportValidationError.Unknown -> UiText.StringResource(R.string.import_error_unknown)
 }
 
 private fun SettingsState.toProfileUiState(

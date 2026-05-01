@@ -2,6 +2,7 @@ package com.burak.healthapp
 
 import com.burak.healthapp.core.reminder.calculateNextWaterReminderDelay
 import com.burak.healthapp.core.reminder.isInsideWaterReminderWindow
+import com.burak.healthapp.core.reminder.shouldReadHydrationSnapshotForReminder
 import com.burak.healthapp.core.reminder.shouldShowWaterReminder
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import org.junit.Assert.assertEquals
@@ -84,6 +85,40 @@ class WaterReminderScheduleTest {
         assertFalse(shouldShowWaterReminder(today, today, currentMl = 500, targetMl = 2500))
         assertFalse(shouldShowWaterReminder(today, null, currentMl = 2500, targetMl = 2500))
         assertTrue(shouldShowWaterReminder(today, today.minusDays(1), currentMl = 500, targetMl = 2500))
+    }
+
+    @Test
+    fun shouldReadHydrationSnapshot_requiresEnabledInsideWindowAndNotificationPermission() {
+        val reminder = settings(start = LocalTime.of(9, 0), end = LocalTime.of(21, 0), interval = 60)
+
+        assertFalse(
+            shouldReadHydrationSnapshotForReminder(
+                settings = reminder.copy(enabled = false),
+                now = LocalTime.of(10, 0),
+                canPostNotifications = true,
+            ),
+        )
+        assertFalse(
+            shouldReadHydrationSnapshotForReminder(
+                settings = reminder,
+                now = LocalTime.of(22, 0),
+                canPostNotifications = true,
+            ),
+        )
+        assertFalse(
+            shouldReadHydrationSnapshotForReminder(
+                settings = reminder,
+                now = LocalTime.of(10, 0),
+                canPostNotifications = false,
+            ),
+        )
+        assertTrue(
+            shouldReadHydrationSnapshotForReminder(
+                settings = reminder,
+                now = LocalTime.of(10, 0),
+                canPostNotifications = true,
+            ),
+        )
     }
 
     private fun settings(

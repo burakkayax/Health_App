@@ -29,6 +29,7 @@ import com.burak.healthapp.feature.detail.weight.WeightDetailRoute
 import com.burak.healthapp.feature.profile.ProfileRoute
 import com.burak.healthapp.feature.profile.goals.ProfileGoalsRoute
 import com.burak.healthapp.feature.today.TodayRoute
+import com.burak.healthapp.feature.trends.TrendsDetailDestination
 import com.burak.healthapp.feature.trends.TrendsRoute
 import java.time.LocalDate
 
@@ -60,7 +61,23 @@ internal fun AppNavigation(
             )
         }
         composable(TrendsDestination.route) {
-            TrendsRoute(avatarInitials = avatarInitials)
+            TrendsRoute(
+                avatarInitials = avatarInitials,
+                windowSizeClass = windowSizeClass,
+                onOpenDetail = { destination ->
+                    val route = when (destination) {
+                        TrendsDetailDestination.HYDRATION -> HydrationDetailDestination.route
+                        TrendsDetailDestination.STEPS -> StepDetailDestination.route
+                        TrendsDetailDestination.SLEEP -> SleepDetailDestination.route
+                        TrendsDetailDestination.EXERCISE -> ExerciseDetailDestination.route
+                        TrendsDetailDestination.CAFFEINE -> CaffeineDetailDestination.route
+                        TrendsDetailDestination.SMOKING -> SmokingDetailDestination.route
+                        TrendsDetailDestination.WEIGHT -> WeightDetailDestination.route
+                        TrendsDetailDestination.NUTRITION -> MealHistoryDestination.route
+                    }
+                    navController.navigate(route)
+                },
+            )
         }
         composable(MealHistoryDestination.route) {
             MealHistoryRoute(

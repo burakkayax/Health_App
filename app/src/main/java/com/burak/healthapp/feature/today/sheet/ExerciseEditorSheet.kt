@@ -69,7 +69,7 @@ internal fun ExerciseEditorSheet(
             color = MaterialTheme.colorScheme.onSurface,
         )
         LazyRow(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-            items(ExerciseType.entries) { type ->
+            items(ExerciseType.entries, key = ExerciseType::name) { type ->
                 FilterChip(
                     selected = selectedType == type,
                     onClick = { selectedType = type },

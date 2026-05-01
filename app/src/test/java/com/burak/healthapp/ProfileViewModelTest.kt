@@ -12,6 +12,8 @@ import com.burak.healthapp.domain.export.ExportedMealEntry
 import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
+import com.burak.healthapp.domain.export.HealthDataImportException
+import com.burak.healthapp.domain.export.ImportValidationError
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
 import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.DashboardCardType
@@ -198,6 +200,31 @@ class ProfileViewModelTest {
         assertTrue(exportState.isError)
         assertEquals(
             UiText.StringResource(R.string.import_error_invalid_json),
+            exportState.message,
+        )
+    }
+
+    @Test
+    fun confirmImport_withSettingsFailureShowsTypedError() = runTest {
+        val managementRepository = FailingHealthDataManagementRepository(
+            HealthDataImportException(ImportValidationError.SettingsFailure),
+        )
+        val viewModel = createViewModel(
+            healthDataManagementRepository = managementRepository,
+        )
+        collectUiState(viewModel)
+
+        viewModel.loadImportPreviewJson(JsonHealthDataExporter().encode(profileImportModel()))
+        advanceUntilIdle()
+
+        viewModel.confirmImport()
+        advanceUntilIdle()
+
+        val exportState = viewModel.uiState.value.exportState
+        assertTrue(exportState.isError)
+        assertFalse(exportState.isImporting)
+        assertEquals(
+            UiText.StringResource(R.string.import_error_settings_failure),
             exportState.message,
         )
     }
@@ -468,6 +495,14 @@ private class RecordingHealthDataManagementRepository : HealthDataManagementRepo
     override suspend fun deleteAllHealthData() {
         deleteCount++
     }
+}
+
+private class FailingHealthDataManagementRepository(
+    private val throwable: Throwable,
+) : HealthDataManagementRepository {
+    override suspend fun importHealthData(model: HealthDataExportModel): Unit = throw throwable
+
+    override suspend fun deleteAllHealthData() = Unit
 }
 
 private fun profileImportModel(): HealthDataExportModel {

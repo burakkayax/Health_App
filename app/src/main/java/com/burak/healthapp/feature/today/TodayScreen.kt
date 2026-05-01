@@ -62,9 +62,6 @@ import com.burak.healthapp.domain.model.ExerciseIntensity
 import com.burak.healthapp.domain.model.ExerciseType
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.domain.model.SupplementDoseEntry
-import com.burak.healthapp.feature.today.SmokingStatus
-import com.burak.healthapp.feature.today.SupplementItemState
-import com.burak.healthapp.feature.today.TodayUiState
 import com.burak.healthapp.feature.today.components.CaffeineCard
 import com.burak.healthapp.feature.today.components.ExerciseCard
 import com.burak.healthapp.feature.today.components.HydrationCard
@@ -96,10 +93,23 @@ private sealed interface TodaySheet {
     data object CustomizeDashboard : TodaySheet
 }
 
-private sealed interface TodayDashboardItem {
+internal sealed interface TodayDashboardItem {
     data class Card(val config: DashboardCardConfig) : TodayDashboardItem
     data object Empty : TodayDashboardItem
     data object Customize : TodayDashboardItem
+}
+
+internal fun buildDashboardItems(cards: List<DashboardCardConfig>): List<TodayDashboardItem> = buildDashboardItemsFromOrderedCards(cards.sortedBy(DashboardCardConfig::sortOrder))
+
+private fun buildDashboardItemsFromOrderedCards(
+    orderedCards: List<DashboardCardConfig>,
+): List<TodayDashboardItem> {
+    val visibleCards = orderedCards.filter(DashboardCardConfig::isVisible)
+    return if (visibleCards.isEmpty()) {
+        listOf(TodayDashboardItem.Empty)
+    } else {
+        visibleCards.map(TodayDashboardItem::Card) + TodayDashboardItem.Customize
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,12 +206,11 @@ fun TodayContent(
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     var activeSheet by remember { mutableStateOf<TodaySheet?>(null) }
-    val orderedCards = state.dashboardCards.sortedBy(DashboardCardConfig::sortOrder)
-    val visibleCards = orderedCards.filter(DashboardCardConfig::isVisible)
-    val dashboardItems = if (visibleCards.isEmpty()) {
-        listOf(TodayDashboardItem.Empty)
-    } else {
-        visibleCards.map(TodayDashboardItem::Card) + TodayDashboardItem.Customize
+    val orderedCards = remember(state.dashboardCards) {
+        state.dashboardCards.sortedBy(DashboardCardConfig::sortOrder)
+    }
+    val dashboardItems = remember(orderedCards) {
+        buildDashboardItemsFromOrderedCards(orderedCards)
     }
 
     Box(
@@ -240,29 +249,29 @@ fun TodayContent(
                 )
                 is TodayDashboardItem.Card -> when (item.config.type) {
                     DashboardCardType.NUTRITION -> NutritionCard(
-                        state = state,
+                        state = state.nutrition,
                         onAddMeal = { activeSheet = TodaySheet.Meal },
                         onOpenMealHistory = onOpenMealHistory,
                     )
                     DashboardCardType.WEIGHT -> WeightCard(
-                        state = state,
+                        state = state.weight,
                         onAddWeight = { activeSheet = TodaySheet.Weight },
                         onOpenDetails = onOpenWeightDetail,
                     )
                     DashboardCardType.HYDRATION -> HydrationCard(
-                        state = state,
+                        state = state.hydration,
                         onQuickAdd = onAddHydration,
                         onMore = { activeSheet = TodaySheet.Hydration },
                         onOpenDetails = onOpenHydrationDetail,
                     )
                     DashboardCardType.SLEEP -> SleepCard(
-                        state = state,
+                        state = state.sleep,
                         onEdit = { activeSheet = TodaySheet.Sleep },
                         onOpenDetails = onOpenSleepDetail,
                         onDeleteSleep = onDeleteSleep,
                     )
                     DashboardCardType.EXERCISE -> ExerciseCard(
-                        state = state,
+                        state = state.exercise,
                         onAddExercise = { activeSheet = TodaySheet.Exercise },
                         onDeleteExercise = onDeleteExercise,
                         onOpenDetails = onOpenExerciseDetail,
@@ -273,7 +282,7 @@ fun TodayContent(
                         onOpenDetails = onOpenCaffeineDetail,
                     )
                     DashboardCardType.SMOKING -> SmokingCard(
-                        state = state,
+                        state = state.smoking,
                         onAddSmoking = { activeSheet = TodaySheet.Smoking },
                         onQuickIncrement = onIncrementSmoking,
                         onDeleteSmoking = onDeleteSmoking,
@@ -285,7 +294,7 @@ fun TodayContent(
                         onDeleteDose = onDeleteSupplementDose,
                     )
                     DashboardCardType.STEPS -> StepCard(
-                        state = state,
+                        state = state.steps,
                         onOpenDetails = onOpenStepDetail,
                     )
                 }

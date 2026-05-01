@@ -33,7 +33,7 @@ import com.burak.healthapp.core.ui.format.formatMetricCount
 import com.burak.healthapp.core.ui.theme.HealthCarbs
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
-import com.burak.healthapp.feature.today.TodayUiState
+import com.burak.healthapp.feature.today.SmokingCardState
 
 internal enum class SmokingDashboardTone {
     SUCCESS,
@@ -53,13 +53,13 @@ internal fun smokingDashboardToneForCount(
 
 @Composable
 internal fun SmokingCard(
-    state: TodayUiState,
+    state: SmokingCardState,
     onAddSmoking: () -> Unit,
     onQuickIncrement: () -> Unit,
     onDeleteSmoking: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
-    val statusColor = when (smokingDashboardToneForCount(state.smoking.count, state.smoking.limit)) {
+    val statusColor = when (smokingDashboardToneForCount(state.count, state.limit)) {
         SmokingDashboardTone.SUCCESS -> HealthSuccess
         SmokingDashboardTone.WARNING -> HealthCarbs
         SmokingDashboardTone.DANGER -> MaterialTheme.colorScheme.error
@@ -75,7 +75,7 @@ internal fun SmokingCard(
             title = stringResource(R.string.today_title_smoking),
             trailing = {
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    if (state.smoking.count > 0) {
+                    if (state.count > 0) {
                         DeleteIconButton(
                             testTag = "smoking_delete_button",
                             contentDescription = stringResource(R.string.content_description_delete_smoking),
@@ -98,12 +98,12 @@ internal fun SmokingCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SmokingStatusCircle(
-                count = state.smoking.count,
+                count = state.count,
                 containerColor = statusColor.copy(alpha = 0.16f),
                 contentColor = statusColor,
                 contentDescription = stringResource(
                     R.string.smoking_status_circle_description,
-                    formatMetricCount(state.smoking.count),
+                    formatMetricCount(state.count),
                 ),
             )
             Column(
@@ -111,12 +111,12 @@ internal fun SmokingCard(
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = state.smoking.supportingLabel,
+                    text = state.supportingLabel,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = state.smoking.helperLabel,
+                    text = state.helperLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

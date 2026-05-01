@@ -1,5 +1,58 @@
 # Changelog
 
+## PR23.9 - Trends Tab Redesign v1
+
+### Değiştirildi
+
+- Eğilimler sekmesi haftalık/aylık dönem özeti, hedef uyumu, öne çıkan değişimler, kısa içgörüler ve veri yeterliliği uyarılarıyla yeniden yapılandırıldı.
+
+### Eklendi
+
+- Eğilimler ekranına kısa veri temelli içgörü kartları eklendi.
+- Eğilimler ekranına hedef uyumu ve veri kalitesi bölümleri eklendi.
+
+## PR23.8 - Stability, Import/Export and Error Handling Hardening
+
+### Eklendi
+
+- Import/export akışları için typed hata modeli ve daha açıklayıcı kullanıcı mesajları eklendi.
+- Import preview aşamasına alan bazlı validation kontrolleri eklendi.
+- Büyük dosya ve bozuk tarih/saat formatları için daha güvenli hata yönetimi eklendi.
+
+### Değiştirildi
+
+- Import/export loading ve hata state yönetimi güçlendirildi.
+
+## PR23.7 - Battery, Background Work and Sensor Optimization
+
+### Değiştirildi
+
+- Adım sayar foreground service başlatma akışı, kullanıcı tercihi kapalıyken sensör dinlemeyecek şekilde güçlendirildi.
+- StepCounterService sensor listener lifecycle ve pending sensor flush davranışı daha güvenli hale getirildi.
+- Su hatırlatıcı worker akışı, bildirim gösterilemeyecek durumlarda gereksiz Today snapshot okumasından kaçınacak şekilde iyileştirildi.
+
+### Korundu
+
+- Performans/recomposition optimizasyonları PR23.6 kapsamında tutuldu.
+- Import/export validation ve hata modeli iyileştirmeleri PR23.8'e bırakıldı.
+
+## PR23.6 - Performance and Recomposition Optimization
+
+### Değiştirildi
+
+- Today dashboard türetilmiş kart listesi hesaplamaları daha az recomposition maliyeti oluşturacak şekilde optimize edildi.
+- Detail ekran state builder'larında tekrar eden tarih, gruplama ve formatlama işleri azaltıldı.
+- Lazy list/grid key kullanımları gözden geçirilerek render kararlılığı iyileştirildi.
+
+### Eklendi
+
+- PR23.6 sonrası performans takip notları performance audit dokümanına eklendi.
+
+### Korundu
+
+- Pil/background work optimizasyonları PR23.7'ye bırakıldı.
+- Import/export hata modeli ve validation iyileştirmeleri PR23.8'e bırakıldı.
+
 ## PR23.5 - Performance, Battery and Stability Baseline Audit
 
 ### Eklendi
