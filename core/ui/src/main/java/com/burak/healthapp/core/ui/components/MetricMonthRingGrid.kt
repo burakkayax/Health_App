@@ -42,6 +42,7 @@ data class MetricDayRingState(
     val dateLabel: String? = null,
     val valueLabel: String? = null,
     val isToday: Boolean = false,
+    val isOverLimit: Boolean = false,
     val contentDescription: String? = null,
 )
 
@@ -132,6 +133,11 @@ fun DayRingCell(
     val resolvedContentDescription = day.contentDescription ?: when {
         !day.isInCurrentMonth -> stringResource(R.string.metric_day_ring_outside_month, day.dayLabel)
         !day.hasData -> stringResource(R.string.metric_day_ring_no_data, accessibleDayLabel)
+        day.isOverLimit -> stringResource(
+            R.string.metric_day_ring_over_limit,
+            accessibleDayLabel,
+            day.valueLabel.orEmpty(),
+        )
         day.isTargetMet -> stringResource(
             R.string.metric_day_ring_target_met,
             accessibleDayLabel,
@@ -146,6 +152,7 @@ fun DayRingCell(
     }
     val resolvedActiveColor = when {
         !day.isInCurrentMonth -> MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+        day.isOverLimit -> MaterialTheme.colorScheme.error
         day.isTargetMet -> targetMetColor
         day.hasData -> activeColor
         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)

@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
@@ -44,6 +46,7 @@ import com.burak.healthapp.core.ui.components.ProgressBarRow
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.core.ui.components.weekDayShortLabel
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -84,12 +87,14 @@ class HydrationDetailViewModel @Inject constructor(
                 settingsRepository.settings,
                 dashboardRepository.observeHydrationBetween(startDate, date),
             ) { settings, entries ->
-                buildHydrationDetailUiState(
-                    entries = entries,
-                    selectedDate = date,
-                    period = period,
-                    targetMl = settings.goalSettings.waterTargetMl,
-                )
+                PerformanceLogger.measure("HydrationDetail:state_build") {
+                    buildHydrationDetailUiState(
+                        entries = entries,
+                        selectedDate = date,
+                        period = period,
+                        targetMl = settings.goalSettings.waterTargetMl,
+                    )
+                }
             }
         }
         .stateIn(
@@ -118,6 +123,7 @@ fun HydrationDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("HydrationDetailRoute")
     val viewModel: HydrationDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -330,7 +336,10 @@ private fun HydrationHistoryItem(
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = stringResource(R.string.today_format_ml, item.amountMl),
+                    text = stringResource(
+                        R.string.today_format_ml_formatted,
+                        formatWholeNumber(item.amountMl),
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -384,7 +393,10 @@ private fun HydrationSummaryCard(
             .fillMaxWidth()
             .testTag("hydration_detail_summary_card"),
     ) {
-        val targetLabel = stringResource(R.string.today_format_ml, state.targetMl)
+        val targetLabel = stringResource(
+            R.string.today_format_ml_formatted,
+            formatWholeNumber(state.targetMl),
+        )
         Text(
             text = stringResource(R.string.hydration_detail_title),
             style = MaterialTheme.typography.titleMedium,
@@ -392,7 +404,10 @@ private fun HydrationSummaryCard(
         )
         ProgressBarRow(
             modifier = Modifier.padding(top = HealthSpacing.sm),
-            label = stringResource(R.string.today_format_ml, state.totalMl),
+            label = stringResource(
+                R.string.today_format_ml_formatted,
+                formatWholeNumber(state.totalMl),
+            ),
             valueLabel = stringResource(R.string.hydration_detail_target, targetLabel),
             progress = state.progress,
             color = HealthWater,
@@ -408,7 +423,10 @@ private fun HydrationAverageCard(
     InsightCard(
         modifier = modifier.fillMaxWidth(),
         title = stringResource(R.string.hydration_detail_average_title),
-        value = stringResource(R.string.today_format_ml, state.averageMl),
+        value = stringResource(
+            R.string.today_format_ml_formatted,
+            formatWholeNumber(state.averageMl),
+        ),
         subtitle = stringResource(R.string.common_average_logged_days),
     )
 }
@@ -427,7 +445,10 @@ private fun HydrationWeekBarChart(
     ) {
         days.forEachIndexed { index, day ->
             val dayLabel = day.date?.let { weekDayShortLabel(it) } ?: day.label
-            val valueLabel = stringResource(R.string.today_format_ml, day.amountMl)
+            val valueLabel = stringResource(
+                R.string.today_format_ml_formatted,
+                formatWholeNumber(day.amountMl),
+            )
             val percent = (day.progress.coerceIn(0f, 1f) * 100).toInt()
             val description = when {
                 day.amountMl <= 0 -> stringResource(R.string.metric_day_ring_no_data, dayLabel)
@@ -566,7 +587,7 @@ internal fun buildHydrationMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = amount > 0 && progress >= 1f,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "$amount ml",
+            valueLabel = "${formatWholeNumber(amount)} ml",
             isToday = date == LocalDate.now(),
         )
     }

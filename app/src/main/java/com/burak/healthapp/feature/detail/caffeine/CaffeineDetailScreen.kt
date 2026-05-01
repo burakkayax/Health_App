@@ -31,6 +31,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
@@ -41,6 +43,7 @@ import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.core.ui.components.weekDayShortLabel
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -70,6 +73,7 @@ data class CaffeineBarState(
     val totalMg: Int,
     val progress: Float,
     val date: LocalDate? = null,
+    val isOverLimit: Boolean = false,
 )
 
 @Immutable
@@ -105,41 +109,44 @@ class CaffeineDetailViewModel @Inject constructor(
                 settingsRepository.settings,
                 dashboardRepository.observeCaffeineBetween(startDate, date),
             ) { settings, entries ->
-                val days = if (period == TrendsPeriod.WEEKLY) {
-                    (6L downTo 0L).map(date::minusDays)
-                } else {
-                    (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, date)).map(startDate::plusDays)
-                }
-                val entriesByDate = entries.groupBy(CaffeineEntry::date)
-                val todayEntries = entriesByDate[date].orEmpty()
-                val limit = settings.goalSettings.dailyCaffeineLimitMg
-                val periodTotals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(CaffeineEntry::estimatedMg) }
-                CaffeineDetailUiState(
-                    selectedPeriod = period,
-                    entries = todayEntries.sortedWith(compareBy(CaffeineEntry::time).thenBy(CaffeineEntry::createdAt)),
-                    bars = periodTotals.map { (day, total) ->
-                        CaffeineBarState(
-                            label = day.dayOfMonth.toString(),
-                            totalMg = total,
-                            progress = clampProgress(total.toFloat(), limit.toFloat()),
-                            date = day,
-                        )
-                    },
-                    monthDays = if (period == TrendsPeriod.MONTHLY) {
-                        buildCaffeineMonthRingDays(
-                            anchorDate = date,
-                            entriesByDate = entriesByDate,
-                            dailyLimitMg = limit,
-                        )
+                PerformanceLogger.measure("CaffeineDetail:state_build") {
+                    val days = if (period == TrendsPeriod.WEEKLY) {
+                        (6L downTo 0L).map(date::minusDays)
                     } else {
-                        emptyList()
-                    },
-                    totalTodayMg = todayEntries.sumOf(CaffeineEntry::estimatedMg),
-                    periodAverageMg = if (days.isEmpty()) 0 else periodTotals.sumOf { (_, total) -> total } / days.size,
-                    lastTimeLabel = todayEntries.maxByOrNull(CaffeineEntry::time)?.time?.let(::formatHourMinute) ?: "--",
-                    limitMg = limit,
-                    hasPeriodData = periodTotals.any { (_, total) -> total > 0 },
-                )
+                        (0L..java.time.temporal.ChronoUnit.DAYS.between(startDate, date)).map(startDate::plusDays)
+                    }
+                    val entriesByDate = entries.groupBy(CaffeineEntry::date)
+                    val todayEntries = entriesByDate[date].orEmpty()
+                    val limit = settings.goalSettings.dailyCaffeineLimitMg
+                    val periodTotals = days.map { day -> day to entriesByDate[day].orEmpty().sumOf(CaffeineEntry::estimatedMg) }
+                    CaffeineDetailUiState(
+                        selectedPeriod = period,
+                        entries = todayEntries.sortedWith(compareBy(CaffeineEntry::time).thenBy(CaffeineEntry::createdAt)),
+                        bars = periodTotals.map { (day, total) ->
+                            CaffeineBarState(
+                                label = day.dayOfMonth.toString(),
+                                totalMg = total,
+                                progress = clampProgress(total.toFloat(), limit.toFloat()),
+                                date = day,
+                                isOverLimit = total > limit,
+                            )
+                        },
+                        monthDays = if (period == TrendsPeriod.MONTHLY) {
+                            buildCaffeineMonthRingDays(
+                                anchorDate = date,
+                                entriesByDate = entriesByDate,
+                                dailyLimitMg = limit,
+                            )
+                        } else {
+                            emptyList()
+                        },
+                        totalTodayMg = todayEntries.sumOf(CaffeineEntry::estimatedMg),
+                        periodAverageMg = if (days.isEmpty()) 0 else periodTotals.sumOf { (_, total) -> total } / days.size,
+                        lastTimeLabel = todayEntries.maxByOrNull(CaffeineEntry::time)?.time?.let(::formatHourMinute) ?: "--",
+                        limitMg = limit,
+                        hasPeriodData = periodTotals.any { (_, total) -> total > 0 },
+                    )
+                }
             }
         }
         .distinctUntilChanged()
@@ -169,6 +176,7 @@ fun CaffeineDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("CaffeineDetailRoute")
     val viewModel: CaffeineDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -322,8 +330,18 @@ private fun CaffeineTodayTotalCard(state: CaffeineDetailUiState) {
     InsightCard(
         modifier = Modifier.fillMaxWidth(),
         title = stringResource(R.string.caffeine_detail_today_total),
-        value = stringResource(R.string.caffeine_today_total_format, state.totalTodayMg, state.limitMg),
-        subtitle = stringResource(R.string.caffeine_estimate_notice),
+        value = stringResource(
+            R.string.caffeine_today_total_formatted_format,
+            formatWholeNumber(state.totalTodayMg),
+            formatWholeNumber(state.limitMg),
+        ),
+        subtitle = stringResource(
+            if (state.totalTodayMg > state.limitMg) {
+                R.string.caffeine_limit_over
+            } else {
+                R.string.caffeine_estimate_notice
+            },
+        ),
     )
 }
 
@@ -333,7 +351,11 @@ private fun CaffeineMetricRow(state: CaffeineDetailUiState) {
         InsightCard(
             modifier = Modifier.weight(1f),
             title = stringResource(R.string.caffeine_detail_weekly_average),
-            value = stringResource(R.string.caffeine_today_total_format, state.periodAverageMg, state.limitMg),
+            value = stringResource(
+                R.string.caffeine_today_total_formatted_format,
+                formatWholeNumber(state.periodAverageMg),
+                formatWholeNumber(state.limitMg),
+            ),
             subtitle = stringResource(R.string.common_average_selected_period),
         )
         InsightCard(
@@ -389,7 +411,7 @@ private fun CaffeineEntryList(
                                 text = stringResource(
                                     R.string.caffeine_detail_record_format,
                                     formatHourMinute(entry.time),
-                                    entry.estimatedMg,
+                                    formatWholeNumber(entry.estimatedMg),
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -428,7 +450,11 @@ private fun CaffeineWeekChart(
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = if (bar.totalMg == 0) "--" else "${bar.totalMg} mg",
+                    text = if (bar.totalMg == 0) {
+                        "--"
+                    } else {
+                        stringResource(R.string.format_mg_count, formatWholeNumber(bar.totalMg))
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -448,7 +474,11 @@ private fun CaffeineWeekChart(
                             .fillMaxWidth()
                             .fillMaxHeight(bar.progress)
                             .background(
-                                color = HealthPrimary,
+                                color = if (bar.isOverLimit) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    HealthPrimary
+                                },
                                 shape = RoundedCornerShape(999.dp),
                             ),
                     )
@@ -478,7 +508,7 @@ private fun CaffeineDrinkType.detailLabel(): String = when (this) {
     CaffeineDrinkType.OTHER -> stringResource(R.string.caffeine_type_other)
 }
 
-private fun buildCaffeineMonthRingDays(
+internal fun buildCaffeineMonthRingDays(
     anchorDate: LocalDate,
     entriesByDate: Map<LocalDate, List<CaffeineEntry>>,
     dailyLimitMg: Int,
@@ -501,9 +531,10 @@ private fun buildCaffeineMonthRingDays(
             progress = progress,
             hasData = amount > 0,
             isInCurrentMonth = isInCurrentMonth,
-            isTargetMet = amount > 0 && progress >= 1f,
+            isTargetMet = false,
+            isOverLimit = amount > dailyLimitMg,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "$amount mg",
+            valueLabel = "${formatWholeNumber(amount)} mg",
             isToday = date == LocalDate.now(),
         )
     }

@@ -27,6 +27,7 @@
     <string name="metric_day_ring_no_data">%1$s, no entry</string>
     <string name="metric_day_ring_progress">%1$s, %2$s, %3$d percent of target</string>
     <string name="metric_day_ring_target_met">%1$s, %2$s, target completed</string>
+    <string name="metric_day_ring_over_limit">%1$s, %2$s, over limit</string>
 
     <string name="error_field_required">This field is required.</string>
     <string name="error_field_must_be_number">Must be a number.</string>

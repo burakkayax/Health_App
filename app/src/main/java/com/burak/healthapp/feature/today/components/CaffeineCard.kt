@@ -16,6 +16,7 @@ import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
 import com.burak.healthapp.core.ui.components.ThickMetricProgressBar
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.feature.today.CaffeineCardState
@@ -47,7 +48,11 @@ internal fun CaffeineCard(
             verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
         ) {
             Text(
-                text = stringResource(R.string.caffeine_today_total_format, state.dailyTotalMg, state.limitMg),
+                text = stringResource(
+                    R.string.caffeine_today_total_formatted_format,
+                    formatWholeNumber(state.dailyTotalMg),
+                    formatWholeNumber(state.limitMg),
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )

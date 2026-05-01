@@ -1,5 +1,37 @@
 # Changelog
 
+## PR23.5 - Performance, Battery and Stability Baseline Audit
+
+### Eklendi
+
+- Performans, pil ve kararlılık risklerini belgeleyen baseline audit dokümanı eklendi.
+- Debug-only performans ölçüm noktaları eklendi.
+- Today, detail ekranları, Flow/Room akışları, background işler ve import/export kararlılığı için optimizasyon planı çıkarıldı.
+
+### Değiştirildi
+
+- README performans audit dokümanına yönlendirecek şekilde güncellendi.
+
+## PR23.4.1 - Smoking Card Status Color Adjustment
+
+### Değiştirildi
+
+- Ana ekrandaki Sigara kartının durum dairesi renk mantığı sadeleştirildi.
+- 0 sigara yeşil, limit altındaki sigara kullanımı sarı, limite ulaşan veya limiti aşan değerler kırmızı gösterilir.
+
+## PR23.4 - Dashboard Metric Polish & Number Formatting
+
+### Değiştirildi
+
+- Ana ekrandaki Sigara kartında halka progress yerine dolu durum dairesi kullanılmaya başlandı.
+- Büyük metrik sayıları locale-aware binlik ayırıcıyla gösterilecek şekilde iyileştirildi.
+- Sigara ve kafein gibi limit odaklı metriklerde limit aşımı görsel anlamı netleştirildi.
+
+### Düzeltildi
+
+- Kafein aylık görünümünde limit aşımının başarı gibi algılanabilecek renkle gösterilmesi engellendi.
+- Sigara metriklerinde progress/başarı anlamı oluşturabilecek görsel kullanım azaltıldı.
+
 ## PR23.3 - Smoking and Exercise Detail Screens
 
 ### Eklendi

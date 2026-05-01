@@ -26,6 +26,7 @@ import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.CircularProgressRing
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SectionTitle
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthCarbs
 import com.burak.healthapp.core.ui.theme.HealthFat
 import com.burak.healthapp.core.ui.theme.HealthPrimary
@@ -81,13 +82,16 @@ internal fun NutritionCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "${state.nutrition.currentCalories}",
+                        text = formatWholeNumber(state.nutrition.currentCalories),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = "/ ${state.nutrition.targetCalories} kcal",
+                        text = stringResource(
+                            R.string.nutrition_target_kcal_format,
+                            formatWholeNumber(state.nutrition.targetCalories),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -127,7 +131,10 @@ internal fun NutritionCard(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "${macro.current}g",
+                            text = stringResource(
+                                R.string.format_grams_count,
+                                formatWholeNumber(macro.current),
+                            ),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold,

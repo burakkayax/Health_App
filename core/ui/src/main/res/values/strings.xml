@@ -27,6 +27,7 @@
     <string name="metric_day_ring_no_data">%1$s, kayıt yok</string>
     <string name="metric_day_ring_progress">%1$s, %2$s, hedefin yüzde %3$d’i</string>
     <string name="metric_day_ring_target_met">%1$s, %2$s, hedef tamamlandı</string>
+    <string name="metric_day_ring_over_limit">%1$s, %2$s, limitin üstünde</string>
 
     <string name="error_field_required">Bu alan gerekli.</string>
     <string name="error_field_must_be_number">Sayı olmalı.</string>

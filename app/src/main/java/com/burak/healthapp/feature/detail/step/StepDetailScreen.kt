@@ -39,6 +39,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.HealthCard
@@ -48,6 +50,7 @@ import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
@@ -98,13 +101,15 @@ class StepDetailViewModel @Inject constructor(
                 settingsRepository.settings,
                 dashboardRepository.observeStepsBetween(displayDays.first(), date),
             ) { settings, entries ->
-                entries.toStepDetailUiState(
-                    days = displayDays,
-                    anchorDate = date,
-                    period = period,
-                    targetSteps = settings.goalSettings.dailyStepTarget,
-                    stepTrackingEnabled = settings.stepTrackingEnabled,
-                )
+                PerformanceLogger.measure("StepDetail:state_build") {
+                    entries.toStepDetailUiState(
+                        days = displayDays,
+                        anchorDate = date,
+                        period = period,
+                        targetSteps = settings.goalSettings.dailyStepTarget,
+                        stepTrackingEnabled = settings.stepTrackingEnabled,
+                    )
+                }
             }
                 .distinctUntilChanged()
         }
@@ -135,6 +140,7 @@ fun StepDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("StepDetailRoute")
     val viewModel: StepDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -238,7 +244,10 @@ fun StepDetailContent(
                 )
                 Text(
                     modifier = Modifier.padding(top = HealthSpacing.xs),
-                    text = stringResource(R.string.step_detail_daily_target_format, state.targetSteps),
+                    text = stringResource(
+                        R.string.step_detail_daily_target_formatted_format,
+                        formatWholeNumber(state.targetSteps),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -316,7 +325,10 @@ private fun StepTotalInsight(
     InsightCard(
         modifier = modifier.fillMaxWidth(),
         title = stringResource(R.string.step_detail_total_steps),
-        value = stringResource(R.string.step_detail_steps_format, state.totalSteps),
+        value = stringResource(
+            R.string.step_detail_steps_formatted_format,
+            formatWholeNumber(state.totalSteps),
+        ),
         subtitle = subtitle,
     )
 }
@@ -329,7 +341,10 @@ private fun StepAverageInsight(
     InsightCard(
         modifier = modifier.fillMaxWidth(),
         title = stringResource(R.string.step_detail_average_steps),
-        value = stringResource(R.string.step_detail_steps_format, state.averageSteps),
+        value = stringResource(
+            R.string.step_detail_steps_formatted_format,
+            formatWholeNumber(state.averageSteps),
+        ),
         subtitle = stringResource(R.string.step_detail_logged_days_subtitle),
     )
 }
@@ -403,7 +418,10 @@ private fun StepBarChart(
                     text = if (bar.steps == 0) {
                         stringResource(R.string.common_empty_dash)
                     } else {
-                        stringResource(R.string.step_detail_steps_format, bar.steps)
+                        stringResource(
+                            R.string.step_detail_steps_formatted_format,
+                            formatWholeNumber(bar.steps),
+                        )
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -515,7 +533,7 @@ internal fun buildStepMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = steps > 0 && progress >= 1f,
             dateLabel = date.format(stepMonthDateFormatter),
-            valueLabel = "$steps adım",
+            valueLabel = "${formatWholeNumber(steps)} adım",
             isToday = date == LocalDate.now(),
         )
     }

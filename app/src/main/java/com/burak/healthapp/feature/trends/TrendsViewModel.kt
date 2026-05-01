@@ -3,6 +3,8 @@ package com.burak.healthapp.feature.trends
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.PerformanceLogger
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.model.WeeklyCalorieBarState
 import com.burak.healthapp.core.ui.model.buildWeightTrendChartState
 import com.burak.healthapp.core.ui.text.UiText
@@ -36,10 +38,12 @@ class TrendsViewModel @Inject constructor(
                 settingsRepository.settings,
                 trendsRepository.observeTrends(period),
             ) { settings, snapshot ->
-                snapshot.toUiState(
-                    avatarInitials = settings.userProfile.avatarInitials,
-                    targetWeightKg = settings.goalSettings.targetWeightKg,
-                )
+                PerformanceLogger.measure("Trends:state_build") {
+                    snapshot.toUiState(
+                        avatarInitials = settings.userProfile.avatarInitials,
+                        targetWeightKg = settings.goalSettings.targetWeightKg,
+                    )
+                }
             }
                 .flowOn(Dispatchers.Default)
                 .distinctUntilChanged()
@@ -82,7 +86,7 @@ private fun TrendsSnapshot.toUiState(
             ),
             InsightCardState(
                 title = stringRes(R.string.trends_insight_avg_water),
-                value = stringRes(R.string.format_ml_float, averageWaterMl),
+                value = stringRes(R.string.format_ml_count, formatWholeNumber(averageWaterMl.toInt())),
                 subtitle = periodSubtitle,
                 hasData = averageWaterMl > 0f,
             ),
@@ -94,14 +98,14 @@ private fun TrendsSnapshot.toUiState(
             ),
             InsightCardState(
                 title = stringRes(R.string.trends_insight_avg_steps),
-                value = stringRes(R.string.format_steps_float, averageSteps),
+                value = stringRes(R.string.format_steps_count, formatWholeNumber(averageSteps.toInt())),
                 subtitle = periodSubtitle,
                 hasData = averageSteps > 0f,
             ),
         ),
         weeklyCaloriesCard = if (period == TrendsPeriod.WEEKLY) {
             WeeklyCaloriesCardState(
-                averageCaloriesLabel = stringRes(R.string.format_kcal_float, averageCalories),
+                averageCaloriesLabel = stringRes(R.string.format_kcal_count, formatWholeNumber(averageCalories.toInt())),
                 subtitle = stringRes(R.string.trends_week_range),
                 bars = weeklyCalories.map { bar ->
                     WeeklyCalorieBarState(

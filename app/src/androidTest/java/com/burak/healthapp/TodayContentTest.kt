@@ -396,6 +396,7 @@ class TodayContentTest {
     @Test
     fun smokingQuickAdd_invokesIncrementCallback() {
         var incremented = false
+        var openedDetail = false
 
         composeRule.setContent {
             HealthTheme {
@@ -412,6 +413,7 @@ class TodayContentTest {
                     onOpenMealHistory = {},
                     onOpenWeightDetail = {},
                     onOpenSleepDetail = {},
+                    onOpenSmokingDetail = { openedDetail = true },
                     mealEditorState = sampleMealEditorState(),
                     onMealTypeChange = {},
                     onAddMealDraft = {},
@@ -428,6 +430,101 @@ class TodayContentTest {
 
         composeRule.onNodeWithTag("smoking_quick_add_button").performClick()
         assertEquals(true, incremented)
+        assertEquals(false, openedDetail)
+    }
+
+    @Test
+    fun smokingCard_usesStatusCircleAndSeparatesCardAndActions() {
+        var openedDetail = false
+        var incremented = false
+        var deleted = false
+
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState(),
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = { incremented = true },
+                    onDeleteSmoking = { deleted = true },
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    onOpenSmokingDetail = { openedDetail = true },
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("today_list").performScrollToNode(hasTestTag("smoking_card"))
+        composeRule.onNodeWithTag("smoking_status_circle").assertIsDisplayed()
+        composeRule.onNodeWithTag("smoking_status_count").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("smoking_quick_add_button").performClick()
+        assertEquals(true, incremented)
+        assertEquals(false, openedDetail)
+
+        composeRule.onNodeWithTag("smoking_delete_button").performClick()
+        assertEquals(true, deleted)
+        assertEquals(false, openedDetail)
+
+        composeRule.onNodeWithTag("smoking_card").performClick()
+        assertEquals(true, openedDetail)
+    }
+
+    @Test
+    fun smokingAddButton_opensSheetWithoutOpeningDetail() {
+        var openedDetail = false
+
+        composeRule.setContent {
+            HealthTheme {
+                TodayContent(
+                    state = sampleTodayState(),
+                    onAddMeal = { _, _, _, _, _, _ -> },
+                    onAddHydration = {},
+                    onSaveSleep = { _, _ -> },
+                    onSaveWeight = {},
+                    onSaveExercise = { _, _, _ -> },
+                    onSaveSmokingCount = {},
+                    onIncrementSmoking = {},
+                    onSaveSupplementDoses = {},
+                    onOpenMealHistory = {},
+                    onOpenWeightDetail = {},
+                    onOpenSleepDetail = {},
+                    onOpenSmokingDetail = { openedDetail = true },
+                    mealEditorState = sampleMealEditorState(),
+                    onMealTypeChange = {},
+                    onAddMealDraft = {},
+                    onRemoveMealDraft = {},
+                    onMealDraftNameChange = { _, _ -> },
+                    onMealDraftCaloriesChange = { _, _ -> },
+                    onMealDraftProteinChange = { _, _ -> },
+                    onMealDraftCarbsChange = { _, _ -> },
+                    onMealDraftFatChange = { _, _ -> },
+                    onResetMealEditor = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("today_list").performScrollToNode(hasTestTag("smoking_card"))
+        composeRule.onNodeWithTag("smoking_add_button").performClick()
+
+        assertEquals(false, openedDetail)
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.today_sheet_smoking_title)).assertIsDisplayed()
     }
 
     @Test
@@ -755,7 +852,7 @@ class TodayContentTest {
                 headline = "1 adet",
                 supportingLabel = "Günlük limit 3 adet",
                 helperLabel = "Limit aşılmadı",
-                status = SmokingStatus.WARNING,
+                status = SmokingStatus.NEUTRAL,
             ),
             steps = StepCardState(
                 currentSteps = 4200,

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.InsightCard
 import com.burak.healthapp.core.ui.components.SegmentedControl
@@ -32,6 +33,7 @@ import com.burak.healthapp.domain.model.TrendsPeriod
 fun TrendsRoute(
     avatarInitials: String,
 ) {
+    DebugRoutePerformanceTrace("TrendsRoute")
     val viewModel: TrendsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

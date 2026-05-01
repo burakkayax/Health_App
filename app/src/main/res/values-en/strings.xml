@@ -70,6 +70,19 @@
     <string name="today_label_custom">Custom</string>
     <string name="today_label_custom_duration">Custom Duration (min)</string>
     <string name="today_format_duration_minutes">%1$d min</string>
+    <string name="today_format_ml_formatted">%1$s ml</string>
+    <string name="today_format_target_ml_formatted">/ %1$s ml</string>
+    <string name="today_steps_count_format">%1$s steps</string>
+    <string name="today_steps_target_format">Target %1$s steps</string>
+    <string name="today_steps_week_format">This week %1$s steps</string>
+    <string name="nutrition_target_kcal_format">/ %1$s kcal</string>
+    <string name="format_kcal_count">%1$s kcal</string>
+    <string name="format_ml_count">%1$s ml</string>
+    <string name="format_mg_count">%1$s mg</string>
+    <string name="format_steps_count">%1$s steps</string>
+    <string name="format_grams_count">%1$s g</string>
+    <string name="smoking_status_circle_unit">count</string>
+    <string name="smoking_status_circle_description">%1$s cigarettes today</string>
     <string name="today_sheet_exercise_title">Add Exercise</string>
     <string name="today_exercise_not_added">No workout added</string>
     <string name="today_exercise_duration_not_added">No duration added</string>
@@ -105,7 +118,9 @@
     <string name="meal_type_snack">Snack</string>
 
     <string name="caffeine_today_total_format">%1$d / %2$d mg</string>
+    <string name="caffeine_today_total_formatted_format">%1$s / %2$s mg</string>
     <string name="caffeine_last_time_format">Last intake %1$s</string>
+    <string name="caffeine_limit_over">Above daily limit</string>
     <string name="caffeine_estimate_notice">Caffeine values are estimates, not medical advice.</string>
     <string name="caffeine_sheet_title">Add Caffeine</string>
     <string name="caffeine_estimated_mg">Estimated mg</string>
@@ -147,11 +162,12 @@
     <string name="exercise_detail_average_duration">Average duration</string>
     <string name="exercise_detail_total_duration">Total duration</string>
     <string name="exercise_detail_active_days">%1$d active days</string>
+    <string name="exercise_detail_duration_formatted">%1$s min</string>
     <string name="exercise_detail_entries">Entries</string>
     <string name="exercise_detail_empty">No exercise entries yet.</string>
     <string name="exercise_detail_weekly_chart">Last 7 days</string>
     <string name="exercise_detail_monthly_chart">This month</string>
-    <string name="exercise_detail_entry_format">%1$d min • %2$s</string>
+    <string name="exercise_detail_entry_format">%1$s min • %2$s</string>
 
     <string name="profile_summary_helper">Manage goals, theme, and supplements here.</string>
     <string name="profile_goals_title">Goals</string>
@@ -197,7 +213,9 @@
     <string name="step_tracking_enable">Turn on</string>
     <string name="step_detail_statistics_title">Step Statistics</string>
     <string name="step_detail_daily_target_format">Daily target %1$d steps</string>
+    <string name="step_detail_daily_target_formatted_format">Daily target %1$s steps</string>
     <string name="step_detail_steps_format">%1$d steps</string>
+    <string name="step_detail_steps_formatted_format">%1$s steps</string>
     <string name="step_detail_no_data">No step data for this period yet.</string>
     <string name="step_detail_total_steps">Total Steps</string>
     <string name="step_detail_average_steps">Average Steps</string>

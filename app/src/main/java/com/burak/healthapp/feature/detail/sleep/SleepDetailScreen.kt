@@ -36,6 +36,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.MetricDayRingState
 import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
@@ -97,11 +99,13 @@ class SleepDetailViewModel @Inject constructor(
                     endDate = date,
                 ),
             ) { settings, sessions ->
-                sessions.toSleepDetailUiState(
-                    anchorDate = date,
-                    period = period,
-                    goals = settings.goalSettings,
-                )
+                PerformanceLogger.measure("SleepDetail:state_build") {
+                    sessions.toSleepDetailUiState(
+                        anchorDate = date,
+                        period = period,
+                        goals = settings.goalSettings,
+                    )
+                }
             }
         }
         .stateIn(
@@ -123,6 +127,7 @@ class SleepDetailViewModel @Inject constructor(
 fun SleepDetailRoute(
     selectedDate: LocalDate,
 ) {
+    DebugRoutePerformanceTrace("SleepDetailRoute")
     val viewModel: SleepDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

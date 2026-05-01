@@ -1,6 +1,7 @@
 package com.burak.healthapp.feature.today
 
 import com.burak.healthapp.R
+import com.burak.healthapp.core.ui.format.formatMetricCount
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.calculation.calculateHydrationTotal
 import com.burak.healthapp.domain.calculation.calculateNutritionTotals
@@ -107,9 +108,10 @@ internal fun snapshotToUiState(snapshot: TodaySnapshot): TodayUiState {
             currentSteps = stepCount,
             targetSteps = goals.dailyStepTarget,
             progress = clampProgress(stepCount.toFloat(), goals.dailyStepTarget.toFloat()),
-            headline = "$stepCount adım",
-            supportingLabel = "Hedef ${goals.dailyStepTarget} adım",
-            helperLabel = "Bu hafta $weekSteps adım",
+            headline = "${formatMetricCount(stepCount)} adım",
+            supportingLabel = "Hedef ${formatMetricCount(goals.dailyStepTarget)} adım",
+            helperLabel = "Bu hafta ${formatMetricCount(weekSteps)} adım",
+            weeklySteps = weekSteps,
         ),
         caffeine = CaffeineCardState(
             dailyTotalMg = caffeineTotal,
@@ -231,8 +233,9 @@ internal fun emptyUiState(): TodayUiState = TodayUiState(
         targetSteps = DefaultHealthGoals.DAILY_STEPS,
         progress = 0f,
         headline = "0 adım",
-        supportingLabel = "Hedef 8000 adım",
+        supportingLabel = "Hedef ${formatMetricCount(DefaultHealthGoals.DAILY_STEPS)} adım",
         helperLabel = "Telefon hareket ettikçe otomatik güncellenir.",
+        weeklySteps = 0,
     ),
     caffeine = CaffeineCardState(
         dailyTotalMg = 0,
@@ -264,7 +267,7 @@ private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
             headline = "$count adet",
             supportingLabel = "Limit ayarlanmadı",
             helperLabel = "İstersen profilden günlük limit ekleyebilirsin.",
-            status = SmokingStatus.PASSIVE,
+            status = smokingStatusForCount(count, limit),
         )
 
         count == 0 -> SmokingCardState(
@@ -274,7 +277,7 @@ private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
             headline = "0 adet",
             supportingLabel = "Limit $limit adet",
             helperLabel = "Bugün hiç sigara içilmedi.",
-            status = SmokingStatus.SAFE,
+            status = smokingStatusForCount(count, limit),
         )
 
         count < limit -> SmokingCardState(
@@ -284,7 +287,17 @@ private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
             headline = "$count adet",
             supportingLabel = "Limit $limit adet",
             helperLabel = "Limitin içindesin.",
-            status = SmokingStatus.WARNING,
+            status = smokingStatusForCount(count, limit),
+        )
+
+        count == limit -> SmokingCardState(
+            count = count,
+            limit = limit,
+            progress = clampProgress(count.toFloat(), limit.toFloat()),
+            headline = "$count adet",
+            supportingLabel = "Limit $limit adet",
+            helperLabel = "Günlük limite ulaşıldı.",
+            status = smokingStatusForCount(count, limit),
         )
 
         else -> SmokingCardState(
@@ -294,9 +307,17 @@ private fun com.burak.healthapp.domain.model.SmokingEntry?.toSmokingCardState(
             headline = "$count adet",
             supportingLabel = "Limit $limit adet",
             helperLabel = "Günlük limit aşıldı.",
-            status = SmokingStatus.DANGER,
+            status = smokingStatusForCount(count, limit),
         )
     }
+}
+
+internal fun smokingStatusForCount(count: Int, limit: Int): SmokingStatus = when {
+    limit <= 0 -> SmokingStatus.PASSIVE
+    count <= 0 -> SmokingStatus.SAFE
+    count < limit -> SmokingStatus.NEUTRAL
+    count == limit -> SmokingStatus.WARNING
+    else -> SmokingStatus.DANGER
 }
 
 private fun stringRes(resId: Int, vararg args: Any): UiText = UiText.StringResource(resId = resId, args = args.toList())

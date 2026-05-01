@@ -18,6 +18,7 @@ import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SectionTitle
 import com.burak.healthapp.core.ui.components.ThickMetricProgressBar
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthWater
 import com.burak.healthapp.feature.today.TodayUiState
@@ -51,12 +52,18 @@ internal fun HydrationCard(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
                 Text(
-                    text = stringResource(R.string.today_format_ml, state.hydration.currentMl),
+                    text = stringResource(
+                        R.string.today_format_ml_formatted,
+                        formatWholeNumber(state.hydration.currentMl),
+                    ),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = stringResource(R.string.today_format_target_ml, state.hydration.targetMl),
+                    text = stringResource(
+                        R.string.today_format_target_ml_formatted,
+                        formatWholeNumber(state.hydration.targetMl),
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

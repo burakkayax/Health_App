@@ -47,6 +47,8 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Sigara detay ekranında haftalık/aylık grafikler, özetler ve dönem geçmişi
 - Egzersiz detay ekranında haftalık/aylık grafikler, toplam süre ve dönem geçmişi
 - Su ve kafein kartlarında tutarlı kalın progress göstergeleri
+- Büyük metrik sayılarında cihaz diline uygun binlik ayırıcılar
+- Sigara kartında progress yerine durum odaklı dolu daire göstergesi
 - Ana ekran kartlarını göster/gizle ve sürükleyerek sıralama desteği (Beslenme, Kilo, Egzersiz, Adım, Kafein, Su, Uyku, Sigara, Takviyeler)
 - Compact telefon, landscape ve tablet ekranlar için adaptive dashboard, profil ve detay ekran düzenleri
 
@@ -461,6 +463,8 @@ Release build dağıtım kalitesi için R8 minification ve resource shrinking et
 * Release build optimize edilmiş APK üretir.
 * CI, `:app:assembleRelease` adımını da doğrular.
 * Baseline Profile dosyası `app/src/main/baseline-prof.txt` altında tutulur.
+* Performans, pil ve kararlılık baseline audit notları `docs/performance-audit.md` dosyasında tutulur.
+* Connected benchmark doğrulaması emulator/fiziksel cihaz gerektirir; gerçek performans ölçümü için fiziksel cihaz tercih edilmelidir.
 
 ---
 

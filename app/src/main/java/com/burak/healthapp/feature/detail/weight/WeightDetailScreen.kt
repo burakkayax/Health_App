@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.BmiGaugeChart
@@ -59,10 +61,12 @@ class WeightDetailViewModel @Inject constructor(
         settingsRepository.settings,
         dashboardRepository.observeWeightHistory(),
     ) { settings, measurements ->
-        measurements.toWeightDetailUiState(
-            heightCm = settings.userProfile.heightCm,
-            targetWeightKg = settings.goalSettings.targetWeightKg,
-        )
+        PerformanceLogger.measure("WeightDetail:state_build") {
+            measurements.toWeightDetailUiState(
+                heightCm = settings.userProfile.heightCm,
+                targetWeightKg = settings.goalSettings.targetWeightKg,
+            )
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -84,6 +88,7 @@ class WeightDetailViewModel @Inject constructor(
 fun WeightDetailRoute(
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("WeightDetailRoute")
     val viewModel: WeightDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

@@ -2,6 +2,7 @@ package com.burak.healthapp.feature.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.domain.model.CaffeineDrinkSize
 import com.burak.healthapp.domain.model.CaffeineDrinkType
 import com.burak.healthapp.domain.model.CaffeineEntry
@@ -52,7 +53,11 @@ class TodayViewModel @Inject constructor(
     val uiState = selectedDate
         .flatMapLatest { date ->
             dashboardRepository.observeToday(date)
-                .map(::snapshotToUiState)
+                .map { snapshot ->
+                    PerformanceLogger.measure("Today:state_build") {
+                        snapshotToUiState(snapshot)
+                    }
+                }
                 .flowOn(Dispatchers.Default)
                 .distinctUntilChanged()
         }

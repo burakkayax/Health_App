@@ -79,6 +79,7 @@ data class StepCardState(
     val headline: String,
     val supportingLabel: String,
     val helperLabel: String,
+    val weeklySteps: Int = 0,
 )
 
 data class CaffeineCardState(
@@ -95,6 +96,7 @@ data class CaffeineCardState(
 enum class SmokingStatus {
     PASSIVE,
     SAFE,
+    NEUTRAL,
     WARNING,
     DANGER,
 }

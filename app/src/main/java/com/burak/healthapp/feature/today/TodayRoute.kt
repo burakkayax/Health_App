@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.SupplementItemState
@@ -26,6 +27,7 @@ fun TodayRoute(
     onOpenSmokingDetail: () -> Unit,
     onOpenExerciseDetail: () -> Unit,
 ) {
+    DebugRoutePerformanceTrace("TodayRoute")
     val viewModel: TodayViewModel = hiltViewModel()
     val mealEditorViewModel: MealEditorViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

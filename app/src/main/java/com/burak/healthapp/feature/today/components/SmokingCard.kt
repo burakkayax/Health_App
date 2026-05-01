@@ -1,29 +1,56 @@
 package com.burak.healthapp.feature.today.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.LocalFireDepartment
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.CardHeaderActionButton
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.components.SectionTitle
+import com.burak.healthapp.core.ui.format.formatMetricCount
 import com.burak.healthapp.core.ui.theme.HealthCarbs
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
-import com.burak.healthapp.feature.today.SmokingStatus
 import com.burak.healthapp.feature.today.TodayUiState
+
+internal enum class SmokingDashboardTone {
+    SUCCESS,
+    WARNING,
+    DANGER,
+}
+
+internal fun smokingDashboardToneForCount(
+    count: Int,
+    dailyLimit: Int,
+): SmokingDashboardTone = when {
+    count <= 0 -> SmokingDashboardTone.SUCCESS
+    dailyLimit <= 0 -> SmokingDashboardTone.DANGER
+    count >= dailyLimit -> SmokingDashboardTone.DANGER
+    else -> SmokingDashboardTone.WARNING
+}
+
 @Composable
 internal fun SmokingCard(
     state: TodayUiState,
@@ -32,11 +59,10 @@ internal fun SmokingCard(
     onDeleteSmoking: () -> Unit,
     onOpenDetails: () -> Unit,
 ) {
-    val ringColor = when (state.smoking.status) {
-        SmokingStatus.PASSIVE -> MaterialTheme.colorScheme.onSurfaceVariant
-        SmokingStatus.SAFE -> HealthSuccess
-        SmokingStatus.WARNING -> HealthCarbs
-        SmokingStatus.DANGER -> MaterialTheme.colorScheme.error
+    val statusColor = when (smokingDashboardToneForCount(state.smoking.count, state.smoking.limit)) {
+        SmokingDashboardTone.SUCCESS -> HealthSuccess
+        SmokingDashboardTone.WARNING -> HealthCarbs
+        SmokingDashboardTone.DANGER -> MaterialTheme.colorScheme.error
     }
 
     HealthCard(
@@ -64,28 +90,81 @@ internal fun SmokingCard(
                 }
             },
         )
-        CompactRingMetricLayout(
-            progress = state.smoking.progress,
-            color = ringColor,
-            headline = state.smoking.headline,
-            supportingLabel = state.smoking.supportingLabel,
-            helperLabel = state.smoking.helperLabel,
-            trackColor = ringColor.copy(alpha = 0.14f),
-            bottomContent = {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = HealthSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SmokingStatusCircle(
+                count = state.smoking.count,
+                containerColor = statusColor.copy(alpha = 0.16f),
+                contentColor = statusColor,
+                contentDescription = stringResource(
+                    R.string.smoking_status_circle_description,
+                    formatMetricCount(state.smoking.count),
+                ),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            ) {
+                Text(
+                    text = state.smoking.supportingLabel,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = state.smoking.helperLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 RoundedPillButton(
                     label = "+1",
                     modifier = Modifier.testTag("smoking_quick_add_button"),
-                    containerColor = ringColor.copy(alpha = 0.14f),
-                    contentColor = ringColor,
+                    containerColor = statusColor.copy(alpha = 0.14f),
+                    contentColor = statusColor,
                     onClick = onQuickIncrement,
                 )
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.LocalFireDepartment,
-                contentDescription = null,
-                tint = ringColor,
-                modifier = Modifier.size(32.dp),
+            }
+        }
+    }
+}
+
+@Composable
+private fun SmokingStatusCircle(
+    count: Int,
+    containerColor: Color,
+    contentColor: Color,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(84.dp)
+            .clip(CircleShape)
+            .background(containerColor)
+            .semantics { this.contentDescription = contentDescription }
+            .testTag("smoking_status_circle"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                modifier = Modifier.testTag("smoking_status_count"),
+                text = formatMetricCount(count),
+                style = MaterialTheme.typography.headlineSmall,
+                color = contentColor,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+            Text(
+                text = stringResource(R.string.smoking_status_circle_unit),
+                style = MaterialTheme.typography.labelSmall,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
             )
         }
     }

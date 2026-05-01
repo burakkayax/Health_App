@@ -12,6 +12,7 @@ import com.burak.healthapp.feature.detail.smoking.SmokingDayBarState
 import com.burak.healthapp.feature.detail.smoking.SmokingDetailContent
 import com.burak.healthapp.feature.detail.smoking.SmokingDetailUiState
 import com.burak.healthapp.feature.detail.smoking.SmokingHistoryItemState
+import com.burak.healthapp.feature.today.SmokingStatus
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -62,8 +63,8 @@ class SmokingDetailContentTest {
     private fun sampleState(): SmokingDetailUiState = SmokingDetailUiState(
         selectedPeriod = TrendsPeriod.WEEKLY,
         bars = listOf(
-            SmokingDayBarState(LocalDate.of(2026, 4, 29), count = 0, progress = 0f),
-            SmokingDayBarState(LocalDate.of(2026, 4, 30), count = 3, progress = 1f),
+            SmokingDayBarState(LocalDate.of(2026, 4, 29), count = 0, progress = 0f, status = SmokingStatus.SAFE),
+            SmokingDayBarState(LocalDate.of(2026, 4, 30), count = 3, progress = 1f, status = SmokingStatus.DANGER),
         ),
         averageCount = 1,
         totalCount = 3,

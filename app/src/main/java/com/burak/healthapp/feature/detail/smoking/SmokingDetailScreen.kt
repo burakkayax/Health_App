@@ -31,6 +31,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
@@ -41,13 +43,18 @@ import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.core.ui.components.weekDayShortLabel
+import com.burak.healthapp.core.ui.format.formatMetricCount
 import com.burak.healthapp.core.ui.theme.HealthCarbs
+import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.core.ui.theme.HealthSuccess
 import com.burak.healthapp.domain.calculation.clampProgress
 import com.burak.healthapp.domain.model.SmokingEntry
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.today.SmokingStatus
+import com.burak.healthapp.feature.today.smokingStatusForCount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +74,7 @@ data class SmokingDayBarState(
     val date: LocalDate,
     val count: Int,
     val progress: Float,
+    val status: SmokingStatus,
 )
 
 @Immutable
@@ -109,12 +117,14 @@ class SmokingDetailViewModel @Inject constructor(
                 settingsRepository.settings,
                 dashboardRepository.observeSmokingBetween(startDate, date),
             ) { settings, entries ->
-                buildSmokingDetailUiState(
-                    selectedDate = date,
-                    selectedPeriod = period,
-                    entries = entries,
-                    limit = settings.goalSettings.smokeDailyLimit,
-                )
+                PerformanceLogger.measure("SmokingDetail:state_build") {
+                    buildSmokingDetailUiState(
+                        selectedDate = date,
+                        selectedPeriod = period,
+                        entries = entries,
+                        limit = settings.goalSettings.smokeDailyLimit,
+                    )
+                }
             }
         }
         .distinctUntilChanged()
@@ -144,6 +154,7 @@ fun SmokingDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("SmokingDetailRoute")
     val viewModel: SmokingDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -290,7 +301,7 @@ private fun SmokingWeekBarChart(
                 verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             ) {
                 Text(
-                    text = if (bar.count == 0) "--" else bar.count.toString(),
+                    text = if (bar.count == 0) "--" else formatMetricCount(bar.count),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -310,7 +321,7 @@ private fun SmokingWeekBarChart(
                             .fillMaxWidth()
                             .fillMaxHeight(bar.progress.coerceIn(0f, 1f))
                             .background(
-                                color = HealthCarbs,
+                                color = bar.status.toSmokingDetailColor(),
                                 shape = RoundedCornerShape(999.dp),
                             ),
                     )
@@ -445,6 +456,7 @@ internal fun buildSmokingDetailUiState(
                 date = day,
                 count = count,
                 progress = clampProgress(count.toFloat(), safeLimit.toFloat()),
+                status = smokingStatusForCount(count, limit),
             )
         },
         monthDays = if (selectedPeriod == TrendsPeriod.MONTHLY) {
@@ -492,9 +504,19 @@ private fun buildSmokingMonthRingDays(
             hasData = count > 0,
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = false,
+            isOverLimit = limit > 0 && count > limit,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "$count adet",
+            valueLabel = "${formatMetricCount(count)} adet",
             isToday = date == LocalDate.now(),
         )
     }
+}
+
+@Composable
+private fun SmokingStatus.toSmokingDetailColor() = when (this) {
+    SmokingStatus.PASSIVE -> MaterialTheme.colorScheme.onSurfaceVariant
+    SmokingStatus.SAFE -> HealthSuccess
+    SmokingStatus.NEUTRAL -> HealthPrimary
+    SmokingStatus.WARNING -> HealthCarbs
+    SmokingStatus.DANGER -> MaterialTheme.colorScheme.error
 }

@@ -31,6 +31,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.burak.healthapp.R
+import com.burak.healthapp.core.performance.DebugRoutePerformanceTrace
+import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.CardHeaderDestructiveButton
@@ -41,6 +43,7 @@ import com.burak.healthapp.core.ui.components.MetricMonthRingGrid
 import com.burak.healthapp.core.ui.components.SegmentedControl
 import com.burak.healthapp.core.ui.components.metricWeekdayLabels
 import com.burak.healthapp.core.ui.components.weekDayShortLabel
+import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.calculation.clampProgress
@@ -113,12 +116,14 @@ class ExerciseDetailViewModel @Inject constructor(
                 settingsRepository.settings,
                 dashboardRepository.observeExerciseBetween(startDate, date),
             ) { settings, entries ->
-                buildExerciseDetailUiState(
-                    selectedDate = date,
-                    selectedPeriod = period,
-                    entries = entries,
-                    dailyTargetMinutes = settings.goalSettings.exerciseTargetDurationMinutes,
-                )
+                PerformanceLogger.measure("ExerciseDetail:state_build") {
+                    buildExerciseDetailUiState(
+                        selectedDate = date,
+                        selectedPeriod = period,
+                        entries = entries,
+                        dailyTargetMinutes = settings.goalSettings.exerciseTargetDurationMinutes,
+                    )
+                }
             }
         }
         .distinctUntilChanged()
@@ -148,6 +153,7 @@ fun ExerciseDetailRoute(
     selectedDate: LocalDate,
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
+    DebugRoutePerformanceTrace("ExerciseDetailRoute")
     val viewModel: ExerciseDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -297,8 +303,8 @@ private fun ExerciseWeekBarChart(
                         "--"
                     } else {
                         stringResource(
-                            R.string.today_format_duration_minutes,
-                            bar.durationMinutes,
+                            R.string.exercise_detail_duration_formatted,
+                            formatWholeNumber(bar.durationMinutes),
                         )
                     },
                     style = MaterialTheme.typography.labelSmall,
@@ -345,7 +351,10 @@ private fun ExerciseSummaryCards(
         InsightCard(
             modifier = Modifier.fillMaxWidth(),
             title = stringResource(R.string.exercise_detail_average_duration),
-            value = stringResource(R.string.today_format_duration_minutes, state.averageDurationMinutes),
+            value = stringResource(
+                R.string.exercise_detail_duration_formatted,
+                formatWholeNumber(state.averageDurationMinutes),
+            ),
             subtitle = stringResource(R.string.common_average_selected_period),
         )
     }
@@ -353,7 +362,10 @@ private fun ExerciseSummaryCards(
         InsightCard(
             modifier = Modifier.fillMaxWidth(),
             title = stringResource(R.string.exercise_detail_total_duration),
-            value = stringResource(R.string.today_format_duration_minutes, state.totalDurationMinutes),
+            value = stringResource(
+                R.string.exercise_detail_duration_formatted,
+                formatWholeNumber(state.totalDurationMinutes),
+            ),
             subtitle = stringResource(R.string.exercise_detail_active_days, state.activeDays),
         )
     }
@@ -418,7 +430,7 @@ private fun ExerciseEntryList(
                             Text(
                                 text = stringResource(
                                     R.string.exercise_detail_entry_format,
-                                    entry.durationMinutes,
+                                    formatWholeNumber(entry.durationMinutes),
                                     stringResource(entry.intensity.labelResId),
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
@@ -517,7 +529,7 @@ private fun buildExerciseMonthRingDays(
             isInCurrentMonth = isInCurrentMonth,
             isTargetMet = duration > 0 && progress >= 1f,
             dateLabel = date.format(dateFormatter),
-            valueLabel = "$duration dk",
+            valueLabel = "${formatWholeNumber(duration)} dk",
             isToday = date == LocalDate.now(),
         )
     }
