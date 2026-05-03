@@ -1,42 +1,56 @@
 # Changelog
 
+## PR23.12.1 - Nutrition Presets Integration Hardening and UI Polish
+
+### Düzeltildi
+- Hazır besin arama akışındaki çift bottom sheet riski giderildi.
+- Hazır besin auto-fill değerlerinde yuvarlama tek yardımcı fonksiyon üzerinden tutarlı hale getirildi.
+- CHANGELOG içindeki Türkçe karakter bozulmaları düzeltildi.
+
+### Değiştirildi
+- Hazır besin arama kategorileri yatay kaydırılabilir ve seçili durumu görülebilir hale getirildi.
+- Hazır besin sonuç kartları kategori ve kısa veri kalitesi etiketiyle daha okunabilir hale getirildi.
+- Hazır besin arama hata/loading durumları daha güvenli hale getirildi.
+
+### Eklendi
+- Nutrition preset arama, hesaplama ve dataset doğrulama testleri güçlendirildi.
+
 ## PR23.12 - Nutrition Presets v1
 
 ### Eklendi
-
 - `Besin ara` (Search food) özelliği eklenerek hazır gıdaların kalori ve makro değerlerinin otomatik doldurulması sağlandı.
 - NutritionPreset domain modelleri, repository ve Hilt entegrasyonu eklendi.
 - Asset dizinine JSON tabanlı 188 yaygın hazır besin seti eklendi.
 - Hazır besin verileri için Python tabanlı JSON schema validation scripti eklendi.
 
 ### Değiştirildi
-
 - MealEditorSheet'e `Besin ara` butonu eklendi.
 - TodayScreen içerisine `NutritionPresetSearch` bottom sheet yönetimi eklendi.
 
+
 ## PR23.11 - Loading, Skeleton and Empty State UX Polish
 
-### DeÄŸiÅŸtirildi
+### Değiştirildi
 
-- Uygulama aÃ§Ä±lÄ±ÅŸÄ±ndaki root "YÃ¼kleniyor" metni kaldÄ±rÄ±ldÄ±.
-- Today, Trends ve detay ekranlarÄ± iÃ§in initial loading deneyimi skeleton yapÄ±larla iyileÅŸtirildi.
-- Veri olmayan ekranlarda ghost empty state bileÅŸenleri eklendi.
+- Uygulama açılışındaki root "Yükleniyor" metni kaldırıldı.
+- Today, Trends ve detay ekranları için initial loading deneyimi skeleton yapılarla iyileştirildi.
+- Veri olmayan ekranlarda ghost empty state bileşenleri eklendi.
 
 ### Eklendi
 
-- Ortak skeleton/ghost UI bileÅŸenleri eklendi.
-- Import/export iÅŸlemleri iÃ§in aÃ§Ä±klamalÄ± loading state metinleri gÃ¼Ã§lendirildi.
+- Ortak skeleton/ghost UI bileşenleri eklendi.
+- Import/export işlemleri için açıklamalı loading state metinleri güçlendirildi.
 
 ## PR23.10 - Benchmark Connected Test Stabilization
 
-### DeÄŸiÅŸtirildi
+### Değiştirildi
 
-- Connected benchmark navigation akÄ±ÅŸlarÄ± daha stabil selector/testTag kullanÄ±mÄ±na yaklaÅŸtÄ±rÄ±ldÄ±.
-- Baseline profile ve startup benchmark path'leri connected cihaz/emulator koÅŸullarÄ±na gÃ¶re gÃ¶zden geÃ§irildi.
+- Connected benchmark navigation akışları daha stabil selector/testTag kullanımına yaklaştırıldı.
+- Baseline profile ve startup benchmark path'leri connected cihaz/emulator koşullarına göre gözden geçirildi.
 
 ### Eklendi
 
-- Connected benchmark Ã§alÄ±ÅŸtÄ±rma koÅŸullarÄ± README/performance audit dokÃ¼mantasyonunda netleÅŸtirildi.
+- Connected benchmark çalıştırma koşulları README/performance audit dokümantasyonunda netleştirildi.
 
 ## PR23.9 - Trends Tab Redesign v1
 

@@ -1,5 +1,6 @@
 package com.burak.healthapp.core.di
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
@@ -12,6 +13,7 @@ import com.burak.healthapp.data.local.dao.SmokingDao
 import com.burak.healthapp.data.local.dao.StepDao
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.nutrition.AssetNutritionPresetDataSource
 import com.burak.healthapp.data.nutrition.NutritionPresetRepositoryImpl
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
@@ -23,6 +25,7 @@ import com.burak.healthapp.domain.repository.TrendsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -96,8 +99,8 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideNutritionPresetRepository(
-        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context,
+        @ApplicationContext context: Context,
     ): NutritionPresetRepository = NutritionPresetRepositoryImpl(
-        dataSource = com.burak.healthapp.data.nutrition.AssetNutritionPresetDataSource(context),
+        dataSource = AssetNutritionPresetDataSource(context),
     )
 }

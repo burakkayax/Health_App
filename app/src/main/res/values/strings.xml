@@ -495,4 +495,8 @@
     <string name="nutrition_preset_search_label">Besin adı</string>
     <string name="nutrition_preset_search_all_categories">Tümü</string>
     <string name="nutrition_preset_search_no_results">Sonuç bulunamadı.</string>
+    <string name="nutrition_preset_search_error">Hazır besinler yüklenemedi.</string>
+    <string name="nutrition_quality_high">Yüksek güven</string>
+    <string name="nutrition_quality_medium">Ortalama veri</string>
+    <string name="nutrition_quality_low">Tarife göre değişebilir</string>
 </resources>

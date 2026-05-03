@@ -348,4 +348,8 @@
     <string name="nutrition_preset_search_label">Food name</string>
     <string name="nutrition_preset_search_all_categories">All</string>
     <string name="nutrition_preset_search_no_results">No results found.</string>
+    <string name="nutrition_preset_search_error">Food presets could not be loaded.</string>
+    <string name="nutrition_quality_high">High confidence</string>
+    <string name="nutrition_quality_medium">Average data</string>
+    <string name="nutrition_quality_low">Varies by recipe</string>
 </resources>

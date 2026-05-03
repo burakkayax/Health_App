@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AssistChip
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,17 +37,15 @@ fun NutritionPresetSearchSheet(
     viewModel: NutritionPresetSearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        NutritionPresetSearchContent(
-            state = state,
-            onQueryChange = viewModel::onQueryChange,
-            onCategoryChange = viewModel::onCategoryChange,
-            onSelectPreset = { food ->
-                onSelectPreset(food.defaultAutofill())
-                onDismiss()
-            },
-        )
-    }
+    NutritionPresetSearchContent(
+        state = state,
+        onQueryChange = viewModel::onQueryChange,
+        onCategoryChange = viewModel::onCategoryChange,
+        onSelectPreset = { food ->
+            onSelectPreset(food.defaultAutofill())
+            onDismiss()
+        },
+    )
 }
 
 @Composable
@@ -82,15 +80,24 @@ fun NutritionPresetSearchContent(
             label = { Text(stringResource(R.string.nutrition_preset_search_label)) },
             singleLine = true,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-            AssistChip(
-                onClick = { onCategoryChange(null) },
-                label = { Text(stringResource(R.string.nutrition_preset_search_all_categories)) },
-            )
-            state.categories.take(4).forEach { category ->
-                AssistChip(
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            item {
+                FilterChip(
+                    selected = state.selectedCategory == null,
+                    onClick = { onCategoryChange(null) },
+                    label = { Text(stringResource(R.string.nutrition_preset_search_all_categories)) },
+                    modifier = Modifier.testTag("nutrition_preset_category_all")
+                )
+            }
+            items(state.categories) { category ->
+                FilterChip(
+                    selected = state.selectedCategory == category,
                     onClick = { onCategoryChange(category) },
                     label = { Text(category) },
+                    modifier = Modifier.testTag("nutrition_preset_category_${category.replace(Regex("[^a-zA-Z0-9]"), "_")}")
                 )
             }
         }
@@ -99,6 +106,15 @@ fun NutritionPresetSearchContent(
         ) {
             if (state.isLoading) {
                 items(3) { SkeletonCard(lines = 2) }
+            } else if (state.isError) {
+                item {
+                    Text(
+                        modifier = Modifier.padding(HealthSpacing.sm),
+                        text = stringResource(R.string.nutrition_preset_search_error),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             } else if (state.results.isEmpty()) {
                 item {
                     Text(
@@ -148,9 +164,14 @@ private fun NutritionPresetResultRow(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        val qualityRes = when (food.dataQuality.level) {
+            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.HIGH -> R.string.nutrition_quality_high
+            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.MEDIUM -> R.string.nutrition_quality_medium
+            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.LOW -> R.string.nutrition_quality_low
+        }
         Text(
             modifier = Modifier.padding(top = HealthSpacing.xs),
-            text = food.dataQuality.notesTr,
+            text = "${food.categoryTr} · ${stringResource(qualityRes)}",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

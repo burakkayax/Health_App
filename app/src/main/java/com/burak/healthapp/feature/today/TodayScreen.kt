@@ -432,19 +432,18 @@ fun TodayContent(
 
         is TodaySheet.NutritionPresetSearch -> {
             val sheet = activeSheet as TodaySheet.NutritionPresetSearch
-            ModalBottomSheet(onDismissRequest = { activeSheet = TodaySheet.Meal }) {
-                com.burak.healthapp.feature.today.meal.NutritionPresetSearchSheet(
-                    onDismiss = { activeSheet = TodaySheet.Meal },
-                    onSelectPreset = { preset ->
-                        onMealDraftNameChange(sheet.draftId, preset.food.nameTr)
-                        onMealDraftCaloriesChange(sheet.draftId, preset.nutrients.energyKcal.toInt().toString())
-                        onMealDraftProteinChange(sheet.draftId, preset.nutrients.proteinG.toInt().toString())
-                        onMealDraftCarbsChange(sheet.draftId, preset.nutrients.carbsG.toInt().toString())
-                        onMealDraftFatChange(sheet.draftId, preset.nutrients.fatG.toInt().toString())
-                        activeSheet = TodaySheet.Meal
-                    },
-                )
-            }
+            com.burak.healthapp.feature.today.meal.NutritionPresetSearchSheet(
+                onDismiss = { activeSheet = TodaySheet.Meal },
+                onSelectPreset = { preset ->
+                    val draft = preset.toMealDraftFoodState(sheet.draftId)
+                    onMealDraftNameChange(sheet.draftId, draft.name)
+                    onMealDraftCaloriesChange(sheet.draftId, draft.calories)
+                    onMealDraftProteinChange(sheet.draftId, draft.protein)
+                    onMealDraftCarbsChange(sheet.draftId, draft.carbs)
+                    onMealDraftFatChange(sheet.draftId, draft.fat)
+                    activeSheet = TodaySheet.Meal
+                },
+            )
         }
 
         null -> Unit

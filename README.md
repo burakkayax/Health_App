@@ -59,6 +59,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 - Kalori, protein, karbonhidrat ve yağ takibi
 - Günlük hedeflere göre ilerleme göstergeleri
 - Öğün geçmişi ekranı
+- Beslenme hazır ayarları (Presets) ile hızlı öğün ekleme
 
 ### Su takibi ve hatırlatıcılar
 

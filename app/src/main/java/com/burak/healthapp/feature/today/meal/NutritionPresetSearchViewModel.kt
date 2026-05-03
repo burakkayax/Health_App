@@ -20,6 +20,7 @@ data class NutritionPresetSearchUiState(
     val categories: List<String> = emptyList(),
     val results: List<NutritionPresetFood> = emptyList(),
     val isLoading: Boolean = true,
+    val isError: Boolean = false,
 )
 
 @OptIn(FlowPreview::class)
@@ -33,13 +34,17 @@ class NutritionPresetSearchViewModel @Inject constructor(
     private val results = MutableStateFlow<List<NutritionPresetFood>>(emptyList())
     private val isLoading = MutableStateFlow(true)
 
-    val uiState = combine(query, selectedCategory, categories, results, isLoading) { query, category, categories, results, loading ->
+    private val isError = MutableStateFlow(false)
+
+    val uiState = combine(query, selectedCategory, categories, results, isLoading, isError) { args ->
+        @Suppress("UNCHECKED_CAST")
         NutritionPresetSearchUiState(
-            query = query,
-            selectedCategory = category,
-            categories = categories,
-            results = results,
-            isLoading = loading,
+            query = args[0] as String,
+            selectedCategory = args[1] as String?,
+            categories = args[2] as List<String>,
+            results = args[3] as List<NutritionPresetFood>,
+            isLoading = args[4] as Boolean,
+            isError = args[5] as Boolean,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -49,14 +54,24 @@ class NutritionPresetSearchViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            categories.value = repository.getCategories()
+            try {
+                categories.value = repository.getCategories()
+            } catch (e: Exception) {
+                isError.value = true
+            }
         }
         viewModelScope.launch {
             combine(query.debounce(150), selectedCategory) { query, category -> query to category }
                 .collect { (query, category) ->
                     isLoading.value = true
-                    results.value = repository.searchPresets(query = query, category = category)
-                    isLoading.value = false
+                    try {
+                        results.value = repository.searchPresets(query = query, category = category)
+                        isError.value = false
+                    } catch (e: Exception) {
+                        isError.value = true
+                    } finally {
+                        isLoading.value = false
+                    }
                 }
         }
     }
