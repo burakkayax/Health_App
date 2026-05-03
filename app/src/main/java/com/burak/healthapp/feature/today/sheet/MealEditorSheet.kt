@@ -2,12 +2,10 @@ package com.burak.healthapp.feature.today.sheet
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -19,8 +17,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -101,6 +97,7 @@ internal fun MealEditorSheet(
                     Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
                         RoundedPillButton(
                             label = stringResource(R.string.nutrition_preset_search_title),
+                            modifier = Modifier.testTag("nutrition_preset_search_button_${draft.draftId}"),
                             containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
                             contentColor = MaterialTheme.colorScheme.secondary,
                             onClick = { onSearchFood(draft.draftId) },
@@ -177,94 +174,6 @@ internal fun MealEditorSheet(
             ) {
                 Text(text = stringResource(R.string.today_meal_save))
             }
-        }
-    }
-}
-
-@Composable
-private fun MealDraftFields(
-    draft: MealDraftFoodState,
-    onDraftNameChange: (Long, String) -> Unit,
-    onDraftCaloriesChange: (Long, String) -> Unit,
-    onDraftProteinChange: (Long, String) -> Unit,
-    onDraftCarbsChange: (Long, String) -> Unit,
-    onDraftFatChange: (Long, String) -> Unit,
-) {
-    HealthPillTextField(
-        value = draft.name,
-        onValueChange = { onDraftNameChange(draft.draftId, it) },
-        label = stringResource(R.string.today_meal_food_name),
-    )
-    NumberFieldRow(
-        leftLabel = stringResource(R.string.today_meal_calories),
-        leftValue = draft.calories,
-        rightLabel = stringResource(R.string.today_meal_protein),
-        rightValue = draft.protein,
-        onLeftChange = { onDraftCaloriesChange(draft.draftId, it) },
-        onRightChange = { onDraftProteinChange(draft.draftId, it) },
-    )
-    NumberFieldRow(
-        leftLabel = stringResource(R.string.today_meal_carbs),
-        leftValue = draft.carbs,
-        rightLabel = stringResource(R.string.today_meal_fat),
-        rightValue = draft.fat,
-        onLeftChange = { onDraftCarbsChange(draft.draftId, it) },
-        onRightChange = { onDraftFatChange(draft.draftId, it) },
-    )
-}
-
-@Composable
-private fun MealDraftCard(
-    draft: MealDraftFoodState,
-    state: MealEditorUiState,
-    onRemoveDraft: (Long) -> Unit,
-    onSearchFood: (Long) -> Unit,
-    onDraftNameChange: (Long, String) -> Unit,
-    onDraftCaloriesChange: (Long, String) -> Unit,
-    onDraftProteinChange: (Long, String) -> Unit,
-    onDraftCarbsChange: (Long, String) -> Unit,
-    onDraftFatChange: (Long, String) -> Unit,
-) {
-    HealthCard(modifier = Modifier.testTag("meal_draft_${draft.draftId}")) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.today_meal_food),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                RoundedPillButton(
-                    label = stringResource(R.string.nutrition_preset_search_title),
-                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.secondary,
-                    onClick = { onSearchFood(draft.draftId) },
-                )
-                if (state.draftFoods.size > 1) {
-                    RoundedPillButton(
-                        label = stringResource(R.string.common_delete),
-                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                        contentColor = MaterialTheme.colorScheme.error,
-                        onClick = { onRemoveDraft(draft.draftId) },
-                    )
-                }
-            }
-        }
-        Column(
-            modifier = Modifier.padding(top = HealthSpacing.sm),
-            verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-        ) {
-            MealDraftFields(
-                draft = draft,
-                onDraftNameChange = onDraftNameChange,
-                onDraftCaloriesChange = onDraftCaloriesChange,
-                onDraftProteinChange = onDraftProteinChange,
-                onDraftCarbsChange = onDraftCarbsChange,
-                onDraftFatChange = onDraftFatChange,
-            )
         }
     }
 }

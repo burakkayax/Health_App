@@ -36,15 +36,27 @@ class NutritionPresetSearchViewModel @Inject constructor(
 
     private val isError = MutableStateFlow(false)
 
-    val uiState = combine(query, selectedCategory, categories, results, isLoading, isError) { args ->
-        @Suppress("UNCHECKED_CAST")
+    private data class SearchInputs(
+        val query: String,
+        val selectedCategory: String?,
+        val categories: List<String>,
+        val results: List<NutritionPresetFood>,
+    )
+
+    val uiState = combine(
+        combine(query, selectedCategory, categories, results) { q, cat, cats, res ->
+            SearchInputs(q, cat, cats, res)
+        },
+        isLoading,
+        isError,
+    ) { inputs, loading, error ->
         NutritionPresetSearchUiState(
-            query = args[0] as String,
-            selectedCategory = args[1] as String?,
-            categories = args[2] as List<String>,
-            results = args[3] as List<NutritionPresetFood>,
-            isLoading = args[4] as Boolean,
-            isError = args[5] as Boolean,
+            query = inputs.query,
+            selectedCategory = inputs.selectedCategory,
+            categories = inputs.categories,
+            results = inputs.results,
+            isLoading = loading,
+            isError = error,
         )
     }.stateIn(
         scope = viewModelScope,

@@ -93,7 +93,11 @@ private sealed interface TodaySheet {
     data object SupplementDose : TodaySheet
     data object Caffeine : TodaySheet
     data object CustomizeDashboard : TodaySheet
-    data class NutritionPresetSearch(val draftId: Long) : TodaySheet
+}
+
+private sealed interface MealSheetMode {
+    data object Editor : MealSheetMode
+    data class FoodSearch(val draftId: Long) : MealSheetMode
 }
 
 internal sealed interface TodayDashboardItem {
@@ -209,6 +213,7 @@ fun TodayContent(
     windowSizeClass: HealthWindowSizeClass = HealthWindowSizeClass.COMPACT,
 ) {
     var activeSheet by remember { mutableStateOf<TodaySheet?>(null) }
+    var mealSheetMode by remember { mutableStateOf<MealSheetMode>(MealSheetMode.Editor) }
     if (state.isLoading) {
         TodaySkeletonContent(windowSizeClass = windowSizeClass)
         return
@@ -313,37 +318,60 @@ fun TodayContent(
         TodaySheet.Meal -> ModalBottomSheet(
             onDismissRequest = {
                 onResetMealEditor()
+                mealSheetMode = MealSheetMode.Editor
                 activeSheet = null
             },
         ) {
-            MealEditorSheet(
-                state = mealEditorState,
-                onMealTypeChange = onMealTypeChange,
-                onAddDraft = onAddMealDraft,
-                onRemoveDraft = onRemoveMealDraft,
-                onSearchFood = { draftId -> activeSheet = TodaySheet.NutritionPresetSearch(draftId) },
-                onDraftNameChange = onMealDraftNameChange,
-                onDraftCaloriesChange = onMealDraftCaloriesChange,
-                onDraftProteinChange = onMealDraftProteinChange,
-                onDraftCarbsChange = onMealDraftCarbsChange,
-                onDraftFatChange = onMealDraftFatChange,
-                onSaveMeal = {
-                    mealEditorState.draftFoods
-                        .filter { draft -> draft.name.isNotBlank() }
-                        .forEach { draft ->
-                            onAddMeal(
-                                mealEditorState.mealType,
-                                draft.name,
-                                draft.calories.toIntOrDefault(0),
-                                draft.carbs.toIntOrDefault(0),
-                                draft.fat.toIntOrDefault(0),
-                                draft.protein.toIntOrDefault(0),
-                            )
-                        }
-                    onResetMealEditor()
-                    activeSheet = null
-                },
-            )
+            when (val mode = mealSheetMode) {
+                MealSheetMode.Editor -> {
+                    MealEditorSheet(
+                        state = mealEditorState,
+                        onMealTypeChange = onMealTypeChange,
+                        onAddDraft = onAddMealDraft,
+                        onRemoveDraft = onRemoveMealDraft,
+                        onSearchFood = { draftId ->
+                            mealSheetMode = MealSheetMode.FoodSearch(draftId)
+                        },
+                        onDraftNameChange = onMealDraftNameChange,
+                        onDraftCaloriesChange = onMealDraftCaloriesChange,
+                        onDraftProteinChange = onMealDraftProteinChange,
+                        onDraftCarbsChange = onMealDraftCarbsChange,
+                        onDraftFatChange = onMealDraftFatChange,
+                        onSaveMeal = {
+                            mealEditorState.draftFoods
+                                .filter { draft -> draft.name.isNotBlank() }
+                                .forEach { draft ->
+                                    onAddMeal(
+                                        mealEditorState.mealType,
+                                        draft.name,
+                                        draft.calories.toIntOrDefault(0),
+                                        draft.carbs.toIntOrDefault(0),
+                                        draft.fat.toIntOrDefault(0),
+                                        draft.protein.toIntOrDefault(0),
+                                    )
+                                }
+                            onResetMealEditor()
+                            mealSheetMode = MealSheetMode.Editor
+                            activeSheet = null
+                        },
+                    )
+                }
+
+                is MealSheetMode.FoodSearch -> {
+                    com.burak.healthapp.feature.today.meal.NutritionPresetSearchRoute(
+                        onBack = { mealSheetMode = MealSheetMode.Editor },
+                        onSelectPreset = { preset ->
+                            val draft = preset.toMealDraftFoodState(mode.draftId)
+                            onMealDraftNameChange(mode.draftId, draft.name)
+                            onMealDraftCaloriesChange(mode.draftId, draft.calories)
+                            onMealDraftProteinChange(mode.draftId, draft.protein)
+                            onMealDraftCarbsChange(mode.draftId, draft.carbs)
+                            onMealDraftFatChange(mode.draftId, draft.fat)
+                            mealSheetMode = MealSheetMode.Editor
+                        },
+                    )
+                }
+            }
         }
 
         TodaySheet.Exercise -> ModalBottomSheet(onDismissRequest = { activeSheet = null }) {
@@ -428,22 +456,6 @@ fun TodayContent(
                     onReset = onResetDashboardCards,
                 )
             }
-        }
-
-        is TodaySheet.NutritionPresetSearch -> {
-            val sheet = activeSheet as TodaySheet.NutritionPresetSearch
-            com.burak.healthapp.feature.today.meal.NutritionPresetSearchSheet(
-                onDismiss = { activeSheet = TodaySheet.Meal },
-                onSelectPreset = { preset ->
-                    val draft = preset.toMealDraftFoodState(sheet.draftId)
-                    onMealDraftNameChange(sheet.draftId, draft.name)
-                    onMealDraftCaloriesChange(sheet.draftId, draft.calories)
-                    onMealDraftProteinChange(sheet.draftId, draft.protein)
-                    onMealDraftCarbsChange(sheet.draftId, draft.carbs)
-                    onMealDraftFatChange(sheet.draftId, draft.fat)
-                    activeSheet = TodaySheet.Meal
-                },
-            )
         }
 
         null -> Unit

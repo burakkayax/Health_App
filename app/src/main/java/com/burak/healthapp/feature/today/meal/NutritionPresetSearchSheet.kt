@@ -5,20 +5,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.burak.healthapp.R
@@ -26,24 +34,28 @@ import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.SkeletonCard
 import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.theme.HealthSpacing
+import com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel
 import com.burak.healthapp.domain.model.nutrition.NutritionPresetFood
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Route-level composable that wires the ViewModel to [NutritionPresetSearchContent].
+ * This is NOT a standalone ModalBottomSheet — it is hosted inside the Meal bottom sheet.
+ */
 @Composable
-fun NutritionPresetSearchSheet(
-    onDismiss: () -> Unit,
+fun NutritionPresetSearchRoute(
+    onBack: () -> Unit,
     onSelectPreset: (NutritionPresetAutofillState) -> Unit,
     viewModel: NutritionPresetSearchViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     NutritionPresetSearchContent(
         state = state,
+        onBack = onBack,
         onQueryChange = viewModel::onQueryChange,
         onCategoryChange = viewModel::onCategoryChange,
         onSelectPreset = { food ->
             onSelectPreset(food.defaultAutofill())
-            onDismiss()
         },
     )
 }
@@ -51,6 +63,7 @@ fun NutritionPresetSearchSheet(
 @Composable
 fun NutritionPresetSearchContent(
     state: NutritionPresetSearchUiState,
+    onBack: () -> Unit,
     onQueryChange: (String) -> Unit,
     onCategoryChange: (String?) -> Unit,
     onSelectPreset: (NutritionPresetFood) -> Unit,
@@ -58,14 +71,34 @@ fun NutritionPresetSearchContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(HealthSpacing.sm)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = HealthSpacing.sm)
             .testTag("nutrition_preset_search_sheet"),
         verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
-        Text(
-            text = stringResource(R.string.nutrition_preset_search_title),
-            style = MaterialTheme.typography.titleLarge,
-        )
+        // Header with back button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(40.dp)
+                    .testTag("nutrition_preset_search_back"),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                )
+            }
+            Text(
+                text = stringResource(R.string.nutrition_preset_search_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(start = HealthSpacing.xs),
+            )
+        }
         Text(
             text = stringResource(R.string.nutrition_preset_search_disclaimer),
             style = MaterialTheme.typography.bodySmall,
@@ -82,14 +115,14 @@ fun NutritionPresetSearchContent(
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             item {
                 FilterChip(
                     selected = state.selectedCategory == null,
                     onClick = { onCategoryChange(null) },
                     label = { Text(stringResource(R.string.nutrition_preset_search_all_categories)) },
-                    modifier = Modifier.testTag("nutrition_preset_category_all")
+                    modifier = Modifier.testTag("nutrition_preset_category_all"),
                 )
             }
             items(state.categories) { category ->
@@ -97,7 +130,9 @@ fun NutritionPresetSearchContent(
                     selected = state.selectedCategory == category,
                     onClick = { onCategoryChange(category) },
                     label = { Text(category) },
-                    modifier = Modifier.testTag("nutrition_preset_category_${category.replace(Regex("[^a-zA-Z0-9]"), "_")}")
+                    modifier = Modifier.testTag(
+                        "nutrition_preset_category_${category.replace(Regex("[^a-zA-Z0-9]"), "_")}",
+                    ),
                 )
             }
         }
@@ -165,9 +200,9 @@ private fun NutritionPresetResultRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         val qualityRes = when (food.dataQuality.level) {
-            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.HIGH -> R.string.nutrition_quality_high
-            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.MEDIUM -> R.string.nutrition_quality_medium
-            com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel.LOW -> R.string.nutrition_quality_low
+            NutritionDataQualityLevel.HIGH -> R.string.nutrition_quality_high
+            NutritionDataQualityLevel.MEDIUM -> R.string.nutrition_quality_medium
+            NutritionDataQualityLevel.LOW -> R.string.nutrition_quality_low
         }
         Text(
             modifier = Modifier.padding(top = HealthSpacing.xs),

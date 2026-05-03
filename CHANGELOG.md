@@ -1,5 +1,16 @@
 # Changelog
 
+## PR23.12.2 - Meal Food Search Sheet Redesign
+
+### Düzeltildi
+- "Besin ara" ekranının Today ekranı üstüne çıplak çizilmesine neden olan sheet state hatası düzeltildi.
+- Hazır besin arama artık Öğün ekle bottom sheet'i içinde alt ekran olarak çalışır.
+- Besin seçimi sonrası doğru meal draft doldurulup kullanıcı Öğün ekle ekranına geri döner.
+
+### Değiştirildi
+- Öğün ekle bottom sheet'i, MealEditor ve FoodSearch modlarını tek sheet içinde yönetecek şekilde sadeleştirildi.
+- Hazır besin arama ekranına geri davranışı ve sheet içi yerleşim netleştirildi.
+
 ## PR23.12.1 - Nutrition Presets Integration Hardening and UI Polish
 
 ### Düzeltildi

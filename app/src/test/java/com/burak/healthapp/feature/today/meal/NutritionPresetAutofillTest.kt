@@ -1,11 +1,11 @@
 package com.burak.healthapp.feature.today.meal
 
+import com.burak.healthapp.domain.model.nutrition.NutrientProfile
 import com.burak.healthapp.domain.model.nutrition.NutritionDataQuality
 import com.burak.healthapp.domain.model.nutrition.NutritionDataQualityLevel
-import com.burak.healthapp.domain.model.nutrition.NutrientProfile
+import com.burak.healthapp.domain.model.nutrition.NutritionDataSource
 import com.burak.healthapp.domain.model.nutrition.NutritionPresetFood
 import com.burak.healthapp.domain.model.nutrition.NutritionServing
-import com.burak.healthapp.domain.model.nutrition.NutritionDataSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -29,7 +29,7 @@ class NutritionPresetAutofillTest {
             source = NutritionDataSource("test", "test", null, null, null),
             nutrientsPer100g = nutrients,
             nutrientsPerDefaultServing = nutrients,
-            dataQuality = NutritionDataQuality(NutritionDataQualityLevel.HIGH, "")
+            dataQuality = NutritionDataQuality(NutritionDataQualityLevel.HIGH, ""),
         )
 
         val state = NutritionPresetAutofillState(food, 100f, nutrients)
@@ -60,7 +60,7 @@ class NutritionPresetAutofillTest {
             source = NutritionDataSource("test", "test", null, null, null),
             nutrientsPer100g = nutrients,
             nutrientsPerDefaultServing = nutrients,
-            dataQuality = NutritionDataQuality(NutritionDataQualityLevel.HIGH, "")
+            dataQuality = NutritionDataQuality(NutritionDataQualityLevel.HIGH, ""),
         )
 
         val state = NutritionPresetAutofillState(food, 100f, nutrients)
