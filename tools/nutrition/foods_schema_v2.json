@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/health-app/nutrition-presets.schema.json",
+  "title": "Health App Nutrition Presets v1",
+  "type": "object",
+  "required": ["schema_version", "dataset_name", "locale", "unit_basis", "nutrient_units", "foods"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "dataset_name": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "locale": { "const": "tr-TR" },
+    "unit_basis": { "type": "string", "minLength": 1 },
+    "source_note": { "type": "string" },
+    "sources": { "type": "array" },
+    "nutrient_units": { "type": "object" },
+    "foods": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/food" }
+    }
+  },
+  "$defs": {
+    "nullableNumber": {
+      "anyOf": [
+        { "type": "number", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "food": {
+      "type": "object",
+      "required": [
+        "id", "slug", "name_tr", "category_tr", "default_serving", "basis",
+        "source", "nutrients_per_100g", "nutrients_per_default_serving", "data_quality"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^food_[a-z0-9]+$" },
+        "slug": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "name_tr": { "type": "string", "minLength": 2 },
+        "name_tr_original": { "type": "string" },
+        "aliases_tr": { "type": "array", "items": { "type": "string" } },
+        "search_terms_tr": { "type": "array", "items": { "type": "string" } },
+        "name_en_source": { "type": ["string", "null"] },
+        "category_tr": { "type": "string", "minLength": 2 },
+        "default_serving": { "$ref": "#/$defs/serving" },
+        "common_servings": { "type": "array", "items": { "$ref": "#/$defs/serving" } },
+        "basis": { "enum": ["per_100g_edible_portion", "per_100g_edible_portion_or_100ml_for_alcoholic_beverages"] },
+        "source": { "$ref": "#/$defs/source" },
+        "nutrients_per_100g": { "$ref": "#/$defs/nutrients" },
+        "nutrients_per_default_serving": { "$ref": "#/$defs/nutrients" },
+        "data_quality": { "$ref": "#/$defs/dataQuality" }
+      }
+    },
+    "serving": {
+      "type": "object",
+      "required": ["name_tr", "grams"],
+      "properties": {
+        "name_tr": { "type": "string", "minLength": 1 },
+        "grams": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["dataset", "source_id"],
+      "properties": {
+        "dataset": { "type": "string", "minLength": 1 },
+        "source_id": { "type": "string", "minLength": 1 },
+        "source_category": { "type": ["string", "null"] },
+        "access_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "license_note": { "type": "string" }
+      }
+    },
+    "dataQuality": {
+      "type": "object",
+      "required": ["level", "notes_tr"],
+      "properties": {
+        "level": { "enum": ["high", "medium", "low"] },
+        "notes_tr": { "type": "string", "minLength": 1 }
+      }
+    },
+    "nutrients": {
+      "type": "object",
+      "required": ["energy_kcal", "protein_g", "fat_g", "carbs_g"],
+      "properties": {
+        "energy_kcal": { "type": "number", "minimum": 0, "maximum": 1000 },
+        "protein_g": { "type": "number", "minimum": 0, "maximum": 100 },
+        "fat_g": { "type": "number", "minimum": 0, "maximum": 110 },
+        "carbs_g": { "type": "number", "minimum": 0, "maximum": 110 },
+        "fiber_g": { "$ref": "#/$defs/nullableNumber" },
+        "sugars_g": { "$ref": "#/$defs/nullableNumber" },
+        "saturated_fat_g": { "$ref": "#/$defs/nullableNumber" },
+        "trans_fat_g": { "$ref": "#/$defs/nullableNumber" },
+        "cholesterol_mg": { "$ref": "#/$defs/nullableNumber" },
+        "sodium_mg": { "$ref": "#/$defs/nullableNumber" },
+        "potassium_mg": { "$ref": "#/$defs/nullableNumber" },
+        "calcium_mg": { "$ref": "#/$defs/nullableNumber" },
+        "iron_mg": { "$ref": "#/$defs/nullableNumber" },
+        "magnesium_mg": { "$ref": "#/$defs/nullableNumber" },
+        "phosphorus_mg": { "$ref": "#/$defs/nullableNumber" },
+        "zinc_mg": { "$ref": "#/$defs/nullableNumber" },
+        "copper_mg": { "$ref": "#/$defs/nullableNumber" },
+        "manganese_mg": { "$ref": "#/$defs/nullableNumber" },
+        "selenium_ug": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_a_ug_rae": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_c_mg": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_d_ug": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_e_mg": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_k_ug": { "$ref": "#/$defs/nullableNumber" },
+        "thiamin_mg": { "$ref": "#/$defs/nullableNumber" },
+        "riboflavin_mg": { "$ref": "#/$defs/nullableNumber" },
+        "niacin_mg": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_b6_mg": { "$ref": "#/$defs/nullableNumber" },
+        "folate_ug": { "$ref": "#/$defs/nullableNumber" },
+        "vitamin_b12_ug": { "$ref": "#/$defs/nullableNumber" }
+      }
+    }
+  }
+}

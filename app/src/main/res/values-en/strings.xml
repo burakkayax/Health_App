@@ -343,4 +343,9 @@
     <string name="format_sleep_short">%1$dh %2$dm</string>
     <string name="format_steps_float">%1$.0f steps</string>
     <string name="format_kcal_float">%1$.0f kcal</string>
+    <string name="nutrition_preset_search_title">Search food</string>
+    <string name="nutrition_preset_search_disclaimer">Nutrition values are average estimates and may vary by brand, portion and cooking method.</string>
+    <string name="nutrition_preset_search_label">Food name</string>
+    <string name="nutrition_preset_search_all_categories">All</string>
+    <string name="nutrition_preset_search_no_results">No results found.</string>
 </resources>

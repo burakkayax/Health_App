@@ -490,4 +490,9 @@
     <string name="format_kg">%1$.1f kg</string>
     <string name="format_cm">%1$.0f cm</string>
     <string name="format_weight_measurements">%1$.1f kg • %2$.0f/%3$.0f/%4$.0f cm</string>
+    <string name="nutrition_preset_search_title">Besin ara</string>
+    <string name="nutrition_preset_search_disclaimer">Besin değerleri ortalama kaynaklara göre tahminidir. Marka, porsiyon ve pişirme yöntemine göre değişebilir.</string>
+    <string name="nutrition_preset_search_label">Besin adı</string>
+    <string name="nutrition_preset_search_all_categories">Tümü</string>
+    <string name="nutrition_preset_search_no_results">Sonuç bulunamadı.</string>
 </resources>

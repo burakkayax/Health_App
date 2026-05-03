@@ -55,6 +55,7 @@ Uygulama; beslenme, makro, su tüketimi, uyku, kilo, vücut ölçüleri, egzersi
 ### Beslenme ve makro takibi
 
 - Öğün bazlı yiyecek girişi
+- Hazır besin arama ve kalori/makro değerlerini otomatik doldurma
 - Kalori, protein, karbonhidrat ve yağ takibi
 - Günlük hedeflere göre ilerleme göstergeleri
 - Öğün geçmişi ekranı

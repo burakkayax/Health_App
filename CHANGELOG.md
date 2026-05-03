@@ -1,5 +1,19 @@
 # Changelog
 
+## PR23.12 - Nutrition Presets v1
+
+### Eklendi
+
+- `Besin ara` (Search food) özelliği eklenerek hazır gıdaların kalori ve makro değerlerinin otomatik doldurulması sağlandı.
+- NutritionPreset domain modelleri, repository ve Hilt entegrasyonu eklendi.
+- Asset dizinine JSON tabanlı 188 yaygın hazır besin seti eklendi.
+- Hazır besin verileri için Python tabanlı JSON schema validation scripti eklendi.
+
+### Değiştirildi
+
+- MealEditorSheet'e `Besin ara` butonu eklendi.
+- TodayScreen içerisine `NutritionPresetSearch` bottom sheet yönetimi eklendi.
+
 ## PR23.11 - Loading, Skeleton and Empty State UX Polish
 
 ### DeÄŸiÅŸtirildi

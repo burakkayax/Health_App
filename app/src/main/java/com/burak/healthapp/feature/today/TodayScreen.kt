@@ -93,6 +93,7 @@ private sealed interface TodaySheet {
     data object SupplementDose : TodaySheet
     data object Caffeine : TodaySheet
     data object CustomizeDashboard : TodaySheet
+    data class NutritionPresetSearch(val draftId: Long) : TodaySheet
 }
 
 internal sealed interface TodayDashboardItem {
@@ -320,6 +321,7 @@ fun TodayContent(
                 onMealTypeChange = onMealTypeChange,
                 onAddDraft = onAddMealDraft,
                 onRemoveDraft = onRemoveMealDraft,
+                onSearchFood = { draftId -> activeSheet = TodaySheet.NutritionPresetSearch(draftId) },
                 onDraftNameChange = onMealDraftNameChange,
                 onDraftCaloriesChange = onMealDraftCaloriesChange,
                 onDraftProteinChange = onMealDraftProteinChange,
@@ -424,6 +426,23 @@ fun TodayContent(
                     onVisibilityChange = onDashboardCardVisibilityChange,
                     onMove = onMoveDashboardCard,
                     onReset = onResetDashboardCards,
+                )
+            }
+        }
+
+        is TodaySheet.NutritionPresetSearch -> {
+            val sheet = activeSheet as TodaySheet.NutritionPresetSearch
+            ModalBottomSheet(onDismissRequest = { activeSheet = TodaySheet.Meal }) {
+                com.burak.healthapp.feature.today.meal.NutritionPresetSearchSheet(
+                    onDismiss = { activeSheet = TodaySheet.Meal },
+                    onSelectPreset = { preset ->
+                        onMealDraftNameChange(sheet.draftId, preset.food.nameTr)
+                        onMealDraftCaloriesChange(sheet.draftId, preset.nutrients.energyKcal.toInt().toString())
+                        onMealDraftProteinChange(sheet.draftId, preset.nutrients.proteinG.toInt().toString())
+                        onMealDraftCarbsChange(sheet.draftId, preset.nutrients.carbsG.toInt().toString())
+                        onMealDraftFatChange(sheet.draftId, preset.nutrients.fatG.toInt().toString())
+                        activeSheet = TodaySheet.Meal
+                    },
                 )
             }
         }

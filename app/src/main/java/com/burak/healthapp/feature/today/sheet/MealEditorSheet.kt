@@ -45,6 +45,7 @@ internal fun MealEditorSheet(
     onMealTypeChange: (MealType) -> Unit,
     onAddDraft: () -> Unit,
     onRemoveDraft: (Long) -> Unit,
+    onSearchFood: (Long) -> Unit,
     onDraftNameChange: (Long, String) -> Unit,
     onDraftCaloriesChange: (Long, String) -> Unit,
     onDraftProteinChange: (Long, String) -> Unit,
@@ -97,13 +98,21 @@ internal fun MealEditorSheet(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    if (state.draftFoods.size > 1) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
                         RoundedPillButton(
-                            label = stringResource(R.string.common_delete),
-                            containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                            contentColor = MaterialTheme.colorScheme.error,
-                            onClick = { onRemoveDraft(draft.draftId) },
+                            label = stringResource(R.string.nutrition_preset_search_title),
+                            containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                            contentColor = MaterialTheme.colorScheme.secondary,
+                            onClick = { onSearchFood(draft.draftId) },
                         )
+                        if (state.draftFoods.size > 1) {
+                            RoundedPillButton(
+                                label = stringResource(R.string.common_delete),
+                                containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                                contentColor = MaterialTheme.colorScheme.error,
+                                onClick = { onRemoveDraft(draft.draftId) },
+                            )
+                        }
                     }
                 }
                 HealthPillTextField(
@@ -209,6 +218,7 @@ private fun MealDraftCard(
     draft: MealDraftFoodState,
     state: MealEditorUiState,
     onRemoveDraft: (Long) -> Unit,
+    onSearchFood: (Long) -> Unit,
     onDraftNameChange: (Long, String) -> Unit,
     onDraftCaloriesChange: (Long, String) -> Unit,
     onDraftProteinChange: (Long, String) -> Unit,
@@ -226,13 +236,21 @@ private fun MealDraftCard(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            if (state.draftFoods.size > 1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
                 RoundedPillButton(
-                    label = stringResource(R.string.common_delete),
-                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.error,
-                    onClick = { onRemoveDraft(draft.draftId) },
+                    label = stringResource(R.string.nutrition_preset_search_title),
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    onClick = { onSearchFood(draft.draftId) },
                 )
+                if (state.draftFoods.size > 1) {
+                    RoundedPillButton(
+                        label = stringResource(R.string.common_delete),
+                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                        contentColor = MaterialTheme.colorScheme.error,
+                        onClick = { onRemoveDraft(draft.draftId) },
+                    )
+                }
             }
         }
         Column(
