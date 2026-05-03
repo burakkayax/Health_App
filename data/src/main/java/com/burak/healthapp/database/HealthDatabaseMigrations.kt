@@ -220,3 +220,32 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         )
     }
 }
+
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS custom_foods (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                name TEXT NOT NULL,
+                brand TEXT,
+                servingName TEXT NOT NULL,
+                servingGrams REAL NOT NULL,
+                calories INTEGER NOT NULL,
+                proteinGrams INTEGER NOT NULL,
+                carbsGrams INTEGER NOT NULL,
+                fatGrams INTEGER NOT NULL,
+                fiberGrams REAL,
+                sugarGrams REAL,
+                sodiumMg REAL,
+                isFavorite INTEGER NOT NULL DEFAULT 0,
+                createdAt TEXT NOT NULL,
+                updatedAt TEXT NOT NULL
+            )
+            """.trimIndent(),
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_custom_foods_name ON custom_foods (name)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_custom_foods_isFavorite ON custom_foods (isFavorite)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_custom_foods_updatedAt ON custom_foods (updatedAt)")
+    }
+}

@@ -48,6 +48,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.adaptive.AdaptiveDashboardGrid
 import com.burak.healthapp.core.ui.adaptive.ConstrainedLargeScreenContainer
@@ -98,6 +99,8 @@ private sealed interface TodaySheet {
 private sealed interface MealSheetMode {
     data object Editor : MealSheetMode
     data class FoodSearch(val draftId: Long) : MealSheetMode
+    data class CustomFoodAdd(val draftId: Long) : MealSheetMode
+    data class CustomFoodEdit(val draftId: Long, val foodId: Long) : MealSheetMode
 }
 
 internal sealed interface TodayDashboardItem {
@@ -358,7 +361,7 @@ fun TodayContent(
                 }
 
                 is MealSheetMode.FoodSearch -> {
-                    com.burak.healthapp.feature.today.meal.NutritionPresetSearchRoute(
+                    com.burak.healthapp.feature.today.meal.MealFoodSearchRoute(
                         onBack = { mealSheetMode = MealSheetMode.Editor },
                         onSelectPreset = { preset ->
                             val draft = preset.toMealDraftFoodState(mode.draftId)
@@ -369,6 +372,63 @@ fun TodayContent(
                             onMealDraftFatChange(mode.draftId, draft.fat)
                             mealSheetMode = MealSheetMode.Editor
                         },
+                        onSelectCustomFood = { food ->
+                            onMealDraftNameChange(mode.draftId, food.name)
+                            onMealDraftCaloriesChange(mode.draftId, food.calories.toString())
+                            onMealDraftProteinChange(mode.draftId, food.proteinGrams.toString())
+                            onMealDraftCarbsChange(mode.draftId, food.carbsGrams.toString())
+                            onMealDraftFatChange(mode.draftId, food.fatGrams.toString())
+                            mealSheetMode = MealSheetMode.Editor
+                        },
+                        onAddCustomFood = {
+                            mealSheetMode = MealSheetMode.CustomFoodAdd(mode.draftId)
+                        },
+                        onEditCustomFood = { foodId ->
+                            mealSheetMode = MealSheetMode.CustomFoodEdit(mode.draftId, foodId)
+                        },
+                    )
+                }
+
+                is MealSheetMode.CustomFoodAdd -> {
+                    val vm: com.burak.healthapp.feature.today.meal.CustomFoodEditorViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+                    val editorState by vm.state.collectAsStateWithLifecycle()
+                    com.burak.healthapp.feature.today.meal.CustomFoodEditorContent(
+                        state = editorState,
+                        onNameChange = vm::onNameChange,
+                        onBrandChange = vm::onBrandChange,
+                        onServingNameChange = vm::onServingNameChange,
+                        onServingGramsChange = vm::onServingGramsChange,
+                        onCaloriesChange = vm::onCaloriesChange,
+                        onProteinChange = vm::onProteinChange,
+                        onCarbsChange = vm::onCarbsChange,
+                        onFatChange = vm::onFatChange,
+                        onSave = { vm.save { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
+                        onDelete = null,
+                        onBack = { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) },
+                    )
+                }
+
+                is MealSheetMode.CustomFoodEdit -> {
+                    val vm: com.burak.healthapp.feature.today.meal.CustomFoodEditorViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(
+                        key = "edit_${mode.foodId}",
+                    )
+                    androidx.compose.runtime.LaunchedEffect(mode.foodId) {
+                        vm.loadFood(mode.foodId)
+                    }
+                    val editorState by vm.state.collectAsStateWithLifecycle()
+                    com.burak.healthapp.feature.today.meal.CustomFoodEditorContent(
+                        state = editorState,
+                        onNameChange = vm::onNameChange,
+                        onBrandChange = vm::onBrandChange,
+                        onServingNameChange = vm::onServingNameChange,
+                        onServingGramsChange = vm::onServingGramsChange,
+                        onCaloriesChange = vm::onCaloriesChange,
+                        onProteinChange = vm::onProteinChange,
+                        onCarbsChange = vm::onCarbsChange,
+                        onFatChange = vm::onFatChange,
+                        onSave = { vm.save { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
+                        onDelete = { vm.delete { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
+                        onBack = { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) },
                     )
                 }
             }

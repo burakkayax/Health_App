@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
 import com.burak.healthapp.data.local.dao.CaffeineDao
+import com.burak.healthapp.data.local.dao.CustomFoodDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -14,10 +15,12 @@ import com.burak.healthapp.data.local.dao.StepDao
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.nutrition.AssetNutritionPresetDataSource
+import com.burak.healthapp.data.nutrition.CustomFoodRepositoryImpl
 import com.burak.healthapp.data.nutrition.NutritionPresetRepositoryImpl
 import com.burak.healthapp.data.repository.DashboardRepositoryImpl
 import com.burak.healthapp.data.repository.SettingsRepositoryImpl
 import com.burak.healthapp.data.repository.TrendsRepositoryImpl
+import com.burak.healthapp.domain.repository.CustomFoodRepository
 import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.NutritionPresetRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
@@ -103,4 +106,10 @@ object RepositoryModule {
     ): NutritionPresetRepository = NutritionPresetRepositoryImpl(
         dataSource = AssetNutritionPresetDataSource(context),
     )
+
+    @Provides
+    @Singleton
+    fun provideCustomFoodRepository(
+        dao: CustomFoodDao,
+    ): CustomFoodRepository = CustomFoodRepositoryImpl(dao)
 }

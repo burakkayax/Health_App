@@ -94,6 +94,7 @@ class HealthDataManagementRepositoryImpl(
                 database.stepDao().deleteAll()
                 database.caffeineDao().deleteAll()
                 database.bodyMeasurementDao().deleteAll()
+                database.customFoodDao().deleteAll()
             }
         }
     }

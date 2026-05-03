@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
 import com.burak.healthapp.data.local.dao.CaffeineDao
+import com.burak.healthapp.data.local.dao.CustomFoodDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -16,6 +17,7 @@ import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.entity.CaffeineEntryEntity
+import com.burak.healthapp.data.local.entity.CustomFoodEntity
 import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.entity.MealEntryEntity
@@ -39,8 +41,9 @@ import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
         BodyMeasurementEntity::class,
         StepEntryEntity::class,
         CaffeineEntryEntity::class,
+        CustomFoodEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(DateTimeConverters::class)
@@ -56,4 +59,5 @@ abstract class HealthDatabase : RoomDatabase() {
     abstract fun supplementCheckDao(): SupplementCheckDao
     abstract fun supplementDoseDao(): SupplementDoseDao
     abstract fun bodyMeasurementDao(): BodyMeasurementDao
+    abstract fun customFoodDao(): CustomFoodDao
 }

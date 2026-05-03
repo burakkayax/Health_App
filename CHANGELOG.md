@@ -1,5 +1,30 @@
 # Changelog
 
+## PR23.13 - Custom Food Library v1
+
+### Eklendi
+- Kullanıcının kendi özel besinlerini lokal olarak kaydedebilmesi eklendi.
+- Özel besinler, hazır besinlerle birlikte öğün ekleme aramasında gösterilmeye başladı.
+- Özel besin oluşturma, düzenleme, silme ve favori bilgisi eklendi.
+
+### Değiştirildi
+- Öğün ekleme araması, hazır ve özel besinleri tek akışta destekleyecek şekilde genişletildi.
+- Besin arama ViewModel ve Route, preset ve custom food'u destekleyen MealFoodSearchViewModel / MealFoodSearchRoute olarak yeniden adlandırıldı.
+
+### Not
+- Özel besinler cihazda lokal olarak saklanır. Geçmiş öğün kayıtları snapshot olarak korunur.
+- Custom food export/import kapsamına sonraki veri yönetimi PR'ında alınacak.
+
+## PR23.12.3 - Meal Food Search UI Final Polish
+
+### Düzeltildi
+- Hazır besin arama alt ekranının küçük ekran, klavye ve sonuç listesi davranışı iyileştirildi.
+- Hazır besin arama geri butonuna erişilebilirlik açıklaması eklendi.
+
+### Değiştirildi
+- Hazır besin arama route/content isimlendirmesi sheet mimarisini daha doğru yansıtacak şekilde sadeleştirildi.
+- Food search regression testleri güçlendirildi.
+
 ## PR23.12.2 - Meal Food Search Sheet Redesign
 
 ### Düzeltildi
