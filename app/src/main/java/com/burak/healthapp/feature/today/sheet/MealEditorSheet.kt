@@ -159,7 +159,7 @@ internal fun MealEditorSheet(
                 onClick = onAddDraft,
             )
         }
-        if (state.totalSummary.foodCount > 0) {
+        if (state.totalSummary.foodCount > 0 || state.totalSummary.hasInvalidDrafts) {
             item {
                 MealTotalSummaryBar(
                     summary = state.totalSummary,
@@ -256,5 +256,13 @@ internal fun MealTotalSummaryBar(
             style = MaterialTheme.typography.titleSmall,
             color = HealthPrimary,
         )
+        if (summary.hasInvalidDrafts) {
+            Text(
+                modifier = Modifier.padding(top = 4.dp),
+                text = stringResource(R.string.today_meal_total_invalid_notice),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
     }
 }

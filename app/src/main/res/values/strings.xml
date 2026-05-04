@@ -116,6 +116,7 @@
     <string name="today_meal_add_food">Besin Ekle</string>
     <string name="today_meal_save">Öğünü Kaydet</string>
     <string name="today_meal_total_summary">Toplam: %1$d kcal · P %2$dg · K %3$dg · Y %4$dg</string>
+    <string name="today_meal_total_invalid_notice">Geçersiz değerler toplam hesaba dahil edilmedi.</string>
     <string name="today_meal_food_count">%1$d besin</string>
     <string name="meal_history_empty_title">Seçili tarih için öğün kaydı yok</string>
     <string name="meal_history_empty_body">Beslenme kartındaki + Ekle aksiyonuyla öğün girmeye başladığında bu ekran otomatik dolacak.</string>
@@ -123,6 +124,8 @@
     <string name="meal_history_daily_summary_title">Günlük Özet</string>
     <string name="meal_history_total_calories">Toplam %1$d kcal</string>
     <string name="meal_history_macro_distribution">P %1$dg · K %2$dg · Y %3$dg</string>
+    <string name="meal_history_macro_percent_distribution">Yaklaşık dağılım: P %1$d%% · K %2$d%% · Y %3$d%%</string>
+    <string name="meal_history_snapshot_note">Geçmiş öğünler eklendiği andaki değerlerle saklanır.</string>
     <string name="meal_history_meal_count">%1$d öğün, %2$d besin</string>
     <string name="today_label_amount_ml">Miktar (ml)</string>
     <string name="today_label_weight_kg">Kilo (kg)</string>

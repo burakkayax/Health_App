@@ -15,6 +15,7 @@ import com.burak.healthapp.data.local.entity.SupplementCheckEntity
 import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
+import com.burak.healthapp.domain.export.ExportedCustomFood
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -145,6 +146,166 @@ class HealthDataManagementRepositoryInstrumentedTest {
     }
 
     @Test
+    fun importCustomFoods_doesNotDuplicateSameExportImportedTwice() = runBlocking {
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Sütlü kahve",
+                    brand = "Cafe",
+                    servingName = "fincan",
+                    servingGrams = 200f,
+                    calories = 100,
+                    proteinGrams = 4,
+                    carbsGrams = 10,
+                    fatGrams = 4,
+                    isFavorite = false,
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T10:00:00",
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+        repository.importHealthData(model)
+
+        assertEquals(1, database.customFoodDao().getAll().size)
+    }
+
+    @Test
+    fun importCustomFoods_deduplicatesTurkishNormalizedNames() = runBlocking {
+        val date = LocalDateTime.parse("2026-04-27T10:00:00")
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Sütlü kahve",
+                brand = "Cafe",
+                servingName = "fincan",
+                servingGrams = 200f,
+                calories = 100,
+                proteinGrams = 4,
+                carbsGrams = 10,
+                fatGrams = 4,
+                createdAt = date,
+                updatedAt = date,
+            )
+        )
+
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Sutlu kahve", // missing turkish chars
+                    brand = "cafe", // different case
+                    servingName = "fincan",
+                    servingGrams = 200f,
+                    calories = 100,
+                    proteinGrams = 4,
+                    carbsGrams = 10,
+                    fatGrams = 4,
+                    isFavorite = true, // different favorite status, should be updated or ignored
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T10:00:00", // same date, keep existing or ignore
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+
+        assertEquals(1, database.customFoodDao().getAll().size)
+    }
+
+    @Test
+    fun importCustomFoods_updatesExistingWhenImportedIsNewer() = runBlocking {
+        val oldDate = LocalDateTime.parse("2026-04-27T10:00:00")
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Yulaf",
+                brand = null,
+                servingName = "kase",
+                servingGrams = 100f,
+                calories = 300,
+                proteinGrams = 10,
+                carbsGrams = 50,
+                fatGrams = 5,
+                createdAt = oldDate,
+                updatedAt = oldDate,
+            )
+        )
+
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Yulaf",
+                    brand = null,
+                    servingName = "kase",
+                    servingGrams = 100f,
+                    calories = 350, // updated calories
+                    proteinGrams = 10,
+                    carbsGrams = 50,
+                    fatGrams = 5,
+                    isFavorite = true, // updated favorite
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T11:00:00", // newer
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+
+        val foods = database.customFoodDao().getAll()
+        assertEquals(1, foods.size)
+        assertEquals(350, foods.first().calories)
+        assertTrue(foods.first().isFavorite)
+    }
+
+    @Test
+    fun importCustomFoods_keepsExistingWhenImportedIsOlder() = runBlocking {
+        val newDate = LocalDateTime.parse("2026-04-27T11:00:00")
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Yulaf",
+                brand = null,
+                servingName = "kase",
+                servingGrams = 100f,
+                calories = 350,
+                proteinGrams = 10,
+                carbsGrams = 50,
+                fatGrams = 5,
+                isFavorite = true,
+                createdAt = LocalDateTime.parse("2026-04-27T10:00:00"),
+                updatedAt = newDate,
+            )
+        )
+
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Yulaf",
+                    brand = null,
+                    servingName = "kase",
+                    servingGrams = 100f,
+                    calories = 300, // older calories
+                    proteinGrams = 10,
+                    carbsGrams = 50,
+                    fatGrams = 5,
+                    isFavorite = false,
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T10:00:00", // older
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+
+        val foods = database.customFoodDao().getAll()
+        assertEquals(1, foods.size)
+        assertEquals(350, foods.first().calories) // Should keep newer
+        assertTrue(foods.first().isFavorite)
+    }
+
+    @Test
     fun deleteAllHealthData_deletesHealthRecordsAndPreservesSettings() = runBlocking {
         val date = LocalDate.of(2026, 4, 27)
         database.mealDao().upsert(
@@ -182,6 +343,19 @@ class HealthDataManagementRepositoryInstrumentedTest {
         database.supplementCheckDao().upsert(
             SupplementCheckEntity(templateId = templateId, date = date, isChecked = true),
         )
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Yulaf",
+                servingName = "kase",
+                servingGrams = 100f,
+                calories = 350,
+                proteinGrams = 10,
+                carbsGrams = 50,
+                fatGrams = 5,
+                createdAt = date.atTime(10, 0),
+                updatedAt = date.atTime(10, 0),
+            )
+        )
 
         repository.deleteAllHealthData()
 
@@ -195,6 +369,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
         assertEquals(emptyList<SupplementTemplateEntity>(), database.supplementTemplateDao().getAll())
         assertEquals(emptyList<SupplementDoseEntryEntity>(), database.supplementDoseDao().getAll())
         assertEquals(0, supplementCheckCount())
+        assertEquals(0, database.customFoodDao().getAll().size)
         assertEquals("Misafir", settingsRepository.current.userProfile.name)
         assertEquals(ThemeMode.SYSTEM, settingsRepository.current.themeMode)
         assertEquals(GoalSettings(), settingsRepository.current.goalSettings)

@@ -351,6 +351,86 @@ class JsonHealthDataImporterTest {
     }
 
     @Test
+    fun validate_rejectsCustomFoodWithNegativeProtein() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(proteinGrams = -5),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].proteinGrams")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithNegativeCarbs() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(carbsGrams = -5),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].carbsGrams")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithNegativeFat() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(fatGrams = -5),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].fatGrams")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithNegativeNullableFiber() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(fiberGrams = -5f),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].fiberGrams")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithInvalidCreatedAt() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(createdAt = "invalid-date"),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.InvalidDateTime("customFoods[0].createdAt")),
+            result,
+        )
+    }
+
+    @Test
     fun validate_acceptsValidCustomFoods() {
         val model = sampleModel().copy(
             customFoods = listOf(sampleCustomFood()),

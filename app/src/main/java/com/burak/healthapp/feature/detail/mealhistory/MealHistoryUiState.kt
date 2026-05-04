@@ -18,6 +18,12 @@ data class MealHistorySectionState(
     val entries: List<MealHistoryEntryState>,
 )
 
+data class MealMacroDistribution(
+    val proteinPercent: Int,
+    val carbsPercent: Int,
+    val fatPercent: Int,
+)
+
 data class MealHistoryDailySummary(
     val totalCalories: Int,
     val totalProtein: Int,
@@ -25,6 +31,7 @@ data class MealHistoryDailySummary(
     val totalFat: Int,
     val mealCount: Int,
     val foodCount: Int,
+    val macroDistribution: MealMacroDistribution? = null,
 )
 
 data class MealHistoryUiState(

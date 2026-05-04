@@ -145,11 +145,13 @@ private fun String.errorFrom(errors: List<HealthInputError>): HealthInputError? 
 
 private fun computeTotalSummary(drafts: List<MealDraftFoodState>): MealTotalSummary {
     val withInput = drafts.filter { it.name.isNotBlank() }
+    val validDrafts = withInput.filter { !it.hasValidationError() }
     return MealTotalSummary(
-        totalCalories = withInput.sumOf { it.calories.toIntOrNull() ?: 0 },
-        totalProtein = withInput.sumOf { it.protein.toIntOrNull() ?: 0 },
-        totalCarbs = withInput.sumOf { it.carbs.toIntOrNull() ?: 0 },
-        totalFat = withInput.sumOf { it.fat.toIntOrNull() ?: 0 },
-        foodCount = withInput.size,
+        totalCalories = validDrafts.sumOf { it.calories.toIntOrNull() ?: 0 },
+        totalProtein = validDrafts.sumOf { it.protein.toIntOrNull() ?: 0 },
+        totalCarbs = validDrafts.sumOf { it.carbs.toIntOrNull() ?: 0 },
+        totalFat = validDrafts.sumOf { it.fat.toIntOrNull() ?: 0 },
+        foodCount = validDrafts.size,
+        hasInvalidDrafts = withInput.size > validDrafts.size,
     )
 }

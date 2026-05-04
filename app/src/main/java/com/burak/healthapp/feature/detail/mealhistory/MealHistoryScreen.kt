@@ -79,6 +79,14 @@ fun MealHistoryContent(
             verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
             horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
         ) {
+            state.dailySummary?.let { summary ->
+                item(
+                    key = "daily_summary",
+                    span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) },
+                ) {
+                    DailySummaryCard(summary = summary)
+                }
+            }
             gridItems(state.sections, key = MealHistorySectionState::titleResId) { section ->
                 MealHistorySection(
                     section = section,
@@ -166,6 +174,19 @@ private fun DailySummaryCard(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (summary.macroDistribution != null) {
+            Text(
+                modifier = Modifier.padding(top = 4.dp),
+                text = stringResource(
+                    R.string.meal_history_macro_percent_distribution,
+                    summary.macroDistribution.proteinPercent,
+                    summary.macroDistribution.carbsPercent,
+                    summary.macroDistribution.fatPercent,
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Text(
             modifier = Modifier.padding(top = 4.dp),
             text = stringResource(
@@ -175,6 +196,12 @@ private fun DailySummaryCard(
             ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.sm),
+            text = stringResource(R.string.meal_history_snapshot_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
         )
     }
 }

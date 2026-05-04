@@ -21,6 +21,7 @@ data class MealTotalSummary(
     val totalCarbs: Int = 0,
     val totalFat: Int = 0,
     val foodCount: Int = 0,
+    val hasInvalidDrafts: Boolean = false,
 )
 
 data class MealEditorUiState(

@@ -428,12 +428,13 @@ private fun SupplementDoseEntryEntity.importKey(): String = listOf(templateId, d
 private fun String.normalizedTemplateName(): String = trim().lowercase()
 
 private fun CustomFoodEntity.customFoodContentKey(): String {
-    val normalizedName = name.trim().lowercase()
-    val normalizedBrand = (brand ?: "").trim().lowercase()
+    val normalizedName = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(name)
+    val normalizedBrand = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(brand ?: "")
+    val servingKey = "%.2f".format(java.util.Locale.US, servingGrams)
     return listOf(
         normalizedName,
         normalizedBrand,
-        servingGrams.toString(),
+        servingKey,
         calories.toString(),
         proteinGrams.toString(),
         carbsGrams.toString(),

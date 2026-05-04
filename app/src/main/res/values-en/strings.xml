@@ -118,6 +118,7 @@
     <string name="meal_type_snack">Snack</string>
 
     <string name="today_meal_total_summary">Total: %1$d kcal · P %2$dg · C %3$dg · F %4$dg</string>
+    <string name="today_meal_total_invalid_notice">Invalid values are not included in the total.</string>
     <string name="today_meal_food_count">%1$d food</string>
     <string name="meal_history_empty_title">No meal entries for selected date</string>
     <string name="meal_history_empty_body">Start logging meals from the + Add action on the Nutrition card.</string>
@@ -125,6 +126,8 @@
     <string name="meal_history_daily_summary_title">Daily Summary</string>
     <string name="meal_history_total_calories">Total %1$d kcal</string>
     <string name="meal_history_macro_distribution">P %1$dg · C %2$dg · F %3$dg</string>
+    <string name="meal_history_macro_percent_distribution">Approx. distribution: P %1$d%% · C %2$d%% · F %3$d%%</string>
+    <string name="meal_history_snapshot_note">Past meal entries keep the values saved at the time of logging.</string>
     <string name="meal_history_meal_count">%1$d meals, %2$d foods</string>
     <string name="caffeine_today_total_format">%1$d / %2$d mg</string>
     <string name="caffeine_today_total_formatted_format">%1$s / %2$s mg</string>
