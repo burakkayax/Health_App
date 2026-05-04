@@ -29,12 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.adaptive.HealthWindowSizeClass
 import com.burak.healthapp.core.ui.adaptive.isCompact
 import com.burak.healthapp.core.ui.components.HealthCard
+import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.feature.detail.mealhistory.MealHistorySectionState
-import com.burak.healthapp.feature.detail.mealhistory.MealHistoryUiState
 import java.time.LocalDate
 import androidx.compose.foundation.lazy.grid.items as gridItems
 
@@ -106,19 +106,24 @@ fun MealHistoryContent(
             item {
                 HealthCard(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Seçili tarih için öğün kaydı yok",
+                        text = stringResource(R.string.meal_history_empty_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         modifier = Modifier.padding(top = HealthSpacing.xs),
-                        text = "Beslenme kartındaki + Ekle aksiyonuyla öğün girmeye başladığında bu ekran otomatik dolacak.",
+                        text = stringResource(R.string.meal_history_empty_body),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
         } else {
+            state.dailySummary?.let { summary ->
+                item(key = "daily_summary") {
+                    DailySummaryCard(summary = summary)
+                }
+            }
             items(state.sections, key = MealHistorySectionState::titleResId) { section ->
                 MealHistorySection(
                     section = section,
@@ -126,6 +131,51 @@ fun MealHistoryContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DailySummaryCard(
+    summary: MealHistoryDailySummary,
+    modifier: Modifier = Modifier,
+) {
+    HealthCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("meal_history_daily_summary"),
+    ) {
+        Text(
+            text = stringResource(R.string.meal_history_daily_summary_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.xs),
+            text = stringResource(R.string.meal_history_total_calories, summary.totalCalories),
+            style = MaterialTheme.typography.titleSmall,
+            color = HealthPrimary,
+        )
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = stringResource(
+                R.string.meal_history_macro_distribution,
+                summary.totalProtein,
+                summary.totalCarbs,
+                summary.totalFat,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = stringResource(
+                R.string.meal_history_meal_count,
+                summary.mealCount,
+                summary.foodCount,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -159,7 +209,13 @@ private fun MealHistorySection(
                     )
                     Text(
                         modifier = Modifier.padding(top = 4.dp),
-                        text = "${entry.calories} kcal • P ${entry.proteinGrams} • K ${entry.carbsGrams} • Y ${entry.fatGrams}",
+                        text = stringResource(
+                            R.string.meal_history_entry_macros,
+                            entry.calories,
+                            entry.proteinGrams,
+                            entry.carbsGrams,
+                            entry.fatGrams,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -170,7 +226,7 @@ private fun MealHistorySection(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
-                        contentDescription = "Öğünü sil",
+                        contentDescription = stringResource(R.string.content_description_delete_meal),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

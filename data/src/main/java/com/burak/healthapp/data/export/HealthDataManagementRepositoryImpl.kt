@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.burak.healthapp.core.database.HealthDatabase
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
 import com.burak.healthapp.data.local.entity.CaffeineEntryEntity
+import com.burak.healthapp.data.local.entity.CustomFoodEntity
 import com.burak.healthapp.data.local.entity.ExerciseEntryEntity
 import com.burak.healthapp.data.local.entity.HydrationEntryEntity
 import com.burak.healthapp.data.local.entity.MealEntryEntity
@@ -14,6 +15,7 @@ import com.burak.healthapp.data.local.entity.SupplementDoseEntryEntity
 import com.burak.healthapp.data.local.entity.SupplementTemplateEntity
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
 import com.burak.healthapp.domain.export.ExportedCaffeineEntry
+import com.burak.healthapp.domain.export.ExportedCustomFood
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -64,6 +66,7 @@ class HealthDataManagementRepositoryImpl(
                     importBodyMeasurements(prepared.bodyMeasurements)
                     val templateIdMap = importSupplementTemplates(prepared.supplementTemplates)
                     importSupplementDoses(prepared.supplementDoses, templateIdMap)
+                    importCustomFoods(prepared.customFoods)
                 }
             }
         } catch (exception: Exception) {
@@ -220,6 +223,42 @@ class HealthDataManagementRepositoryImpl(
             }
         }
     }
+
+    private suspend fun importCustomFoods(entries: List<CustomFoodEntity>) {
+        val currentByKey = database.customFoodDao().getAll()
+            .associateBy { it.customFoodContentKey() }
+            .toMutableMap()
+
+        entries.forEach { entry ->
+            val key = entry.customFoodContentKey()
+            val existing = currentByKey[key]
+            if (existing != null) {
+                // If import data is newer, update the existing record
+                if (entry.updatedAt.isAfter(existing.updatedAt)) {
+                    val updated = existing.copy(
+                        name = entry.name,
+                        brand = entry.brand,
+                        servingName = entry.servingName,
+                        servingGrams = entry.servingGrams,
+                        calories = entry.calories,
+                        proteinGrams = entry.proteinGrams,
+                        carbsGrams = entry.carbsGrams,
+                        fatGrams = entry.fatGrams,
+                        fiberGrams = entry.fiberGrams,
+                        sugarGrams = entry.sugarGrams,
+                        sodiumMg = entry.sodiumMg,
+                        isFavorite = entry.isFavorite,
+                        updatedAt = entry.updatedAt,
+                    )
+                    database.customFoodDao().upsert(updated)
+                    currentByKey[key] = updated
+                }
+            } else {
+                val newId = database.customFoodDao().upsert(entry.copy(id = 0))
+                currentByKey[key] = entry.copy(id = newId)
+            }
+        }
+    }
 }
 
 private data class PreparedHealthDataImport(
@@ -237,6 +276,7 @@ private data class PreparedHealthDataImport(
     val bodyMeasurements: List<BodyMeasurementEntity>,
     val supplementTemplates: List<SupplementTemplateImport>,
     val supplementDoses: List<SupplementDoseEntryEntity>,
+    val customFoods: List<CustomFoodEntity>,
 )
 
 private data class SupplementTemplateImport(
@@ -259,6 +299,7 @@ private fun HealthDataExportModel.toPreparedImport(): PreparedHealthDataImport =
     bodyMeasurements = bodyMeasurements.map(ExportedBodyMeasurementEntry::toEntity),
     supplementTemplates = supplementTemplates.map(ExportedSupplementTemplate::toImport),
     supplementDoses = supplementDoseEntries.map(ExportedSupplementDoseEntry::toEntity),
+    customFoods = customFoods.map(ExportedCustomFood::toEntity),
 )
 
 private fun ExportedUserProfile.toDomain(): UserProfile = UserProfile(
@@ -385,3 +426,34 @@ private fun CaffeineEntryEntity.importKey(): String = listOf(date, time, drinkTy
 private fun SupplementDoseEntryEntity.importKey(): String = listOf(templateId, date, loggedAt).joinToString("|")
 
 private fun String.normalizedTemplateName(): String = trim().lowercase()
+
+private fun CustomFoodEntity.customFoodContentKey(): String {
+    val normalizedName = name.trim().lowercase()
+    val normalizedBrand = (brand ?: "").trim().lowercase()
+    return listOf(
+        normalizedName,
+        normalizedBrand,
+        servingGrams.toString(),
+        calories.toString(),
+        proteinGrams.toString(),
+        carbsGrams.toString(),
+        fatGrams.toString(),
+    ).joinToString("|")
+}
+
+private fun ExportedCustomFood.toEntity(): CustomFoodEntity = CustomFoodEntity(
+    name = name.trim(),
+    brand = brand?.trim()?.ifBlank { null },
+    servingName = servingName.trim(),
+    servingGrams = servingGrams,
+    calories = calories,
+    proteinGrams = proteinGrams,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    fiberGrams = fiberGrams,
+    sugarGrams = sugarGrams,
+    sodiumMg = sodiumMg,
+    isFavorite = isFavorite,
+    createdAt = LocalDateTime.parse(createdAt),
+    updatedAt = LocalDateTime.parse(updatedAt),
+)

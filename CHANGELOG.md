@@ -1,5 +1,47 @@
 # Changelog
 
+## PR23.15 - Meal History & Nutrition Detail Polish
+
+### Eklendi
+- Öğün geçmişi ekranına günlük özet kartı eklendi (toplam kalori, makro dağılımı, öğün/besin sayısı).
+- DailySummaryCard composable ile toplam değerler HealthPrimary renkte gösteriliyor.
+
+### Değiştirildi
+- Öğün geçmişi ekranındaki tüm hardcoded Türkçe metinler string resource'larına taşındı.
+- Besin satırlarındaki makro gösterimi formatlı string resource ile düzenlendi.
+- Silme butonu contentDescription olarak string resource kullanacak şekilde güncellendi.
+- Hem Türkçe hem İngilizce dil desteği eklendi.
+
+## PR23.14 - Nutrition Entry Flow v2
+
+### Eklendi
+- MealTotalSummary veri modeli eklendi (toplam kalori, protein, karb, yağ, besin sayısı).
+- Öğün düzenleyicide "Besin Ekle" butonundan sonra gerçek zamanlı toplam makro çubuğu eklendi.
+- Toplam bar yalnızca en az bir besin girişi olduğunda gösteriliyor.
+
+### Değiştirildi
+- MealEditorViewModel her draft değişikliğinde toplam özeti yeniden hesaplıyor.
+- MealEditorSheet'e MealTotalSummaryBar composable eklendi.
+
+## PR23.13.2 - Custom Food Data Management Integration
+
+### Eklendi
+- Export şeması v2'den v3'e yükseltildi; ExportedCustomFood veri modeli eklendi.
+- Özel besinler dışa aktarma dosyasına dahil ediliyor.
+- İçe aktarma sırasında özel besinler content-key dedup mantığıyla birleştiriliyor.
+- İçe aktarma önizlemesinde özel besin sayısı gösteriliyor.
+- Tüm verileri sil işlemi özel besinleri de temizliyor.
+
+### Değiştirildi
+- JsonHealthDataImporter artık schemaVersion 1, 2 ve 3'ü destekliyor.
+- ExportedCustomFood için validateNotBlank ve validatePositiveFloat doğrulama eklendi.
+- İçe aktarma merge mantığı: aynı content-key varsa ve import verisi daha yeniyse güncelleme yapılıyor.
+- Import preview dialog'a özel besin satırı eklendi.
+- "Tüm verileri sil" uyarı mesajına özel besin eklendi.
+
+### Test
+- JsonHealthDataImporterTest'e 5 yeni test eklendi: v2 backward compat, blank name reject, negative calories reject, zero serving reject, valid custom food accept.
+
 ## PR23.13.1 - Custom Food Library Stabilization
 
 ### Düzeltildi

@@ -91,6 +91,7 @@ class MealEditorViewModel : ViewModel() {
                 draftFoods = validatedDrafts,
                 canSave = validatedDrafts.any { it.hasInput() } &&
                     validatedDrafts.none { it.hasValidationError() },
+                totalSummary = computeTotalSummary(validatedDrafts),
             )
         }
     }
@@ -140,4 +141,15 @@ private fun MealDraftFoodState.hasValidationError(): Boolean = nameError != null
 private fun String.errorFrom(errors: List<HealthInputError>): HealthInputError? {
     if (isBlank()) return null
     return errors.firstOrNull { it != HealthInputError.REQUIRED }
+}
+
+private fun computeTotalSummary(drafts: List<MealDraftFoodState>): MealTotalSummary {
+    val withInput = drafts.filter { it.name.isNotBlank() }
+    return MealTotalSummary(
+        totalCalories = withInput.sumOf { it.calories.toIntOrNull() ?: 0 },
+        totalProtein = withInput.sumOf { it.protein.toIntOrNull() ?: 0 },
+        totalCarbs = withInput.sumOf { it.carbs.toIntOrNull() ?: 0 },
+        totalFat = withInput.sumOf { it.fat.toIntOrNull() ?: 0 },
+        foodCount = withInput.size,
+    )
 }

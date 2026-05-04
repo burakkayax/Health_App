@@ -21,9 +21,10 @@ data class HealthDataExportModel(
     val bodyMeasurements: List<ExportedBodyMeasurementEntry> = emptyList(),
     val supplementTemplates: List<ExportedSupplementTemplate> = emptyList(),
     val supplementDoseEntries: List<ExportedSupplementDoseEntry> = emptyList(),
+    val customFoods: List<ExportedCustomFood> = emptyList(),
 ) {
     companion object {
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 3
     }
 }
 
@@ -164,4 +165,23 @@ data class ExportedSupplementDoseEntry(
     val date: String,
     val amount: Float,
     val loggedAt: String,
+)
+
+@Serializable
+data class ExportedCustomFood(
+    val id: Long,
+    val name: String,
+    val brand: String?,
+    val servingName: String,
+    val servingGrams: Float,
+    val calories: Int,
+    val proteinGrams: Int,
+    val carbsGrams: Int,
+    val fatGrams: Int,
+    val fiberGrams: Float? = null,
+    val sugarGrams: Float? = null,
+    val sodiumMg: Float? = null,
+    val isFavorite: Boolean,
+    val createdAt: String,
+    val updatedAt: String,
 )

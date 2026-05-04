@@ -117,6 +117,15 @@
     <string name="meal_type_dinner">Dinner</string>
     <string name="meal_type_snack">Snack</string>
 
+    <string name="today_meal_total_summary">Total: %1$d kcal · P %2$dg · C %3$dg · F %4$dg</string>
+    <string name="today_meal_food_count">%1$d food</string>
+    <string name="meal_history_empty_title">No meal entries for selected date</string>
+    <string name="meal_history_empty_body">Start logging meals from the + Add action on the Nutrition card.</string>
+    <string name="meal_history_entry_macros">%1$d kcal · P %2$dg · C %3$dg · F %4$dg</string>
+    <string name="meal_history_daily_summary_title">Daily Summary</string>
+    <string name="meal_history_total_calories">Total %1$d kcal</string>
+    <string name="meal_history_macro_distribution">P %1$dg · C %2$dg · F %3$dg</string>
+    <string name="meal_history_meal_count">%1$d meals, %2$d foods</string>
     <string name="caffeine_today_total_format">%1$d / %2$d mg</string>
     <string name="caffeine_today_total_formatted_format">%1$s / %2$s mg</string>
     <string name="caffeine_last_time_format">Last intake %1$s</string>
@@ -222,8 +231,9 @@
     <string name="import_validation_expected_datetime_format">Sleep record date-time format is invalid. Expected format: 2026-04-02T23:10:00</string>
     <string name="import_preview_title">Import preview</string>
     <string name="import_preview_settings_notice">Profile, goals, theme, and water reminder settings will also be updated.</string>
+    <string name="import_preview_custom_foods">Custom food</string>
     <string name="delete_health_data_title">Delete all health records?</string>
-    <string name="delete_health_data_message">This deletes meal, water, sleep, exercise, smoking, step, body measurement, and supplement records. Profile name, theme, onboarding, and goals are kept.</string>
+    <string name="delete_health_data_message">This deletes meal, water, sleep, exercise, smoking, step, body measurement, supplement, and custom food records. Profile name, theme, onboarding, and goals are kept.</string>
     <string name="delete_health_data_success">Health records deleted.</string>
     <string name="delete_health_data_failed">Could not delete health records. Try again.</string>
 

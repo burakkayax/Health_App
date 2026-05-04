@@ -2,6 +2,7 @@ package com.burak.healthapp.data.export
 
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
 import com.burak.healthapp.domain.export.ExportedCaffeineEntry
+import com.burak.healthapp.domain.export.ExportedCustomFood
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -86,7 +87,7 @@ class JsonHealthDataImporter(
     }
 
     private companion object {
-        val SUPPORTED_SCHEMA_VERSIONS = setOf(1, HealthDataExportModel.SCHEMA_VERSION)
+        val SUPPORTED_SCHEMA_VERSIONS = setOf(1, 2, HealthDataExportModel.SCHEMA_VERSION)
     }
 }
 
@@ -118,6 +119,7 @@ private fun HealthDataExportModel.validateSemantics(): ImportValidationError? =
         ?: bodyMeasurements.firstErrorIndexed { index, entry -> entry.validate(index) }
         ?: supplementTemplates.firstErrorIndexed { index, entry -> entry.validate(index) }
         ?: supplementDoseEntries.firstErrorIndexed { index, entry -> entry.validate(index) }
+        ?: customFoods.firstErrorIndexed { index, entry -> entry.validate(index) }
 
 private fun HealthDataExportModel.validateProfile(): ImportValidationError? =
     profile.heightCm?.let { height ->
@@ -212,6 +214,20 @@ private fun ExportedSupplementDoseEntry.validate(index: Int): ImportValidationEr
         ?: validateNonNegative(amount, "supplementDoseEntries[$index].amount")
         ?: validateDateTime(loggedAt, "supplementDoseEntries[$index].loggedAt")
 
+private fun ExportedCustomFood.validate(index: Int): ImportValidationError? =
+    validateNotBlank(name, "customFoods[$index].name")
+        ?: validateNotBlank(servingName, "customFoods[$index].servingName")
+        ?: validatePositiveFloat(servingGrams, "customFoods[$index].servingGrams")
+        ?: validateNonNegative(calories, "customFoods[$index].calories")
+        ?: validateNonNegative(proteinGrams, "customFoods[$index].proteinGrams")
+        ?: validateNonNegative(carbsGrams, "customFoods[$index].carbsGrams")
+        ?: validateNonNegative(fatGrams, "customFoods[$index].fatGrams")
+        ?: fiberGrams?.let { validateNonNegative(it, "customFoods[$index].fiberGrams") }
+        ?: sugarGrams?.let { validateNonNegative(it, "customFoods[$index].sugarGrams") }
+        ?: sodiumMg?.let { validateNonNegative(it, "customFoods[$index].sodiumMg") }
+        ?: validateDateTime(createdAt, "customFoods[$index].createdAt")
+        ?: validateDateTime(updatedAt, "customFoods[$index].updatedAt")
+
 private inline fun <T> List<T>.firstErrorIndexed(
     validate: (Int, T) -> ImportValidationError?,
 ): ImportValidationError? {
@@ -275,3 +291,13 @@ private fun validateNonNegative(value: Float, fieldPath: String): ImportValidati
     }
 
 private val MISSING_FIELD_REGEX = Regex("Field '([^']+)' is required")
+
+private fun validateNotBlank(value: String, fieldPath: String): ImportValidationError? =
+    if (value.isBlank()) ImportValidationError.MissingRequiredField(fieldPath) else null
+
+private fun validatePositiveFloat(value: Float, fieldPath: String): ImportValidationError? =
+    when {
+        !value.isFinite() -> ImportValidationError.InvalidNumber(fieldPath)
+        value <= 0f -> ImportValidationError.NegativeValue(fieldPath)
+        else -> null
+    }

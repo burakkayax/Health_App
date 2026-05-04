@@ -2,6 +2,7 @@ package com.burak.healthapp.data.export
 
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
 import com.burak.healthapp.data.local.dao.CaffeineDao
+import com.burak.healthapp.data.local.dao.CustomFoodDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -10,9 +11,11 @@ import com.burak.healthapp.data.local.dao.SmokingDao
 import com.burak.healthapp.data.local.dao.StepDao
 import com.burak.healthapp.data.local.dao.SupplementDoseDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
+import com.burak.healthapp.data.local.entity.CustomFoodEntity
 import com.burak.healthapp.data.local.mapper.toDomain
 import com.burak.healthapp.domain.export.ExportedBodyMeasurementEntry
 import com.burak.healthapp.domain.export.ExportedCaffeineEntry
+import com.burak.healthapp.domain.export.ExportedCustomFood
 import com.burak.healthapp.domain.export.ExportedExerciseEntry
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
@@ -57,6 +60,7 @@ class HealthDataExportRepositoryImpl(
     private val measurementDao: BodyMeasurementDao,
     private val templateDao: SupplementTemplateDao,
     private val doseDao: SupplementDoseDao,
+    private val customFoodDao: CustomFoodDao,
 ) : HealthDataExportRepository {
     override suspend fun buildExportModel(
         exportedAt: Instant,
@@ -82,6 +86,7 @@ class HealthDataExportRepositoryImpl(
             bodyMeasurements = measurementDao.getAll().map { it.toDomain().toExported() },
             supplementTemplates = templateDao.getAll().map { it.toDomain().toExported() },
             supplementDoseEntries = doseDao.getAll().map { it.toDomain().toExported() },
+            customFoods = customFoodDao.getAll().map { it.toExported() },
         )
     }
 }
@@ -206,4 +211,22 @@ private fun SupplementDoseEntry.toExported(): ExportedSupplementDoseEntry = Expo
     date = date.toString(),
     amount = amount,
     loggedAt = loggedAt.toString(),
+)
+
+private fun CustomFoodEntity.toExported(): ExportedCustomFood = ExportedCustomFood(
+    id = id,
+    name = name,
+    brand = brand,
+    servingName = servingName,
+    servingGrams = servingGrams,
+    calories = calories,
+    proteinGrams = proteinGrams,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    fiberGrams = fiberGrams,
+    sugarGrams = sugarGrams,
+    sodiumMg = sodiumMg,
+    isFavorite = isFavorite,
+    createdAt = createdAt.toString(),
+    updatedAt = updatedAt.toString(),
 )

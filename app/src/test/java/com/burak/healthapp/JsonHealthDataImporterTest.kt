@@ -4,6 +4,7 @@ import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.export.ExportedCaffeineEntry
+import com.burak.healthapp.domain.export.ExportedCustomFood
 import com.burak.healthapp.domain.export.ExportedGoalSettings
 import com.burak.healthapp.domain.export.ExportedHydrationEntry
 import com.burak.healthapp.domain.export.ExportedMealEntry
@@ -209,6 +210,7 @@ class JsonHealthDataImporterTest {
         assertEquals(0, preview.caffeineCount)
         assertEquals(0, preview.bodyMeasurementCount)
         assertEquals(0, preview.supplementDoseCount)
+        assertEquals(1, preview.customFoodsCount)
     }
 
     @Test
@@ -253,6 +255,111 @@ class JsonHealthDataImporterTest {
         val model = (result as ImportValidationResult.Valid).model
         assertEquals(1, model.schemaVersion)
         assertTrue(model.caffeineEntries.isEmpty())
+        assertTrue(model.customFoods.isEmpty())
+    }
+
+    @Test
+    fun validate_supportsSchemaVersion2WithoutCustomFoods() {
+        val legacyJson = """
+            {
+              "schemaVersion": 2,
+              "exportedAt": "2026-04-27T10:00:00Z",
+              "appVersion": "1.0-test",
+              "profile": { "name": "Burak", "avatarInitials": "BK", "heightCm": 182.0 },
+              "goals": {
+                "dailyCaloriesTarget": 2200,
+                "proteinTargetGrams": 160,
+                "carbTargetGrams": 220,
+                "fatTargetGrams": 70,
+                "waterTargetMl": 2500,
+                "dailyStepTarget": 8000,
+                "sleepTargetBedtime": "23:00",
+                "sleepTargetWakeTime": "07:00",
+                "exerciseTargetDaysPerWeek": 4,
+                "exerciseTargetDurationMinutes": 45,
+                "smokeDailyLimit": 0,
+                "baselineWeightKg": 78.0,
+                "targetWeightKg": 74.0,
+                "baselineShoulderCm": 118.0,
+                "baselineWaistCm": 88.0,
+                "baselineHipCm": 99.0
+              },
+              "waterReminderSettings": {
+                "enabled": true,
+                "startTime": "09:00",
+                "endTime": "21:00",
+                "intervalMinutes": 60
+              },
+              "themeMode": "SYSTEM"
+            }
+        """.trimIndent()
+
+        val result = importer.validate(legacyJson)
+
+        assertTrue(result is ImportValidationResult.Valid)
+        val model = (result as ImportValidationResult.Valid).model
+        assertEquals(2, model.schemaVersion)
+        assertTrue(model.customFoods.isEmpty())
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithBlankName() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(name = " "),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.MissingRequiredField("customFoods[0].name")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithNegativeCalories() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(calories = -10),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].calories")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_rejectsCustomFoodWithZeroServingGrams() {
+        val model = sampleModel().copy(
+            customFoods = listOf(
+                sampleCustomFood().copy(servingGrams = 0f),
+            ),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].servingGrams")),
+            result,
+        )
+    }
+
+    @Test
+    fun validate_acceptsValidCustomFoods() {
+        val model = sampleModel().copy(
+            customFoods = listOf(sampleCustomFood()),
+        )
+
+        val result = importer.validate(exporter.encode(model))
+
+        assertTrue(result is ImportValidationResult.Valid)
+        assertEquals(1, (result as ImportValidationResult.Valid).preview.customFoodsCount)
     }
 }
 
@@ -324,4 +431,20 @@ private fun sampleModel(): HealthDataExportModel = HealthDataExportModel(
             sortOrder = 0,
         ),
     ),
+    customFoods = listOf(sampleCustomFood()),
+)
+
+private fun sampleCustomFood(): ExportedCustomFood = ExportedCustomFood(
+    id = 1,
+    name = "Yulaf ezmesi",
+    brand = "Bünting",
+    servingName = "porsiyon",
+    servingGrams = 40f,
+    calories = 150,
+    proteinGrams = 5,
+    carbsGrams = 27,
+    fatGrams = 3,
+    isFavorite = true,
+    createdAt = "2026-04-27T08:00:00",
+    updatedAt = "2026-04-27T08:00:00",
 )

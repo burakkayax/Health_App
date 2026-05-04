@@ -55,8 +55,9 @@ class MealHistoryViewModel @Inject constructor(
     }
 }
 
-internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState = MealHistoryUiState(
-    sections = groupMealsByType(entries).map { groupedMeal ->
+internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState {
+    val grouped = groupMealsByType(entries)
+    val sections = grouped.map { groupedMeal ->
         MealHistorySectionState(
             titleResId = groupedMeal.mealType.labelResId,
             entries = groupedMeal.entries.map { mealEntry ->
@@ -71,5 +72,19 @@ internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState 
                 )
             },
         )
-    },
-)
+    }
+    val dailySummary = if (entries.isEmpty()) null else {
+        MealHistoryDailySummary(
+            totalCalories = entries.sumOf { it.calories },
+            totalProtein = entries.sumOf { it.proteinGrams },
+            totalCarbs = entries.sumOf { it.carbsGrams },
+            totalFat = entries.sumOf { it.fatGrams },
+            mealCount = grouped.size,
+            foodCount = entries.size,
+        )
+    }
+    return MealHistoryUiState(
+        sections = sections,
+        dailySummary = dailySummary,
+    )
+}

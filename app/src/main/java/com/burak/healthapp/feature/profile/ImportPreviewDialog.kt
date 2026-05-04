@@ -45,6 +45,7 @@ internal fun ImportPreviewDialog(
                 ImportPreviewRow(stringResource(R.string.import_preview_body_measurements), preview.bodyMeasurementCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_supplement_templates), preview.supplementTemplateCount)
                 ImportPreviewRow(stringResource(R.string.import_preview_supplement_doses), preview.supplementDoseCount)
+                ImportPreviewRow(stringResource(R.string.import_preview_custom_foods), preview.customFoodsCount)
             }
         },
         confirmButton = {

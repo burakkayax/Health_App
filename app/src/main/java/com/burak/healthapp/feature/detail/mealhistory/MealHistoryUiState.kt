@@ -18,6 +18,16 @@ data class MealHistorySectionState(
     val entries: List<MealHistoryEntryState>,
 )
 
+data class MealHistoryDailySummary(
+    val totalCalories: Int,
+    val totalProtein: Int,
+    val totalCarbs: Int,
+    val totalFat: Int,
+    val mealCount: Int,
+    val foodCount: Int,
+)
+
 data class MealHistoryUiState(
     val sections: List<MealHistorySectionState>,
+    val dailySummary: MealHistoryDailySummary? = null,
 )

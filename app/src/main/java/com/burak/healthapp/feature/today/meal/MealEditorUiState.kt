@@ -15,8 +15,17 @@ data class MealDraftFoodState(
     val macroError: HealthInputError? = null,
 )
 
+data class MealTotalSummary(
+    val totalCalories: Int = 0,
+    val totalProtein: Int = 0,
+    val totalCarbs: Int = 0,
+    val totalFat: Int = 0,
+    val foodCount: Int = 0,
+)
+
 data class MealEditorUiState(
     val mealType: MealType = MealType.BREAKFAST,
     val draftFoods: List<MealDraftFoodState> = emptyList(),
     val canSave: Boolean = false,
+    val totalSummary: MealTotalSummary = MealTotalSummary(),
 )

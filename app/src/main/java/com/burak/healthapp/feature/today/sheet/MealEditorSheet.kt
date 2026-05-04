@@ -34,6 +34,7 @@ import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.domain.model.MealType
 import com.burak.healthapp.feature.today.meal.MealDraftFoodState
 import com.burak.healthapp.feature.today.meal.MealEditorUiState
+import com.burak.healthapp.feature.today.meal.MealTotalSummary
 import com.burak.healthapp.feature.today.meal.labelResId
 @Composable
 internal fun MealEditorSheet(
@@ -158,6 +159,13 @@ internal fun MealEditorSheet(
                 onClick = onAddDraft,
             )
         }
+        if (state.totalSummary.foodCount > 0) {
+            item {
+                MealTotalSummaryBar(
+                    summary = state.totalSummary,
+                )
+            }
+        }
         item {
             Button(
                 modifier = Modifier
@@ -212,5 +220,41 @@ internal fun NumberFieldRow(
                 ),
             )
         }
+    }
+}
+
+@Composable
+internal fun MealTotalSummaryBar(
+    summary: MealTotalSummary,
+    modifier: Modifier = Modifier,
+) {
+    HealthCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("meal_total_summary_bar"),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.today_meal_food_count, summary.foodCount),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.xs),
+            text = stringResource(
+                R.string.today_meal_total_summary,
+                summary.totalCalories,
+                summary.totalProtein,
+                summary.totalCarbs,
+                summary.totalFat,
+            ),
+            style = MaterialTheme.typography.titleSmall,
+            color = HealthPrimary,
+        )
     }
 }

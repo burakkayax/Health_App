@@ -115,6 +115,15 @@
     <string name="today_meal_fat">Yağ</string>
     <string name="today_meal_add_food">Besin Ekle</string>
     <string name="today_meal_save">Öğünü Kaydet</string>
+    <string name="today_meal_total_summary">Toplam: %1$d kcal · P %2$dg · K %3$dg · Y %4$dg</string>
+    <string name="today_meal_food_count">%1$d besin</string>
+    <string name="meal_history_empty_title">Seçili tarih için öğün kaydı yok</string>
+    <string name="meal_history_empty_body">Beslenme kartındaki + Ekle aksiyonuyla öğün girmeye başladığında bu ekran otomatik dolacak.</string>
+    <string name="meal_history_entry_macros">%1$d kcal · P %2$dg · K %3$dg · Y %4$dg</string>
+    <string name="meal_history_daily_summary_title">Günlük Özet</string>
+    <string name="meal_history_total_calories">Toplam %1$d kcal</string>
+    <string name="meal_history_macro_distribution">P %1$dg · K %2$dg · Y %3$dg</string>
+    <string name="meal_history_meal_count">%1$d öğün, %2$d besin</string>
     <string name="today_label_amount_ml">Miktar (ml)</string>
     <string name="today_label_weight_kg">Kilo (kg)</string>
     <string name="today_label_daily_total">Günlük Toplam</string>
@@ -409,8 +418,9 @@
     <string name="import_preview_body_measurements">Kilo/&#246;l&#231;&#252;m kayd&#305;</string>
     <string name="import_preview_supplement_templates">Takviye &#351;ablonu</string>
     <string name="import_preview_supplement_doses">Takviye doz kayd&#305;</string>
+    <string name="import_preview_custom_foods">Özel besin</string>
     <string name="delete_health_data_title">T&#252;m sa&#287;l&#305;k kay&#305;tlar&#305; silinsin mi?</string>
-    <string name="delete_health_data_message">Bu i&#351;lem &#246;&#287;&#252;n, su, uyku, egzersiz, sigara, ad&#305;m, kilo/&#246;l&#231;&#252;m ve takviye kay&#305;tlar&#305;n&#305; siler. Profil ad&#305;, tema, onboarding ve hedef ayarlar&#305; korunur.</string>
+    <string name="delete_health_data_message">Bu i&#351;lem &#246;&#287;&#252;n, su, uyku, egzersiz, sigara, ad&#305;m, kilo/&#246;l&#231;&#252;m, takviye ve &#246;zel besin kay&#305;tlar&#305;n&#305; siler. Profil ad&#305;, tema, onboarding ve hedef ayarlar&#305; korunur.</string>
     <string name="delete_health_data_success">Sa&#287;l&#305;k kay&#305;tlar&#305; silindi.</string>
     <string name="delete_health_data_failed">Sa&#287;l&#305;k kay&#305;tlar&#305; silinemedi. Tekrar dene.</string>
     <string name="profile_goals_daily_title">Günlük Hedefler</string>

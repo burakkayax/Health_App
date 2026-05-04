@@ -13,6 +13,7 @@ import com.burak.healthapp.data.export.JsonHealthDataExporter
 import com.burak.healthapp.data.export.JsonHealthDataImporter
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
 import com.burak.healthapp.data.local.dao.CaffeineDao
+import com.burak.healthapp.data.local.dao.CustomFoodDao
 import com.burak.healthapp.data.local.dao.ExerciseDao
 import com.burak.healthapp.data.local.dao.HydrationDao
 import com.burak.healthapp.data.local.dao.MealDao
@@ -53,6 +54,7 @@ object ExportImportModule {
         measurementDao: BodyMeasurementDao,
         templateDao: SupplementTemplateDao,
         doseDao: SupplementDoseDao,
+        customFoodDao: CustomFoodDao,
     ): HealthDataExportRepository = HealthDataExportRepositoryImpl(
         settingsRepository = settingsRepository,
         mealDao = mealDao,
@@ -65,6 +67,7 @@ object ExportImportModule {
         measurementDao = measurementDao,
         templateDao = templateDao,
         doseDao = doseDao,
+        customFoodDao = customFoodDao,
     )
 
     @Provides

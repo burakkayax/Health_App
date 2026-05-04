@@ -11,6 +11,7 @@ data class HealthDataImportPreview(
     val bodyMeasurementCount: Int,
     val supplementTemplateCount: Int,
     val supplementDoseCount: Int,
+    val customFoodsCount: Int = 0,
 ) {
     companion object {
         fun from(model: HealthDataExportModel): HealthDataImportPreview = HealthDataImportPreview(
@@ -24,6 +25,7 @@ data class HealthDataImportPreview(
             bodyMeasurementCount = model.bodyMeasurements.size,
             supplementTemplateCount = model.supplementTemplates.size,
             supplementDoseCount = model.supplementDoseEntries.size,
+            customFoodsCount = model.customFoods.size,
         )
     }
 }
