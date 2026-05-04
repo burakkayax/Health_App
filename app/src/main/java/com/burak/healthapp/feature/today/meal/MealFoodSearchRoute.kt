@@ -355,9 +355,14 @@ private fun CustomFoodResultRow(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        val sourceLabel = if (food.isFavorite) {
+            "${stringResource(R.string.custom_food_source_custom)} · ${stringResource(R.string.custom_food_favorite)}"
+        } else {
+            stringResource(R.string.custom_food_source_custom)
+        }
         Text(
             modifier = Modifier.padding(top = HealthSpacing.xs),
-            text = stringResource(R.string.custom_food_source_custom),
+            text = sourceLabel,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

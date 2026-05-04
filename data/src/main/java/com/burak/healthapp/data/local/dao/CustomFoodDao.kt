@@ -4,13 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.burak.healthapp.data.local.entity.CustomFoodEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CustomFoodDao {
     @Query("SELECT * FROM custom_foods ORDER BY isFavorite DESC, updatedAt DESC")
     suspend fun getAll(): List<CustomFoodEntity>
+
+    @Query("SELECT * FROM custom_foods ORDER BY isFavorite DESC, updatedAt DESC")
+    fun observeAll(): Flow<List<CustomFoodEntity>>
 
     @Query(
         """

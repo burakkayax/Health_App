@@ -2,7 +2,7 @@ package com.burak.healthapp.data.nutrition
 
 import com.burak.healthapp.domain.model.nutrition.NutritionPresetFood
 import com.burak.healthapp.domain.repository.NutritionPresetRepository
-import java.text.Normalizer
+
 class NutritionPresetRepositoryImpl(
     private val dataSource: AssetNutritionPresetDataSource,
 ) : NutritionPresetRepository {
@@ -21,7 +21,7 @@ class NutritionPresetRepositoryImpl(
         category: String?,
         limit: Int,
     ): List<NutritionPresetFood> {
-        val normalizedQuery = query.normalizeForSearch()
+        val normalizedQuery = TurkishSearchNormalizer.normalize(query)
         return getAllPresets()
             .asSequence()
             .filter { food -> category == null || food.categoryTr == category }
@@ -44,7 +44,7 @@ class NutritionPresetRepositoryImpl(
             addAll(aliasesTr)
             addAll(searchTermsTr)
             nameEnSource?.let(::add)
-        }.map { it.normalizeForSearch() }
+        }.map { TurkishSearchNormalizer.normalize(it) }
         return when {
             fields.any { it == normalizedQuery } -> 100
             fields.any { it.startsWith(normalizedQuery) } -> 80
@@ -55,17 +55,3 @@ class NutritionPresetRepositoryImpl(
     }
 }
 
-private fun String.normalizeForSearch(): String {
-    val lower = lowercase()
-        .replace('ı', 'i')
-        .replace('ğ', 'g')
-        .replace('ü', 'u')
-        .replace('ş', 's')
-        .replace('ö', 'o')
-        .replace('ç', 'c')
-    return Normalizer.normalize(lower, Normalizer.Form.NFD)
-        .replace("\\p{Mn}+".toRegex(), "")
-        .replace("[^a-z0-9 ]".toRegex(), " ")
-        .replace("\\s+".toRegex(), " ")
-        .trim()
-}

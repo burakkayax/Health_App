@@ -527,4 +527,8 @@
     <string name="custom_food_error_invalid_number">Geçerli bir sayı gir.</string>
     <string name="custom_food_error_negative_value">Negatif değer girilemez.</string>
     <string name="custom_food_add_button">Özel besin ekle</string>
+    <string name="custom_food_error_value_too_large">Değer çok yüksek görünüyor.</string>
+    <string name="custom_food_save_error">Özel besin kaydedilemedi.</string>
+    <string name="custom_food_delete_error">Özel besin silinemedi.</string>
+    <string name="custom_food_favorite_helper">Sık kullandığın besinleri üstte göstermek için işaretle.</string>
 </resources>

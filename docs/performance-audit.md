@@ -454,3 +454,10 @@ Remaining UX follow-ups:
 - Define an import commit model for Room + DataStore consistency.
 - Add more granular import/export failure telemetry in debug builds.
 - Add tests for malformed date/time fields and oversized files.
+
+### PR23.13.1 Custom Food Library Stabilization
+
+- Custom food search now uses Flow-based observe from Room — results auto-refresh on save/delete/favorite.
+- Turkish character normalization (TurkishSearchNormalizer) is shared between preset and custom food search.
+- Custom food in-memory filtering is acceptable for expected dataset sizes (<1000 items).
+- Custom food export/import is deferred to a future data management PR.

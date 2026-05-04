@@ -391,6 +391,9 @@ fun TodayContent(
 
                 is MealSheetMode.CustomFoodAdd -> {
                     val vm: com.burak.healthapp.feature.today.meal.CustomFoodEditorViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()
+                    androidx.compose.runtime.LaunchedEffect(Unit) {
+                        vm.resetForAdd()
+                    }
                     val editorState by vm.state.collectAsStateWithLifecycle()
                     com.burak.healthapp.feature.today.meal.CustomFoodEditorContent(
                         state = editorState,
@@ -402,6 +405,7 @@ fun TodayContent(
                         onProteinChange = vm::onProteinChange,
                         onCarbsChange = vm::onCarbsChange,
                         onFatChange = vm::onFatChange,
+                        onFavoriteChange = vm::onFavoriteChange,
                         onSave = { vm.save { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
                         onDelete = null,
                         onBack = { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) },
@@ -426,6 +430,7 @@ fun TodayContent(
                         onProteinChange = vm::onProteinChange,
                         onCarbsChange = vm::onCarbsChange,
                         onFatChange = vm::onFatChange,
+                        onFavoriteChange = vm::onFavoriteChange,
                         onSave = { vm.save { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
                         onDelete = { vm.delete { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) } },
                         onBack = { mealSheetMode = MealSheetMode.FoodSearch(mode.draftId) },

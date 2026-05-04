@@ -2,6 +2,7 @@ package com.burak.healthapp.feature.today.meal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.burak.healthapp.data.nutrition.TurkishSearchNormalizer
 import com.burak.healthapp.domain.model.nutrition.CustomFood
 import com.burak.healthapp.domain.model.nutrition.NutritionPresetFood
 import com.burak.healthapp.domain.repository.CustomFoodRepository
@@ -10,6 +11,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
@@ -40,35 +43,65 @@ class MealFoodSearchViewModel @Inject constructor(
     private val selectedSource = MutableStateFlow(FoodSearchSourceFilter.ALL)
     private val categories = MutableStateFlow<List<String>>(emptyList())
     private val presetResults = MutableStateFlow<List<NutritionPresetFood>>(emptyList())
-    private val customResults = MutableStateFlow<List<CustomFood>>(emptyList())
     private val isLoading = MutableStateFlow(true)
     private val isError = MutableStateFlow(false)
 
-    private data class SearchInputs(
+    private data class UiInputs(
         val query: String,
-        val selectedCategory: String?,
-        val selectedSource: FoodSearchSourceFilter,
+        val category: String?,
+        val source: FoodSearchSourceFilter,
         val categories: List<String>,
-        val presetResults: List<NutritionPresetFood>,
-        val customResults: List<CustomFood>,
     )
 
-    val uiState = combine(
+    /**
+     * Custom foods observed reactively from Room.
+     * Filtered in-memory with Turkish-aware normalize to support
+     * queries like "sut" finding "Süt".
+     */
+    private val filteredCustomFoods: StateFlow<List<CustomFood>> = combine(
+        customFoodRepository.observeAll(),
+        query.debounce(150),
+        selectedSource,
+    ) { allCustom, q, src ->
+        if (src == FoodSearchSourceFilter.PRESETS) return@combine emptyList()
+        val normalizedQuery = TurkishSearchNormalizer.normalize(q)
+        if (normalizedQuery.isBlank()) {
+            // Favorites first, then by updatedAt (DAO already sorts this way)
+            allCustom
+        } else {
+            allCustom.filter { food ->
+                val nameN = TurkishSearchNormalizer.normalize(food.name)
+                val brandN = food.brand?.let { TurkishSearchNormalizer.normalize(it) } ?: ""
+                nameN.contains(normalizedQuery) || brandN.contains(normalizedQuery)
+            }.sortedWith(
+                compareByDescending<CustomFood> { it.isFavorite }
+                    .thenBy { TurkishSearchNormalizer.normalize(it.name) },
+            )
+        }
+    }.catch {
+        // On error, emit empty list so the UI doesn't break
+        emit(emptyList())
+    }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val uiState: StateFlow<MealFoodSearchUiState> = combine(
         combine(
             query,
             selectedCategory,
             selectedSource,
             categories,
-        ) { q, cat, src, cats -> SearchInputs(q, cat, src, cats, emptyList(), emptyList()) },
+        ) { q, cat, src, cats ->
+            UiInputs(q, cat, src, cats)
+        },
         presetResults,
-        customResults,
+        filteredCustomFoods,
         isLoading,
         isError,
     ) { inputs, presets, custom, loading, error ->
         MealFoodSearchUiState(
             query = inputs.query,
-            selectedCategory = inputs.selectedCategory,
-            selectedSource = inputs.selectedSource,
+            selectedCategory = inputs.category,
+            selectedSource = inputs.source,
             categories = inputs.categories,
             presetResults = presets,
             customResults = custom,
@@ -85,7 +118,7 @@ class MealFoodSearchViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 categories.value = presetRepository.getCategories()
-            } catch (e: Exception) {
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 isError.value = true
             }
         }
@@ -103,13 +136,8 @@ class MealFoodSearchViewModel @Inject constructor(
                         } else {
                             presetResults.value = emptyList()
                         }
-                        if (src != FoodSearchSourceFilter.PRESETS) {
-                            customResults.value = customFoodRepository.searchCustomFoods(q)
-                        } else {
-                            customResults.value = emptyList()
-                        }
                         isError.value = false
-                    } catch (e: Exception) {
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                         isError.value = true
                     } finally {
                         isLoading.value = false

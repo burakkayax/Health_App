@@ -1,5 +1,6 @@
 package com.burak.healthapp.feature.today.meal
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +41,61 @@ import com.burak.healthapp.core.ui.components.RoundedPillButton
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 
+// ────────────────────────────────────────────
+// Validation error enum — ViewModel carries this, UI maps to stringResource
+// ────────────────────────────────────────────
+enum class CustomFoodFieldError {
+    NAME_REQUIRED,
+    SERVING_REQUIRED,
+    CALORIES_REQUIRED,
+    INVALID_NUMBER,
+    NEGATIVE_VALUE,
+    VALUE_TOO_LARGE,
+}
+
+// ────────────────────────────────────────────
+// Submit error for save/delete failures
+// ────────────────────────────────────────────
+enum class CustomFoodSubmitError {
+    SAVE_FAILED,
+    DELETE_FAILED,
+}
+
+// ────────────────────────────────────────────
+// Input parsing helpers (test-friendly, no Android deps)
+// ────────────────────────────────────────────
+private const val MAX_REASONABLE_VALUE = 99_999
+
+fun parseDecimalInput(value: String): Float? = value.trim().replace(',', '.').toFloatOrNull()
+
+fun validateRequiredPositiveFloat(value: String): CustomFoodFieldError? {
+    if (value.isBlank()) return CustomFoodFieldError.SERVING_REQUIRED
+    val f = parseDecimalInput(value) ?: return CustomFoodFieldError.INVALID_NUMBER
+    if (f < 0f) return CustomFoodFieldError.NEGATIVE_VALUE
+    if (f == 0f) return CustomFoodFieldError.SERVING_REQUIRED
+    if (f > MAX_REASONABLE_VALUE) return CustomFoodFieldError.VALUE_TOO_LARGE
+    return null
+}
+
+fun validateRequiredNonNegativeInt(value: String): CustomFoodFieldError? {
+    if (value.isBlank()) return CustomFoodFieldError.CALORIES_REQUIRED
+    val f = parseDecimalInput(value) ?: return CustomFoodFieldError.INVALID_NUMBER
+    if (f < 0f) return CustomFoodFieldError.NEGATIVE_VALUE
+    if (f > MAX_REASONABLE_VALUE) return CustomFoodFieldError.VALUE_TOO_LARGE
+    return null
+}
+
+fun validateOptionalNonNegativeInt(value: String): CustomFoodFieldError? {
+    if (value.isBlank()) return null
+    val f = parseDecimalInput(value) ?: return CustomFoodFieldError.INVALID_NUMBER
+    if (f < 0f) return CustomFoodFieldError.NEGATIVE_VALUE
+    if (f > MAX_REASONABLE_VALUE) return CustomFoodFieldError.VALUE_TOO_LARGE
+    return null
+}
+
+// ────────────────────────────────────────────
+// Editor state
+// ────────────────────────────────────────────
 data class CustomFoodEditorState(
     val id: Long? = null,
     val name: String = "",
@@ -50,23 +107,59 @@ data class CustomFoodEditorState(
     val carbs: String = "",
     val fat: String = "",
     val isFavorite: Boolean = false,
-    val nameError: String? = null,
-    val servingError: String? = null,
-    val caloriesError: String? = null,
+    val nameError: CustomFoodFieldError? = null,
+    val servingError: CustomFoodFieldError? = null,
+    val caloriesError: CustomFoodFieldError? = null,
+    val proteinError: CustomFoodFieldError? = null,
+    val carbsError: CustomFoodFieldError? = null,
+    val fatError: CustomFoodFieldError? = null,
+    val isSaving: Boolean = false,
+    val isDeleting: Boolean = false,
+    val submitError: CustomFoodSubmitError? = null,
 ) {
     val isEditing: Boolean get() = id != null
 
+    val hasFieldError: Boolean
+        get() = nameError != null ||
+            servingError != null ||
+            caloriesError != null ||
+            proteinError != null ||
+            carbsError != null ||
+            fatError != null
+
     val canSave: Boolean
         get() = name.isNotBlank() &&
-            servingGrams.toSafeFloat() != null &&
-            servingGrams.toSafeFloat()!! > 0f &&
-            calories.toSafeInt() != null &&
-            calories.toSafeInt()!! >= 0
+            validateRequiredPositiveFloat(servingGrams) == null &&
+            validateRequiredNonNegativeInt(calories) == null &&
+            validateOptionalNonNegativeInt(protein) == null &&
+            validateOptionalNonNegativeInt(carbs) == null &&
+            validateOptionalNonNegativeInt(fat) == null &&
+            !isSaving &&
+            !isDeleting
 }
 
-private fun String.toSafeFloat(): Float? = replace(',', '.').toFloatOrNull()
-private fun String.toSafeInt(): Int? = replace(',', '.').toFloatOrNull()?.toInt()
+// ────────────────────────────────────────────
+// Error → stringResource mapping
+// ────────────────────────────────────────────
+@Composable
+private fun CustomFoodFieldError.asText(): String = when (this) {
+    CustomFoodFieldError.NAME_REQUIRED -> stringResource(R.string.custom_food_error_name_required)
+    CustomFoodFieldError.SERVING_REQUIRED -> stringResource(R.string.custom_food_error_serving_required)
+    CustomFoodFieldError.CALORIES_REQUIRED -> stringResource(R.string.custom_food_error_calories_required)
+    CustomFoodFieldError.INVALID_NUMBER -> stringResource(R.string.custom_food_error_invalid_number)
+    CustomFoodFieldError.NEGATIVE_VALUE -> stringResource(R.string.custom_food_error_negative_value)
+    CustomFoodFieldError.VALUE_TOO_LARGE -> stringResource(R.string.custom_food_error_value_too_large)
+}
 
+@Composable
+private fun CustomFoodSubmitError.asText(): String = when (this) {
+    CustomFoodSubmitError.SAVE_FAILED -> stringResource(R.string.custom_food_save_error)
+    CustomFoodSubmitError.DELETE_FAILED -> stringResource(R.string.custom_food_delete_error)
+}
+
+// ────────────────────────────────────────────
+// Editor composable
+// ────────────────────────────────────────────
 @Composable
 fun CustomFoodEditorContent(
     state: CustomFoodEditorState,
@@ -78,6 +171,7 @@ fun CustomFoodEditorContent(
     onProteinChange: (String) -> Unit,
     onCarbsChange: (String) -> Unit,
     onFatChange: (String) -> Unit,
+    onFavoriteChange: (Boolean) -> Unit,
     onSave: () -> Unit,
     onDelete: (() -> Unit)?,
     onBack: () -> Unit,
@@ -90,10 +184,13 @@ fun CustomFoodEditorContent(
             title = { Text(stringResource(R.string.custom_food_delete_confirm_title)) },
             text = { Text(stringResource(R.string.custom_food_delete_confirm_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    showDeleteConfirm = false
-                    onDelete()
-                }) {
+                TextButton(
+                    enabled = !state.isDeleting,
+                    onClick = {
+                        showDeleteConfirm = false
+                        onDelete()
+                    },
+                ) {
                     Text(
                         stringResource(R.string.custom_food_delete),
                         color = MaterialTheme.colorScheme.error,
@@ -159,6 +256,18 @@ fun CustomFoodEditorContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // Submit error
+        val submitErr = state.submitError
+        if (submitErr != null) {
+            item {
+                Text(
+                    text = submitErr.asText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("custom_food_submit_error"),
+                )
+            }
+        }
         // Name
         item {
             HealthPillTextField(
@@ -167,7 +276,7 @@ fun CustomFoodEditorContent(
                 onValueChange = onNameChange,
                 label = stringResource(R.string.custom_food_name),
                 isError = state.nameError != null,
-                supportingText = state.nameError,
+                supportingText = state.nameError?.asText(),
             )
         }
         // Brand
@@ -197,7 +306,7 @@ fun CustomFoodEditorContent(
                     onValueChange = onServingGramsChange,
                     label = stringResource(R.string.custom_food_serving_grams),
                     isError = state.servingError != null,
-                    supportingText = state.servingError,
+                    supportingText = state.servingError?.asText(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
             }
@@ -214,7 +323,7 @@ fun CustomFoodEditorContent(
                     onValueChange = onCaloriesChange,
                     label = stringResource(R.string.custom_food_calories),
                     isError = state.caloriesError != null,
-                    supportingText = state.caloriesError,
+                    supportingText = state.caloriesError?.asText(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
                 HealthPillTextField(
@@ -222,6 +331,8 @@ fun CustomFoodEditorContent(
                     value = state.protein,
                     onValueChange = onProteinChange,
                     label = stringResource(R.string.custom_food_protein),
+                    isError = state.proteinError != null,
+                    supportingText = state.proteinError?.asText(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
             }
@@ -236,6 +347,8 @@ fun CustomFoodEditorContent(
                     value = state.carbs,
                     onValueChange = onCarbsChange,
                     label = stringResource(R.string.custom_food_carbs),
+                    isError = state.carbsError != null,
+                    supportingText = state.carbsError?.asText(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
                 HealthPillTextField(
@@ -243,9 +356,40 @@ fun CustomFoodEditorContent(
                     value = state.fat,
                     onValueChange = onFatChange,
                     label = stringResource(R.string.custom_food_fat),
+                    isError = state.fatError != null,
+                    supportingText = state.fatError?.asText(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
             }
+        }
+        // Favorite
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onFavoriteChange(!state.isFavorite) }
+                    .padding(vertical = HealthSpacing.xs)
+                    .testTag("custom_food_favorite_row"),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.custom_food_favorite),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(
+                    checked = state.isFavorite,
+                    onCheckedChange = onFavoriteChange,
+                    modifier = Modifier.testTag("custom_food_favorite_switch"),
+                )
+            }
+            Text(
+                text = stringResource(R.string.custom_food_favorite_helper),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         // Save
         item {
@@ -275,6 +419,7 @@ fun CustomFoodEditorContent(
                         .testTag("custom_food_delete_button"),
                     containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
                     contentColor = MaterialTheme.colorScheme.error,
+                    enabled = !state.isDeleting,
                     onClick = { showDeleteConfirm = true },
                 )
             }

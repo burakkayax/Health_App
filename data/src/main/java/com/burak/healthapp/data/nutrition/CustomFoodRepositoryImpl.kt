@@ -4,11 +4,17 @@ import com.burak.healthapp.data.local.dao.CustomFoodDao
 import com.burak.healthapp.data.local.entity.CustomFoodEntity
 import com.burak.healthapp.domain.model.nutrition.CustomFood
 import com.burak.healthapp.domain.repository.CustomFoodRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 
 class CustomFoodRepositoryImpl(
     private val dao: CustomFoodDao,
 ) : CustomFoodRepository {
+
+    override fun observeAll(): Flow<List<CustomFood>> =
+        dao.observeAll().map { list -> list.map { it.toDomain() } }
+
     override suspend fun getAll(): List<CustomFood> =
         dao.getAll().map { it.toDomain() }
 

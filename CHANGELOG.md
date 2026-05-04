@@ -1,5 +1,25 @@
 # Changelog
 
+## PR23.13.1 - Custom Food Library Stabilization
+
+### Düzeltildi
+- Özel besin ekleme, düzenleme ve silme sonrası besin arama sonuçlarının otomatik güncellenmesi sağlandı (Flow-based observe).
+- Yeni özel besin ekleme formunun eski state ile açılma riski giderildi (resetForAdd).
+- Özel besin formundaki negatif ve geçersiz makro değerlerinin sessizce 0'a çevrilmesi engellendi.
+- Özel besin araması Türkçe karakter duyarsız çalışacak şekilde iyileştirildi (TurkishSearchNormalizer).
+- Hazır besin araması da aynı ortak normalizer ile çalışacak şekilde yeniden düzenlendi.
+
+### Değiştirildi
+- Özel besin validation hataları resource/enum tabanlı (CustomFoodFieldError) hale getirildi.
+- Özel besin formuna favori Switch kontrolü eklendi.
+- Kaydetme ve silme işlemleri isSaving/isDeleting loading state ile daha güvenli hale getirildi.
+- Kaydetme/silme hata durumlarında form kapanmıyor, hata mesajı gösteriliyor.
+- Arama sonuçlarında favori özel besinler "Özel · Favori" etiketi ile gösteriliyor.
+
+### Not
+- Özel besinler hâlâ lokal saklanır. Export/import entegrasyonu sonraki veri yönetimi PR'ına bırakılmıştır.
+- Database version (7) değişmedi; yeni migration eklenmedi.
+
 ## PR23.13 - Custom Food Library v1
 
 ### Eklendi

@@ -380,4 +380,8 @@
     <string name="custom_food_error_invalid_number">Enter a valid number.</string>
     <string name="custom_food_error_negative_value">Negative values are not allowed.</string>
     <string name="custom_food_add_button">Add custom food</string>
+    <string name="custom_food_error_value_too_large">This value looks too high.</string>
+    <string name="custom_food_save_error">Custom food could not be saved.</string>
+    <string name="custom_food_delete_error">Custom food could not be deleted.</string>
+    <string name="custom_food_favorite_helper">Mark frequently used foods to show them first.</string>
 </resources>
