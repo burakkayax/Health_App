@@ -1,10 +1,12 @@
 package com.burak.healthapp.feature.detail
 
+import com.burak.healthapp.domain.calculation.buildCalendarMonthDays
+import com.burak.healthapp.domain.calculation.metricDateWindowFor
 import com.burak.healthapp.domain.model.TrendsPeriod
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-internal fun buildTrailingWeekDays(anchorDate: LocalDate): List<LocalDate> = buildTrailingDays(anchorDate = anchorDate, dayCount = 7)
+internal fun buildTrailingWeekDays(anchorDate: LocalDate): List<LocalDate> = metricDateWindowFor(anchorDate, TrendsPeriod.WEEKLY).days()
 
 internal fun buildTrailingDays(
     anchorDate: LocalDate,
@@ -14,18 +16,12 @@ internal fun buildTrailingDays(
     return ((dayCount - 1).toLong() downTo 0L).map(anchorDate::minusDays)
 }
 
-internal fun buildMonthToDateDays(anchorDate: LocalDate): List<LocalDate> {
-    val monthStart = anchorDate.withDayOfMonth(1)
-    return (0L..ChronoUnit.DAYS.between(monthStart, anchorDate)).map(monthStart::plusDays)
-}
+internal fun buildMonthToDateDays(anchorDate: LocalDate): List<LocalDate> = buildCalendarMonthDays(anchorDate)
 
 internal fun buildPeriodDays(
     anchorDate: LocalDate,
     period: TrendsPeriod,
-): List<LocalDate> = when (period) {
-    TrendsPeriod.WEEKLY -> buildTrailingWeekDays(anchorDate)
-    TrendsPeriod.MONTHLY -> buildMonthToDateDays(anchorDate)
-}
+): List<LocalDate> = metricDateWindowFor(anchorDate, period).days()
 
 internal fun buildMonthGridDays(anchorDate: LocalDate): List<LocalDate> {
     val monthStart = anchorDate.withDayOfMonth(1)

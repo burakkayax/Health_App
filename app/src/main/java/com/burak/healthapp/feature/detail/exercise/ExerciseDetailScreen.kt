@@ -124,9 +124,10 @@ class ExerciseDetailViewModel @Inject constructor(
         .flatMapLatest { (date, period) ->
             val periodDays = buildPeriodDays(date, period)
             val startDate = periodDays.firstOrNull() ?: date
+            val endDate = periodDays.lastOrNull() ?: date
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeExerciseBetween(startDate, date),
+                dashboardRepository.observeExerciseBetween(startDate, endDate),
             ) { settings, entries ->
                 PerformanceLogger.measure("ExerciseDetail:state_build") {
                     buildExerciseDetailUiState(
@@ -476,7 +477,6 @@ internal fun buildExerciseDetailUiState(
     dailyTargetMinutes: Int,
     periodDays: List<LocalDate> = buildPeriodDays(selectedDate, selectedPeriod),
 ): ExerciseDetailUiState {
-    val startDate = periodDays.firstOrNull() ?: selectedDate
     val days = periodDays
     val entriesByDate = entries.groupBy(ExerciseEntry::date)
     val target = dailyTargetMinutes.coerceAtLeast(1)
@@ -502,7 +502,7 @@ internal fun buildExerciseDetailUiState(
         totalDurationMinutes = totalDuration,
         activeDays = activeDays,
         entries = entries
-            .filter { entry -> entry.date in startDate..selectedDate }
+            .filter { entry -> entry.date in days }
             .sortedByDescending(ExerciseEntry::date)
             .map { entry ->
                 ExerciseHistoryItemState(

@@ -112,9 +112,10 @@ class CaffeineDetailViewModel @Inject constructor(
         .flatMapLatest { (date, period) ->
             val days = buildPeriodDays(date, period)
             val startDate = days.firstOrNull() ?: date
+            val endDate = days.lastOrNull() ?: date
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeCaffeineBetween(startDate, date),
+                dashboardRepository.observeCaffeineBetween(startDate, endDate),
             ) { settings, entries ->
                 PerformanceLogger.measure("CaffeineDetail:state_build") {
                     val entriesByDate = entries.groupBy(CaffeineEntry::date)

@@ -125,9 +125,10 @@ class SmokingDetailViewModel @Inject constructor(
         .flatMapLatest { (date, period) ->
             val periodDays = buildPeriodDays(date, period)
             val startDate = periodDays.firstOrNull() ?: date
+            val endDate = periodDays.lastOrNull() ?: date
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeSmokingBetween(startDate, date),
+                dashboardRepository.observeSmokingBetween(startDate, endDate),
             ) { settings, entries ->
                 PerformanceLogger.measure("SmokingDetail:state_build") {
                     buildSmokingDetailUiState(
@@ -453,7 +454,6 @@ internal fun buildSmokingDetailUiState(
     limit: Int,
     periodDays: List<LocalDate> = buildPeriodDays(selectedDate, selectedPeriod),
 ): SmokingDetailUiState {
-    val startDate = periodDays.firstOrNull() ?: selectedDate
     val days = periodDays
     val entriesByDate = entries.groupBy(SmokingEntry::date)
     val safeLimit = limit.coerceAtLeast(1)
@@ -481,7 +481,7 @@ internal fun buildSmokingDetailUiState(
         limit = limit,
         loggedDays = loggedTotals.size,
         entries = entries
-            .filter { entry -> entry.date in startDate..selectedDate }
+            .filter { entry -> entry.date in days }
             .sortedByDescending(SmokingEntry::date)
             .map { entry ->
                 SmokingHistoryItemState(

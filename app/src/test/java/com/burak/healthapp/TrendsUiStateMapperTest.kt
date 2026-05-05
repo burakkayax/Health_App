@@ -1,5 +1,6 @@
 package com.burak.healthapp
 
+import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SleepStabilityMetrics
 import com.burak.healthapp.domain.model.SleepStabilityStatus
@@ -29,13 +30,61 @@ class TrendsUiStateMapperTest {
     }
 
     @Test
-    fun monthlySummary_usesThirtyDayPeriod() {
-        val state = sampleSnapshot(period = TrendsPeriod.MONTHLY, days = 30).toTrendsUiState(
+    fun monthlySummary_usesSnapshotPeriodDayCount() {
+        val state = sampleSnapshot(period = TrendsPeriod.MONTHLY, days = 31).toTrendsUiState(
             avatarInitials = "BK",
             goals = GoalSettings(exerciseTargetDaysPerWeek = 3),
         )
 
-        assertEquals(30, state.goalAdherence.first().totalDays)
+        assertEquals(31, state.goalAdherence.first().totalDays)
+    }
+
+    @Test
+    fun monthlySummary_usesThisMonthPeriodLabel() {
+        val state = sampleSnapshot(period = TrendsPeriod.MONTHLY, days = 31).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        assertEquals(R.string.trends_period_month, state.summary.periodLabel.stringResourceId())
+    }
+
+    @Test
+    fun loggedDayAverageLabel_isExplicitInTrendsMapper() {
+        val state = sampleSnapshot(period = TrendsPeriod.WEEKLY).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        assertEquals(
+            R.string.trends_metric_logged_goal_days,
+            state.metricCards.first { it.metric == TrendsMetric.HYDRATION }.secondaryValue.stringResourceId(),
+        )
+        assertEquals(
+            R.string.trends_metric_logged_data_days,
+            state.metricCards.first { it.metric == TrendsMetric.SLEEP }.secondaryValue.stringResourceId(),
+        )
+        assertEquals(
+            R.string.trends_metric_logged_protein_average,
+            state.metricCards.first { it.metric == TrendsMetric.NUTRITION }.secondaryValue.stringResourceId(),
+        )
+    }
+
+    @Test
+    fun periodDayAverageLabel_isExplicitInTrendsMapper() {
+        val state = sampleSnapshot(period = TrendsPeriod.WEEKLY).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        assertEquals(
+            R.string.trends_metric_period_caffeine_over_days,
+            state.metricCards.first { it.metric == TrendsMetric.CAFFEINE }.secondaryValue.stringResourceId(),
+        )
+        assertEquals(
+            R.string.trends_metric_period_smoking_over_days,
+            state.metricCards.first { it.metric == TrendsMetric.SMOKING }.secondaryValue.stringResourceId(),
+        )
     }
 
     @Test
@@ -227,4 +276,6 @@ class TrendsUiStateMapperTest {
             sleepStability = sleepStability,
         )
     }
+
+    private fun UiText.stringResourceId(): Int = (this as UiText.StringResource).resId
 }

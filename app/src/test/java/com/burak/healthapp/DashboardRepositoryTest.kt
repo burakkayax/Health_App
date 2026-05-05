@@ -363,7 +363,7 @@ class DashboardRepositoryTest {
         ).first()
 
         assertEquals(6000f, snapshot.averageSteps, 0.001f)
-        assertEquals(listOf(0f, 0f, 0f, 0f, 4000f, 0f, 8000f), snapshot.stepPoints.map { it.value })
+        assertEquals(listOf(4000f, 0f, 8000f, 0f, 0f, 0f, 0f), snapshot.stepPoints.map { it.value })
     }
 
     @Test
@@ -416,7 +416,7 @@ class DashboardRepositoryTest {
             endDate = anchorDate,
         ).first()
 
-        assertEquals(listOf(70f, 71f, 72f, 73f), snapshot.weightPoints.map { it.value })
+        assertEquals(listOf(71f, 72f, 73f, 74f, 75f, 76f, 77f), snapshot.weightPoints.map { it.value })
     }
 
     @Test
@@ -451,12 +451,11 @@ class DashboardRepositoryTest {
             endDate = anchorDate,
         ).first()
 
-        assertEquals(1, snapshot.weightPoints.size)
-        assertEquals(73f, snapshot.weightPoints.single().value)
+        assertEquals(listOf(73f, 73f, 73f, 73f, 73f), snapshot.weightPoints.map { it.value })
     }
 
     @Test
-    fun observeTrends_usesMonthToDateForMonthlyAggregates() = runTest {
+    fun observeTrends_usesCalendarMonthForMonthlyAggregates() = runTest {
         val repository = TrendsRepositoryImpl(
             settingsRepository = FakeSettingsRepository(),
             mealDao = FakeMealDao(

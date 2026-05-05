@@ -219,7 +219,7 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.HYDRATION,
         title = stringRes(R.string.trends_metric_hydration),
         primaryValue = stringRes(R.string.format_ml_count, formatWholeNumber(averageWaterMl.toInt())),
-        secondaryValue = stringRes(R.string.trends_metric_goal_days, waterGoalMetDays, days.size),
+        secondaryValue = stringRes(R.string.trends_metric_logged_goal_days, waterGoalMetDays, days.size),
         changeLabel = changeLabel(averageWaterMl, previousAverageWaterMl),
         chartPoints = emptyList(),
         tone = toneFromGoalDays(waterGoalMetDays, days.size),
@@ -230,7 +230,7 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.STEPS,
         title = stringRes(R.string.trends_metric_steps),
         primaryValue = stringRes(R.string.format_steps_count, formatWholeNumber(averageSteps.toInt())),
-        secondaryValue = stringRes(R.string.trends_metric_goal_days, stepGoalMetDays, days.size),
+        secondaryValue = stringRes(R.string.trends_metric_logged_goal_days, stepGoalMetDays, days.size),
         changeLabel = changeLabel(averageSteps, previousAverageSteps),
         chartPoints = stepPoints,
         tone = toneFromGoalDays(stepGoalMetDays, days.size),
@@ -241,7 +241,7 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.SLEEP,
         title = stringRes(R.string.trends_metric_sleep),
         primaryValue = sleepAverageText(averageSleepMinutes),
-        secondaryValue = stringRes(R.string.trends_metric_data_days, sleepLoggedDays, days.size),
+        secondaryValue = stringRes(R.string.trends_metric_logged_data_days, sleepLoggedDays, days.size),
         changeLabel = changeLabel(averageSleepMinutes, previousAverageSleepMinutes),
         chartPoints = emptyList(),
         tone = toneFromGoalDays(sleepGoalMetDays, days.size),
@@ -252,7 +252,7 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.CAFFEINE,
         title = stringRes(R.string.trends_metric_caffeine),
         primaryValue = stringRes(R.string.format_mg_count, formatWholeNumber(averageCaffeineMg.toInt())),
-        secondaryValue = stringRes(R.string.trends_metric_caffeine_over_days, caffeineOverLimitDays, days.size),
+        secondaryValue = stringRes(R.string.trends_metric_period_caffeine_over_days, caffeineOverLimitDays, days.size),
         changeLabel = changeLabel(averageCaffeineMg, previousAverageCaffeineMg),
         chartPoints = emptyList(),
         tone = if (caffeineOverLimitDays > 0) TrendTone.WARNING else TrendTone.NEUTRAL,
@@ -274,7 +274,7 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.SMOKING,
         title = stringRes(R.string.trends_metric_smoking),
         primaryValue = stringRes(R.string.trends_metric_count_average, averageSmokingCount),
-        secondaryValue = stringRes(R.string.trends_metric_smoking_over_days, smokingOverLimitDays, days.size),
+        secondaryValue = stringRes(R.string.trends_metric_period_smoking_over_days, smokingOverLimitDays, days.size),
         changeLabel = changeLabel(averageSmokingCount, previousAverageSmokingCount),
         chartPoints = emptyList(),
         tone = if (smokingOverLimitDays > 0) TrendTone.WARNING else TrendTone.NEUTRAL,
@@ -296,7 +296,10 @@ private fun TrendsSnapshot.buildMetricCards(goals: GoalSettings): List<MetricTre
         metric = TrendsMetric.NUTRITION,
         title = stringRes(R.string.trends_metric_nutrition),
         primaryValue = stringRes(R.string.format_kcal_count, formatWholeNumber(averageCalories.toInt())),
-        secondaryValue = stringRes(R.string.trends_metric_protein_average, formatWholeNumber(averageProteinGrams.toInt())),
+        secondaryValue = stringRes(
+            R.string.trends_metric_logged_protein_average,
+            formatWholeNumber(averageProteinGrams.toInt()),
+        ),
         changeLabel = changeLabel(averageCalories, previousAverageCalories),
         chartPoints = weeklyCalories.map { point -> TrendPoint(point.label, point.calories.toFloat()) },
         tone = TrendTone.NEUTRAL,
@@ -456,9 +459,9 @@ private fun DataQualityWarningState.label(): UiText = when (metric) {
 
 private fun periodLabel(period: TrendsPeriod): UiText = stringRes(
     if (period == TrendsPeriod.WEEKLY) {
-        R.string.trends_period_last_7_days
+        R.string.trends_period_week
     } else {
-        R.string.trends_period_last_30_days
+        R.string.trends_period_month
     },
 )
 
@@ -468,7 +471,7 @@ private fun emptyUiState(): TrendsUiState = TrendsUiState(
     summary = PeriodSummaryState(
         title = stringRes(R.string.trends_summary_title),
         body = stringRes(R.string.trends_empty_helper),
-        periodLabel = stringRes(R.string.trends_period_last_7_days),
+        periodLabel = stringRes(R.string.trends_period_week),
         hasData = false,
     ),
     highlights = emptyList(),

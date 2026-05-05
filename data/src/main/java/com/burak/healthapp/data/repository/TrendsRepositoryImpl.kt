@@ -21,15 +21,16 @@ import com.burak.healthapp.domain.calculation.WeightMeasurementSample
 import com.burak.healthapp.domain.calculation.averageCalories
 import com.burak.healthapp.domain.calculation.averageProtein
 import com.burak.healthapp.domain.calculation.averageSleepMinutes
-import com.burak.healthapp.domain.calculation.calculateSleepStabilityMetrics
 import com.burak.healthapp.domain.calculation.averageSteps
 import com.burak.healthapp.domain.calculation.averageWaterMl
 import com.burak.healthapp.domain.calculation.buildCalendarWeekDays
 import com.burak.healthapp.domain.calculation.buildInterpolatedWeightTrendPoints
 import com.burak.healthapp.domain.calculation.buildStepTrendPoints
 import com.burak.healthapp.domain.calculation.buildWeeklyCalories
+import com.burak.healthapp.domain.calculation.calculateSleepStabilityMetrics
 import com.burak.healthapp.domain.calculation.clipWeightTrendDays
-import com.burak.healthapp.domain.calculation.buildWindowDays
+import com.burak.healthapp.domain.calculation.metricDateWindowFor
+import com.burak.healthapp.domain.calculation.previousMetricDateWindowFor
 import com.burak.healthapp.domain.model.CaffeineEntry
 import com.burak.healthapp.domain.model.ExerciseEntry
 import com.burak.healthapp.domain.model.HydrationEntry
@@ -59,12 +60,13 @@ class TrendsRepositoryImpl(
     private val measurementDao: BodyMeasurementDao,
 ) : TrendsRepository {
     override fun observeTrends(period: TrendsPeriod, endDate: LocalDate): Flow<TrendsSnapshot> {
-        val periodLength = if (period == TrendsPeriod.WEEKLY) WEEKLY_DAYS else MONTHLY_DAYS
-        val dataDays = buildWindowDays(endDate, periodLength)
-        val previousDays = buildWindowDays(dataDays.first().minusDays(1), periodLength)
-        val startDate = dataDays.first()
-        val queryStartDate = previousDays.first()
-        val finalDate = endDate
+        val currentWindow = metricDateWindowFor(endDate, period)
+        val previousWindow = previousMetricDateWindowFor(endDate, period)
+        val dataDays = currentWindow.days()
+        val previousDays = previousWindow.days()
+        val startDate = currentWindow.startDate
+        val queryStartDate = previousWindow.startDate
+        val finalDate = currentWindow.endDateInclusive
         val weeklyDays = buildCalendarWeekDays(endDate)
         val weightMeasurements = combine(
             measurementDao.observeBetween(startDate, finalDate),
@@ -213,9 +215,6 @@ private data class SecondaryTrendContext(
     val exercise: List<ExerciseEntry>,
     val weightContext: WeightChartContext,
 )
-
-private const val WEEKLY_DAYS = 7L
-private const val MONTHLY_DAYS = 30L
 
 private fun <T> List<T>.filterInDays(
     days: List<LocalDate>,

@@ -1,5 +1,12 @@
 # Changelog
 
+## PR25.2 — Date/time and Weekly/Monthly Calculation Fixes
+- Centralized weekly/monthly date-window logic and documented the period contract.
+- Aligned Trends and Sleep Detail monthly calculations around the same calendar-month window.
+- Added boundary tests for weekly/monthly windows, leap years, and inclusive/exclusive date ranges.
+- Clarified logged-day versus period-day average behavior and updated labels/tests where needed.
+- Preserved overnight sleep and midnight-adjacent sleep stability behavior with regression tests.
+
 ## PR25.1.1 — Import Result Contract & Partial Settings Failure
 - Made settings failures after successful Room import explicit as partial import outcomes.
 - Added retry-safe/idempotent handling and tests for partial settings failure.

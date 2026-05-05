@@ -94,9 +94,10 @@ class HydrationDetailViewModel @Inject constructor(
         .flatMapLatest { (date, period) ->
             val periodDays = buildPeriodDays(date, period)
             val startDate = periodDays.firstOrNull() ?: date
+            val endDate = periodDays.lastOrNull() ?: date
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeHydrationBetween(startDate, date),
+                dashboardRepository.observeHydrationBetween(startDate, endDate),
             ) { settings, entries ->
                 PerformanceLogger.measure("HydrationDetail:state_build") {
                     buildHydrationDetailUiState(

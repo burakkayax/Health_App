@@ -47,12 +47,14 @@ import com.burak.healthapp.core.ui.theme.HealthCarbs
 import com.burak.healthapp.core.ui.theme.HealthSleep
 import com.burak.healthapp.core.ui.theme.HealthSpacing
 import com.burak.healthapp.core.ui.theme.HealthSuccess
+import com.burak.healthapp.domain.calculation.MetricDateWindow
 import com.burak.healthapp.domain.calculation.buildSleepFeedback
 import com.burak.healthapp.domain.calculation.calculateSleepDurationMinutes
 import com.burak.healthapp.domain.calculation.calculateSleepRegularityStandardDeviation
 import com.burak.healthapp.domain.calculation.clampProgress
 import com.burak.healthapp.domain.calculation.formatLocalTime
 import com.burak.healthapp.domain.calculation.formatMinutesAsSleepLabel
+import com.burak.healthapp.domain.calculation.metricDateWindowFor
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SleepSession
 import com.burak.healthapp.domain.model.TrendsPeriod
@@ -60,8 +62,7 @@ import com.burak.healthapp.domain.repository.DashboardRepository
 import com.burak.healthapp.domain.repository.SettingsRepository
 import com.burak.healthapp.feature.detail.DetailSkeletonContent
 import com.burak.healthapp.feature.detail.buildMonthGridDays
-import com.burak.healthapp.feature.detail.buildTrailingDays
-import com.burak.healthapp.feature.detail.buildTrailingWeekDays
+import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.detail.sleep.SleepBarState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarDayState
 import com.burak.healthapp.feature.detail.sleep.SleepCalendarWeekState
@@ -96,16 +97,12 @@ class SleepDetailViewModel @Inject constructor(
 
     val uiState = combine(selectedDate, selectedPeriod) { date, period -> date to period }
         .flatMapLatest { (date, period) ->
-            val startDate = if (period == TrendsPeriod.MONTHLY) {
-                date.withDayOfMonth(1)
-            } else {
-                date.minusDays(29)
-            }
+            val dateWindow = sleepDetailDateWindowFor(date, period)
             combine(
                 settingsRepository.settings,
                 dashboardRepository.observeSleepSessionsBetween(
-                    startDate = startDate,
-                    endDate = date,
+                    startDate = dateWindow.startDate,
+                    endDate = dateWindow.endDateInclusive,
                 ),
             ) { settings, sessions ->
                 PerformanceLogger.measure("SleepDetail:state_build") {
@@ -419,6 +416,11 @@ private fun SleepConsistencyChart(
     }
 }
 
+internal fun sleepDetailDateWindowFor(
+    selectedDate: LocalDate,
+    period: TrendsPeriod,
+): MetricDateWindow = metricDateWindowFor(selectedDate, period)
+
 private fun List<SleepSession>.toSleepDetailUiState(
     anchorDate: LocalDate,
     period: TrendsPeriod,
@@ -427,9 +429,7 @@ private fun List<SleepSession>.toSleepDetailUiState(
     val sessionsByDate = groupBy(SleepSession::sessionDate)
         .mapValues { (_, entries) -> entries.maxByOrNull(SleepSession::endTime) }
 
-    val weeklyDays = buildTrailingWeekDays(anchorDate)
-    val monthlyDays = buildTrailingDays(anchorDate = anchorDate, dayCount = 30)
-    val displayDays = if (period == TrendsPeriod.WEEKLY) weeklyDays else monthlyDays
+    val displayDays = buildPeriodDays(anchorDate, period)
     val targetMinutes = goals.sleepTargetMinutes.toFloat().coerceAtLeast(1f)
     val calendarWeeks = buildSleepCalendarWeeks(
         anchorDate = anchorDate,
@@ -450,9 +450,10 @@ private fun List<SleepSession>.toSleepDetailUiState(
         )
     }
 
-    val regularitySessions = weeklyDays.mapNotNull { sessionsByDate[it] }
+    val regularitySessions = displayDays.mapNotNull { sessionsByDate[it] }
     val standardDeviation = calculateSleepRegularityStandardDeviation(regularitySessions)
     val selectedSession = sessionsByDate[anchorDate]
+    val regularityPeriodText = if (period == TrendsPeriod.WEEKLY) "Bu hafta" else "Bu ay"
 
     return SleepDetailUiState(
         selectedPeriod = period,
@@ -470,7 +471,7 @@ private fun List<SleepSession>.toSleepDetailUiState(
             when {
                 standardDeviation < 30f -> SleepRegularityState(
                     title = "Düzenli",
-                    subtitle = "Son 7 günde uyku saatlerin oldukça stabil.",
+                    subtitle = "$regularityPeriodText uyku saatlerin oldukça stabil.",
                     helperLabel = buildSleepFeedback(selectedSession, goals),
                     progress = 1f,
                     status = SleepRegularityStatus.REGULAR,
@@ -478,7 +479,7 @@ private fun List<SleepSession>.toSleepDetailUiState(
 
                 standardDeviation <= 60f -> SleepRegularityState(
                     title = "Değişken",
-                    subtitle = "Son 7 günde uyku saatlerin orta seviyede değişiyor.",
+                    subtitle = "$regularityPeriodText uyku saatlerin orta seviyede değişiyor.",
                     helperLabel = buildSleepFeedback(selectedSession, goals),
                     progress = 0.55f,
                     status = SleepRegularityStatus.VARIABLE,
@@ -486,7 +487,7 @@ private fun List<SleepSession>.toSleepDetailUiState(
 
                 else -> SleepRegularityState(
                     title = "Düzensiz",
-                    subtitle = "Son 7 günde yatış veya uyanış saatlerin oldukça oynak.",
+                    subtitle = "$regularityPeriodText yatış veya uyanış saatlerin oldukça oynak.",
                     helperLabel = buildSleepFeedback(selectedSession, goals),
                     progress = 0.25f,
                     status = SleepRegularityStatus.IRREGULAR,

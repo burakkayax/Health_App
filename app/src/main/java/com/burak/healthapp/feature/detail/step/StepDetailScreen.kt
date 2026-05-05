@@ -95,9 +95,11 @@ class StepDetailViewModel @Inject constructor(
         .distinctUntilChanged()
         .flatMapLatest { (date, period) ->
             val displayDays = buildPeriodDays(date, period)
+            val startDate = displayDays.firstOrNull() ?: date
+            val endDate = displayDays.lastOrNull() ?: date
             combine(
                 settingsRepository.settings,
-                dashboardRepository.observeStepsBetween(displayDays.first(), date),
+                dashboardRepository.observeStepsBetween(startDate, endDate),
             ) { settings, entries ->
                 PerformanceLogger.measure("StepDetail:state_build") {
                     entries.toStepDetailUiState(

@@ -90,3 +90,15 @@ internal fun averageByLoggedDays(valuesByDay: Map<LocalDate, Int>): Float {
     if (valuesByDay.isEmpty()) return 0f
     return valuesByDay.values.sum().toFloat() / valuesByDay.size
 }
+
+internal fun averageByPeriodDays(
+    valuesByDay: Map<LocalDate, Int>,
+    window: MetricDateWindow,
+): Float {
+    if (window.dayCount <= 0) return 0f
+    return valuesByDay
+        .filterKeys { date -> date in window }
+        .values
+        .sum()
+        .toFloat() / window.dayCount
+}

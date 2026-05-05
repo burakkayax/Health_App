@@ -262,6 +262,27 @@ class SleepStabilityCalculationsTest {
     }
 
     @Test
+    fun overnightSleepDuration_stillCorrect() {
+        val session = sleepSession("2026-04-26T23:30", "2026-04-27T07:20")
+
+        assertEquals(470, calculateSleepDurationMinutes(session))
+    }
+
+    @Test
+    fun midnightAdjacentSleepAverage_staysNearMidnight() {
+        val result = calculateSleepStabilityMetrics(
+            sessions = listOf(
+                sleepSession("2026-04-27T23:50", "2026-04-28T07:00"),
+                sleepSession("2026-04-28T00:10", "2026-04-28T07:10"),
+            ),
+            targetBedtime = defaultTargetBedtime,
+            targetWakeTime = defaultTargetWakeTime,
+        )
+
+        assertEquals(0, result.averageBedtimeMinutes)
+    }
+
+    @Test
     fun normalizeMinutesToClock_handlesOverflow() {
         assertEquals(0, normalizeMinutesToClock(1440))
         assertEquals(0, normalizeMinutesToClock(2880))

@@ -15,21 +15,21 @@ class MetricDateWindowsTest {
     private val anchorDate = LocalDate.of(2026, 4, 27)
 
     @Test
-    fun trailingWeekDays_returnsSevenOrderedDaysEndingAtAnchor() {
+    fun trailingWeekDays_returnsCalendarWeekContainingAnchor() {
         val days = buildTrailingWeekDays(anchorDate)
 
         assertEquals(7, days.size)
-        assertEquals(LocalDate.of(2026, 4, 21), days.first())
-        assertEquals(anchorDate, days.last())
+        assertEquals(LocalDate.of(2026, 4, 27), days.first())
+        assertEquals(LocalDate.of(2026, 5, 3), days.last())
     }
 
     @Test
-    fun monthToDateDays_returnsMonthStartThroughAnchor() {
+    fun monthToDateDays_returnsFullCalendarMonthForMetricPeriods() {
         val days = buildMonthToDateDays(anchorDate)
 
         assertEquals(LocalDate.of(2026, 4, 1), days.first())
-        assertEquals(anchorDate, days.last())
-        assertEquals(27, days.size)
+        assertEquals(LocalDate.of(2026, 4, 30), days.last())
+        assertEquals(30, days.size)
     }
 
     @Test
