@@ -1,5 +1,10 @@
 # Changelog
 
+## PR24 — Full App Audit
+- Added full-app audit documents covering data flow, critical bugs, test gaps, UI/UX risks, navigation/state risks, and performance/battery concerns.
+- Mapped audit findings into PR25.1–PR29 follow-up plans.
+- Recorded current CI/test command results and remaining verification gaps.
+
 ## PR23.17.3.2 — AndroidTest Signature, Detekt & Onboarding Cleanup
 - Updated androidTest fake SettingsRepository implementations to match the expanded completeOnboarding signature.
 - Fixed detekt issues in onboarding tests by replacing empty override blocks and using error() for expected test failures.
