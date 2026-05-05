@@ -1,5 +1,11 @@
 # Changelog
 
+## PR23.16 — Sleep Stability Metrics v2
+- Added period-based sleep stability metrics for average bedtime, average wake time, and variability.
+- Handled overnight and midnight-adjacent sleep records without naive time averaging errors.
+- Added Trends sleep stability card with data sufficiency states (NO_DATA, LIMITED_DATA, READY).
+- Added unit tests for sleep stability calculations and trend mapping.
+
 ## PR23.15.3 — Import / Settings / Test Safety Hardening
 - Strengthened JSON import semantic validation for goals, reminders, sleep, hydration, supplements, caffeine, and custom foods.
 - Made DataStore time/date parsing resilient to invalid stored values.

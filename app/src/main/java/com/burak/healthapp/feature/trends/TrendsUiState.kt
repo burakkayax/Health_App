@@ -1,6 +1,7 @@
 package com.burak.healthapp.feature.trends
 
 import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.domain.model.SleepStabilityStatus
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 
@@ -13,6 +14,7 @@ data class TrendsUiState(
     val metricCards: List<MetricTrendCardState>,
     val insights: List<ShortInsightState>,
     val dataQuality: List<DataQualityWarningState>,
+    val sleepStability: SleepStabilityCardState? = null,
     val isLoading: Boolean = false,
 )
 
@@ -91,3 +93,14 @@ enum class TrendsDetailDestination {
     WEIGHT,
     NUTRITION,
 }
+
+data class SleepStabilityCardState(
+    val status: SleepStabilityStatus,
+    val averageBedtimeLabel: UiText,
+    val averageWakeTimeLabel: UiText,
+    val bedtimeVariabilityLabel: UiText,
+    val wakeTimeVariabilityLabel: UiText,
+    val targetDeviationLabel: UiText,
+    val insight: UiText,
+    val hasData: Boolean,
+)

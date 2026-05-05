@@ -21,6 +21,7 @@ import com.burak.healthapp.domain.calculation.WeightMeasurementSample
 import com.burak.healthapp.domain.calculation.averageCalories
 import com.burak.healthapp.domain.calculation.averageProtein
 import com.burak.healthapp.domain.calculation.averageSleepMinutes
+import com.burak.healthapp.domain.calculation.calculateSleepStabilityMetrics
 import com.burak.healthapp.domain.calculation.averageSteps
 import com.burak.healthapp.domain.calculation.averageWaterMl
 import com.burak.healthapp.domain.calculation.buildCalendarWeekDays
@@ -189,6 +190,11 @@ class TrendsRepositoryImpl(
                 stepPoints = buildStepTrendPoints(
                     entries = currentSteps,
                     days = dataDays,
+                ),
+                sleepStability = calculateSleepStabilityMetrics(
+                    sessions = currentSleeps,
+                    targetBedtime = settings.goalSettings.sleepTargetBedtime,
+                    targetWakeTime = settings.goalSettings.sleepTargetWakeTime,
                 ),
             )
         }

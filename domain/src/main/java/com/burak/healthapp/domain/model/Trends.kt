@@ -62,4 +62,5 @@ data class TrendsSnapshot(
     val weeklyCalories: List<CalorieBarPoint>,
     val weightPoints: List<TrendPoint>,
     val stepPoints: List<TrendPoint>,
+    val sleepStability: SleepStabilityMetrics,
 )

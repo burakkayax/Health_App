@@ -94,9 +94,9 @@ private fun calculateStandardDeviation(values: List<Float>): Float {
     return sqrt(variance)
 }
 
-private fun normalizeBedtimeMinutes(time: LocalTime): Int {
+internal fun normalizeBedtimeMinutes(time: LocalTime): Int {
     val minutes = time.toMinuteOfDay()
     return if (minutes < 12 * 60) minutes + (24 * 60) else minutes
 }
 
-private fun LocalTime.toMinuteOfDay(): Int = (toSecondOfDay() / 60)
+internal fun LocalTime.toMinuteOfDay(): Int = (toSecondOfDay() / 60)

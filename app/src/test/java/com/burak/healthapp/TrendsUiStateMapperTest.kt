@@ -1,12 +1,16 @@
 package com.burak.healthapp
 
 import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.SleepStabilityMetrics
+import com.burak.healthapp.domain.model.SleepStabilityStatus
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
 import com.burak.healthapp.feature.trends.TrendTone
 import com.burak.healthapp.feature.trends.TrendsMetric
 import com.burak.healthapp.feature.trends.toTrendsUiState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
@@ -48,9 +52,130 @@ class TrendsUiStateMapperTest {
         assertTrue(state.dataQuality.any { it.metric == TrendsMetric.WEIGHT })
     }
 
+    @Test
+    fun readyMetrics_produceNonEmptyLabels() {
+        val state = sampleSnapshot(
+            period = TrendsPeriod.WEEKLY,
+            sleepStability = SleepStabilityMetrics(
+                recordCount = 5,
+                averageBedtimeMinutes = 1380, // 23:00
+                averageWakeTimeMinutes = 420, // 07:00
+                bedtimeVariabilityMinutes = 20,
+                wakeTimeVariabilityMinutes = 15,
+                averageBedtimeTargetDeviationMinutes = 10,
+                averageWakeTargetDeviationMinutes = 5,
+                status = SleepStabilityStatus.READY,
+            ),
+        ).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        val card = state.sleepStability
+        assertNotNull(card)
+        assertEquals(SleepStabilityStatus.READY, card!!.status)
+        assertTrue(card.hasData)
+    }
+
+    @Test
+    fun noDataMetrics_produceNoDataMessage() {
+        val state = sampleSnapshot(
+            period = TrendsPeriod.WEEKLY,
+            sleepStability = SleepStabilityMetrics(
+                recordCount = 0,
+                averageBedtimeMinutes = null,
+                averageWakeTimeMinutes = null,
+                bedtimeVariabilityMinutes = null,
+                wakeTimeVariabilityMinutes = null,
+                averageBedtimeTargetDeviationMinutes = null,
+                averageWakeTargetDeviationMinutes = null,
+                status = SleepStabilityStatus.NO_DATA,
+            ),
+        ).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        val card = state.sleepStability
+        assertNotNull(card)
+        assertEquals(SleepStabilityStatus.NO_DATA, card!!.status)
+        assertFalse(card.hasData)
+    }
+
+    @Test
+    fun limitedDataMetrics_produceLimitedMessage() {
+        val state = sampleSnapshot(
+            period = TrendsPeriod.WEEKLY,
+            sleepStability = SleepStabilityMetrics(
+                recordCount = 1,
+                averageBedtimeMinutes = 1380,
+                averageWakeTimeMinutes = 420,
+                bedtimeVariabilityMinutes = null,
+                wakeTimeVariabilityMinutes = null,
+                averageBedtimeTargetDeviationMinutes = 0,
+                averageWakeTargetDeviationMinutes = 0,
+                status = SleepStabilityStatus.LIMITED_DATA,
+            ),
+        ).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        val card = state.sleepStability
+        assertNotNull(card)
+        assertEquals(SleepStabilityStatus.LIMITED_DATA, card!!.status)
+        assertTrue(card.hasData)
+    }
+
+    @Test
+    fun insightLanguage_doesNotClaimMedicalCausation() {
+        val state = sampleSnapshot(
+            period = TrendsPeriod.WEEKLY,
+            sleepStability = SleepStabilityMetrics(
+                recordCount = 5,
+                averageBedtimeMinutes = 1380,
+                averageWakeTimeMinutes = 420,
+                bedtimeVariabilityMinutes = 45,
+                wakeTimeVariabilityMinutes = 20,
+                averageBedtimeTargetDeviationMinutes = 10,
+                averageWakeTargetDeviationMinutes = 5,
+                status = SleepStabilityStatus.READY,
+            ),
+        ).toTrendsUiState(
+            avatarInitials = "BK",
+            goals = GoalSettings(),
+        )
+
+        val card = state.sleepStability!!
+        val insightText = (card.insight as? com.burak.healthapp.core.ui.text.UiText.StringResource)
+        assertNotNull(insightText)
+        // The string resource IDs should map to safe language (verified via string values)
+        // Not asserting on resolved strings since we don't have Context in unit tests,
+        // but verify the resource ID is one of the safe ones
+        val safeResIds = listOf(
+            R.string.trends_sleep_stability_ready_neutral,
+            R.string.trends_sleep_stability_wake_more_regular,
+            R.string.trends_sleep_stability_bedtime_more_variable,
+        )
+        assertTrue(
+            "Insight resource should be a safe language resource",
+            insightText!!.resId in safeResIds,
+        )
+    }
+
     private fun sampleSnapshot(
         period: TrendsPeriod,
         days: Int = 7,
+        sleepStability: SleepStabilityMetrics = SleepStabilityMetrics(
+            recordCount = 5,
+            averageBedtimeMinutes = 1380,
+            averageWakeTimeMinutes = 420,
+            bedtimeVariabilityMinutes = 20,
+            wakeTimeVariabilityMinutes = 15,
+            averageBedtimeTargetDeviationMinutes = 10,
+            averageWakeTargetDeviationMinutes = 5,
+            status = SleepStabilityStatus.READY,
+        ),
     ): TrendsSnapshot {
         val end = LocalDate.of(2026, 5, 1)
         val currentDays = (days - 1 downTo 0).map { end.minusDays(it.toLong()) }
@@ -99,6 +224,7 @@ class TrendsUiStateMapperTest {
             weeklyCalories = emptyList(),
             weightPoints = emptyList(),
             stepPoints = emptyList(),
+            sleepStability = sleepStability,
         )
     }
 }

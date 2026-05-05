@@ -129,6 +129,11 @@ fun TrendsContent(
                         onOpenDetail = onOpenDetail,
                     )
                 }
+                state.sleepStability?.let { stability ->
+                    item {
+                        SleepStabilityCard(stability)
+                    }
+                }
                 item {
                     ShortInsightsSection(
                         insights = state.insights,
@@ -140,6 +145,69 @@ fun TrendsContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SleepStabilityCard(state: SleepStabilityCardState) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("trends_sleep_stability_card"),
+    ) {
+        Text(
+            text = stringResource(R.string.trends_sleep_stability_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (state.hasData) {
+            Text(
+                modifier = Modifier
+                    .padding(top = HealthSpacing.xs)
+                    .testTag("sleep_stability_avg_bedtime"),
+                text = state.averageBedtimeLabel.asString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                modifier = Modifier
+                    .padding(top = HealthSpacing.xs)
+                    .testTag("sleep_stability_avg_wake"),
+                text = state.averageWakeTimeLabel.asString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (state.status == com.burak.healthapp.domain.model.SleepStabilityStatus.READY) {
+                Text(
+                    modifier = Modifier
+                        .padding(top = HealthSpacing.xs)
+                        .testTag("sleep_stability_bedtime_variability"),
+                    text = state.bedtimeVariabilityLabel.asString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(top = HealthSpacing.xs)
+                        .testTag("sleep_stability_wake_variability"),
+                    text = state.wakeTimeVariabilityLabel.asString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    modifier = Modifier.padding(top = HealthSpacing.xs),
+                    text = state.targetDeviationLabel.asString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Text(
+            modifier = Modifier.padding(top = HealthSpacing.sm),
+            text = state.insight.asString(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 

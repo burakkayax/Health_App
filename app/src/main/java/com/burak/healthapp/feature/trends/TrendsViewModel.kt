@@ -6,7 +6,9 @@ import com.burak.healthapp.R
 import com.burak.healthapp.core.performance.PerformanceLogger
 import com.burak.healthapp.core.ui.format.formatWholeNumber
 import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.domain.calculation.formatClockMinutes
 import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.SleepStabilityStatus
 import com.burak.healthapp.domain.model.TrendPoint
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.domain.model.TrendsSnapshot
@@ -106,6 +108,7 @@ internal fun TrendsSnapshot.toTrendsUiState(
         metricCards = metricCards,
         insights = insights,
         dataQuality = dataQuality,
+        sleepStability = buildSleepStabilityCard(),
     )
 }
 
@@ -477,3 +480,67 @@ private fun emptyUiState(): TrendsUiState = TrendsUiState(
 )
 
 private fun stringRes(resId: Int, vararg args: Any): UiText = UiText.StringResource(resId = resId, args = args.toList())
+
+private fun TrendsSnapshot.buildSleepStabilityCard(): SleepStabilityCardState {
+    val metrics = sleepStability
+    val notAvailable = stringRes(R.string.common_time_not_available)
+
+    return when (metrics.status) {
+        SleepStabilityStatus.NO_DATA -> SleepStabilityCardState(
+            status = SleepStabilityStatus.NO_DATA,
+            averageBedtimeLabel = notAvailable,
+            averageWakeTimeLabel = notAvailable,
+            bedtimeVariabilityLabel = notAvailable,
+            wakeTimeVariabilityLabel = notAvailable,
+            targetDeviationLabel = notAvailable,
+            insight = stringRes(R.string.trends_sleep_stability_no_data),
+            hasData = false,
+        )
+
+        SleepStabilityStatus.LIMITED_DATA -> SleepStabilityCardState(
+            status = SleepStabilityStatus.LIMITED_DATA,
+            averageBedtimeLabel = metrics.averageBedtimeMinutes?.let {
+                stringRes(R.string.trends_sleep_avg_bedtime, formatClockMinutes(it))
+            } ?: notAvailable,
+            averageWakeTimeLabel = metrics.averageWakeTimeMinutes?.let {
+                stringRes(R.string.trends_sleep_avg_wake, formatClockMinutes(it))
+            } ?: notAvailable,
+            bedtimeVariabilityLabel = notAvailable,
+            wakeTimeVariabilityLabel = notAvailable,
+            targetDeviationLabel = notAvailable,
+            insight = stringRes(R.string.trends_sleep_stability_limited),
+            hasData = true,
+        )
+
+        SleepStabilityStatus.READY -> {
+            val bedVar = metrics.bedtimeVariabilityMinutes ?: 0
+            val wakeVar = metrics.wakeTimeVariabilityMinutes ?: 0
+            val insightText = when {
+                wakeVar < bedVar -> stringRes(R.string.trends_sleep_stability_wake_more_regular)
+                bedVar < wakeVar -> stringRes(R.string.trends_sleep_stability_bedtime_more_variable)
+                else -> stringRes(R.string.trends_sleep_stability_ready_neutral)
+            }
+            val avgDeviation = listOfNotNull(
+                metrics.averageBedtimeTargetDeviationMinutes,
+                metrics.averageWakeTargetDeviationMinutes,
+            ).let { deviations ->
+                if (deviations.isNotEmpty()) deviations.average().toInt() else 0
+            }
+
+            SleepStabilityCardState(
+                status = SleepStabilityStatus.READY,
+                averageBedtimeLabel = metrics.averageBedtimeMinutes?.let {
+                    stringRes(R.string.trends_sleep_avg_bedtime, formatClockMinutes(it))
+                } ?: notAvailable,
+                averageWakeTimeLabel = metrics.averageWakeTimeMinutes?.let {
+                    stringRes(R.string.trends_sleep_avg_wake, formatClockMinutes(it))
+                } ?: notAvailable,
+                bedtimeVariabilityLabel = stringRes(R.string.trends_sleep_bedtime_variability, bedVar),
+                wakeTimeVariabilityLabel = stringRes(R.string.trends_sleep_wake_variability, wakeVar),
+                targetDeviationLabel = stringRes(R.string.trends_sleep_target_deviation, avgDeviation),
+                insight = insightText,
+                hasData = true,
+            )
+        }
+    }
+}
