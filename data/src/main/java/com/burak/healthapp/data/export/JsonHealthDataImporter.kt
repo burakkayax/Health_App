@@ -127,22 +127,22 @@ private fun HealthDataExportModel.validateProfile(): ImportValidationError? =
     }
 
 private fun ExportedGoalSettings.validate(): ImportValidationError? =
-    validateNonNegative(dailyCaloriesTarget, "goals.dailyCaloriesTarget")
+    validatePositive(dailyCaloriesTarget, "goals.dailyCaloriesTarget")
         ?: validateNonNegative(proteinTargetGrams, "goals.proteinTargetGrams")
         ?: validateNonNegative(carbTargetGrams, "goals.carbTargetGrams")
         ?: validateNonNegative(fatTargetGrams, "goals.fatTargetGrams")
-        ?: validateNonNegative(waterTargetMl, "goals.waterTargetMl")
+        ?: validatePositive(waterTargetMl, "goals.waterTargetMl")
         ?: validateNonNegative(dailyStepTarget, "goals.dailyStepTarget")
         ?: validateNonNegative(dailyCaffeineLimitMg, "goals.dailyCaffeineLimitMg")
         ?: validateTime(caffeineCutoffTime, "goals.caffeineCutoffTime")
         ?: validateNonNegative(caffeineSleepBufferHours, "goals.caffeineSleepBufferHours")
         ?: validateTime(sleepTargetBedtime, "goals.sleepTargetBedtime")
         ?: validateTime(sleepTargetWakeTime, "goals.sleepTargetWakeTime")
-        ?: validateNonNegative(exerciseTargetDaysPerWeek, "goals.exerciseTargetDaysPerWeek")
+        ?: validateRange(exerciseTargetDaysPerWeek, 0..7, "goals.exerciseTargetDaysPerWeek")
         ?: validateNonNegative(exerciseTargetDurationMinutes, "goals.exerciseTargetDurationMinutes")
         ?: validateNonNegative(smokeDailyLimit, "goals.smokeDailyLimit")
-        ?: validateNonNegative(baselineWeightKg, "goals.baselineWeightKg")
-        ?: validateNonNegative(targetWeightKg, "goals.targetWeightKg")
+        ?: validatePositiveFloat(baselineWeightKg, "goals.baselineWeightKg")
+        ?: validatePositiveFloat(targetWeightKg, "goals.targetWeightKg")
         ?: validateNonNegative(baselineShoulderCm, "goals.baselineShoulderCm")
         ?: validateNonNegative(baselineWaistCm, "goals.baselineWaistCm")
         ?: validateNonNegative(baselineHipCm, "goals.baselineHipCm")
@@ -150,10 +150,11 @@ private fun ExportedGoalSettings.validate(): ImportValidationError? =
 private fun ExportedWaterReminderSettings.validate(): ImportValidationError? =
     validateTime(startTime, "waterReminderSettings.startTime")
         ?: validateTime(endTime, "waterReminderSettings.endTime")
-        ?: validateNonNegative(intervalMinutes, "waterReminderSettings.intervalMinutes")
+        ?: validateRange(intervalMinutes, com.burak.healthapp.domain.config.DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES..Int.MAX_VALUE, "waterReminderSettings.intervalMinutes")
 
 private fun ExportedMealEntry.validate(index: Int): ImportValidationError? =
-    validateDate(date, "meals[$index].date")
+    validateNotBlank(name, "meals[$index].name")
+        ?: validateDate(date, "meals[$index].date")
         ?: validateEnum<MealType>(mealType, "meals[$index].mealType")
         ?: validateNonNegative(calories, "meals[$index].calories")
         ?: validateNonNegative(carbsGrams, "meals[$index].carbsGrams")
@@ -163,18 +164,28 @@ private fun ExportedMealEntry.validate(index: Int): ImportValidationError? =
 
 private fun ExportedHydrationEntry.validate(index: Int): ImportValidationError? =
     validateDate(date, "hydration[$index].date")
-        ?: validateNonNegative(amountMl, "hydration[$index].amountMl")
+        ?: validatePositive(amountMl, "hydration[$index].amountMl")
         ?: validateDateTime(createdAt, "hydration[$index].createdAt")
 
-private fun ExportedSleepSession.validate(index: Int): ImportValidationError? =
-    validateDate(sessionDate, "sleep[$index].sessionDate")
-        ?: validateDateTime(startTime, "sleep[$index].startTime")
-        ?: validateDateTime(endTime, "sleep[$index].endTime")
+private fun ExportedSleepSession.validate(index: Int): ImportValidationError? {
+    validateDate(sessionDate, "sleep[$index].sessionDate")?.let { return it }
+    validateDateTime(startTime, "sleep[$index].startTime")?.let { return it }
+    validateDateTime(endTime, "sleep[$index].endTime")?.let { return it }
+    val start = java.time.LocalDateTime.parse(startTime)
+    val end = java.time.LocalDateTime.parse(endTime)
+    if (!end.isAfter(start)) {
+        return ImportValidationError.NonPositiveValue("sleep[$index].duration")
+    }
+    if (java.time.Duration.between(start, end).toHours() > 24) {
+        return ImportValidationError.InvalidRange("sleep[$index].duration")
+    }
+    return null
+}
 
 private fun ExportedExerciseEntry.validate(index: Int): ImportValidationError? =
     validateDate(date, "exercise[$index].date")
         ?: validateEnum<ExerciseType>(type, "exercise[$index].type")
-        ?: validateNonNegative(durationMinutes, "exercise[$index].durationMinutes")
+        ?: validatePositive(durationMinutes, "exercise[$index].durationMinutes")
         ?: validateEnum<ExerciseIntensity>(intensity, "exercise[$index].intensity")
 
 private fun ExportedSmokingEntry.validate(index: Int): ImportValidationError? =
@@ -193,25 +204,27 @@ private fun ExportedCaffeineEntry.validate(index: Int): ImportValidationError? =
         ?: validateTime(time, "caffeineEntries[$index].time")
         ?: validateEnum<CaffeineDrinkType>(drinkType, "caffeineEntries[$index].drinkType")
         ?: validateEnum<CaffeineDrinkSize>(size, "caffeineEntries[$index].size")
-        ?: validateNonNegative(estimatedMg, "caffeineEntries[$index].estimatedMg")
+        ?: validatePositive(estimatedMg, "caffeineEntries[$index].estimatedMg")
         ?: validateDateTime(createdAt, "caffeineEntries[$index].createdAt")
 
 private fun ExportedBodyMeasurementEntry.validate(index: Int): ImportValidationError? =
     validateDate(date, "bodyMeasurements[$index].date")
-        ?: validateNonNegative(weightKg, "bodyMeasurements[$index].weightKg")
+        ?: validatePositiveFloat(weightKg, "bodyMeasurements[$index].weightKg")
         ?: validateNonNegative(shoulderCm, "bodyMeasurements[$index].shoulderCm")
         ?: validateNonNegative(waistCm, "bodyMeasurements[$index].waistCm")
         ?: validateNonNegative(hipCm, "bodyMeasurements[$index].hipCm")
         ?: validateDateTime(recordedAt, "bodyMeasurements[$index].recordedAt")
 
 private fun ExportedSupplementTemplate.validate(index: Int): ImportValidationError? =
-    validateNonNegative(targetAmount, "supplementTemplates[$index].targetAmount")
+    validateNotBlank(name, "supplementTemplates[$index].name")
+        ?: validateNotBlank(unitLabel, "supplementTemplates[$index].unitLabel")
+        ?: validatePositiveFloat(targetAmount, "supplementTemplates[$index].targetAmount")
         ?: validateNonNegative(sortOrder, "supplementTemplates[$index].sortOrder")
 
 private fun ExportedSupplementDoseEntry.validate(index: Int): ImportValidationError? =
-    validateNonNegative(templateId, "supplementDoseEntries[$index].templateId")
+    validatePositive(templateId, "supplementDoseEntries[$index].templateId")
         ?: validateDate(date, "supplementDoseEntries[$index].date")
-        ?: validateNonNegative(amount, "supplementDoseEntries[$index].amount")
+        ?: validatePositiveFloat(amount, "supplementDoseEntries[$index].amount")
         ?: validateDateTime(loggedAt, "supplementDoseEntries[$index].loggedAt")
 
 private fun ExportedCustomFood.validate(index: Int): ImportValidationError? =
@@ -280,6 +293,15 @@ private fun validateInstant(value: String, fieldPath: String): ImportValidationE
 private fun validateNonNegative(value: Int, fieldPath: String): ImportValidationError? =
     if (value < 0) ImportValidationError.NegativeValue(fieldPath) else null
 
+private fun validatePositive(value: Int, fieldPath: String): ImportValidationError? =
+    if (value <= 0) ImportValidationError.NonPositiveValue(fieldPath) else null
+
+private fun validatePositive(value: Long, fieldPath: String): ImportValidationError? =
+    if (value <= 0L) ImportValidationError.NonPositiveValue(fieldPath) else null
+
+private fun validateRange(value: Int, range: IntRange, fieldPath: String): ImportValidationError? =
+    if (value !in range) ImportValidationError.InvalidRange(fieldPath) else null
+
 private fun validateNonNegative(value: Long, fieldPath: String): ImportValidationError? =
     if (value < 0L) ImportValidationError.NegativeValue(fieldPath) else null
 
@@ -298,6 +320,6 @@ private fun validateNotBlank(value: String, fieldPath: String): ImportValidation
 private fun validatePositiveFloat(value: Float, fieldPath: String): ImportValidationError? =
     when {
         !value.isFinite() -> ImportValidationError.InvalidNumber(fieldPath)
-        value <= 0f -> ImportValidationError.NegativeValue(fieldPath)
+        value <= 0f -> ImportValidationError.NonPositiveValue(fieldPath)
         else -> null
     }

@@ -453,6 +453,8 @@ private fun ImportValidationError.toUiText(): UiText = when (this) {
     is ImportValidationError.InvalidEnum -> UiText.StringResource(R.string.import_error_invalid_enum)
     is ImportValidationError.InvalidNumber -> UiText.StringResource(R.string.import_error_invalid_number)
     is ImportValidationError.NegativeValue -> UiText.StringResource(R.string.import_error_negative_value)
+    is ImportValidationError.NonPositiveValue -> UiText.StringResource(R.string.import_error_negative_value)
+    is ImportValidationError.InvalidRange -> UiText.StringResource(R.string.import_error_invalid_number)
     is ImportValidationError.FileTooLarge -> UiText.StringResource(R.string.import_error_file_too_large)
     ImportValidationError.DecodeFailure -> UiText.StringResource(R.string.import_error_decode_failure)
     ImportValidationError.DatabaseFailure -> UiText.StringResource(R.string.import_error_database_failure)

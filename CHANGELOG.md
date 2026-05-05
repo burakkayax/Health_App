@@ -1,5 +1,11 @@
 # Changelog
 
+## PR23.15.3 — Import / Settings / Test Safety Hardening
+- Strengthened JSON import semantic validation for goals, reminders, sleep, hydration, supplements, caffeine, and custom foods.
+- Made DataStore time/date parsing resilient to invalid stored values.
+- Clarified import failure behavior when settings persistence fails after Room import.
+- Expanded tests for import validation and settings fallback behavior.
+
 ## PR23.15.2 - Custom Food Import Merge Key Fix
 
 ### Düzeltildi

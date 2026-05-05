@@ -39,7 +39,7 @@ jobs:
         run: ./gradlew :app:compileDebugKotlin
 
       - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest
+        run: ./gradlew :domain:test :data:test :app:testDebugUnitTest
 
       - name: Compile androidTest Kotlin
         run: ./gradlew :app:compileDebugAndroidTestKotlin

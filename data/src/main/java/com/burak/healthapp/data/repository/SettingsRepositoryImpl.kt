@@ -43,10 +43,8 @@ class SettingsRepositoryImpl(
     override val settings: Flow<SettingsState> = dataStore.data.map { preferences ->
         val legacySleepTarget = preferences[SettingsKeys.sleepTarget] ?: DefaultHealthGoals.LEGACY_SLEEP_TARGET_MINUTES
         val fallbackSleepSchedule = deriveSleepScheduleFromLegacy(legacySleepTarget)
-        val bedtime = preferences[SettingsKeys.sleepTargetBedtime]?.let(LocalTime::parse)
-            ?: fallbackSleepSchedule.first
-        val wakeTime = preferences[SettingsKeys.sleepTargetWakeTime]?.let(LocalTime::parse)
-            ?: fallbackSleepSchedule.second
+        val bedtime = preferences[SettingsKeys.sleepTargetBedtime].toLocalTimeOrDefault(fallbackSleepSchedule.first)
+        val wakeTime = preferences[SettingsKeys.sleepTargetWakeTime].toLocalTimeOrDefault(fallbackSleepSchedule.second)
 
         SettingsState(
             onboardingCompleted = preferences[SettingsKeys.onboardingComplete] ?: false,
@@ -63,8 +61,8 @@ class SettingsRepositoryImpl(
                 waterTargetMl = preferences[SettingsKeys.waterTarget] ?: DefaultHealthGoals.WATER_TARGET_ML,
                 dailyStepTarget = preferences[SettingsKeys.dailyStepTarget] ?: DefaultHealthGoals.DAILY_STEPS,
                 dailyCaffeineLimitMg = preferences[SettingsKeys.dailyCaffeineLimitMg] ?: DefaultHealthGoals.DAILY_CAFFEINE_LIMIT_MG,
-                caffeineCutoffTime = preferences[SettingsKeys.caffeineCutoffTime]?.let(LocalTime::parse)
-                    ?: DefaultHealthGoals.CAFFEINE_CUTOFF_TIME,
+                caffeineCutoffTime = preferences[SettingsKeys.caffeineCutoffTime]
+                    .toLocalTimeOrDefault(DefaultHealthGoals.CAFFEINE_CUTOFF_TIME),
                 caffeineSleepBufferHours = preferences[SettingsKeys.caffeineSleepBufferHours] ?: DefaultHealthGoals.CAFFEINE_SLEEP_BUFFER_HOURS,
                 sleepTargetBedtime = bedtime,
                 sleepTargetWakeTime = wakeTime,
@@ -79,13 +77,13 @@ class SettingsRepositoryImpl(
             ),
             waterReminderSettings = WaterReminderSettings(
                 enabled = preferences[SettingsKeys.waterReminderEnabled] ?: false,
-                startTime = preferences[SettingsKeys.waterReminderStartTime]?.let(LocalTime::parse)
-                    ?: DefaultHealthGoals.WATER_REMINDER_START_TIME,
-                endTime = preferences[SettingsKeys.waterReminderEndTime]?.let(LocalTime::parse)
-                    ?: DefaultHealthGoals.WATER_REMINDER_END_TIME,
+                startTime = preferences[SettingsKeys.waterReminderStartTime]
+                    .toLocalTimeOrDefault(DefaultHealthGoals.WATER_REMINDER_START_TIME),
+                endTime = preferences[SettingsKeys.waterReminderEndTime]
+                    .toLocalTimeOrDefault(DefaultHealthGoals.WATER_REMINDER_END_TIME),
                 intervalMinutes = preferences[SettingsKeys.waterReminderIntervalMinutes] ?: DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
             ),
-            waterReminderSnoozedDate = preferences[SettingsKeys.waterReminderSnoozedDate]?.let(LocalDate::parse),
+            waterReminderSnoozedDate = preferences[SettingsKeys.waterReminderSnoozedDate].toLocalDateOrNull(),
             stepTrackingEnabled = preferences[SettingsKeys.stepTrackingEnabled] ?: false,
             dashboardCards = preferences[SettingsKeys.dashboardCardConfig]
                 ?.let(::decodeDashboardCardConfig)
@@ -282,3 +280,9 @@ private fun deriveSleepScheduleFromLegacy(totalMinutes: Int): Pair<LocalTime, Lo
     val wakeTime = bedtime.plusMinutes(totalMinutes.coerceAtLeast(0).toLong())
     return bedtime to wakeTime
 }
+
+private fun String?.toLocalTimeOrDefault(default: LocalTime): LocalTime =
+    this?.let { runCatching { LocalTime.parse(it) }.getOrNull() } ?: default
+
+private fun String?.toLocalDateOrNull(): LocalDate? =
+    this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

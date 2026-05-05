@@ -11,6 +11,8 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
+import androidx.datastore.preferences.core.edit
+import com.burak.healthapp.core.datastore.SettingsKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -186,6 +188,40 @@ class SettingsRepositoryTest {
         val reset = repository.settings.first().dashboardCards
         assertEquals(DashboardCardType.NUTRITION, reset.first().type)
         assertEquals(true, reset.first { it.type == DashboardCardType.HYDRATION }.isVisible)
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun invalidStoredTimes_fallBackToDefaults() = runTest {
+        val tempDir = Files.createTempDirectory("health-invalid-times").toFile()
+        val tempFile = File(tempDir, "settings.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { tempFile },
+        )
+        
+        dataStore.edit { preferences ->
+            preferences[SettingsKeys.sleepTargetBedtime] = "invalid-time"
+            preferences[SettingsKeys.caffeineCutoffTime] = "invalid-time"
+            preferences[SettingsKeys.waterReminderStartTime] = "invalid-time"
+            preferences[SettingsKeys.waterReminderSnoozedDate] = "invalid-date"
+            preferences[SettingsKeys.dashboardCardConfig] = "invalid-json"
+        }
+
+        val repository = SettingsRepositoryImpl(
+            dataStore = dataStore,
+            templateDao = EmptyTemplateDao,
+            measurementDao = EmptyMeasurementDao,
+        )
+
+        val settings = repository.settings.first()
+        
+        assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.SLEEP_BEDTIME, settings.goalSettings.sleepTargetBedtime)
+        assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.CAFFEINE_CUTOFF_TIME, settings.goalSettings.caffeineCutoffTime)
+        assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.WATER_REMINDER_START_TIME, settings.waterReminderSettings.startTime)
+        assertEquals(null, settings.waterReminderSnoozedDate)
+        assertEquals(com.burak.healthapp.domain.model.defaultDashboardCardConfig().map { it.type }, settings.dashboardCards.map { it.type })
+        
         tempDir.deleteRecursively()
     }
 }

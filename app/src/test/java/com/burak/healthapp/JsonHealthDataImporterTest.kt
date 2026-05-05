@@ -131,7 +131,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate(exporter.encode(model))
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("hydration[0].amountMl")),
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("hydration[0].amountMl")),
             result,
         )
     }
@@ -156,7 +156,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate(exporter.encode(model))
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("caffeineEntries[0].estimatedMg")),
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("caffeineEntries[0].estimatedMg")),
             result,
         )
     }
@@ -345,7 +345,7 @@ class JsonHealthDataImporterTest {
         val result = importer.validate(exporter.encode(model))
 
         assertEquals(
-            ImportValidationResult.Invalid(ImportValidationError.NegativeValue("customFoods[0].servingGrams")),
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("customFoods[0].servingGrams")),
             result,
         )
     }
@@ -440,6 +440,135 @@ class JsonHealthDataImporterTest {
 
         assertTrue(result is ImportValidationResult.Valid)
         assertEquals(1, (result as ImportValidationResult.Valid).preview.customFoodsCount)
+    }
+
+    @Test
+    fun validate_rejectsWaterReminderIntervalBelowMinimum() {
+        val model = sampleModel().copy(
+            waterReminderSettings = sampleModel().waterReminderSettings.copy(intervalMinutes = 14)
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.InvalidRange("waterReminderSettings.intervalMinutes")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroWaterTarget() {
+        val model = sampleModel().copy(
+            goals = sampleModel().goals.copy(waterTargetMl = 0)
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("goals.waterTargetMl")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroHydrationAmount() {
+        val model = sampleModel().copy(
+            hydration = listOf(sampleModel().hydration.first().copy(amountMl = 0))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("hydration[0].amountMl")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsBlankMealName() {
+        val model = sampleModel().copy(
+            meals = listOf(sampleModel().meals.first().copy(name = "   "))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.MissingRequiredField("meals[0].name")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroExerciseDuration() {
+        val model = sampleModel().copy(
+            exercise = listOf(com.burak.healthapp.domain.export.ExportedExerciseEntry(1, "2026-04-27", "RUN", 0, "HIGH"))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("exercise[0].durationMinutes")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroSleepDuration() {
+        val model = sampleModel().copy(
+            sleep = listOf(sampleModel().sleep.first().copy(startTime = "2026-04-27T07:00:00", endTime = "2026-04-27T07:00:00"))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("sleep[0].duration")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_acceptsValidOvernightSleep() {
+        val model = sampleModel().copy(
+            sleep = listOf(sampleModel().sleep.first().copy(startTime = "2026-04-26T22:00:00", endTime = "2026-04-27T06:00:00"))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertTrue(result is ImportValidationResult.Valid)
+    }
+
+    @Test
+    fun validate_rejectsBlankSupplementTemplateName() {
+        val model = sampleModel().copy(
+            supplementTemplates = listOf(sampleModel().supplementTemplates.first().copy(name = ""))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.MissingRequiredField("supplementTemplates[0].name")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroSupplementDoseAmount() {
+        val model = sampleModel().copy(
+            supplementDoseEntries = listOf(com.burak.healthapp.domain.export.ExportedSupplementDoseEntry(1, 1, "2026-04-27", 0f, "2026-04-27T10:00:00"))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("supplementDoseEntries[0].amount")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsBlankCustomFoodServingName() {
+        val model = sampleModel().copy(
+            customFoods = listOf(sampleCustomFood().copy(servingName = "  "))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.MissingRequiredField("customFoods[0].servingName")),
+            result
+        )
+    }
+
+    @Test
+    fun validate_rejectsZeroCaffeineEstimatedMg() {
+        val model = sampleModel().copy(
+            caffeineEntries = listOf(com.burak.healthapp.domain.export.ExportedCaffeineEntry(1, "2026-04-27", "10:00", "BLACK_TEA", "SMALL", 0, null, "2026-04-27T10:00:00"))
+        )
+        val result = importer.validate(exporter.encode(model))
+        assertEquals(
+            ImportValidationResult.Invalid(ImportValidationError.NonPositiveValue("caffeineEntries[0].estimatedMg")),
+            result
+        )
     }
 }
 

@@ -53,6 +53,8 @@ sealed interface ImportValidationError {
     data class InvalidEnum(val fieldPath: String) : ImportValidationError
     data class InvalidNumber(val fieldPath: String) : ImportValidationError
     data class NegativeValue(val fieldPath: String) : ImportValidationError
+    data class NonPositiveValue(val fieldPath: String) : ImportValidationError
+    data class InvalidRange(val fieldPath: String) : ImportValidationError
     data class FileTooLarge(val limitBytes: Long) : ImportValidationError
     data object DecodeFailure : ImportValidationError
     data object DatabaseFailure : ImportValidationError

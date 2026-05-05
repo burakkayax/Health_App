@@ -74,6 +74,9 @@ class HealthDataManagementRepositoryImpl(
         }
 
         try {
+            // Note: If settings persistence fails here, the database transaction has already
+            // committed. This results in a partial import where health records exist
+            // but the profile/goals are not fully updated.
             settingsRepository.updateProfile(prepared.profile)
             settingsRepository.updateGoalSettings(prepared.goals)
             settingsRepository.updateWaterReminderSettings(prepared.waterReminderSettings)

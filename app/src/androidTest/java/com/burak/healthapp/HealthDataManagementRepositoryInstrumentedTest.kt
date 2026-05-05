@@ -136,13 +136,34 @@ class HealthDataManagementRepositoryInstrumentedTest {
     fun importHealthData_withInvalidModelLeavesRoomDataUntouched() = runBlocking {
         try {
             repository.importHealthData(fullImportModel().copy(meals = listOf(fullImportModel().meals.single().copy(date = "bad-date"))))
-        } catch (_: Exception) {
-            // Expected: parsing fails before Room writes begin.
+        } catch (e: com.burak.healthapp.domain.export.HealthDataImportException) {
+            assertEquals(com.burak.healthapp.domain.export.ImportValidationError.DecodeFailure, e.error)
         }
 
         assertEquals(emptyList<MealEntryEntity>(), database.mealDao().getAll())
         assertEquals(emptyList<HydrationEntryEntity>(), database.hydrationDao().getAll())
         assertEquals("Misafir", settingsRepository.current.userProfile.name)
+    }
+
+    @Test
+    fun importHealthData_withSettingsFailureResultsInPartialImport() = runBlocking {
+        val failingSettingsRepo = object : RecordingManagementSettingsRepository() {
+            override suspend fun updateGoalSettings(goals: GoalSettings) {
+                throw RuntimeException("Simulated Settings Failure")
+            }
+        }
+        val failingRepository = HealthDataManagementRepositoryImpl(database, failingSettingsRepo)
+
+        try {
+            failingRepository.importHealthData(fullImportModel())
+        } catch (e: com.burak.healthapp.domain.export.HealthDataImportException) {
+            assertEquals(com.burak.healthapp.domain.export.ImportValidationError.SettingsFailure, e.error)
+        }
+
+        // Database records are imported
+        assertEquals(1, database.mealDao().getAll().size)
+        assertEquals(1, database.hydrationDao().getAll().size)
+        // But settings failed (or partially succeeded before the throw)
     }
 
     @Test
@@ -470,7 +491,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
     }
 }
 
-private class RecordingManagementSettingsRepository : SettingsRepository {
+private open class RecordingManagementSettingsRepository : SettingsRepository {
     private val state = MutableStateFlow(SettingsState(onboardingCompleted = true))
 
     val current: SettingsState
@@ -487,7 +508,7 @@ private class RecordingManagementSettingsRepository : SettingsRepository {
         supplements: List<String>,
     ) = Unit
 
-    override suspend fun updateGoalSettings(goals: GoalSettings) {
+    open override suspend fun updateGoalSettings(goals: GoalSettings) {
         state.value = state.value.copy(goalSettings = goals)
     }
 
