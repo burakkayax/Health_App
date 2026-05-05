@@ -61,6 +61,7 @@ import com.burak.healthapp.core.ui.theme.HealthSpacing
 @Composable
 fun HealthCard(
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     footer: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -71,7 +72,7 @@ fun HealthCard(
             ambientColor = HealthShadow,
             spotColor = HealthShadow,
         ),
-        color = MaterialTheme.colorScheme.surface,
+        color = containerColor,
         shape = RoundedCornerShape(HealthSpacing.lg),
     ) {
         Column {

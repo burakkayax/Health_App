@@ -1,0 +1,257 @@
+package com.burak.healthapp
+
+import com.burak.healthapp.core.ui.text.UiText
+import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardType
+import com.burak.healthapp.domain.model.GoalSettings
+import com.burak.healthapp.domain.model.SettingsState
+import com.burak.healthapp.domain.model.SupplementTemplate
+import com.burak.healthapp.domain.model.ThemeMode
+import com.burak.healthapp.domain.model.UserProfile
+import com.burak.healthapp.domain.model.WaterReminderSettings
+import com.burak.healthapp.domain.repository.SettingsRepository
+import com.burak.healthapp.feature.onboarding.OnboardingStep
+import com.burak.healthapp.feature.onboarding.OnboardingViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+import java.time.LocalDate
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class OnboardingViewModelTest {
+
+    @get:Rule
+    val mainDispatcherRule = OnboardingMainDispatcherRule()
+
+    @Test
+    fun cannotProceedFromTrackingAreasWhenNothingSelected() = runTest {
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        
+        viewModel.goToNextStep() // WELCOME -> TRACKING_AREAS
+        advanceUntilIdle()
+        assertEquals(OnboardingStep.TRACKING_AREAS, viewModel.uiState.value.currentStep)
+
+        // Deselect all
+        viewModel.uiState.value.selectedTrackingAreas.toList().forEach {
+            viewModel.onTrackingAreaToggled(it)
+        }
+        advanceUntilIdle()
+
+        viewModel.goToNextStep()
+        advanceUntilIdle()
+        
+        assertEquals(OnboardingStep.TRACKING_AREAS, viewModel.uiState.value.currentStep)
+        assertNotNull(viewModel.uiState.value.validationErrors["tracking_areas"])
+    }
+
+    @Test
+    fun emptyOptionalBasicInfoCanProceed() = runTest {
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        advanceUntilIdle()
+        assertEquals(OnboardingStep.BASIC_INFO, viewModel.uiState.value.currentStep)
+
+        viewModel.goToNextStep() // Should proceed
+        advanceUntilIdle()
+        assertEquals(OnboardingStep.ACTIVITY_GOAL, viewModel.uiState.value.currentStep)
+    }
+
+    @Test
+    fun invalidAgeShowsValidationError() = runTest {
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        
+        viewModel.updateAge("12") // Invalid age
+        viewModel.goToNextStep()
+        advanceUntilIdle()
+        
+        assertEquals(OnboardingStep.BASIC_INFO, viewModel.uiState.value.currentStep)
+        assertNotNull(viewModel.uiState.value.validationErrors["age"])
+    }
+
+    @Test
+    fun invalidWeightShowsValidationError() = runTest {
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        
+        viewModel.updateCurrentWeightKg("20") // Invalid weight
+        viewModel.goToNextStep()
+        advanceUntilIdle()
+        
+        assertEquals(OnboardingStep.BASIC_INFO, viewModel.uiState.value.currentStep)
+        assertNotNull(viewModel.uiState.value.validationErrors["currentWeight"])
+    }
+
+    @Test
+    fun invalidReminderIntervalShowsValidationError() = runTest {
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        advanceUntilIdle()
+        
+        viewModel.updateWaterReminderEnabled(true)
+        viewModel.updateWaterReminderIntervalMinutes("10") // Invalid interval (< 15)
+        viewModel.goToNextStep()
+        advanceUntilIdle()
+        
+        assertEquals(OnboardingStep.PREFERENCES, viewModel.uiState.value.currentStep)
+        assertNotNull(viewModel.uiState.value.validationErrors["reminder_interval"])
+    }
+
+    @Test
+    fun finishOnboardingBuildsExpectedGoalSettings() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository)
+        
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.updateWaterTargetMl("3000")
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertNotNull(repository.lastGoals)
+        assertEquals(3000, repository.lastGoals?.waterTargetMl)
+    }
+
+    @Test
+    fun finishOnboardingPersistsDashboardVisibility() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository)
+        
+        viewModel.goToNextStep() // TRACKING_AREAS
+        // Keep defaults, which includes NUTRITION and HYDRATION, doesn't include CAFFEINE
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertTrue(repository.dashboardVisibilities[DashboardCardType.NUTRITION] == true)
+        assertTrue(repository.dashboardVisibilities[DashboardCardType.HYDRATION] == true)
+        assertTrue(repository.dashboardVisibilities[DashboardCardType.CAFFEINE] == false)
+    }
+
+    @Test
+    fun finishOnboardingSavesWaterReminderPreference() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository)
+        
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.updateWaterReminderEnabled(true)
+        viewModel.updateWaterReminderIntervalMinutes("60")
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertNotNull(repository.lastWaterReminderSettings)
+        assertTrue(repository.lastWaterReminderSettings?.enabled == true)
+        assertEquals(60, repository.lastWaterReminderSettings?.intervalMinutes)
+    }
+
+    @Test
+    fun finishOnboardingSavesStepTrackingPreference() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository)
+        
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.updateStepTrackingPreferred(true)
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertTrue(repository.lastStepTrackingEnabled == true)
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class OnboardingMainDispatcherRule(
+    private val dispatcher: TestDispatcher = StandardTestDispatcher(),
+) : TestWatcher() {
+    override fun starting(description: Description) {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    override fun finished(description: Description) {
+        Dispatchers.resetMain()
+    }
+}
+
+class FakeOnboardingSettingsRepository : SettingsRepository {
+    var lastProfile: UserProfile? = null
+    var lastGoals: GoalSettings? = null
+    var lastMeasurement: BodyMeasurementEntry? = null
+    var lastSupplements: List<String>? = null
+    var lastWaterReminderSettings: WaterReminderSettings? = null
+    var lastStepTrackingEnabled: Boolean? = null
+    val dashboardVisibilities = mutableMapOf<DashboardCardType, Boolean>()
+
+    override val settings: Flow<SettingsState> = MutableStateFlow(SettingsState())
+    override fun observeSupplementTemplates(): Flow<List<SupplementTemplate>> = emptyFlow()
+
+    override suspend fun completeOnboarding(
+        profile: UserProfile,
+        goals: GoalSettings,
+        initialMeasurement: BodyMeasurementEntry,
+        supplements: List<String>
+    ) {
+        lastProfile = profile
+        lastGoals = goals
+        lastMeasurement = initialMeasurement
+        lastSupplements = supplements
+    }
+
+    override suspend fun updateGoalSettings(goals: GoalSettings) {}
+    override suspend fun updateWaterReminderSettings(settings: WaterReminderSettings) {
+        lastWaterReminderSettings = settings
+    }
+    override suspend fun updateWaterReminderSnoozedDate(date: LocalDate?) {}
+    override suspend fun updateStepTrackingEnabled(enabled: Boolean) {
+        lastStepTrackingEnabled = enabled
+    }
+    override suspend fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean) {
+        dashboardVisibilities[type] = isVisible
+    }
+    override suspend fun moveDashboardCard(type: DashboardCardType, newIndex: Int) {}
+    override suspend fun resetDashboardCardsToDefault() {}
+    override suspend fun updateProfile(profile: UserProfile) {}
+    override suspend fun updateThemeMode(mode: ThemeMode) {}
+    override suspend fun replaceSupplementTemplates(templates: List<SupplementTemplate>) {}
+}

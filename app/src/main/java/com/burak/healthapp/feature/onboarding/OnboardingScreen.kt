@@ -1,219 +1,131 @@
 package com.burak.healthapp.feature.onboarding
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.burak.healthapp.core.ui.components.AvatarBadge
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.components.HealthCard
 import com.burak.healthapp.core.ui.components.HealthPillTextField
 import com.burak.healthapp.core.ui.components.RoundedPillButton
+import com.burak.healthapp.core.ui.text.asString
 import com.burak.healthapp.core.ui.theme.HealthPrimary
 import com.burak.healthapp.core.ui.theme.HealthSpacing
-import com.burak.healthapp.domain.config.DefaultHealthGoals
-import com.burak.healthapp.domain.model.BodyMeasurementEntry
-import com.burak.healthapp.domain.model.GoalSettings
-import com.burak.healthapp.domain.model.UserProfile
-import com.burak.healthapp.domain.repository.SettingsRepository
-import com.burak.healthapp.domain.validation.parseLocalizedDecimalInput
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalTime
-import javax.inject.Inject
-
-data class OnboardingFormState(
-    val name: String = "",
-    val dailyCalories: String = DefaultHealthGoals.DAILY_CALORIES.toString(),
-    val protein: String = DefaultHealthGoals.PROTEIN_GRAMS.toString(),
-    val carbs: String = DefaultHealthGoals.CARB_GRAMS.toString(),
-    val fat: String = DefaultHealthGoals.FAT_GRAMS.toString(),
-    val water: String = DefaultHealthGoals.WATER_TARGET_ML.toString(),
-    val sleepBedtime: String = DefaultHealthGoals.SLEEP_BEDTIME.toString(),
-    val sleepWakeTime: String = DefaultHealthGoals.SLEEP_WAKE_TIME.toString(),
-    val exerciseTargetDays: String = DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK.toString(),
-    val exerciseTargetDuration: String = DefaultHealthGoals.EXERCISE_DURATION_MINUTES.toString(),
-    val smokeDailyLimit: String = DefaultHealthGoals.SMOKE_DAILY_LIMIT.toString(),
-    val targetWeight: String = DefaultHealthGoals.TARGET_WEIGHT_KG.toInt().toString(),
-    val currentWeight: String = DefaultHealthGoals.BASELINE_WEIGHT_KG.toInt().toString(),
-    val currentHeight: String = "",
-    val currentShoulder: String = DefaultHealthGoals.BASELINE_SHOULDER_CM.toInt().toString(),
-    val currentWaist: String = DefaultHealthGoals.BASELINE_WAIST_CM.toInt().toString(),
-    val currentHip: String = DefaultHealthGoals.BASELINE_HIP_CM.toInt().toString(),
-    val supplementsText: String = "D3 Vitamini\nOmega 3\nMultivitamin",
-)
-
-@HiltViewModel
-class OnboardingViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
-) : ViewModel() {
-    var isSaving by mutableStateOf(false)
-        private set
-
-    fun complete(form: OnboardingFormState) {
-        viewModelScope.launch {
-            isSaving = true
-            val profile = UserProfile.fromName(
-                name = form.name,
-                heightCm = parseLocalizedDecimalInput(form.currentHeight),
-            )
-            val currentWeight = form.currentWeight.toFloatOrDefault(DefaultHealthGoals.BASELINE_WEIGHT_KG)
-            val currentShoulder = form.currentShoulder.toFloatOrDefault(DefaultHealthGoals.BASELINE_SHOULDER_CM)
-            val currentWaist = form.currentWaist.toFloatOrDefault(DefaultHealthGoals.BASELINE_WAIST_CM)
-            val currentHip = form.currentHip.toFloatOrDefault(DefaultHealthGoals.BASELINE_HIP_CM)
-            val goals = GoalSettings(
-                dailyCaloriesTarget = form.dailyCalories.toIntOrDefault(DefaultHealthGoals.DAILY_CALORIES),
-                proteinTargetGrams = form.protein.toIntOrDefault(DefaultHealthGoals.PROTEIN_GRAMS),
-                carbTargetGrams = form.carbs.toIntOrDefault(DefaultHealthGoals.CARB_GRAMS),
-                fatTargetGrams = form.fat.toIntOrDefault(DefaultHealthGoals.FAT_GRAMS),
-                waterTargetMl = form.water.toIntOrDefault(DefaultHealthGoals.WATER_TARGET_ML),
-                sleepTargetBedtime = form.sleepBedtime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_BEDTIME,
-                sleepTargetWakeTime = form.sleepWakeTime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_WAKE_TIME,
-                exerciseTargetDaysPerWeek = form.exerciseTargetDays.toIntOrDefault(DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK),
-                exerciseTargetDurationMinutes = form.exerciseTargetDuration.toIntOrDefault(DefaultHealthGoals.EXERCISE_DURATION_MINUTES),
-                smokeDailyLimit = form.smokeDailyLimit.toIntOrDefault(DefaultHealthGoals.SMOKE_DAILY_LIMIT),
-                baselineWeightKg = currentWeight,
-                targetWeightKg = form.targetWeight.toFloatOrDefault(DefaultHealthGoals.TARGET_WEIGHT_KG),
-                baselineShoulderCm = currentShoulder,
-                baselineWaistCm = currentWaist,
-                baselineHipCm = currentHip,
-            )
-            val measurement = BodyMeasurementEntry(
-                date = LocalDate.now(),
-                weightKg = currentWeight,
-                shoulderCm = currentShoulder,
-                waistCm = currentWaist,
-                hipCm = currentHip,
-            )
-            val supplements = form.supplementsText
-                .lineSequence()
-                .map { it.trim() }
-                .filter { it.isNotBlank() }
-                .toList()
-            settingsRepository.completeOnboarding(
-                profile = profile,
-                goals = goals,
-                initialMeasurement = measurement,
-                supplements = supplements,
-            )
-            isSaving = false
-        }
-    }
-}
-
-private val OnboardingFormStateSaver = listSaver<OnboardingFormState, String>(
-    save = { form ->
-        listOf(
-            form.name,
-            form.dailyCalories,
-            form.protein,
-            form.carbs,
-            form.fat,
-            form.water,
-            form.sleepBedtime,
-            form.sleepWakeTime,
-            form.exerciseTargetDays,
-            form.exerciseTargetDuration,
-            form.smokeDailyLimit,
-            form.targetWeight,
-            form.currentWeight,
-            form.currentHeight,
-            form.currentShoulder,
-            form.currentWaist,
-            form.currentHip,
-            form.supplementsText,
-        )
-    },
-    restore = { values ->
-        OnboardingFormState(
-            name = values[0],
-            dailyCalories = values[1],
-            protein = values[2],
-            carbs = values[3],
-            fat = values[4],
-            water = values[5],
-            sleepBedtime = values[6],
-            sleepWakeTime = values[7],
-            exerciseTargetDays = values[8],
-            exerciseTargetDuration = values[9],
-            smokeDailyLimit = values[10],
-            targetWeight = values[11],
-            currentWeight = values[12],
-            currentHeight = values[13],
-            currentShoulder = values[14],
-            currentWaist = values[15],
-            currentHip = values[16],
-            supplementsText = values[17],
-        )
-    },
-)
+import com.burak.healthapp.domain.model.DashboardCardType
 
 @Composable
 fun OnboardingRoute() {
     val viewModel: OnboardingViewModel = hiltViewModel()
-    var currentStep by rememberSaveable { mutableIntStateOf(0) }
-    var form by rememberSaveable(stateSaver = OnboardingFormStateSaver) {
-        mutableStateOf(OnboardingFormState())
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     OnboardingScreen(
-        currentStep = currentStep,
-        form = form,
-        isSaving = viewModel.isSaving,
-        onStepChange = { currentStep = it },
-        onFormChange = { form = it },
-        onFinish = { viewModel.complete(form) },
+        state = uiState,
+        onAction = { action ->
+            when (action) {
+                is OnboardingAction.NextClicked -> viewModel.goToNextStep()
+                is OnboardingAction.BackClicked -> viewModel.goToPreviousStep()
+                is OnboardingAction.SkipWithDefaults -> viewModel.skipWithDefaults()
+                is OnboardingAction.ToggleTrackingArea -> viewModel.onTrackingAreaToggled(action.area)
+                is OnboardingAction.UpdateName -> viewModel.updateName(action.value)
+                is OnboardingAction.UpdateAge -> viewModel.updateAge(action.value)
+                is OnboardingAction.UpdateSex -> viewModel.updateSex(action.value)
+                is OnboardingAction.UpdateHeight -> viewModel.updateHeightCm(action.value)
+                is OnboardingAction.UpdateCurrentWeight -> viewModel.updateCurrentWeightKg(action.value)
+                is OnboardingAction.UpdateTargetWeight -> viewModel.updateTargetWeightKg(action.value)
+                is OnboardingAction.UpdateActivityLevel -> viewModel.updateActivityLevel(action.value)
+                is OnboardingAction.UpdateMainGoal -> viewModel.updateMainGoal(action.value)
+                is OnboardingAction.UpdateWaterTarget -> viewModel.updateWaterTargetMl(action.value)
+                is OnboardingAction.UpdateSleepBedtime -> viewModel.updateSleepBedtime(action.value)
+                is OnboardingAction.UpdateSleepWakeTime -> viewModel.updateSleepWakeTime(action.value)
+                is OnboardingAction.UpdateCaffeineLimit -> viewModel.updateDailyCaffeineLimitMg(action.value)
+                is OnboardingAction.UpdateCaffeineCutoff -> viewModel.updateCaffeineCutoffTime(action.value)
+                is OnboardingAction.UpdateCalories -> viewModel.updateDailyCaloriesTarget(action.value)
+                is OnboardingAction.UpdateProtein -> viewModel.updateProteinTargetGrams(action.value)
+                is OnboardingAction.UpdateCarbs -> viewModel.updateCarbTargetGrams(action.value)
+                is OnboardingAction.UpdateFat -> viewModel.updateFatTargetGrams(action.value)
+                is OnboardingAction.UpdateExerciseDays -> viewModel.updateExerciseDaysPerWeek(action.value)
+                is OnboardingAction.UpdateExerciseDuration -> viewModel.updateExerciseDurationMinutes(action.value)
+                is OnboardingAction.UpdateSmokeLimit -> viewModel.updateSmokeDailyLimit(action.value)
+                is OnboardingAction.UpdateDailySteps -> viewModel.updateDailyStepTarget(action.value)
+                is OnboardingAction.UpdateWaterReminderEnabled -> viewModel.updateWaterReminderEnabled(action.value)
+                is OnboardingAction.UpdateWaterReminderStart -> viewModel.updateWaterReminderStartTime(action.value)
+                is OnboardingAction.UpdateWaterReminderEnd -> viewModel.updateWaterReminderEndTime(action.value)
+                is OnboardingAction.UpdateWaterReminderInterval -> viewModel.updateWaterReminderIntervalMinutes(action.value)
+                is OnboardingAction.UpdateStepTrackingPreferred -> viewModel.updateStepTrackingPreferred(action.value)
+            }
+        }
     )
 }
 
-@Composable
-private fun OnboardingScreen(
-    currentStep: Int,
-    form: OnboardingFormState,
-    isSaving: Boolean,
-    onStepChange: (Int) -> Unit,
-    onFormChange: (OnboardingFormState) -> Unit,
-    onFinish: () -> Unit,
-) {
-    val stepTitles = listOf("Hedefler", "Ölçüler", "Profil")
+sealed interface OnboardingAction {
+    data object NextClicked : OnboardingAction
+    data object BackClicked : OnboardingAction
+    data object SkipWithDefaults : OnboardingAction
+    data class ToggleTrackingArea(val area: DashboardCardType) : OnboardingAction
+    data class UpdateName(val value: String) : OnboardingAction
+    data class UpdateAge(val value: String) : OnboardingAction
+    data class UpdateSex(val value: OnboardingSex) : OnboardingAction
+    data class UpdateHeight(val value: String) : OnboardingAction
+    data class UpdateCurrentWeight(val value: String) : OnboardingAction
+    data class UpdateTargetWeight(val value: String) : OnboardingAction
+    data class UpdateActivityLevel(val value: OnboardingActivityLevel) : OnboardingAction
+    data class UpdateMainGoal(val value: OnboardingMainGoal) : OnboardingAction
+    data class UpdateWaterTarget(val value: String) : OnboardingAction
+    data class UpdateDailySteps(val value: String) : OnboardingAction
+    data class UpdateSleepBedtime(val value: String) : OnboardingAction
+    data class UpdateSleepWakeTime(val value: String) : OnboardingAction
+    data class UpdateCaffeineLimit(val value: String) : OnboardingAction
+    data class UpdateCaffeineCutoff(val value: String) : OnboardingAction
+    data class UpdateCalories(val value: String) : OnboardingAction
+    data class UpdateProtein(val value: String) : OnboardingAction
+    data class UpdateCarbs(val value: String) : OnboardingAction
+    data class UpdateFat(val value: String) : OnboardingAction
+    data class UpdateExerciseDays(val value: String) : OnboardingAction
+    data class UpdateExerciseDuration(val value: String) : OnboardingAction
+    data class UpdateSmokeLimit(val value: String) : OnboardingAction
+    data class UpdateWaterReminderEnabled(val value: Boolean) : OnboardingAction
+    data class UpdateWaterReminderStart(val value: String) : OnboardingAction
+    data class UpdateWaterReminderEnd(val value: String) : OnboardingAction
+    data class UpdateWaterReminderInterval(val value: String) : OnboardingAction
+    data class UpdateStepTrackingPreferred(val value: Boolean) : OnboardingAction
+}
 
+@Composable
+fun OnboardingScreen(
+    state: OnboardingUiState,
+    onAction: (OnboardingAction) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -225,92 +137,43 @@ private fun OnboardingScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                horizontal = HealthSpacing.sm,
-                vertical = HealthSpacing.sm,
-            ),
+            contentPadding = PaddingValues(horizontal = HealthSpacing.sm, vertical = HealthSpacing.sm),
             verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
         ) {
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                ) {
-                    Text(
-                        text = "Sağlık",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = "İlk kurulum birkaç kısa adımdan oluşur. Sonrasında dashboard doğrudan bugüne odaklanır.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
-                    )
+                OnboardingHeader(step = state.currentStep)
+            }
+            
+            item {
+                when (state.currentStep) {
+                    OnboardingStep.WELCOME -> WelcomeStep()
+                    OnboardingStep.TRACKING_AREAS -> TrackingAreasStep(state, onAction)
+                    OnboardingStep.BASIC_INFO -> BasicInfoStep(state, onAction)
+                    OnboardingStep.ACTIVITY_GOAL -> ActivityGoalStep(state, onAction)
+                    OnboardingStep.SMART_GOALS -> SmartGoalsStep(state, onAction)
+                    OnboardingStep.PREFERENCES -> PreferencesStep(state, onAction)
+                    OnboardingStep.DONE -> DoneStep()
                 }
             }
-            item {
-                StepSelector(
-                    stepTitles = stepTitles,
-                    currentStep = currentStep,
-                )
-            }
-            item {
-                HealthCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("onboarding_content"),
-                ) {
-                    when (currentStep) {
-                        0 -> GoalsStep(form = form, onFormChange = onFormChange)
-                        1 -> MeasurementsStep(form = form, onFormChange = onFormChange)
-                        else -> ProfileStep(form = form, onFormChange = onFormChange)
-                    }
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-                ) {
-                    if (currentStep > 0) {
-                        RoundedPillButton(
-                            label = "Geri",
-                            modifier = Modifier.weight(1f),
-                            onClick = { onStepChange(currentStep - 1) },
-                        )
-                    }
-                    RoundedPillButton(
-                        label = if (currentStep == stepTitles.lastIndex) "Kurulumu Bitir" else "Devam",
-                        modifier = Modifier.weight(1f),
-                        containerColor = HealthPrimary,
-                        contentColor = Color.White,
-                        onClick = {
-                            if (currentStep == stepTitles.lastIndex) onFinish() else onStepChange(currentStep + 1)
-                        },
-                    )
-                }
-            }
-            if (isSaving) {
+
+            if (state.isSaving) {
                 item {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = HealthSpacing.xs),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = HealthSpacing.xs),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = HealthPrimary,
-                        )
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), color = HealthPrimary, strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.size(HealthSpacing.xs))
-                        Text(
-                            text = "İlk veriler hazırlanıyor",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
-                        )
+                        Text(text = stringResource(R.string.common_saving), color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f))
                     }
+                }
+            } else {
+                item {
+                    OnboardingFooter(
+                        step = state.currentStep,
+                        onAction = onAction
+                    )
                 }
             }
         }
@@ -318,304 +181,458 @@ private fun OnboardingScreen(
 }
 
 @Composable
-private fun StepSelector(
-    stepTitles: List<String>,
-    currentStep: Int,
+private fun OnboardingHeader(step: OnboardingStep) {
+    if (step == OnboardingStep.WELCOME || step == OnboardingStep.DONE) return
+    
+    val currentIdx = step.ordinal
+    val totalIdx = OnboardingStep.entries.size - 2 // Exclude WELCOME and DONE from progress visually
+    Text(
+        text = "$currentIdx / $totalIdx",
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+        modifier = Modifier.padding(bottom = HealthSpacing.xs)
+    )
+}
+
+@Composable
+private fun OnboardingFooter(
+    step: OnboardingStep,
+    onAction: (OnboardingAction) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
     ) {
-        stepTitles.forEachIndexed { index, title ->
-            val selected = index == currentStep
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(
-                        color = if (selected) {
-                            MaterialTheme.colorScheme.surface
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        },
-                        shape = RoundedCornerShape(20.dp),
-                    )
-                    .padding(vertical = HealthSpacing.sm, horizontal = HealthSpacing.xs),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                )
-            }
+        if (step != OnboardingStep.WELCOME && step != OnboardingStep.DONE) {
+            RoundedPillButton(
+                label = stringResource(R.string.onboarding_back),
+                modifier = Modifier.weight(1f).testTag("onboarding_back_button"),
+                onClick = { onAction(OnboardingAction.BackClicked) },
+            )
         }
-    }
-}
-
-@Composable
-private fun GoalsStep(
-    form: OnboardingFormState,
-    onFormChange: (OnboardingFormState) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
-        Text(
-            text = "Beslenme ve günlük hedefler",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "Kalori, makro ve su hedeflerini gram/ml bazında net tutuyoruz.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OnboardingSectionTitle("Beslenme")
-        FieldRow(
-            leftLabel = "Günlük Kalori",
-            leftValue = form.dailyCalories,
-            rightLabel = "Protein (g)",
-            rightValue = form.protein,
-            onLeftChange = { onFormChange(form.copy(dailyCalories = it)) },
-            onRightChange = { onFormChange(form.copy(protein = it)) },
-        )
-        FieldRow(
-            leftLabel = "Karb (g)",
-            leftValue = form.carbs,
-            rightLabel = "Yağ (g)",
-            rightValue = form.fat,
-            onLeftChange = { onFormChange(form.copy(carbs = it)) },
-            onRightChange = { onFormChange(form.copy(fat = it)) },
-        )
-        FieldRow(
-            leftLabel = "Su Hedefi (ml)",
-            leftValue = form.water,
-            rightLabel = "Hedef Kilo",
-            rightValue = form.targetWeight,
-            onLeftChange = { onFormChange(form.copy(water = it)) },
-            onRightChange = { onFormChange(form.copy(targetWeight = it)) },
-        )
-        OnboardingSectionTitle("Uyku")
-        FieldRow(
-            leftLabel = "Planlanan Yatış",
-            leftValue = form.sleepBedtime,
-            rightLabel = "Planlanan Uyanış",
-            rightValue = form.sleepWakeTime,
-            onLeftChange = { onFormChange(form.copy(sleepBedtime = it)) },
-            onRightChange = { onFormChange(form.copy(sleepWakeTime = it)) },
-        )
-        OnboardingSectionTitle("Egzersiz ve sigara")
-        FieldRow(
-            leftLabel = "Egzersiz Gün",
-            leftValue = form.exerciseTargetDays,
-            rightLabel = "Egzersiz Süre (dk)",
-            rightValue = form.exerciseTargetDuration,
-            onLeftChange = { onFormChange(form.copy(exerciseTargetDays = it)) },
-            onRightChange = { onFormChange(form.copy(exerciseTargetDuration = it)) },
-        )
-        FieldRow(
-            leftLabel = "Sigara Limiti",
-            leftValue = form.smokeDailyLimit,
-            rightLabel = "",
-            rightValue = "",
-            onLeftChange = { onFormChange(form.copy(smokeDailyLimit = it)) },
-            onRightChange = {},
-        )
-    }
-}
-
-@Composable
-private fun MeasurementsStep(
-    form: OnboardingFormState,
-    onFormChange: (OnboardingFormState) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
-        Text(
-            text = "Mevcut ölçüler",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "Omuz, bel ve kalça ölçülerini tarih bazlı kayıtları başlatmak için alıyoruz.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FieldRow(
-            leftLabel = "Mevcut Kilo",
-            leftValue = form.currentWeight,
-            rightLabel = "Mevcut Omuz",
-            rightValue = form.currentShoulder,
-            onLeftChange = { onFormChange(form.copy(currentWeight = it)) },
-            onRightChange = { onFormChange(form.copy(currentShoulder = it)) },
-        )
-        FieldRow(
-            leftLabel = "Boy (cm)",
-            leftValue = form.currentHeight,
-            rightLabel = "",
-            rightValue = "",
-            onLeftChange = { onFormChange(form.copy(currentHeight = it)) },
-            onRightChange = {},
-        )
-        FieldRow(
-            leftLabel = "Mevcut Bel",
-            leftValue = form.currentWaist,
-            rightLabel = "Mevcut Kalça",
-            rightValue = form.currentHip,
-            onLeftChange = { onFormChange(form.copy(currentWaist = it)) },
-            onRightChange = { onFormChange(form.copy(currentHip = it)) },
-        )
-    }
-}
-
-@Composable
-private fun ProfileStep(
-    form: OnboardingFormState,
-    onFormChange: (OnboardingFormState) -> Unit,
-) {
-    val profile = remember(form.name) { UserProfile.fromName(form.name) }
-
-    Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)) {
-        Text(
-            text = "Profil ve takviyeler",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "Takviyeleri her satıra bir adet gelecek şekilde yazabilirsin.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
-        ) {
-            AvatarBadge(initials = profile.avatarInitials)
-            Column {
-                Text(
-                    text = if (form.name.isBlank()) "İsmini gir" else profile.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
+        
+        if (step == OnboardingStep.WELCOME) {
+            Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm), modifier = Modifier.fillMaxWidth()) {
+                RoundedPillButton(
+                    label = stringResource(R.string.onboarding_start),
+                    modifier = Modifier.fillMaxWidth().testTag("onboarding_next_button"),
+                    containerColor = HealthPrimary,
+                    contentColor = Color.White,
+                    onClick = { onAction(OnboardingAction.NextClicked) },
                 )
-                Text(
-                    text = "Avatar baş harflerden üretilecek",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                RoundedPillButton(
+                    label = stringResource(R.string.onboarding_use_defaults),
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onAction(OnboardingAction.SkipWithDefaults) },
                 )
-            }
-        }
-        HealthPillTextField(
-            label = "Ad Soyad",
-            value = form.name,
-            onValueChange = { onFormChange(form.copy(name = it)) },
-        )
-        HealthPillTextField(
-            label = "Takviyeler",
-            value = form.supplementsText,
-            onValueChange = { onFormChange(form.copy(supplementsText = it)) },
-            singleLine = false,
-            minLines = 5,
-        )
-    }
-}
-
-@Composable
-private fun FieldRow(
-    leftLabel: String,
-    leftValue: String,
-    rightLabel: String,
-    rightValue: String,
-    onLeftChange: (String) -> Unit,
-    onRightChange: (String) -> Unit,
-) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val useSingleColumn = maxWidth < 360.dp || rightLabel.isBlank()
-        if (useSingleColumn) {
-            Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                OnboardingPillTextField(
-                    label = leftLabel,
-                    value = leftValue,
-                    onValueChange = onLeftChange,
-                )
-                if (rightLabel.isNotBlank()) {
-                    OnboardingPillTextField(
-                        label = rightLabel,
-                        value = rightValue,
-                        onValueChange = onRightChange,
-                    )
-                }
             }
         } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+            val primaryLabel = if (step == OnboardingStep.DONE) stringResource(R.string.onboarding_go_today) else stringResource(R.string.onboarding_next)
+            val testTag = if (step == OnboardingStep.DONE) "onboarding_finish_button" else "onboarding_next_button"
+            RoundedPillButton(
+                label = primaryLabel,
+                modifier = Modifier.weight(1f).testTag(testTag),
+                containerColor = HealthPrimary,
+                contentColor = Color.White,
+                onClick = { onAction(OnboardingAction.NextClicked) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun WelcomeStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_welcome"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_welcome_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_welcome_body),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        HealthCard {
+            Text(
+                text = stringResource(R.string.onboarding_medical_disclaimer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_tracking_areas"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_tracking_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_tracking_body),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        
+        DashboardCardType.entries.forEach { area ->
+            val isSelected = state.selectedTrackingAreas.contains(area)
+            val titleRes = when (area) {
+                DashboardCardType.HYDRATION -> R.string.dashboard_card_hydration
+                DashboardCardType.SLEEP -> R.string.dashboard_card_sleep
+                DashboardCardType.NUTRITION -> R.string.dashboard_card_nutrition
+                DashboardCardType.STEPS -> R.string.dashboard_card_steps
+                DashboardCardType.WEIGHT -> R.string.dashboard_card_weight
+                DashboardCardType.CAFFEINE -> R.string.dashboard_card_caffeine
+                DashboardCardType.SMOKING -> R.string.dashboard_card_smoking
+                DashboardCardType.EXERCISE -> R.string.dashboard_card_exercise
+                DashboardCardType.SUPPLEMENTS -> R.string.dashboard_card_supplements
+            }
+            HealthCard(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { onAction(OnboardingAction.ToggleTrackingArea(area)) }
+                    .testTag("onboarding_tracking_card_${area.name}"),
+                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
             ) {
-                OnboardingPillTextField(
-                    label = leftLabel,
-                    value = leftValue,
-                    modifier = Modifier.weight(1f),
-                    onValueChange = onLeftChange,
-                )
-                OnboardingPillTextField(
-                    label = rightLabel,
-                    value = rightValue,
-                    modifier = Modifier.weight(1f),
-                    onValueChange = onRightChange,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(titleRes),
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                    )
+                    if (isSelected) {
+                        Icon(
+                            painter = painterResource(android.R.drawable.checkbox_on_background),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(android.R.drawable.checkbox_off_background),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+        
+        state.validationErrors["tracking_areas"]?.let { error ->
+            Text(text = error.asString(), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+private fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_basic_info"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_basic_info_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_basic_info_body),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        HealthPillTextField(
+            label = stringResource(R.string.onboarding_label_name),
+            value = state.name,
+            onValueChange = { onAction(OnboardingAction.UpdateName(it)) }
+        )
+        HealthPillTextField(
+            label = stringResource(R.string.onboarding_label_age),
+            value = state.age,
+            onValueChange = { onAction(OnboardingAction.UpdateAge(it)) },
+            isError = state.validationErrors["age"] != null,
+            supportingText = state.validationErrors["age"]?.asString()
+        )
+        
+        Text(text = stringResource(R.string.onboarding_label_sex), style = MaterialTheme.typography.labelMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+            OnboardingSex.entries.forEach { sex ->
+                val labelRes = when (sex) {
+                    OnboardingSex.MALE -> R.string.onboarding_sex_male
+                    OnboardingSex.FEMALE -> R.string.onboarding_sex_female
+                    OnboardingSex.UNSPECIFIED -> R.string.onboarding_sex_unspecified
+                }
+                val selected = state.sex == sex
+                Box(
+                    modifier = Modifier.weight(1f).background(
+                        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.large
+                    ).clickable { onAction(OnboardingAction.UpdateSex(sex)) }
+                    .padding(HealthSpacing.xs),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+
+        HealthPillTextField(
+            label = stringResource(R.string.onboarding_label_height),
+            value = state.heightCm,
+            onValueChange = { onAction(OnboardingAction.UpdateHeight(it)) },
+            isError = state.validationErrors["height"] != null,
+            supportingText = state.validationErrors["height"]?.asString()
+        )
+        HealthPillTextField(
+            label = stringResource(R.string.onboarding_label_current_weight),
+            value = state.currentWeightKg,
+            onValueChange = { onAction(OnboardingAction.UpdateCurrentWeight(it)) },
+            isError = state.validationErrors["currentWeight"] != null,
+            supportingText = state.validationErrors["currentWeight"]?.asString()
+        )
+        HealthPillTextField(
+            label = stringResource(R.string.onboarding_label_target_weight),
+            value = state.targetWeightKg,
+            onValueChange = { onAction(OnboardingAction.UpdateTargetWeight(it)) },
+            isError = state.validationErrors["targetWeight"] != null,
+            supportingText = state.validationErrors["targetWeight"]?.asString()
+        )
+    }
+}
+
+@Composable
+private fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_activity_goal"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_activity_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_activity_body),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        OnboardingActivityLevel.entries.forEach { level ->
+            val selected = state.activityLevel == level
+            val titleRes = when(level) {
+                OnboardingActivityLevel.LOW -> R.string.onboarding_activity_low
+                OnboardingActivityLevel.LIGHT -> R.string.onboarding_activity_light
+                OnboardingActivityLevel.MODERATE -> R.string.onboarding_activity_moderate
+                OnboardingActivityLevel.HIGH -> R.string.onboarding_activity_high
+            }
+            val descRes = when(level) {
+                OnboardingActivityLevel.LOW -> R.string.onboarding_activity_low_desc
+                OnboardingActivityLevel.LIGHT -> R.string.onboarding_activity_light_desc
+                OnboardingActivityLevel.MODERATE -> R.string.onboarding_activity_moderate_desc
+                OnboardingActivityLevel.HIGH -> R.string.onboarding_activity_high_desc
+            }
+            HealthCard(
+                modifier = Modifier.fillMaxWidth().clickable { onAction(OnboardingAction.UpdateActivityLevel(level)) },
+                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+            ) {
+                Column {
+                    Text(text = stringResource(titleRes), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(descRes), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.size(HealthSpacing.xs))
+        
+        OnboardingMainGoal.entries.forEach { goal ->
+            val selected = state.mainGoal == goal
+            val titleRes = when(goal) {
+                OnboardingMainGoal.MAINTAIN -> R.string.onboarding_goal_maintain
+                OnboardingMainGoal.SLOW_GAIN -> R.string.onboarding_goal_slow_gain
+                OnboardingMainGoal.SLOW_LOSS -> R.string.onboarding_goal_slow_loss
+            }
+            HealthCard(
+                modifier = Modifier.fillMaxWidth().clickable { onAction(OnboardingAction.UpdateMainGoal(goal)) },
+                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+            ) {
+                Text(text = stringResource(titleRes), fontWeight = FontWeight.Bold)
             }
         }
     }
 }
 
 @Composable
-private fun OnboardingSectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(top = HealthSpacing.xs),
-    )
-}
-
-@Composable
-private fun OnboardingPillTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_smart_goals"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
     ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = stringResource(R.string.onboarding_smart_goals_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
         )
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp),
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default,
-            shape = RoundedCornerShape(28.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                cursorColor = MaterialTheme.colorScheme.primary,
-            ),
+        Text(
+            text = stringResource(R.string.onboarding_smart_goals_body),
+            style = MaterialTheme.typography.bodyMedium,
         )
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_hydration), fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.onboarding_water_suggestion_info), style = MaterialTheme.typography.bodySmall)
+                HealthPillTextField(
+            label = stringResource(R.string.onboarding_water_goal_field),
+            value = state.waterTargetMl,
+            onValueChange = { onAction(OnboardingAction.UpdateWaterTarget(it)) },
+            isError = state.validationErrors["water"] != null,
+            supportingText = state.validationErrors["water"]?.asString(),
+            modifier = Modifier.testTag("onboarding_water_goal_field")
+        )
+                Text(text = stringResource(R.string.onboarding_not_medical_advice_short), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.NUTRITION)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_nutrition), fontWeight = FontWeight.Bold)
+                if (state.age.isBlank() || state.heightCm.isBlank() || state.currentWeightKg.isBlank() || state.sex == OnboardingSex.UNSPECIFIED) {
+                    Text(text = stringResource(R.string.onboarding_nutrition_missing_data), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
+                HealthPillTextField(
+            label = stringResource(R.string.profile_goal_calories),
+            value = state.dailyCaloriesTarget,
+            onValueChange = { onAction(OnboardingAction.UpdateCalories(it)) },
+            isError = state.validationErrors["calories"] != null,
+            supportingText = state.validationErrors["calories"]?.asString(),
+            modifier = Modifier.testTag("onboarding_calorie_goal_field")
+        )
+                Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_protein), value = state.proteinTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateProtein(it)) }, modifier = Modifier.weight(1f))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_carbs), value = state.carbTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateCarbs(it)) }, modifier = Modifier.weight(1f))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_fat), value = state.fatTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateFat(it)) }, modifier = Modifier.weight(1f))
+                }
+                Text(text = stringResource(R.string.onboarding_not_medical_advice_short), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.CAFFEINE)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_caffeine), fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.onboarding_caffeine_suggestion_info), style = MaterialTheme.typography.bodySmall)
+                HealthPillTextField(
+                    label = stringResource(R.string.profile_goal_caffeine_cutoff_time),
+                    value = state.caffeineCutoffTime,
+                    onValueChange = { onAction(OnboardingAction.UpdateCaffeineCutoff(it)) },
+                    modifier = Modifier.testTag("onboarding_caffeine_cutoff_field")
+                )
+            }
+        }
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.SLEEP)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_sleep), fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_bedtime), value = state.sleepBedtime, onValueChange = { onAction(OnboardingAction.UpdateSleepBedtime(it)) }, modifier = Modifier.weight(1f))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_wake_time), value = state.sleepWakeTime, onValueChange = { onAction(OnboardingAction.UpdateSleepWakeTime(it)) }, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+        
+        if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_steps), fontWeight = FontWeight.Bold)
+                HealthPillTextField(label = stringResource(R.string.profile_goal_step_target), value = state.dailyStepTarget, onValueChange = { onAction(OnboardingAction.UpdateDailySteps(it)) })
+            }
+        }
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.EXERCISE)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_exercise), fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_days), value = state.exerciseDaysPerWeek, onValueChange = { onAction(OnboardingAction.UpdateExerciseDays(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors["exercise_days"] != null, supportingText = state.validationErrors["exercise_days"]?.asString())
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_duration), value = state.exerciseDurationMinutes, onValueChange = { onAction(OnboardingAction.UpdateExerciseDuration(it)) }, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+        
+        if (state.selectedTrackingAreas.contains(DashboardCardType.SMOKING)) {
+            HealthCard {
+                Text(text = stringResource(R.string.dashboard_card_smoking), fontWeight = FontWeight.Bold)
+                HealthPillTextField(label = stringResource(R.string.profile_goal_smoke_limit), value = state.smokeDailyLimit, onValueChange = { onAction(OnboardingAction.UpdateSmokeLimit(it)) })
+            }
+        }
     }
 }
 
-private fun String.toIntOrDefault(fallback: Int): Int = toIntOrNull() ?: fallback
-private fun String.toFloatOrDefault(fallback: Float): Float = parseLocalizedDecimalInput(this) ?: fallback
-private fun String.toLocalTimeOrNull(): LocalTime? = runCatching { LocalTime.parse(this) }.getOrNull()
+@Composable
+private fun PreferencesStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_preferences"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_preferences_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_preferences_body),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION)) {
+            HealthCard {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = stringResource(R.string.profile_water_reminder_title), fontWeight = FontWeight.Bold)
+                    Switch(checked = state.waterReminderEnabled, onCheckedChange = { onAction(OnboardingAction.UpdateWaterReminderEnabled(it)) }, colors = SwitchDefaults.colors(checkedTrackColor = HealthPrimary))
+                }
+                if (state.waterReminderEnabled) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_start), value = state.waterReminderStartTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderStart(it)) }, modifier = Modifier.weight(1f))
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_end), value = state.waterReminderEndTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderEnd(it)) }, modifier = Modifier.weight(1f))
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_frequency), value = state.waterReminderIntervalMinutes, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderInterval(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors["reminder_interval"] != null, supportingText = state.validationErrors["reminder_interval"]?.asString())
+                    }
+                }
+            }
+        }
+
+        if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
+            HealthCard {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = stringResource(R.string.profile_step_tracking_title), fontWeight = FontWeight.Bold)
+                        Text(text = stringResource(R.string.profile_goal_step_tracking_helper), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = state.stepTrackingPreferred, onCheckedChange = { onAction(OnboardingAction.UpdateStepTrackingPreferred(it)) }, colors = SwitchDefaults.colors(checkedTrackColor = HealthPrimary))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DoneStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag("onboarding_step_done"),
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_done_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = stringResource(R.string.onboarding_done_body),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
