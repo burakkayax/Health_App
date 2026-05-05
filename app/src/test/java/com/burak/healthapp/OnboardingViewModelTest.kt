@@ -307,8 +307,104 @@ class OnboardingViewModelTest {
         viewModel.goToNextStep() // FINISH
         advanceUntilIdle()
 
+        assertTrue(repository.dashboardVisibilities[DashboardCardType.SUPPLEMENTS] == false)
         assertTrue(repository.lastSupplements?.isEmpty() == true)
         assertEquals(false, repository.lastUseDefaultSupplementsWhenEmpty)
+    }
+
+    @Test
+    fun onboardingSelectedSupplements_showsCardAndCreatesTemplates() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.onTrackingAreaToggled(DashboardCardType.SUPPLEMENTS)
+        advanceUntilIdle()
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertTrue(repository.dashboardVisibilities[DashboardCardType.SUPPLEMENTS] == true)
+        assertEquals(true, repository.lastUseDefaultSupplementsWhenEmpty)
+    }
+
+    @Test
+    fun onboardingUnselectedCaffeine_hidesCaffeineCard() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+
+        // CAFFEINE is not selected by default
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertEquals(false, repository.dashboardVisibilities[DashboardCardType.CAFFEINE])
+    }
+
+    @Test
+    fun onboardingUnselectedSmoking_hidesSmokingCard() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+
+        // SMOKING is not selected by default
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertEquals(false, repository.dashboardVisibilities[DashboardCardType.SMOKING])
+    }
+
+    @Test
+    fun skipWithDefaults_usesDefaultDashboardVisibility() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+
+        viewModel.skipWithDefaults()
+        advanceUntilIdle()
+
+        val expectedDefaults = com.burak.healthapp.domain.model.defaultDashboardCardConfig()
+        expectedDefaults.forEach {
+            assertEquals(it.isVisible, repository.dashboardVisibilities[it.type])
+        }
+    }
+
+    @Test
+    fun onboardingDashboardConfig_keepsDefaultSortOrder() = runTest {
+        val repository = FakeOnboardingSettingsRepository()
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        val savedCards = repository.lastDashboardCards
+        assertNotNull(savedCards)
+
+        val expectedDefaults = com.burak.healthapp.domain.model.defaultDashboardCardConfig()
+        assertEquals(expectedDefaults.size, savedCards!!.size)
+
+        savedCards.forEachIndexed { index, config ->
+            assertEquals(expectedDefaults[index].type, config.type)
+        }
     }
 
     @Test
@@ -378,6 +474,7 @@ class FakeOnboardingSettingsRepository : SettingsRepository {
     var lastWaterReminderSettings: WaterReminderSettings? = null
     var lastStepTrackingEnabled: Boolean? = null
     var lastUseDefaultSupplementsWhenEmpty: Boolean? = null
+    var lastDashboardCards: List<DashboardCardConfig>? = null
     val dashboardVisibilities = mutableMapOf<DashboardCardType, Boolean>()
 
     override val settings: Flow<SettingsState> = MutableStateFlow(SettingsState())
@@ -408,6 +505,9 @@ class FakeOnboardingSettingsRepository : SettingsRepository {
         }
         if (stepTrackingEnabled != null) {
             lastStepTrackingEnabled = stepTrackingEnabled
+        }
+        if (dashboardCards != null) {
+            lastDashboardCards = dashboardCards
         }
     }
 

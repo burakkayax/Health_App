@@ -1,9 +1,11 @@
 package com.burak.healthapp.feature.today
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,9 +34,16 @@ fun TodayRoute(
     val mealEditorViewModel: MealEditorViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val mealEditorState by mealEditorViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(selectedDate) {
         viewModel.setSelectedDate(selectedDate)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.errorMessages.collect { messageRes ->
+            Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
+        }
     }
 
     TodayContent(

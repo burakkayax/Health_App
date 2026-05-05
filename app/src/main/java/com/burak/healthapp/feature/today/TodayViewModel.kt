@@ -30,8 +30,10 @@ import com.burak.healthapp.feature.today.WeightCardState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -49,6 +51,9 @@ class TodayViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
     private val selectedDate = MutableStateFlow(LocalDate.now())
+
+    private val _errorMessages = MutableSharedFlow<Int>()
+    val errorMessages = _errorMessages.asSharedFlow()
 
     val uiState = selectedDate
         .flatMapLatest { date ->
@@ -233,7 +238,11 @@ class TodayViewModel @Inject constructor(
 
     fun updateDashboardCardVisibility(type: DashboardCardType, isVisible: Boolean) {
         viewModelScope.launch {
-            settingsRepository.updateDashboardCardVisibility(type, isVisible)
+            try {
+                settingsRepository.updateDashboardCardVisibility(type, isVisible)
+            } catch (e: Exception) {
+                _errorMessages.emit(com.burak.healthapp.R.string.dashboard_visibility_update_failed)
+            }
         }
     }
 
@@ -245,7 +254,11 @@ class TodayViewModel @Inject constructor(
 
     fun resetDashboardCards() {
         viewModelScope.launch {
-            settingsRepository.resetDashboardCardsToDefault()
+            try {
+                settingsRepository.resetDashboardCardsToDefault()
+            } catch (e: Exception) {
+                _errorMessages.emit(com.burak.healthapp.R.string.dashboard_reset_failed)
+            }
         }
     }
 }

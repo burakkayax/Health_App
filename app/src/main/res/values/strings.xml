@@ -637,8 +637,7 @@
     <string name="onboarding_tracking_subtitle_exercise">Egzersiz günlerini takip et</string>
     <string name="onboarding_tracking_subtitle_supplements">Takviye dozlarını takip et</string>
     <string name="onboarding_caffeine_limit_label">Kafein Limiti (mg)</string>
-    <string name="step_tracking_requires_permission">Adım takibini açmak için cihaz izni gerekir. İzni verdiğinde takip aktif olur.</string>
-    <string name="water_reminder_interval_too_short">Hatırlatıcı aralığı en az %1$d dakika olmalı.</string>
+
     <string name="dashboard_visibility_update_failed">Kart görünürlüğü güncellenemedi. Lütfen tekrar dene.</string>
     <string name="dashboard_reset_failed">Kart düzeni sıfırlanamadı. Lütfen tekrar dene.</string>
 </resources>
