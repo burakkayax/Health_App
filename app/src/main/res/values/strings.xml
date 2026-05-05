@@ -418,6 +418,7 @@
     <string name="import_error_decode_failure">Yedek dosyası okunamadı. Dosya yapısını kontrol et.</string>
     <string name="import_error_database_failure">Kayıtlar içe aktarılırken veritabanı hatası oluştu.</string>
     <string name="import_error_settings_failure">Kayıtlar aktarıldı ancak profil veya ayarlar güncellenemedi.</string>
+    <string name="import_result_partial_settings_failure">Sağlık kayıtları içe aktarıldı, ancak profil/hedef ayarları uygulanamadı. Aynı dosyayı tekrar içe aktarabilirsiniz; duplicate oluşmamalıdır.</string>
     <string name="import_error_unknown">Yedek dosyası içe aktarılamadı. Dosyayı kontrol edip tekrar dene.</string>
     <string name="import_partial_settings_failure">Kayıtlar aktarıldı ancak bazı ayarlar güncellenemedi.</string>
     <string name="import_validation_expected_datetime_format">Uyku kaydı tarih-saat formatı geçersiz. Beklenen format: 2026-04-02T23:10:00</string>

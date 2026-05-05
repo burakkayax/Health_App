@@ -37,6 +37,9 @@ class CustomFoodEditorViewModel @Inject constructor(
                 protein = food.proteinGrams.toString(),
                 carbs = food.carbsGrams.toString(),
                 fat = food.fatGrams.toString(),
+                preservedFiberGrams = food.fiberGrams,
+                preservedSugarGrams = food.sugarGrams,
+                preservedSodiumMg = food.sodiumMg,
                 isFavorite = food.isFavorite,
             )
         }
@@ -97,6 +100,9 @@ class CustomFoodEditorViewModel @Inject constructor(
                     proteinGrams = parseMacroOrZero(current.protein),
                     carbsGrams = parseMacroOrZero(current.carbs),
                     fatGrams = parseMacroOrZero(current.fat),
+                    fiberGrams = current.preservedFiberGrams,
+                    sugarGrams = current.preservedSugarGrams,
+                    sodiumMg = current.preservedSodiumMg,
                     isFavorite = current.isFavorite,
                 )
                 repository.save(food)

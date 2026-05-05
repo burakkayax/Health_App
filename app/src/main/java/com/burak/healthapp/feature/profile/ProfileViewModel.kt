@@ -459,6 +459,7 @@ private fun ImportValidationError.toUiText(): UiText = when (this) {
     ImportValidationError.DecodeFailure -> UiText.StringResource(R.string.import_error_decode_failure)
     ImportValidationError.DatabaseFailure -> UiText.StringResource(R.string.import_error_database_failure)
     ImportValidationError.SettingsFailure -> UiText.StringResource(R.string.import_error_settings_failure)
+    ImportValidationError.PartialSettingsFailure -> UiText.StringResource(R.string.import_result_partial_settings_failure)
     ImportValidationError.Unknown -> UiText.StringResource(R.string.import_error_unknown)
 }
 

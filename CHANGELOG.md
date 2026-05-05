@@ -1,5 +1,21 @@
 # Changelog
 
+## PR25.1.1 — Import Result Contract & Partial Settings Failure
+- Made settings failures after successful Room import explicit as partial import outcomes.
+- Added retry-safe/idempotent handling and tests for partial settings failure.
+
+## PR25.1.2 — Custom Food Optional Nutrient Preservation
+- Preserved optional custom food nutrient fields during edit flows.
+- Added tests for fiber, sugar, and sodium preservation across edit/import/export paths.
+
+## PR25.1.3 — Import/Export Idempotency JVM Tests
+- Added JVM tests for custom food merge identity, Turkish normalization, updatedAt behavior, duplicate prevention, and roundtrip stability.
+- Moved critical import planning logic into testable pure helpers where needed.
+
+## PR25.1.4 — Delete All & Migration Coverage
+- Added delete-all coverage for health tables and settings preservation behavior.
+- Expanded Room migration coverage and kept connected/integration test limitations documented.
+
 ## PR24 — Full App Audit
 - Added full-app audit documents covering data flow, critical bugs, test gaps, UI/UX risks, navigation/state risks, and performance/battery concerns.
 - Mapped audit findings into PR25.1–PR29 follow-up plans.

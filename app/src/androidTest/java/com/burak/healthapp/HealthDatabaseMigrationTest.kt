@@ -6,6 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.burak.healthapp.core.database.HealthDatabase
 import com.burak.healthapp.core.database.MIGRATION_4_5
+import com.burak.healthapp.core.database.MIGRATION_5_6
+import com.burak.healthapp.core.database.MIGRATION_6_7
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -41,6 +43,69 @@ class HealthDatabaseMigrationTest {
         assertTrue(db.indexesFor("smoking_entries").contains("index_smoking_entries_date"))
         assertTrue(db.indexesFor("step_entries").contains("index_step_entries_date"))
         assertTrue(db.indexesFor("supplement_dose_entries").contains("index_supplement_dose_entries_templateId_date"))
+    }
+
+    @Test
+    fun migrate4ToLatest_preservesDatabaseOpenability() {
+        helper.createDatabase(TEST_DB, 4).apply {
+            seedVersion4Data()
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            TEST_DB,
+            7,
+            true,
+            MIGRATION_4_5,
+            MIGRATION_5_6,
+            MIGRATION_6_7,
+        )
+
+        assertEquals(1, db.countRows("hydration_entries"))
+        assertEquals(1, db.countRows("meal_entries"))
+        assertTrue(db.tableExists("caffeine_entries"))
+        assertTrue(db.tableExists("custom_foods"))
+    }
+
+    @Test
+    fun migrate5To6_addsCaffeineTablesOrColumns() {
+        helper.createDatabase(TEST_DB, 5).close()
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 6, true, MIGRATION_5_6)
+
+        assertTrue(db.tableExists("caffeine_entries"))
+        assertTrue(db.columnsFor("caffeine_entries").containsAll(CAFFEINE_COLUMNS))
+        assertTrue(db.indexesFor("caffeine_entries").contains("index_caffeine_entries_date"))
+        assertTrue(db.indexesFor("caffeine_entries").contains("index_caffeine_entries_date_time"))
+        assertTrue(db.indexesFor("caffeine_entries").contains("index_caffeine_entries_date_createdAt"))
+    }
+
+    @Test
+    fun migrate6To7_addsCustomFoodTablesOrColumns() {
+        helper.createDatabase(TEST_DB, 6).close()
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 7, true, MIGRATION_6_7)
+
+        assertTrue(db.tableExists("custom_foods"))
+        assertTrue(db.columnsFor("custom_foods").containsAll(CUSTOM_FOOD_COLUMNS))
+        assertTrue(db.indexesFor("custom_foods").contains("index_custom_foods_name"))
+        assertTrue(db.indexesFor("custom_foods").contains("index_custom_foods_isFavorite"))
+        assertTrue(db.indexesFor("custom_foods").contains("index_custom_foods_updatedAt"))
+    }
+
+    @Test
+    fun migrateEachStepToLatest_opensSuccessfully() {
+        helper.createDatabase(TEST_DB, 5).close()
+        assertTrue(
+            helper.runMigrationsAndValidate(TEST_DB, 6, true, MIGRATION_5_6)
+                .tableExists("caffeine_entries"),
+        )
+
+        helper.createDatabase(TEST_DB, 6).close()
+        assertTrue(
+            helper.runMigrationsAndValidate(TEST_DB, 7, true, MIGRATION_6_7)
+                .tableExists("custom_foods"),
+        )
     }
 
     private fun SupportSQLiteDatabase.seedVersion4Data() {
@@ -118,7 +183,50 @@ class HealthDatabaseMigrationTest {
         }
     }
 
+    private fun SupportSQLiteDatabase.columnsFor(table: String): Set<String> = query("PRAGMA table_info(`$table`)").use { cursor ->
+        buildSet {
+            val nameIndex = cursor.getColumnIndex("name")
+            while (cursor.moveToNext()) {
+                add(cursor.getString(nameIndex))
+            }
+        }
+    }
+
+    private fun SupportSQLiteDatabase.tableExists(table: String): Boolean = query(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        arrayOf(table),
+    ).use { cursor ->
+        cursor.moveToFirst()
+    }
+
     private companion object {
         const val TEST_DB = "health-migration-test"
+        val CAFFEINE_COLUMNS = setOf(
+            "id",
+            "date",
+            "time",
+            "drinkType",
+            "size",
+            "estimatedMg",
+            "customName",
+            "createdAt",
+        )
+        val CUSTOM_FOOD_COLUMNS = setOf(
+            "id",
+            "name",
+            "brand",
+            "servingName",
+            "servingGrams",
+            "calories",
+            "proteinGrams",
+            "carbsGrams",
+            "fatGrams",
+            "fiberGrams",
+            "sugarGrams",
+            "sodiumMg",
+            "isFavorite",
+            "createdAt",
+            "updatedAt",
+        )
     }
 }

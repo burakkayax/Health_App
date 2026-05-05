@@ -74,15 +74,15 @@ class HealthDataManagementRepositoryImpl(
         }
 
         try {
-            // Note: If settings persistence fails here, the database transaction has already
-            // committed. This results in a partial import where health records exist
-            // but the profile/goals are not fully updated.
+            // Room and DataStore cannot be committed as one transaction here. If settings
+            // persistence fails, health records remain imported and the caller must surface
+            // this as a partial import instead of implying that nothing changed.
             settingsRepository.updateProfile(prepared.profile)
             settingsRepository.updateGoalSettings(prepared.goals)
             settingsRepository.updateWaterReminderSettings(prepared.waterReminderSettings)
             settingsRepository.updateThemeMode(prepared.themeMode)
         } catch (exception: Exception) {
-            throw HealthDataImportException(ImportValidationError.SettingsFailure, exception)
+            throw HealthDataImportException(ImportValidationError.PartialSettingsFailure, exception)
         }
     }
 
@@ -228,38 +228,16 @@ class HealthDataManagementRepositoryImpl(
     }
 
     private suspend fun importCustomFoods(entries: List<CustomFoodEntity>) {
-        val currentByKey = database.customFoodDao().getAll()
-            .associateBy { it.customFoodContentKey() }
-            .toMutableMap()
+        val plan = CustomFoodImportMergePlanner.plan(
+            existing = database.customFoodDao().getAll().map(CustomFoodEntity::toImportRecord),
+            imported = entries.map(CustomFoodEntity::toImportRecord),
+        )
 
-        entries.forEach { entry ->
-            val key = entry.customFoodContentKey()
-            val existing = currentByKey[key]
-            if (existing != null) {
-                // If import data is newer, update the existing record
-                if (entry.updatedAt.isAfter(existing.updatedAt)) {
-                    val updated = existing.copy(
-                        name = entry.name,
-                        brand = entry.brand,
-                        servingName = entry.servingName,
-                        servingGrams = entry.servingGrams,
-                        calories = entry.calories,
-                        proteinGrams = entry.proteinGrams,
-                        carbsGrams = entry.carbsGrams,
-                        fatGrams = entry.fatGrams,
-                        fiberGrams = entry.fiberGrams,
-                        sugarGrams = entry.sugarGrams,
-                        sodiumMg = entry.sodiumMg,
-                        isFavorite = entry.isFavorite,
-                        updatedAt = entry.updatedAt,
-                    )
-                    database.customFoodDao().upsert(updated)
-                    currentByKey[key] = updated
-                }
-            } else {
-                val newId = database.customFoodDao().upsert(entry.copy(id = 0))
-                currentByKey[key] = entry.copy(id = newId)
-            }
+        plan.updates.forEach { update ->
+            database.customFoodDao().upsert(update.toEntity())
+        }
+        plan.inserts.forEach { insert ->
+            database.customFoodDao().upsert(insert.toEntity(id = 0))
         }
     }
 }
@@ -430,19 +408,6 @@ private fun SupplementDoseEntryEntity.importKey(): String = listOf(templateId, d
 
 private fun String.normalizedTemplateName(): String = trim().lowercase()
 
-private fun CustomFoodEntity.customFoodContentKey(): String {
-    val normalizedName = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(name)
-    val normalizedBrand = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(brand ?: "")
-    val normalizedServingName = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(servingName)
-    val servingKey = "%.2f".format(java.util.Locale.US, servingGrams)
-    return listOf(
-        normalizedName,
-        normalizedBrand,
-        normalizedServingName,
-        servingKey,
-    ).joinToString("|")
-}
-
 private fun ExportedCustomFood.toEntity(): CustomFoodEntity = CustomFoodEntity(
     name = name.trim(),
     brand = brand?.trim()?.ifBlank { null },
@@ -458,4 +423,48 @@ private fun ExportedCustomFood.toEntity(): CustomFoodEntity = CustomFoodEntity(
     isFavorite = isFavorite,
     createdAt = LocalDateTime.parse(createdAt),
     updatedAt = LocalDateTime.parse(updatedAt),
+)
+
+private fun CustomFoodEntity.toImportRecord(): CustomFoodImportRecord = CustomFoodImportRecord(
+    id = id,
+    name = name,
+    brand = brand,
+    servingName = servingName,
+    servingGrams = servingGrams,
+    calories = calories,
+    proteinGrams = proteinGrams,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    fiberGrams = fiberGrams,
+    sugarGrams = sugarGrams,
+    sodiumMg = sodiumMg,
+    isFavorite = isFavorite,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+)
+
+private fun CustomFoodImportUpdate.toEntity(): CustomFoodEntity = imported.toEntity(
+    id = existing.id,
+    createdAt = existing.createdAt,
+)
+
+private fun CustomFoodImportRecord.toEntity(
+    id: Long = this.id,
+    createdAt: LocalDateTime = this.createdAt,
+): CustomFoodEntity = CustomFoodEntity(
+    id = id,
+    name = name,
+    brand = brand,
+    servingName = servingName,
+    servingGrams = servingGrams,
+    calories = calories,
+    proteinGrams = proteinGrams,
+    carbsGrams = carbsGrams,
+    fatGrams = fatGrams,
+    fiberGrams = fiberGrams,
+    sugarGrams = sugarGrams,
+    sodiumMg = sodiumMg,
+    isFavorite = isFavorite,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
 )

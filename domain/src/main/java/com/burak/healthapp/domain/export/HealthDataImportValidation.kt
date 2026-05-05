@@ -59,6 +59,7 @@ sealed interface ImportValidationError {
     data object DecodeFailure : ImportValidationError
     data object DatabaseFailure : ImportValidationError
     data object SettingsFailure : ImportValidationError
+    data object PartialSettingsFailure : ImportValidationError
     data object Unknown : ImportValidationError
 }
 

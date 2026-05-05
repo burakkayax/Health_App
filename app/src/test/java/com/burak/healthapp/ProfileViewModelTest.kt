@@ -230,6 +230,31 @@ class ProfileViewModelTest {
     }
 
     @Test
+    fun confirmImport_withPartialSettingsFailureShowsHonestPartialMessage() = runTest {
+        val managementRepository = FailingHealthDataManagementRepository(
+            HealthDataImportException(ImportValidationError.PartialSettingsFailure),
+        )
+        val viewModel = createViewModel(
+            healthDataManagementRepository = managementRepository,
+        )
+        collectUiState(viewModel)
+
+        viewModel.loadImportPreviewJson(JsonHealthDataExporter().encode(profileImportModel()))
+        advanceUntilIdle()
+
+        viewModel.confirmImport()
+        advanceUntilIdle()
+
+        val exportState = viewModel.uiState.value.exportState
+        assertTrue(exportState.isError)
+        assertFalse(exportState.isImporting)
+        assertEquals(
+            UiText.StringResource(R.string.import_result_partial_settings_failure),
+            exportState.message,
+        )
+    }
+
+    @Test
     fun deleteAllHealthData_requiresConfirmationAndReportsSuccess() = runTest {
         val managementRepository = RecordingHealthDataManagementRepository()
         val viewModel = createViewModel(healthDataManagementRepository = managementRepository)

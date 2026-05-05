@@ -229,6 +229,7 @@
     <string name="import_error_decode_failure">The backup file could not be read. Check the file structure.</string>
     <string name="import_error_database_failure">A database error occurred while importing records.</string>
     <string name="import_error_settings_failure">Records were imported, but profile or settings could not be updated.</string>
+    <string name="import_result_partial_settings_failure">Health records were imported, but profile/goal settings could not be applied. You can import the same file again; duplicates should not be created.</string>
     <string name="import_error_unknown">The backup file could not be imported. Check the file and try again.</string>
     <string name="import_partial_settings_failure">Records were imported, but some settings could not be updated.</string>
     <string name="import_validation_expected_datetime_format">Sleep record date-time format is invalid. Expected format: 2026-04-02T23:10:00</string>
