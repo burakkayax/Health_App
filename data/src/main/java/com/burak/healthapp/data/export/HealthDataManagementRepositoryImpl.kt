@@ -430,15 +430,13 @@ private fun String.normalizedTemplateName(): String = trim().lowercase()
 private fun CustomFoodEntity.customFoodContentKey(): String {
     val normalizedName = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(name)
     val normalizedBrand = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(brand ?: "")
+    val normalizedServingName = com.burak.healthapp.data.nutrition.TurkishSearchNormalizer.normalize(servingName)
     val servingKey = "%.2f".format(java.util.Locale.US, servingGrams)
     return listOf(
         normalizedName,
         normalizedBrand,
+        normalizedServingName,
         servingKey,
-        calories.toString(),
-        proteinGrams.toString(),
-        carbsGrams.toString(),
-        fatGrams.toString(),
     ).joinToString("|")
 }
 

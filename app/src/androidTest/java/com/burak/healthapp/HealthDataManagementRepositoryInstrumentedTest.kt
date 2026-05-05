@@ -306,6 +306,92 @@ class HealthDataManagementRepositoryInstrumentedTest {
     }
 
     @Test
+    fun importCustomFoods_allowsDuplicateWhenServingNameDiffers() = runBlocking {
+        val date = LocalDateTime.parse("2026-04-27T10:00:00")
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Yulaf",
+                brand = null,
+                servingName = "kase",
+                servingGrams = 100f,
+                calories = 300,
+                proteinGrams = 10,
+                carbsGrams = 50,
+                fatGrams = 5,
+                createdAt = date,
+                updatedAt = date,
+            )
+        )
+
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Yulaf",
+                    brand = null,
+                    servingName = "porsiyon", // different serving name
+                    servingGrams = 100f,
+                    calories = 300,
+                    proteinGrams = 10,
+                    carbsGrams = 50,
+                    fatGrams = 5,
+                    isFavorite = false,
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T10:00:00",
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+
+        val foods = database.customFoodDao().getAll()
+        assertEquals(2, foods.size)
+    }
+
+    @Test
+    fun importCustomFoods_allowsDuplicateWhenServingGramsDiffers() = runBlocking {
+        val date = LocalDateTime.parse("2026-04-27T10:00:00")
+        database.customFoodDao().upsert(
+            com.burak.healthapp.data.local.entity.CustomFoodEntity(
+                name = "Yulaf",
+                brand = null,
+                servingName = "kase",
+                servingGrams = 100f,
+                calories = 300,
+                proteinGrams = 10,
+                carbsGrams = 50,
+                fatGrams = 5,
+                createdAt = date,
+                updatedAt = date,
+            )
+        )
+
+        val model = fullImportModel().copy(
+            customFoods = listOf(
+                ExportedCustomFood(
+                    id = 1,
+                    name = "Yulaf",
+                    brand = null,
+                    servingName = "kase",
+                    servingGrams = 50f, // different serving grams
+                    calories = 150,
+                    proteinGrams = 5,
+                    carbsGrams = 25,
+                    fatGrams = 2,
+                    isFavorite = false,
+                    createdAt = "2026-04-27T10:00:00",
+                    updatedAt = "2026-04-27T10:00:00",
+                )
+            )
+        )
+
+        repository.importHealthData(model)
+
+        val foods = database.customFoodDao().getAll()
+        assertEquals(2, foods.size)
+    }
+
+    @Test
     fun deleteAllHealthData_deletesHealthRecordsAndPreservesSettings() = runBlocking {
         val date = LocalDate.of(2026, 4, 27)
         database.mealDao().upsert(

@@ -1,5 +1,11 @@
 # Changelog
 
+## PR23.15.2 - Custom Food Import Merge Key Fix
+
+### Düzeltildi
+- Özel besin içe aktarma işleminde, besin değerleri (kalori, protein, vs.) değiştiğinde yeni kayıt oluşturulmasını engelleyecek şekilde kimlik anahtarı düzeltildi.
+- Özel besin kimlik eşleştirmesi artık yalnızca stabilize edilmiş alanlar (normalize edilmiş isim, marka, porsiyon ismi ve gramaj) üzerinden yapılıyor.
+
 ## PR23.15 - Meal History & Nutrition Detail Polish
 
 ### Eklendi
