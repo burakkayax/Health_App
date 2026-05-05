@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -22,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,7 +37,7 @@ import com.burak.healthapp.domain.model.DashboardCardType
 fun WelcomeStep() {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_welcome"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_welcome_title),
@@ -54,7 +52,7 @@ fun WelcomeStep() {
             Text(
                 text = stringResource(R.string.onboarding_medical_disclaimer),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -65,7 +63,7 @@ fun WelcomeStep() {
 fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_tracking_areas"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_tracking_title),
@@ -76,12 +74,12 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
             text = stringResource(R.string.onboarding_tracking_body),
             style = MaterialTheme.typography.bodyMedium,
         )
-        
+
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
             verticalArrangement = Arrangement.spacedBy(HealthSpacing.xs),
-            maxItemsInEachRow = 2
+            maxItemsInEachRow = 2,
         ) {
             DashboardCardType.entries.forEach { area ->
                 val isSelected = state.selectedTrackingAreas.contains(area)
@@ -112,43 +110,43 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
                         .weight(1f)
                         .clickable { onAction(OnboardingAction.ToggleTrackingArea(area)) }
                         .testTag("onboarding_tracking_card_${area.name}"),
-                    containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                    containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.weight(1f).padding(end = HealthSpacing.xs)) {
                             Text(
                                 text = stringResource(titleRes),
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             )
                             Text(
                                 text = stringResource(subtitleRes),
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                         if (isSelected) {
                             Box(
                                 modifier = Modifier.size(20.dp).background(MaterialTheme.colorScheme.primary, shape = androidx.compose.foundation.shape.CircleShape),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Text("✓", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelSmall)
                             }
                         } else {
                             Box(
-                                modifier = Modifier.size(20.dp).background(MaterialTheme.colorScheme.surfaceVariant, shape = androidx.compose.foundation.shape.CircleShape)
+                                modifier = Modifier.size(20.dp).background(MaterialTheme.colorScheme.surfaceVariant, shape = androidx.compose.foundation.shape.CircleShape),
                             )
                         }
                     }
                 }
             }
         }
-        
+
         state.validationErrors[OnboardingFieldKeys.TRACKING_AREAS]?.let { error ->
             Text(text = error.asString(), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
@@ -159,7 +157,7 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
 fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_basic_info"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_basic_info_title),
@@ -175,7 +173,7 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             label = stringResource(R.string.onboarding_label_name),
             value = state.name,
             onValueChange = { onAction(OnboardingAction.UpdateName(it)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         )
         HealthPillTextField(
             label = stringResource(R.string.onboarding_label_age),
@@ -183,9 +181,9 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             onValueChange = { onAction(OnboardingAction.UpdateAge(it)) },
             isError = state.validationErrors[OnboardingFieldKeys.AGE] != null,
             supportingText = state.validationErrors[OnboardingFieldKeys.AGE]?.asString(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         )
-        
+
         Text(text = stringResource(R.string.onboarding_label_sex), style = MaterialTheme.typography.labelMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
             OnboardingSex.entries.forEach { sex ->
@@ -198,10 +196,10 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
                 Box(
                     modifier = Modifier.weight(1f).background(
                         color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                        shape = MaterialTheme.shapes.large
+                        shape = MaterialTheme.shapes.large,
                     ).clickable { onAction(OnboardingAction.UpdateSex(sex)) }
-                    .padding(HealthSpacing.xs),
-                    contentAlignment = Alignment.Center
+                        .padding(HealthSpacing.xs),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelSmall)
                 }
@@ -215,7 +213,7 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             isError = state.validationErrors[OnboardingFieldKeys.HEIGHT] != null,
             supportingText = state.validationErrors[OnboardingFieldKeys.HEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            suffix = { Text("cm") }
+            suffix = { Text("cm") },
         )
         HealthPillTextField(
             label = stringResource(R.string.onboarding_label_current_weight),
@@ -224,7 +222,7 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             isError = state.validationErrors[OnboardingFieldKeys.CURRENT_WEIGHT] != null,
             supportingText = state.validationErrors[OnboardingFieldKeys.CURRENT_WEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            suffix = { Text("kg") }
+            suffix = { Text("kg") },
         )
         HealthPillTextField(
             label = stringResource(R.string.onboarding_label_target_weight),
@@ -233,7 +231,7 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             isError = state.validationErrors[OnboardingFieldKeys.TARGET_WEIGHT] != null,
             supportingText = state.validationErrors[OnboardingFieldKeys.TARGET_WEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            suffix = { Text("kg") }
+            suffix = { Text("kg") },
         )
     }
 }
@@ -242,7 +240,7 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
 fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_activity_goal"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_activity_title),
@@ -256,13 +254,13 @@ fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> U
 
         OnboardingActivityLevel.entries.forEach { level ->
             val selected = state.activityLevel == level
-            val titleRes = when(level) {
+            val titleRes = when (level) {
                 OnboardingActivityLevel.LOW -> R.string.onboarding_activity_low
                 OnboardingActivityLevel.LIGHT -> R.string.onboarding_activity_light
                 OnboardingActivityLevel.MODERATE -> R.string.onboarding_activity_moderate
                 OnboardingActivityLevel.HIGH -> R.string.onboarding_activity_high
             }
-            val descRes = when(level) {
+            val descRes = when (level) {
                 OnboardingActivityLevel.LOW -> R.string.onboarding_activity_low_desc
                 OnboardingActivityLevel.LIGHT -> R.string.onboarding_activity_light_desc
                 OnboardingActivityLevel.MODERATE -> R.string.onboarding_activity_moderate_desc
@@ -270,7 +268,7 @@ fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> U
             }
             HealthCard(
                 modifier = Modifier.fillMaxWidth().clickable { onAction(OnboardingAction.UpdateActivityLevel(level)) },
-                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
             ) {
                 Column {
                     Text(text = stringResource(titleRes), fontWeight = FontWeight.Bold)
@@ -280,17 +278,17 @@ fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> U
         }
 
         Spacer(modifier = Modifier.size(HealthSpacing.xs))
-        
+
         OnboardingMainGoal.entries.forEach { goal ->
             val selected = state.mainGoal == goal
-            val titleRes = when(goal) {
+            val titleRes = when (goal) {
                 OnboardingMainGoal.MAINTAIN -> R.string.onboarding_goal_maintain
                 OnboardingMainGoal.SLOW_GAIN -> R.string.onboarding_goal_slow_gain
                 OnboardingMainGoal.SLOW_LOSS -> R.string.onboarding_goal_slow_loss
             }
             HealthCard(
                 modifier = Modifier.fillMaxWidth().clickable { onAction(OnboardingAction.UpdateMainGoal(goal)) },
-                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
             ) {
                 Text(text = stringResource(titleRes), fontWeight = FontWeight.Bold)
             }
@@ -302,7 +300,7 @@ fun ActivityGoalStep(state: OnboardingUiState, onAction: (OnboardingAction) -> U
 fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_smart_goals"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_smart_goals_title),
@@ -326,7 +324,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     supportingText = state.validationErrors[OnboardingFieldKeys.WATER]?.asString(),
                     modifier = Modifier.testTag("onboarding_water_goal_field"),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    suffix = { Text("ml") }
+                    suffix = { Text("ml") },
                 )
                 Text(text = stringResource(R.string.onboarding_not_medical_advice_short), style = MaterialTheme.typography.labelSmall)
             }
@@ -346,7 +344,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     supportingText = state.validationErrors[OnboardingFieldKeys.CALORIES]?.asString(),
                     modifier = Modifier.testTag("onboarding_calorie_goal_field"),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    suffix = { Text("kcal") }
+                    suffix = { Text("kcal") },
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
                     HealthPillTextField(label = stringResource(R.string.profile_goal_protein), value = state.proteinTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateProtein(it)) }, isError = state.validationErrors[OnboardingFieldKeys.PROTEIN] != null, supportingText = state.validationErrors[OnboardingFieldKeys.PROTEIN]?.asString(), modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
@@ -369,7 +367,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     supportingText = state.validationErrors[OnboardingFieldKeys.CAFFEINE_LIMIT]?.asString(),
                     modifier = Modifier.testTag("onboarding_caffeine_limit_field"),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    suffix = { Text("mg") }
+                    suffix = { Text("mg") },
                 )
                 HealthPillTextField(
                     label = stringResource(R.string.profile_goal_caffeine_cutoff_time),
@@ -377,7 +375,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     onValueChange = { onAction(OnboardingAction.UpdateCaffeineCutoff(it)) },
                     isError = state.validationErrors[OnboardingFieldKeys.CAFFEINE_CUTOFF] != null,
                     supportingText = state.validationErrors[OnboardingFieldKeys.CAFFEINE_CUTOFF]?.asString(),
-                    modifier = Modifier.testTag("onboarding_caffeine_cutoff_field")
+                    modifier = Modifier.testTag("onboarding_caffeine_cutoff_field"),
                 )
             }
         }
@@ -391,7 +389,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                 }
             }
         }
-        
+
         if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_steps), fontWeight = FontWeight.Bold)
@@ -408,7 +406,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                 }
             }
         }
-        
+
         if (state.selectedTrackingAreas.contains(DashboardCardType.SMOKING)) {
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_smoking), fontWeight = FontWeight.Bold)
@@ -422,7 +420,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
 fun PreferencesStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_preferences"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_preferences_title),
@@ -468,7 +466,7 @@ fun PreferencesStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Un
 fun DoneStep() {
     Column(
         modifier = Modifier.fillMaxWidth().testTag("onboarding_step_done"),
-        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm)
+        verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm),
     ) {
         Text(
             text = stringResource(R.string.onboarding_done_title),

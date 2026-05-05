@@ -1,6 +1,8 @@
 package com.burak.healthapp
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
+import com.burak.healthapp.core.datastore.SettingsKeys
 import com.burak.healthapp.data.local.dao.BodyMeasurementDao
 import com.burak.healthapp.data.local.dao.SupplementTemplateDao
 import com.burak.healthapp.data.local.entity.BodyMeasurementEntity
@@ -11,8 +13,6 @@ import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
-import androidx.datastore.preferences.core.edit
-import com.burak.healthapp.core.datastore.SettingsKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -199,7 +199,7 @@ class SettingsRepositoryTest {
             scope = backgroundScope,
             produceFile = { tempFile },
         )
-        
+
         dataStore.edit { preferences ->
             preferences[SettingsKeys.sleepTargetBedtime] = "invalid-time"
             preferences[SettingsKeys.caffeineCutoffTime] = "invalid-time"
@@ -215,13 +215,13 @@ class SettingsRepositoryTest {
         )
 
         val settings = repository.settings.first()
-        
+
         assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.SLEEP_BEDTIME, settings.goalSettings.sleepTargetBedtime)
         assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.CAFFEINE_CUTOFF_TIME, settings.goalSettings.caffeineCutoffTime)
         assertEquals(com.burak.healthapp.domain.config.DefaultHealthGoals.WATER_REMINDER_START_TIME, settings.waterReminderSettings.startTime)
         assertEquals(null, settings.waterReminderSnoozedDate)
         assertEquals(com.burak.healthapp.domain.model.defaultDashboardCardConfig().map { it.type }, settings.dashboardCards.map { it.type })
-        
+
         tempDir.deleteRecursively()
     }
 }

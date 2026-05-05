@@ -2,7 +2,6 @@ package com.burak.healthapp.feature.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,10 +43,10 @@ fun OnboardingScreen(
             .navigationBarsPadding()
             .imePadding()
             .testTag("onboarding_root"),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.TopCenter,
     ) {
         val maxWidth = if (maxWidth > 600.dp) 600.dp else maxWidth
-        
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxHeight()
@@ -59,18 +58,18 @@ fun OnboardingScreen(
             item {
                 OnboardingHeader(step = state.currentStep)
             }
-            
+
             item {
                 state.saveError?.let { error ->
                     Text(
                         text = error.asString(),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = HealthSpacing.sm)
+                        modifier = Modifier.padding(bottom = HealthSpacing.sm),
                     )
                 }
             }
-            
+
             item {
                 when (state.currentStep) {
                     OnboardingStep.WELCOME -> WelcomeStep()
@@ -99,7 +98,7 @@ fun OnboardingScreen(
                 item {
                     OnboardingFooter(
                         step = state.currentStep,
-                        onAction = onAction
+                        onAction = onAction,
                     )
                 }
             }

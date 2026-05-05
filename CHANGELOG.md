@@ -1,5 +1,12 @@
 # Changelog
 
+## PR23.17.3.2 — AndroidTest Signature, Detekt & Onboarding Cleanup
+- Updated androidTest fake SettingsRepository implementations to match the expanded completeOnboarding signature.
+- Fixed detekt issues in onboarding tests by replacing empty override blocks and using error() for expected test failures.
+- Removed unused onboarding imports and verified onboarding string resources.
+- Added minimum onboarding regression tests for step target, caffeine goals, supplement selection, invalid caffeine cutoff, and SavedStateHandle enum fallback.
+- Re-ran formatting and CI validation commands.
+
 ## PR23.16 — Sleep Stability Metrics v2
 - Added period-based sleep stability metrics for average bedtime, average wake time, and variability.
 - Handled overnight and midnight-adjacent sleep records without naive time averaging errors.

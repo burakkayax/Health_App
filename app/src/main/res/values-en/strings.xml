@@ -484,4 +484,8 @@
     <string name="onboarding_tracking_subtitle_exercise">Track exercise days</string>
     <string name="onboarding_tracking_subtitle_supplements">Track supplement doses</string>
     <string name="onboarding_caffeine_limit_label">Caffeine Limit (mg)</string>
+    <string name="profile_goal_step_tracking_helper">Uses a foreground service, shows a notification, and can be turned off anytime.</string>
+    <string name="profile_goal_start">Start</string>
+    <string name="profile_goal_end">End</string>
+    <string name="profile_goal_frequency">Frequency (min)</string>
 </resources>

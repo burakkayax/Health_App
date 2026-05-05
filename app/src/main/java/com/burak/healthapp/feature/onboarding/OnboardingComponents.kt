@@ -3,10 +3,10 @@ package com.burak.healthapp.feature.onboarding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,29 +24,29 @@ import com.burak.healthapp.core.ui.theme.HealthSpacing
 @Composable
 fun OnboardingHeader(step: OnboardingStep) {
     if (step == OnboardingStep.WELCOME || step == OnboardingStep.DONE) return
-    
+
     // total is TRACKING_AREAS, BASIC_INFO, ACTIVITY_GOAL, SMART_GOALS, PREFERENCES (5)
     // ordinal: WELCOME=0, TRACKING_AREAS=1, BASIC_INFO=2, ACTIVITY_GOAL=3, SMART_GOALS=4, PREFERENCES=5, DONE=6
     val currentIdx = step.ordinal
-    val totalIdx = OnboardingStep.entries.size - 2 
+    val totalIdx = OnboardingStep.entries.size - 2
     val progress = (currentIdx.toFloat() / totalIdx.toFloat()).coerceIn(0f, 1f)
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(bottom = HealthSpacing.sm).testTag("onboarding_progress_indicator")
+        modifier = Modifier.fillMaxWidth().padding(bottom = HealthSpacing.sm).testTag("onboarding_progress_indicator"),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
                 text = stringResource(R.string.onboarding_step_progress, currentIdx, totalIdx),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             )
             Text(
                 text = "${(progress * 100).toInt()}%",
                 style = MaterialTheme.typography.labelLarge,
-                color = HealthPrimary
+                color = HealthPrimary,
             )
         }
         Spacer(modifier = Modifier.height(HealthSpacing.xs))
@@ -54,7 +54,7 @@ fun OnboardingHeader(step: OnboardingStep) {
             progress = { progress },
             modifier = Modifier.fillMaxWidth().height(4.dp),
             color = HealthPrimary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
     }
 }
@@ -62,7 +62,7 @@ fun OnboardingHeader(step: OnboardingStep) {
 @Composable
 fun OnboardingFooter(
     step: OnboardingStep,
-    onAction: (OnboardingAction) -> Unit
+    onAction: (OnboardingAction) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -75,7 +75,7 @@ fun OnboardingFooter(
                 onClick = { onAction(OnboardingAction.BackClicked) },
             )
         }
-        
+
         if (step == OnboardingStep.WELCOME) {
             Column(verticalArrangement = Arrangement.spacedBy(HealthSpacing.sm), modifier = Modifier.fillMaxWidth()) {
                 RoundedPillButton(

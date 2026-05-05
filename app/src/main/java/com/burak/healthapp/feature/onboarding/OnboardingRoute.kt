@@ -45,6 +45,6 @@ fun OnboardingRoute() {
                 is OnboardingAction.UpdateWaterReminderInterval -> viewModel.updateWaterReminderIntervalMinutes(action.value)
                 is OnboardingAction.UpdateStepTrackingPreferred -> viewModel.updateStepTrackingPreferred(action.value)
             }
-        }
+        },
     )
 }

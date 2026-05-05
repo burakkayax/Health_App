@@ -40,13 +40,12 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private inline fun <reified T : Enum<T>> enumValueOrNull(raw: String?): T? =
-        raw?.let { value -> enumValues<T>().firstOrNull { it.name == value } }
+    private inline fun <reified T : Enum<T>> enumValueOrNull(raw: String?): T? = raw?.let { value -> enumValues<T>().firstOrNull { it.name == value } }
 
     private fun restoreState(): OnboardingUiState? {
         val currentStepName = savedStateHandle.get<String>("currentStep") ?: return null
         val currentStep = enumValueOrNull<OnboardingStep>(currentStepName) ?: OnboardingStep.WELCOME
-        
+
         val selectedTrackingAreas = savedStateHandle.get<List<String>>("selectedTrackingAreas")
             ?.mapNotNull { enumValueOrNull<DashboardCardType>(it) }
             ?.toSet()
@@ -127,35 +126,87 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    fun updateName(value: String) { _uiState.update { it.copy(name = value) } }
-    fun updateAge(value: String) { _uiState.update { it.copy(age = value) } }
-    fun updateSex(value: OnboardingSex) { _uiState.update { it.copy(sex = value) } }
-    fun updateHeightCm(value: String) { _uiState.update { it.copy(heightCm = value) } }
-    fun updateCurrentWeightKg(value: String) { _uiState.update { it.copy(currentWeightKg = value) } }
-    fun updateTargetWeightKg(value: String) { _uiState.update { it.copy(targetWeightKg = value) } }
-    
-    fun updateActivityLevel(value: OnboardingActivityLevel) { _uiState.update { it.copy(activityLevel = value) } }
-    fun updateMainGoal(value: OnboardingMainGoal) { _uiState.update { it.copy(mainGoal = value) } }
+    fun updateName(value: String) {
+        _uiState.update { it.copy(name = value) }
+    }
+    fun updateAge(value: String) {
+        _uiState.update { it.copy(age = value) }
+    }
+    fun updateSex(value: OnboardingSex) {
+        _uiState.update { it.copy(sex = value) }
+    }
+    fun updateHeightCm(value: String) {
+        _uiState.update { it.copy(heightCm = value) }
+    }
+    fun updateCurrentWeightKg(value: String) {
+        _uiState.update { it.copy(currentWeightKg = value) }
+    }
+    fun updateTargetWeightKg(value: String) {
+        _uiState.update { it.copy(targetWeightKg = value) }
+    }
 
-    fun updateWaterTargetMl(value: String) { _uiState.update { it.copy(waterTargetMl = value) } }
-    fun updateDailyStepTarget(value: String) { _uiState.update { it.copy(dailyStepTarget = value) } }
-    fun updateSleepBedtime(value: String) { _uiState.update { it.copy(sleepBedtime = value) } }
-    fun updateSleepWakeTime(value: String) { _uiState.update { it.copy(sleepWakeTime = value) } }
-    fun updateDailyCaffeineLimitMg(value: String) { _uiState.update { it.copy(dailyCaffeineLimitMg = value) } }
-    fun updateCaffeineCutoffTime(value: String) { _uiState.update { it.copy(caffeineCutoffTime = value) } }
-    fun updateDailyCaloriesTarget(value: String) { _uiState.update { it.copy(dailyCaloriesTarget = value) } }
-    fun updateProteinTargetGrams(value: String) { _uiState.update { it.copy(proteinTargetGrams = value) } }
-    fun updateCarbTargetGrams(value: String) { _uiState.update { it.copy(carbTargetGrams = value) } }
-    fun updateFatTargetGrams(value: String) { _uiState.update { it.copy(fatTargetGrams = value) } }
-    fun updateExerciseDaysPerWeek(value: String) { _uiState.update { it.copy(exerciseDaysPerWeek = value) } }
-    fun updateExerciseDurationMinutes(value: String) { _uiState.update { it.copy(exerciseDurationMinutes = value) } }
-    fun updateSmokeDailyLimit(value: String) { _uiState.update { it.copy(smokeDailyLimit = value) } }
+    fun updateActivityLevel(value: OnboardingActivityLevel) {
+        _uiState.update { it.copy(activityLevel = value) }
+    }
+    fun updateMainGoal(value: OnboardingMainGoal) {
+        _uiState.update { it.copy(mainGoal = value) }
+    }
 
-    fun updateWaterReminderEnabled(value: Boolean) { _uiState.update { it.copy(waterReminderEnabled = value) } }
-    fun updateWaterReminderStartTime(value: String) { _uiState.update { it.copy(waterReminderStartTime = value) } }
-    fun updateWaterReminderEndTime(value: String) { _uiState.update { it.copy(waterReminderEndTime = value) } }
-    fun updateWaterReminderIntervalMinutes(value: String) { _uiState.update { it.copy(waterReminderIntervalMinutes = value) } }
-    fun updateStepTrackingPreferred(value: Boolean) { _uiState.update { it.copy(stepTrackingPreferred = value) } }
+    fun updateWaterTargetMl(value: String) {
+        _uiState.update { it.copy(waterTargetMl = value) }
+    }
+    fun updateDailyStepTarget(value: String) {
+        _uiState.update { it.copy(dailyStepTarget = value) }
+    }
+    fun updateSleepBedtime(value: String) {
+        _uiState.update { it.copy(sleepBedtime = value) }
+    }
+    fun updateSleepWakeTime(value: String) {
+        _uiState.update { it.copy(sleepWakeTime = value) }
+    }
+    fun updateDailyCaffeineLimitMg(value: String) {
+        _uiState.update { it.copy(dailyCaffeineLimitMg = value) }
+    }
+    fun updateCaffeineCutoffTime(value: String) {
+        _uiState.update { it.copy(caffeineCutoffTime = value) }
+    }
+    fun updateDailyCaloriesTarget(value: String) {
+        _uiState.update { it.copy(dailyCaloriesTarget = value) }
+    }
+    fun updateProteinTargetGrams(value: String) {
+        _uiState.update { it.copy(proteinTargetGrams = value) }
+    }
+    fun updateCarbTargetGrams(value: String) {
+        _uiState.update { it.copy(carbTargetGrams = value) }
+    }
+    fun updateFatTargetGrams(value: String) {
+        _uiState.update { it.copy(fatTargetGrams = value) }
+    }
+    fun updateExerciseDaysPerWeek(value: String) {
+        _uiState.update { it.copy(exerciseDaysPerWeek = value) }
+    }
+    fun updateExerciseDurationMinutes(value: String) {
+        _uiState.update { it.copy(exerciseDurationMinutes = value) }
+    }
+    fun updateSmokeDailyLimit(value: String) {
+        _uiState.update { it.copy(smokeDailyLimit = value) }
+    }
+
+    fun updateWaterReminderEnabled(value: Boolean) {
+        _uiState.update { it.copy(waterReminderEnabled = value) }
+    }
+    fun updateWaterReminderStartTime(value: String) {
+        _uiState.update { it.copy(waterReminderStartTime = value) }
+    }
+    fun updateWaterReminderEndTime(value: String) {
+        _uiState.update { it.copy(waterReminderEndTime = value) }
+    }
+    fun updateWaterReminderIntervalMinutes(value: String) {
+        _uiState.update { it.copy(waterReminderIntervalMinutes = value) }
+    }
+    fun updateStepTrackingPreferred(value: Boolean) {
+        _uiState.update { it.copy(stepTrackingPreferred = value) }
+    }
 
     fun goToNextStep() {
         val currentState = _uiState.value
@@ -213,7 +264,7 @@ class OnboardingViewModel @Inject constructor(
                 )
                 val defaultTrackingAreas = defaultOnboardingTrackingAreas()
                 val dashboardConfig = buildDashboardConfigFromTrackingAreas(defaultTrackingAreas)
-                
+
                 settingsRepository.completeOnboarding(
                     profile = profile,
                     goals = goals,
@@ -241,7 +292,7 @@ class OnboardingViewModel @Inject constructor(
                 val profile = UserProfile.fromName(profileName, heightCm = parseLocalizedDecimalInput(state.heightCm))
 
                 val currentWeight = parseLocalizedDecimalInput(state.currentWeightKg) ?: DefaultHealthGoals.BASELINE_WEIGHT_KG
-                
+
                 val goals = GoalSettings(
                     dailyCaloriesTarget = state.dailyCaloriesTarget.toIntOrNull() ?: DefaultHealthGoals.DAILY_CALORIES,
                     proteinTargetGrams = state.proteinTargetGrams.toIntOrNull() ?: DefaultHealthGoals.PROTEIN_GRAMS,
@@ -294,7 +345,7 @@ class OnboardingViewModel @Inject constructor(
                     ),
                     stepTrackingEnabled = false,
                 )
-                
+
                 _uiState.update { it.copy(isSaving = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false, saveError = UiText.StringResource(R.string.onboarding_error_save_failed)) }
@@ -307,7 +358,7 @@ class OnboardingViewModel @Inject constructor(
         val weight = parseLocalizedDecimalInput(state.currentWeightKg)
         val age = state.age.toIntOrNull()
         val height = parseLocalizedDecimalInput(state.heightCm)
-        
+
         val water = suggestWaterTargetMl(weight, state.activityLevel)
         val bedtime = DefaultHealthGoals.SLEEP_BEDTIME
         val wakeTime = DefaultHealthGoals.SLEEP_WAKE_TIME
@@ -316,7 +367,7 @@ class OnboardingViewModel @Inject constructor(
         val protein = suggestProteinGrams(weight)
         val fat = suggestFatGrams(calories)
         val carbs = suggestCarbGrams(calories, protein, fat)
-        
+
         val dailySteps = when (state.activityLevel) {
             OnboardingActivityLevel.LOW -> 6000
             OnboardingActivityLevel.LIGHT -> 8000
@@ -324,7 +375,7 @@ class OnboardingViewModel @Inject constructor(
             OnboardingActivityLevel.HIGH -> 10000
         }
 
-        _uiState.update { 
+        _uiState.update {
             it.copy(
                 waterTargetMl = water.toString(),
                 sleepBedtime = bedtime.toString(),
@@ -357,7 +408,7 @@ class OnboardingViewModel @Inject constructor(
 
     private fun validateCurrentStep(state: OnboardingUiState): Map<String, UiText> {
         val errors = mutableMapOf<String, UiText>()
-        
+
         when (state.currentStep) {
             OnboardingStep.TRACKING_AREAS -> {
                 if (state.selectedTrackingAreas.isEmpty()) {
@@ -406,20 +457,20 @@ class OnboardingViewModel @Inject constructor(
                 if (state.selectedTrackingAreas.contains(DashboardCardType.NUTRITION)) {
                     val cal = state.dailyCaloriesTarget.toIntOrNull()
                     if (cal == null || cal <= 0) errors[OnboardingFieldKeys.CALORIES] = UiText.StringResource(R.string.onboarding_error_calorie_positive)
-                    
+
                     val protein = state.proteinTargetGrams.toIntOrNull()
                     if (protein == null || protein < 0) errors[OnboardingFieldKeys.PROTEIN] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
-                    
+
                     val carb = state.carbTargetGrams.toIntOrNull()
                     if (carb == null || carb < 0) errors[OnboardingFieldKeys.CARBS] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
-                    
+
                     val fat = state.fatTargetGrams.toIntOrNull()
                     if (fat == null || fat < 0) errors[OnboardingFieldKeys.FAT] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.EXERCISE)) {
                     val days = state.exerciseDaysPerWeek.toIntOrNull()
                     if (days == null || days !in 0..7) errors[OnboardingFieldKeys.EXERCISE_DAYS] = UiText.StringResource(R.string.onboarding_error_exercise_days)
-                    
+
                     val duration = state.exerciseDurationMinutes.toIntOrNull()
                     if (duration == null || duration < 0) errors[OnboardingFieldKeys.EXERCISE_DURATION] = UiText.StringResource(R.string.onboarding_error_exercise_duration)
                 }
@@ -443,7 +494,7 @@ class OnboardingViewModel @Inject constructor(
             }
             else -> {}
         }
-        
+
         return errors
     }
 

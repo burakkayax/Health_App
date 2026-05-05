@@ -73,16 +73,18 @@ internal fun toMealHistoryUiState(entries: List<MealEntry>): MealHistoryUiState 
             },
         )
     }
-    val dailySummary = if (entries.isEmpty()) null else {
+    val dailySummary = if (entries.isEmpty()) {
+        null
+    } else {
         val totalProtein = entries.sumOf { it.proteinGrams }
         val totalCarbs = entries.sumOf { it.carbsGrams }
         val totalFat = entries.sumOf { it.fatGrams }
-        
+
         val proteinKcal = totalProtein * 4
         val carbsKcal = totalCarbs * 4
         val fatKcal = totalFat * 9
         val macroKcal = proteinKcal + carbsKcal + fatKcal
-        
+
         val macroDistribution = if (macroKcal > 0) {
             val proteinPercent = kotlin.math.round((proteinKcal.toFloat() / macroKcal) * 100).toInt()
             val carbsPercent = kotlin.math.round((carbsKcal.toFloat() / macroKcal) * 100).toInt()

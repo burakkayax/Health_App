@@ -17,9 +17,7 @@ fun suggestWaterTargetMl(weightKg: Float?, activityLevel: OnboardingActivityLeve
     return clampValue((total / 250f).roundToInt() * 250, 1500, 4000)
 }
 
-fun suggestCaffeineCutoffTime(bedtime: LocalTime, bufferHours: Int = 8): LocalTime {
-    return bedtime.minusHours(bufferHours.toLong())
-}
+fun suggestCaffeineCutoffTime(bedtime: LocalTime, bufferHours: Int = 8): LocalTime = bedtime.minusHours(bufferHours.toLong())
 
 fun suggestCalories(
     age: Int?,
@@ -63,9 +61,7 @@ fun suggestProteinGrams(weightKg: Float?): Int {
     return (weightKg * 1.6f / 5f).roundToInt() * 5
 }
 
-fun suggestFatGrams(calories: Int): Int {
-    return ((calories * 0.25f) / 9f / 5f).roundToInt() * 5
-}
+fun suggestFatGrams(calories: Int): Int = ((calories * 0.25f) / 9f / 5f).roundToInt() * 5
 
 fun suggestCarbGrams(calories: Int, proteinGrams: Int, fatGrams: Int): Int {
     val remainingCalories = calories - (proteinGrams * 4) - (fatGrams * 9)
@@ -73,6 +69,4 @@ fun suggestCarbGrams(calories: Int, proteinGrams: Int, fatGrams: Int): Int {
     return carbs.coerceAtLeast(0)
 }
 
-private fun clampValue(value: Int, min: Int, max: Int): Int {
-    return value.coerceIn(min, max)
-}
+private fun clampValue(value: Int, min: Int, max: Int): Int = value.coerceIn(min, max)

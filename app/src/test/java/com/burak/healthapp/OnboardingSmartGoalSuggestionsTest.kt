@@ -60,7 +60,7 @@ class OnboardingSmartGoalSuggestionsTest {
             heightCm = 175f,
             currentWeightKg = 70f,
             activityLevel = OnboardingActivityLevel.MODERATE,
-            mainGoal = OnboardingMainGoal.MAINTAIN
+            mainGoal = OnboardingMainGoal.MAINTAIN,
         )
         assertEquals(2550, calories)
     }
@@ -77,7 +77,7 @@ class OnboardingSmartGoalSuggestionsTest {
             heightCm = 165f,
             currentWeightKg = 60f,
             activityLevel = OnboardingActivityLevel.LIGHT,
-            mainGoal = OnboardingMainGoal.MAINTAIN
+            mainGoal = OnboardingMainGoal.MAINTAIN,
         )
         assertEquals(1850, calories)
     }
@@ -85,16 +85,28 @@ class OnboardingSmartGoalSuggestionsTest {
     @Test
     fun suggestCalories_appliesMaintainGainLossAdjustment() {
         val baseCalories = suggestCalories(
-            age = 30, sex = OnboardingSex.MALE, heightCm = 175f, currentWeightKg = 70f,
-            activityLevel = OnboardingActivityLevel.MODERATE, mainGoal = OnboardingMainGoal.MAINTAIN
+            age = 30,
+            sex = OnboardingSex.MALE,
+            heightCm = 175f,
+            currentWeightKg = 70f,
+            activityLevel = OnboardingActivityLevel.MODERATE,
+            mainGoal = OnboardingMainGoal.MAINTAIN,
         )
         val gainCalories = suggestCalories(
-            age = 30, sex = OnboardingSex.MALE, heightCm = 175f, currentWeightKg = 70f,
-            activityLevel = OnboardingActivityLevel.MODERATE, mainGoal = OnboardingMainGoal.SLOW_GAIN
+            age = 30,
+            sex = OnboardingSex.MALE,
+            heightCm = 175f,
+            currentWeightKg = 70f,
+            activityLevel = OnboardingActivityLevel.MODERATE,
+            mainGoal = OnboardingMainGoal.SLOW_GAIN,
         )
         val lossCalories = suggestCalories(
-            age = 30, sex = OnboardingSex.MALE, heightCm = 175f, currentWeightKg = 70f,
-            activityLevel = OnboardingActivityLevel.MODERATE, mainGoal = OnboardingMainGoal.SLOW_LOSS
+            age = 30,
+            sex = OnboardingSex.MALE,
+            heightCm = 175f,
+            currentWeightKg = 70f,
+            activityLevel = OnboardingActivityLevel.MODERATE,
+            mainGoal = OnboardingMainGoal.SLOW_LOSS,
         )
         assertEquals(baseCalories + 250, gainCalories)
         assertEquals(baseCalories - 250, lossCalories)
@@ -104,15 +116,15 @@ class OnboardingSmartGoalSuggestionsTest {
     fun suggestMacros_usesProteinByWeightFatByPercentAndCarbsRemainder() {
         val weightKg = 70f
         val calories = 2500
-        
+
         val protein = suggestProteinGrams(weightKg)
         // 70 * 1.6 = 112 -> nearest 5 = 110
         assertEquals(110, protein)
-        
+
         val fat = suggestFatGrams(calories)
         // 2500 * 0.25 / 9 = 69.44 -> nearest 5 = 70
         assertEquals(70, fat)
-        
+
         val carbs = suggestCarbGrams(calories, protein, fat)
         // 2500 - (110*4) - (70*9) = 2500 - 440 - 630 = 1430
         // 1430 / 4 = 357.5 -> nearest 5 = 360
@@ -127,7 +139,7 @@ class OnboardingSmartGoalSuggestionsTest {
             heightCm = 175f,
             currentWeightKg = 70f,
             activityLevel = OnboardingActivityLevel.MODERATE,
-            mainGoal = OnboardingMainGoal.MAINTAIN
+            mainGoal = OnboardingMainGoal.MAINTAIN,
         )
         assertEquals(DefaultHealthGoals.DAILY_CALORIES, calories)
 
@@ -152,8 +164,12 @@ class OnboardingSmartGoalSuggestionsTest {
     @Test
     fun suggestCalories_clampsToMinimum() {
         val target = suggestCalories(
-            age = 90, sex = OnboardingSex.FEMALE, heightCm = 140f, currentWeightKg = 40f,
-            activityLevel = OnboardingActivityLevel.LOW, mainGoal = OnboardingMainGoal.SLOW_LOSS
+            age = 90,
+            sex = OnboardingSex.FEMALE,
+            heightCm = 140f,
+            currentWeightKg = 40f,
+            activityLevel = OnboardingActivityLevel.LOW,
+            mainGoal = OnboardingMainGoal.SLOW_LOSS,
         )
         // Very low TDEE + loss will be below 1200
         assertEquals(1200, target)
@@ -162,8 +178,12 @@ class OnboardingSmartGoalSuggestionsTest {
     @Test
     fun suggestCalories_clampsToMaximum() {
         val target = suggestCalories(
-            age = 20, sex = OnboardingSex.MALE, heightCm = 210f, currentWeightKg = 150f,
-            activityLevel = OnboardingActivityLevel.HIGH, mainGoal = OnboardingMainGoal.SLOW_GAIN
+            age = 20,
+            sex = OnboardingSex.MALE,
+            heightCm = 210f,
+            currentWeightKg = 150f,
+            activityLevel = OnboardingActivityLevel.HIGH,
+            mainGoal = OnboardingMainGoal.SLOW_GAIN,
         )
         // Very high TDEE + gain will be above 4500
         assertEquals(4500, target)

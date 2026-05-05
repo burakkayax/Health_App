@@ -15,7 +15,7 @@ class OnboardingDashboardConfigTest {
     fun buildDashboardConfigFromTrackingAreas_onlySelectedCardsVisible() {
         val selected = setOf(DashboardCardType.HYDRATION, DashboardCardType.SLEEP)
         val config = buildDashboardConfigFromTrackingAreas(selected)
-        
+
         val hydrationCard = config.find { it.type == DashboardCardType.HYDRATION }
         val sleepCard = config.find { it.type == DashboardCardType.SLEEP }
         val nutritionCard = config.find { it.type == DashboardCardType.NUTRITION }

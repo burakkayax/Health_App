@@ -29,6 +29,7 @@ import com.burak.healthapp.domain.export.ExportedUserProfile
 import com.burak.healthapp.domain.export.ExportedWaterReminderSettings
 import com.burak.healthapp.domain.export.HealthDataExportModel
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.MealType
@@ -148,9 +149,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
     @Test
     fun importHealthData_withSettingsFailureResultsInPartialImport() = runBlocking {
         val failingSettingsRepo = object : RecordingManagementSettingsRepository() {
-            override suspend fun updateGoalSettings(goals: GoalSettings) {
-                throw RuntimeException("Simulated Settings Failure")
-            }
+            override suspend fun updateGoalSettings(goals: GoalSettings): Unit = throw RuntimeException("Simulated Settings Failure")
         }
         val failingRepository = HealthDataManagementRepositoryImpl(database, failingSettingsRepo)
 
@@ -183,8 +182,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = false,
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T10:00:00",
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -208,7 +207,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 fatGrams = 4,
                 createdAt = date,
                 updatedAt = date,
-            )
+            ),
         )
 
         val model = fullImportModel().copy(
@@ -226,8 +225,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = true, // different favorite status, should be updated or ignored
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T10:00:00", // same date, keep existing or ignore
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -250,7 +249,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 fatGrams = 5,
                 createdAt = oldDate,
                 updatedAt = oldDate,
-            )
+            ),
         )
 
         val model = fullImportModel().copy(
@@ -268,8 +267,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = true, // updated favorite
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T11:00:00", // newer
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -296,7 +295,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 isFavorite = true,
                 createdAt = LocalDateTime.parse("2026-04-27T10:00:00"),
                 updatedAt = newDate,
-            )
+            ),
         )
 
         val model = fullImportModel().copy(
@@ -314,8 +313,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = false,
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T10:00:00", // older
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -341,7 +340,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 fatGrams = 5,
                 createdAt = date,
                 updatedAt = date,
-            )
+            ),
         )
 
         val model = fullImportModel().copy(
@@ -359,8 +358,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = false,
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T10:00:00",
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -384,7 +383,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 fatGrams = 5,
                 createdAt = date,
                 updatedAt = date,
-            )
+            ),
         )
 
         val model = fullImportModel().copy(
@@ -402,8 +401,8 @@ class HealthDataManagementRepositoryInstrumentedTest {
                     isFavorite = false,
                     createdAt = "2026-04-27T10:00:00",
                     updatedAt = "2026-04-27T10:00:00",
-                )
-            )
+                ),
+            ),
         )
 
         repository.importHealthData(model)
@@ -461,7 +460,7 @@ class HealthDataManagementRepositoryInstrumentedTest {
                 fatGrams = 5,
                 createdAt = date.atTime(10, 0),
                 updatedAt = date.atTime(10, 0),
-            )
+            ),
         )
 
         repository.deleteAllHealthData()
@@ -507,7 +506,15 @@ private open class RecordingManagementSettingsRepository : SettingsRepository {
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
         useDefaultSupplementsWhenEmpty: Boolean,
-    ) = Unit
+        dashboardCards: List<DashboardCardConfig>?,
+        waterReminderSettings: WaterReminderSettings?,
+        stepTrackingEnabled: Boolean?,
+    ) {
+        updateProfile(profile)
+        updateGoalSettings(goals)
+        waterReminderSettings?.let { updateWaterReminderSettings(it) }
+        stepTrackingEnabled?.let { updateStepTrackingEnabled(it) }
+    }
 
     open override suspend fun updateGoalSettings(goals: GoalSettings) {
         state.value = state.value.copy(goalSettings = goals)
