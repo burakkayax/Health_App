@@ -1,7 +1,9 @@
 package com.burak.healthapp.feature.onboarding
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.burak.healthapp.R
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.config.DefaultHealthGoals
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
@@ -24,10 +26,84 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(OnboardingUiState())
+    private val _uiState = MutableStateFlow(restoreState() ?: OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.collect { state ->
+                saveState(state)
+            }
+        }
+    }
+
+    private fun restoreState(): OnboardingUiState? {
+        val currentStepName = savedStateHandle.get<String>("currentStep") ?: return null
+        return OnboardingUiState(
+            currentStep = OnboardingStep.valueOf(currentStepName),
+            selectedTrackingAreas = savedStateHandle.get<List<String>>("selectedTrackingAreas")?.map { DashboardCardType.valueOf(it) }?.toSet() ?: defaultOnboardingTrackingAreas(),
+            name = savedStateHandle.get<String>("name") ?: "",
+            age = savedStateHandle.get<String>("age") ?: "",
+            sex = savedStateHandle.get<String>("sex")?.let { OnboardingSex.valueOf(it) } ?: OnboardingSex.UNSPECIFIED,
+            heightCm = savedStateHandle.get<String>("heightCm") ?: "",
+            currentWeightKg = savedStateHandle.get<String>("currentWeightKg") ?: "",
+            targetWeightKg = savedStateHandle.get<String>("targetWeightKg") ?: "",
+            activityLevel = savedStateHandle.get<String>("activityLevel")?.let { OnboardingActivityLevel.valueOf(it) } ?: OnboardingActivityLevel.LIGHT,
+            mainGoal = savedStateHandle.get<String>("mainGoal")?.let { OnboardingMainGoal.valueOf(it) } ?: OnboardingMainGoal.MAINTAIN,
+            waterTargetMl = savedStateHandle.get<String>("waterTargetMl") ?: "",
+            dailyStepTarget = savedStateHandle.get<String>("dailyStepTarget") ?: "",
+            sleepBedtime = savedStateHandle.get<String>("sleepBedtime") ?: "",
+            sleepWakeTime = savedStateHandle.get<String>("sleepWakeTime") ?: "",
+            dailyCaffeineLimitMg = savedStateHandle.get<String>("dailyCaffeineLimitMg") ?: "",
+            caffeineCutoffTime = savedStateHandle.get<String>("caffeineCutoffTime") ?: "",
+            dailyCaloriesTarget = savedStateHandle.get<String>("dailyCaloriesTarget") ?: "",
+            proteinTargetGrams = savedStateHandle.get<String>("proteinTargetGrams") ?: "",
+            carbTargetGrams = savedStateHandle.get<String>("carbTargetGrams") ?: "",
+            fatTargetGrams = savedStateHandle.get<String>("fatTargetGrams") ?: "",
+            exerciseDaysPerWeek = savedStateHandle.get<String>("exerciseDaysPerWeek") ?: "",
+            exerciseDurationMinutes = savedStateHandle.get<String>("exerciseDurationMinutes") ?: "",
+            smokeDailyLimit = savedStateHandle.get<String>("smokeDailyLimit") ?: "",
+            waterReminderEnabled = savedStateHandle.get<Boolean>("waterReminderEnabled") ?: false,
+            waterReminderStartTime = savedStateHandle.get<String>("waterReminderStartTime") ?: "",
+            waterReminderEndTime = savedStateHandle.get<String>("waterReminderEndTime") ?: "",
+            waterReminderIntervalMinutes = savedStateHandle.get<String>("waterReminderIntervalMinutes") ?: "",
+            stepTrackingPreferred = savedStateHandle.get<Boolean>("stepTrackingPreferred") ?: false,
+        )
+    }
+
+    private fun saveState(state: OnboardingUiState) {
+        savedStateHandle["currentStep"] = state.currentStep.name
+        savedStateHandle["selectedTrackingAreas"] = state.selectedTrackingAreas.map { it.name }
+        savedStateHandle["name"] = state.name
+        savedStateHandle["age"] = state.age
+        savedStateHandle["sex"] = state.sex.name
+        savedStateHandle["heightCm"] = state.heightCm
+        savedStateHandle["currentWeightKg"] = state.currentWeightKg
+        savedStateHandle["targetWeightKg"] = state.targetWeightKg
+        savedStateHandle["activityLevel"] = state.activityLevel.name
+        savedStateHandle["mainGoal"] = state.mainGoal.name
+        savedStateHandle["waterTargetMl"] = state.waterTargetMl
+        savedStateHandle["dailyStepTarget"] = state.dailyStepTarget
+        savedStateHandle["sleepBedtime"] = state.sleepBedtime
+        savedStateHandle["sleepWakeTime"] = state.sleepWakeTime
+        savedStateHandle["dailyCaffeineLimitMg"] = state.dailyCaffeineLimitMg
+        savedStateHandle["caffeineCutoffTime"] = state.caffeineCutoffTime
+        savedStateHandle["dailyCaloriesTarget"] = state.dailyCaloriesTarget
+        savedStateHandle["proteinTargetGrams"] = state.proteinTargetGrams
+        savedStateHandle["carbTargetGrams"] = state.carbTargetGrams
+        savedStateHandle["fatTargetGrams"] = state.fatTargetGrams
+        savedStateHandle["exerciseDaysPerWeek"] = state.exerciseDaysPerWeek
+        savedStateHandle["exerciseDurationMinutes"] = state.exerciseDurationMinutes
+        savedStateHandle["smokeDailyLimit"] = state.smokeDailyLimit
+        savedStateHandle["waterReminderEnabled"] = state.waterReminderEnabled
+        savedStateHandle["waterReminderStartTime"] = state.waterReminderStartTime
+        savedStateHandle["waterReminderEndTime"] = state.waterReminderEndTime
+        savedStateHandle["waterReminderIntervalMinutes"] = state.waterReminderIntervalMinutes
+        savedStateHandle["stepTrackingPreferred"] = state.stepTrackingPreferred
+    }
 
     fun onTrackingAreaToggled(area: DashboardCardType) {
         _uiState.update { state ->
@@ -113,108 +189,123 @@ class OnboardingViewModel @Inject constructor(
 
     fun skipWithDefaults() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true) }
-            val profile = UserProfile.fromName("")
-            val goals = GoalSettings()
-            val measurement = BodyMeasurementEntry(
-                date = LocalDate.now(),
-                weightKg = goals.baselineWeightKg,
-                shoulderCm = goals.baselineShoulderCm,
-                waistCm = goals.baselineWaistCm,
-                hipCm = goals.baselineHipCm,
-            )
-            settingsRepository.completeOnboarding(
-                profile = profile,
-                goals = goals,
-                initialMeasurement = measurement,
-                supplements = emptyList(),
-            )
-            // Save dashboard config and preferences
-            val defaultTrackingAreas = defaultOnboardingTrackingAreas()
-            val dashboardConfig = buildDashboardConfigFromTrackingAreas(defaultTrackingAreas)
-            dashboardConfig.forEach { config ->
-                settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
+            _uiState.update { it.copy(isSaving = true, saveError = null) }
+            try {
+                val profile = UserProfile.fromName("")
+                val goals = GoalSettings()
+                val measurement = BodyMeasurementEntry(
+                    date = LocalDate.now(),
+                    weightKg = goals.baselineWeightKg,
+                    shoulderCm = goals.baselineShoulderCm,
+                    waistCm = goals.baselineWaistCm,
+                    hipCm = goals.baselineHipCm,
+                )
+                settingsRepository.completeOnboarding(
+                    profile = profile,
+                    goals = goals,
+                    initialMeasurement = measurement,
+                    supplements = emptyList(),
+                    useDefaultSupplementsWhenEmpty = false,
+                )
+                // Save dashboard config and preferences
+                val defaultTrackingAreas = defaultOnboardingTrackingAreas()
+                val dashboardConfig = buildDashboardConfigFromTrackingAreas(defaultTrackingAreas)
+                dashboardConfig.forEach { config ->
+                    settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
+                }
+                settingsRepository.updateWaterReminderSettings(WaterReminderSettings(enabled = false))
+                settingsRepository.updateStepTrackingEnabled(false)
+                _uiState.update { it.copy(isSaving = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSaving = false, saveError = UiText.StringResource(R.string.onboarding_error_save_failed)) }
             }
-            settingsRepository.updateWaterReminderSettings(WaterReminderSettings(enabled = false))
-            settingsRepository.updateStepTrackingEnabled(false)
-            _uiState.update { it.copy(isSaving = false) }
         }
     }
 
     private fun finishOnboarding() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true) }
-            val state = _uiState.value
+            _uiState.update { it.copy(isSaving = true, saveError = null) }
+            try {
+                val state = _uiState.value
 
-            val profileName = state.name.trim().ifBlank { "Misafir" }
-            val profile = UserProfile.fromName(profileName, heightCm = state.heightCm.toFloatOrNull())
+                val profileName = state.name.trim().ifBlank { "Misafir" }
+                val profile = UserProfile.fromName(profileName, heightCm = parseLocalizedDecimalInput(state.heightCm))
 
-            val currentWeight = state.currentWeightKg.toFloatOrNull() ?: DefaultHealthGoals.BASELINE_WEIGHT_KG
-            
-            val goals = GoalSettings(
-                dailyCaloriesTarget = state.dailyCaloriesTarget.toIntOrNull() ?: DefaultHealthGoals.DAILY_CALORIES,
-                proteinTargetGrams = state.proteinTargetGrams.toIntOrNull() ?: DefaultHealthGoals.PROTEIN_GRAMS,
-                carbTargetGrams = state.carbTargetGrams.toIntOrNull() ?: DefaultHealthGoals.CARB_GRAMS,
-                fatTargetGrams = state.fatTargetGrams.toIntOrNull() ?: DefaultHealthGoals.FAT_GRAMS,
-                waterTargetMl = state.waterTargetMl.toIntOrNull() ?: DefaultHealthGoals.WATER_TARGET_ML,
-                sleepTargetBedtime = state.sleepBedtime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_BEDTIME,
-                sleepTargetWakeTime = state.sleepWakeTime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_WAKE_TIME,
-                exerciseTargetDaysPerWeek = state.exerciseDaysPerWeek.toIntOrNull() ?: DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
-                exerciseTargetDurationMinutes = state.exerciseDurationMinutes.toIntOrNull() ?: DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
-                smokeDailyLimit = state.smokeDailyLimit.toIntOrNull() ?: DefaultHealthGoals.SMOKE_DAILY_LIMIT,
-                baselineWeightKg = currentWeight,
-                targetWeightKg = state.targetWeightKg.toFloatOrNull() ?: DefaultHealthGoals.TARGET_WEIGHT_KG,
-                baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
-                baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
-                baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
-            )
-
-            val measurement = BodyMeasurementEntry(
-                date = LocalDate.now(),
-                weightKg = currentWeight,
-                shoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
-                waistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
-                hipCm = DefaultHealthGoals.BASELINE_HIP_CM,
-            )
-
-            val supplements = if (state.selectedTrackingAreas.contains(DashboardCardType.SUPPLEMENTS)) {
-                listOf("D3 Vitamini", "Omega 3", "Multivitamin")
-            } else {
-                emptyList()
-            }
-
-            settingsRepository.completeOnboarding(
-                profile = profile,
-                goals = goals,
-                initialMeasurement = measurement,
-                supplements = supplements,
-            )
-
-            val dashboardConfig = buildDashboardConfigFromTrackingAreas(state.selectedTrackingAreas)
-            dashboardConfig.forEach { config ->
-                settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
-            }
-
-            settingsRepository.updateWaterReminderSettings(
-                WaterReminderSettings(
-                    enabled = state.waterReminderEnabled,
-                    startTime = state.waterReminderStartTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_START_TIME,
-                    endTime = state.waterReminderEndTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_END_TIME,
-                    intervalMinutes = state.waterReminderIntervalMinutes.toIntOrNull() ?: DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
+                val currentWeight = parseLocalizedDecimalInput(state.currentWeightKg) ?: DefaultHealthGoals.BASELINE_WEIGHT_KG
+                
+                val goals = GoalSettings(
+                    dailyCaloriesTarget = state.dailyCaloriesTarget.toIntOrNull() ?: DefaultHealthGoals.DAILY_CALORIES,
+                    proteinTargetGrams = state.proteinTargetGrams.toIntOrNull() ?: DefaultHealthGoals.PROTEIN_GRAMS,
+                    carbTargetGrams = state.carbTargetGrams.toIntOrNull() ?: DefaultHealthGoals.CARB_GRAMS,
+                    fatTargetGrams = state.fatTargetGrams.toIntOrNull() ?: DefaultHealthGoals.FAT_GRAMS,
+                    waterTargetMl = state.waterTargetMl.toIntOrNull() ?: DefaultHealthGoals.WATER_TARGET_ML,
+                    dailyStepTarget = state.dailyStepTarget.toIntOrNull() ?: DefaultHealthGoals.DAILY_STEPS,
+                    dailyCaffeineLimitMg = state.dailyCaffeineLimitMg.toIntOrNull() ?: DefaultHealthGoals.DAILY_CAFFEINE_LIMIT_MG,
+                    caffeineCutoffTime = state.caffeineCutoffTime.toLocalTimeOrNull() ?: DefaultHealthGoals.CAFFEINE_CUTOFF_TIME,
+                    caffeineSleepBufferHours = DefaultHealthGoals.CAFFEINE_SLEEP_BUFFER_HOURS,
+                    sleepTargetBedtime = state.sleepBedtime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_BEDTIME,
+                    sleepTargetWakeTime = state.sleepWakeTime.toLocalTimeOrNull() ?: DefaultHealthGoals.SLEEP_WAKE_TIME,
+                    exerciseTargetDaysPerWeek = state.exerciseDaysPerWeek.toIntOrNull() ?: DefaultHealthGoals.EXERCISE_DAYS_PER_WEEK,
+                    exerciseTargetDurationMinutes = state.exerciseDurationMinutes.toIntOrNull() ?: DefaultHealthGoals.EXERCISE_DURATION_MINUTES,
+                    smokeDailyLimit = state.smokeDailyLimit.toIntOrNull() ?: DefaultHealthGoals.SMOKE_DAILY_LIMIT,
+                    baselineWeightKg = currentWeight,
+                    targetWeightKg = parseLocalizedDecimalInput(state.targetWeightKg) ?: DefaultHealthGoals.TARGET_WEIGHT_KG,
+                    baselineShoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
+                    baselineWaistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
+                    baselineHipCm = DefaultHealthGoals.BASELINE_HIP_CM,
                 )
-            )
 
-            settingsRepository.updateStepTrackingEnabled(state.stepTrackingPreferred)
-            
-            _uiState.update { it.copy(isSaving = false) }
+                val measurement = BodyMeasurementEntry(
+                    date = LocalDate.now(),
+                    weightKg = currentWeight,
+                    shoulderCm = DefaultHealthGoals.BASELINE_SHOULDER_CM,
+                    waistCm = DefaultHealthGoals.BASELINE_WAIST_CM,
+                    hipCm = DefaultHealthGoals.BASELINE_HIP_CM,
+                )
+
+                val useSupplements = state.selectedTrackingAreas.contains(DashboardCardType.SUPPLEMENTS)
+                val supplements = if (useSupplements) {
+                    listOf("D3 Vitamini", "Omega 3", "Multivitamin")
+                } else {
+                    emptyList()
+                }
+
+                settingsRepository.completeOnboarding(
+                    profile = profile,
+                    goals = goals,
+                    initialMeasurement = measurement,
+                    supplements = supplements,
+                    useDefaultSupplementsWhenEmpty = useSupplements,
+                )
+
+                val dashboardConfig = buildDashboardConfigFromTrackingAreas(state.selectedTrackingAreas)
+                dashboardConfig.forEach { config ->
+                    settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
+                }
+
+                settingsRepository.updateWaterReminderSettings(
+                    WaterReminderSettings(
+                        enabled = state.waterReminderEnabled,
+                        startTime = state.waterReminderStartTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_START_TIME,
+                        endTime = state.waterReminderEndTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_END_TIME,
+                        intervalMinutes = state.waterReminderIntervalMinutes.toIntOrNull() ?: DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
+                    )
+                )
+
+                settingsRepository.updateStepTrackingEnabled(false) // Safe mode, intentional
+                
+                _uiState.update { it.copy(isSaving = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSaving = false, saveError = UiText.StringResource(R.string.onboarding_error_save_failed)) }
+            }
         }
     }
 
     private fun generateSmartGoals() {
         val state = _uiState.value
-        val weight = state.currentWeightKg.toFloatOrNull()
+        val weight = parseLocalizedDecimalInput(state.currentWeightKg)
         val age = state.age.toIntOrNull()
-        val height = state.heightCm.toFloatOrNull()
+        val height = parseLocalizedDecimalInput(state.heightCm)
         
         val water = suggestWaterTargetMl(weight, state.activityLevel)
         val bedtime = DefaultHealthGoals.SLEEP_BEDTIME
@@ -269,47 +360,83 @@ class OnboardingViewModel @Inject constructor(
         when (state.currentStep) {
             OnboardingStep.TRACKING_AREAS -> {
                 if (state.selectedTrackingAreas.isEmpty()) {
-                    errors["tracking_areas"] = UiText.DynamicString("En az bir takip alanı seçmelisin.")
+                    errors["tracking_areas"] = UiText.StringResource(R.string.onboarding_error_select_one_tracking_area)
                 }
             }
             OnboardingStep.BASIC_INFO -> {
                 val age = state.age.toIntOrNull()
                 if (state.age.isNotBlank() && (age == null || age !in 13..100)) {
-                    errors["age"] = UiText.DynamicString("Yaş 13 ile 100 arasında olmalı.")
+                    errors["age"] = UiText.StringResource(R.string.onboarding_error_range_age)
                 }
-                val height = state.heightCm.toFloatOrNull()
+                val height = parseLocalizedDecimalInput(state.heightCm)
                 if (state.heightCm.isNotBlank() && (height == null || height !in 100f..230f)) {
-                    errors["height"] = UiText.DynamicString("Boy 100 ile 230 cm arasında olmalı.")
+                    errors["height"] = UiText.StringResource(R.string.onboarding_error_range_height)
                 }
-                val weight = state.currentWeightKg.toFloatOrNull()
+                val weight = parseLocalizedDecimalInput(state.currentWeightKg)
                 if (state.currentWeightKg.isNotBlank() && (weight == null || weight !in 30f..250f)) {
-                    errors["currentWeight"] = UiText.DynamicString("Kilo 30 ile 250 kg arasında olmalı.")
+                    errors["currentWeight"] = UiText.StringResource(R.string.onboarding_error_range_weight)
                 }
-                val targetWeight = state.targetWeightKg.toFloatOrNull()
+                val targetWeight = parseLocalizedDecimalInput(state.targetWeightKg)
                 if (state.targetWeightKg.isNotBlank() && (targetWeight == null || targetWeight !in 30f..250f)) {
-                    errors["targetWeight"] = UiText.DynamicString("Kilo 30 ile 250 kg arasında olmalı.")
+                    errors["targetWeight"] = UiText.StringResource(R.string.onboarding_error_range_weight)
                 }
             }
             OnboardingStep.SMART_GOALS -> {
                 if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION)) {
                     val water = state.waterTargetMl.toIntOrNull()
-                    if (water == null || water <= 0) errors["water"] = UiText.DynamicString("Su hedefi 0’dan büyük olmalı.")
+                    if (water == null || water <= 0) errors["water"] = UiText.StringResource(R.string.onboarding_error_water_positive)
+                }
+                if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
+                    val steps = state.dailyStepTarget.toIntOrNull()
+                    if (steps == null || steps < 0 || steps > 100000) errors["steps"] = UiText.StringResource(R.string.onboarding_error_step_target_invalid)
+                }
+                if (state.selectedTrackingAreas.contains(DashboardCardType.SLEEP)) {
+                    val bedtime = state.sleepBedtime.toLocalTimeOrNull()
+                    if (bedtime == null) errors["sleepBedtime"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    val wakeTime = state.sleepWakeTime.toLocalTimeOrNull()
+                    if (wakeTime == null) errors["sleepWakeTime"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                }
+                if (state.selectedTrackingAreas.contains(DashboardCardType.CAFFEINE)) {
+                    val caffeineLimit = state.dailyCaffeineLimitMg.toIntOrNull()
+                    if (caffeineLimit == null || caffeineLimit < 0) errors["caffeineLimit"] = UiText.StringResource(R.string.onboarding_error_caffeine_limit_invalid)
+                    val caffeineCutoff = state.caffeineCutoffTime.toLocalTimeOrNull()
+                    if (caffeineCutoff == null) errors["caffeineCutoff"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.NUTRITION)) {
                     val cal = state.dailyCaloriesTarget.toIntOrNull()
-                    if (cal == null || cal <= 0) errors["calories"] = UiText.DynamicString("Kalori hedefi 0’dan büyük olmalı.")
+                    if (cal == null || cal <= 0) errors["calories"] = UiText.StringResource(R.string.onboarding_error_calorie_positive)
+                    
+                    val protein = state.proteinTargetGrams.toIntOrNull()
+                    if (protein == null || protein < 0) errors["protein"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
+                    
+                    val carb = state.carbTargetGrams.toIntOrNull()
+                    if (carb == null || carb < 0) errors["carb"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
+                    
+                    val fat = state.fatTargetGrams.toIntOrNull()
+                    if (fat == null || fat < 0) errors["fat"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.EXERCISE)) {
                     val days = state.exerciseDaysPerWeek.toIntOrNull()
-                    if (days == null || days !in 0..7) errors["exercise_days"] = UiText.DynamicString("Egzersiz günü 0 ile 7 arasında olmalı.")
+                    if (days == null || days !in 0..7) errors["exerciseDays"] = UiText.StringResource(R.string.onboarding_error_exercise_days)
+                    
+                    val duration = state.exerciseDurationMinutes.toIntOrNull()
+                    if (duration == null || duration < 0) errors["exerciseDuration"] = UiText.StringResource(R.string.onboarding_error_exercise_duration)
                 }
-                // Add more as needed, this matches requirements
+                if (state.selectedTrackingAreas.contains(DashboardCardType.SMOKING)) {
+                    val smoke = state.smokeDailyLimit.toIntOrNull()
+                    if (smoke == null || smoke < 0) errors["smokeLimit"] = UiText.StringResource(R.string.onboarding_error_smoke_limit)
+                }
             }
             OnboardingStep.PREFERENCES -> {
                 if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION) && state.waterReminderEnabled) {
+                    val startTime = state.waterReminderStartTime.toLocalTimeOrNull()
+                    if (startTime == null) errors["reminder_start_time"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    val endTime = state.waterReminderEndTime.toLocalTimeOrNull()
+                    if (endTime == null) errors["reminder_end_time"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+
                     val interval = state.waterReminderIntervalMinutes.toIntOrNull()
                     if (interval == null || interval < DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES) {
-                        errors["reminder_interval"] = UiText.DynamicString("Hatırlatıcı aralığı en az ${DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES} dakika olmalı.")
+                        errors["reminder_interval"] = UiText.StringResource(R.string.onboarding_error_reminder_interval)
                     }
                 }
             }

@@ -506,6 +506,7 @@ private open class RecordingManagementSettingsRepository : SettingsRepository {
         goals: GoalSettings,
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
+        useDefaultSupplementsWhenEmpty: Boolean,
     ) = Unit
 
     open override suspend fun updateGoalSettings(goals: GoalSettings) {

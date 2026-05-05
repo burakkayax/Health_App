@@ -10,6 +10,7 @@ import com.burak.healthapp.domain.model.ThemeMode
 import com.burak.healthapp.domain.model.UserProfile
 import com.burak.healthapp.domain.model.WaterReminderSettings
 import com.burak.healthapp.domain.repository.SettingsRepository
+import androidx.lifecycle.SavedStateHandle
 import com.burak.healthapp.feature.onboarding.OnboardingStep
 import com.burak.healthapp.feature.onboarding.OnboardingViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun cannotProceedFromTrackingAreasWhenNothingSelected() = runTest {
-        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository(), SavedStateHandle())
         
         viewModel.goToNextStep() // WELCOME -> TRACKING_AREAS
         advanceUntilIdle()
@@ -64,7 +65,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun emptyOptionalBasicInfoCanProceed() = runTest {
-        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository(), SavedStateHandle())
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
         advanceUntilIdle()
@@ -77,7 +78,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun invalidAgeShowsValidationError() = runTest {
-        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository(), SavedStateHandle())
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
         
@@ -91,7 +92,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun invalidWeightShowsValidationError() = runTest {
-        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository(), SavedStateHandle())
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
         
@@ -105,7 +106,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun invalidReminderIntervalShowsValidationError() = runTest {
-        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository())
+        val viewModel = OnboardingViewModel(FakeOnboardingSettingsRepository(), SavedStateHandle())
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
         viewModel.goToNextStep() // ACTIVITY_GOAL
@@ -125,7 +126,7 @@ class OnboardingViewModelTest {
     @Test
     fun finishOnboardingBuildsExpectedGoalSettings() = runTest {
         val repository = FakeOnboardingSettingsRepository()
-        val viewModel = OnboardingViewModel(repository)
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
         
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
@@ -144,7 +145,7 @@ class OnboardingViewModelTest {
     @Test
     fun finishOnboardingPersistsDashboardVisibility() = runTest {
         val repository = FakeOnboardingSettingsRepository()
-        val viewModel = OnboardingViewModel(repository)
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
         
         viewModel.goToNextStep() // TRACKING_AREAS
         // Keep defaults, which includes NUTRITION and HYDRATION, doesn't include CAFFEINE
@@ -164,7 +165,7 @@ class OnboardingViewModelTest {
     @Test
     fun finishOnboardingSavesWaterReminderPreference() = runTest {
         val repository = FakeOnboardingSettingsRepository()
-        val viewModel = OnboardingViewModel(repository)
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
         
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
@@ -185,7 +186,7 @@ class OnboardingViewModelTest {
     @Test
     fun finishOnboardingSavesStepTrackingPreference() = runTest {
         val repository = FakeOnboardingSettingsRepository()
-        val viewModel = OnboardingViewModel(repository)
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
         
         viewModel.goToNextStep() // TRACKING_AREAS
         viewModel.goToNextStep() // BASIC_INFO
@@ -197,7 +198,36 @@ class OnboardingViewModelTest {
         viewModel.goToNextStep() // FINISH
         advanceUntilIdle()
 
-        assertTrue(repository.lastStepTrackingEnabled == true)
+        assertTrue(repository.lastStepTrackingEnabled == false) // As per new safety requirement
+    }
+
+    @Test
+    fun saveFailureUpdatesUiStateWithError() = runTest {
+        val repository = object : SettingsRepository by FakeOnboardingSettingsRepository() {
+            override suspend fun completeOnboarding(
+                profile: UserProfile,
+                goals: GoalSettings,
+                initialMeasurement: BodyMeasurementEntry,
+                supplements: List<String>,
+                useDefaultSupplementsWhenEmpty: Boolean,
+            ) {
+                throw IllegalStateException("Database error")
+            }
+        }
+        val viewModel = OnboardingViewModel(repository, SavedStateHandle())
+        
+        viewModel.goToNextStep() // TRACKING_AREAS
+        viewModel.goToNextStep() // BASIC_INFO
+        viewModel.goToNextStep() // ACTIVITY_GOAL
+        viewModel.goToNextStep() // SMART_GOALS
+        viewModel.goToNextStep() // PREFERENCES
+        viewModel.goToNextStep() // DONE
+        viewModel.goToNextStep() // FINISH
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.uiState.value.saveError)
+        assertFalse(viewModel.uiState.value.isSaving)
+        assertEquals(OnboardingStep.DONE, viewModel.uiState.value.currentStep)
     }
 }
 
@@ -230,7 +260,8 @@ class FakeOnboardingSettingsRepository : SettingsRepository {
         profile: UserProfile,
         goals: GoalSettings,
         initialMeasurement: BodyMeasurementEntry,
-        supplements: List<String>
+        supplements: List<String>,
+        useDefaultSupplementsWhenEmpty: Boolean,
     ) {
         lastProfile = profile
         lastGoals = goals

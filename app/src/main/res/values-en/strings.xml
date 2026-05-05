@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Health</string>
     <string name="common_loading">Loading</string>
@@ -462,8 +462,16 @@
     <string name="onboarding_label_name">Name</string>
     <string name="onboarding_label_age">Age</string>
     <string name="onboarding_label_sex">Sex</string>
+    <string name="onboarding_step_progress">Step %1$d / %2$d</string>
     <string name="onboarding_label_height">Height (cm)</string>
     <string name="onboarding_label_current_weight">Current weight (kg)</string>
     <string name="onboarding_label_target_weight">Target weight (kg)</string>
     <string name="onboarding_water_goal_field">Water goal (ml)</string>
+    
+    <string name="onboarding_error_step_target_invalid">Step goal must be 0 or greater.</string>
+    <string name="onboarding_error_caffeine_limit_invalid">Caffeine limit must be 0 or greater.</string>
+    <string name="onboarding_error_macro_not_negative">Macro goals cannot be negative.</string>
+    <string name="onboarding_error_exercise_duration">Exercise duration cannot be negative.</string>
+    <string name="onboarding_error_smoke_limit">Smoke limit cannot be negative.</string>
+    <string name="onboarding_error_save_failed">Setup could not be saved. Please try again.</string>
 </resources>

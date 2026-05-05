@@ -103,13 +103,19 @@ class SettingsRepositoryImpl(
         goals: GoalSettings,
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
+        useDefaultSupplementsWhenEmpty: Boolean,
     ) {
         updateProfile(profile)
         updateGoalSettings(goals)
         measurementDao.upsert(initialMeasurement.toEntity())
+        val supplementNamesToUse = if (useDefaultSupplementsWhenEmpty && supplements.isEmpty()) {
+            DEFAULT_SUPPLEMENT_NAMES
+        } else {
+            supplements
+        }
         replaceSupplementTemplates(
             createSupplementTemplatesFromNames(
-                names = supplements.ifEmpty { DEFAULT_SUPPLEMENT_NAMES },
+                names = supplementNamesToUse,
             ),
         )
         dataStore.edit { preferences ->

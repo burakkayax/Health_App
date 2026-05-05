@@ -34,6 +34,7 @@ data class OnboardingUiState(
     val stepTrackingPreferred: Boolean = false,
     val validationErrors: Map<String, UiText> = emptyMap(),
     val isSaving: Boolean = false,
+    val saveError: UiText? = null,
 )
 
 fun defaultOnboardingTrackingAreas(): Set<DashboardCardType> = setOf(

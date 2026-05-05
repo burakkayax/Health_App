@@ -21,6 +21,7 @@ interface SettingsRepository {
         goals: GoalSettings,
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
+        useDefaultSupplementsWhenEmpty: Boolean = true,
     )
 
     suspend fun updateGoalSettings(goals: GoalSettings)

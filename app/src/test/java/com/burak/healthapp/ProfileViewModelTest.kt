@@ -319,6 +319,7 @@ private class FakeProfileSettingsRepository(
         goals: GoalSettings,
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
+        useDefaultSupplementsWhenEmpty: Boolean,
     ) = Unit
 
     override suspend fun updateGoalSettings(goals: GoalSettings) = Unit
