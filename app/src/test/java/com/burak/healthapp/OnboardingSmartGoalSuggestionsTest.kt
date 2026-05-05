@@ -134,4 +134,45 @@ class OnboardingSmartGoalSuggestionsTest {
         val protein = suggestProteinGrams(null)
         assertEquals(DefaultHealthGoals.PROTEIN_GRAMS, protein)
     }
+
+    @Test
+    fun suggestWaterTargetMl_clampsToMinimum() {
+        val target = suggestWaterTargetMl(30f, OnboardingActivityLevel.LOW)
+        // 30 * 35 = 1050, minimum is 1500
+        assertEquals(1500, target)
+    }
+
+    @Test
+    fun suggestWaterTargetMl_clampsToMaximum() {
+        val target = suggestWaterTargetMl(150f, OnboardingActivityLevel.HIGH)
+        // 150 * 35 = 5250 + 500 = 5750, maximum is 4000
+        assertEquals(4000, target)
+    }
+
+    @Test
+    fun suggestCalories_clampsToMinimum() {
+        val target = suggestCalories(
+            age = 90, sex = OnboardingSex.FEMALE, heightCm = 140f, currentWeightKg = 40f,
+            activityLevel = OnboardingActivityLevel.LOW, mainGoal = OnboardingMainGoal.SLOW_LOSS
+        )
+        // Very low TDEE + loss will be below 1200
+        assertEquals(1200, target)
+    }
+
+    @Test
+    fun suggestCalories_clampsToMaximum() {
+        val target = suggestCalories(
+            age = 20, sex = OnboardingSex.MALE, heightCm = 210f, currentWeightKg = 150f,
+            activityLevel = OnboardingActivityLevel.HIGH, mainGoal = OnboardingMainGoal.SLOW_GAIN
+        )
+        // Very high TDEE + gain will be above 4500
+        assertEquals(4500, target)
+    }
+
+    @Test
+    fun suggestCarbGrams_neverReturnsNegative() {
+        val target = suggestCarbGrams(1200, 300, 100)
+        // 1200 - (300*4) - (100*9) = 1200 - 1200 - 900 = -900
+        assertEquals(0, target)
+    }
 }

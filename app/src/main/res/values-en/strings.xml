@@ -474,4 +474,14 @@
     <string name="onboarding_error_exercise_duration">Exercise duration cannot be negative.</string>
     <string name="onboarding_error_smoke_limit">Smoke limit cannot be negative.</string>
     <string name="onboarding_error_save_failed">Setup could not be saved. Please try again.</string>
+    <string name="onboarding_tracking_subtitle_hydration">Track your daily water goal</string>
+    <string name="onboarding_tracking_subtitle_sleep">Review your bedtime and wake routine</string>
+    <string name="onboarding_tracking_subtitle_nutrition">Log calories and macros</string>
+    <string name="onboarding_tracking_subtitle_steps">Track daily movement goals</string>
+    <string name="onboarding_tracking_subtitle_weight">Follow weight changes</string>
+    <string name="onboarding_tracking_subtitle_caffeine">Track caffeine amount and timing</string>
+    <string name="onboarding_tracking_subtitle_smoking">Track daily smoking records</string>
+    <string name="onboarding_tracking_subtitle_exercise">Track exercise days</string>
+    <string name="onboarding_tracking_subtitle_supplements">Track supplement doses</string>
+    <string name="onboarding_caffeine_limit_label">Caffeine Limit (mg)</string>
 </resources>

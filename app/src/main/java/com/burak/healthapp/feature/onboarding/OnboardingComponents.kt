@@ -29,10 +29,10 @@ fun OnboardingHeader(step: OnboardingStep) {
     // ordinal: WELCOME=0, TRACKING_AREAS=1, BASIC_INFO=2, ACTIVITY_GOAL=3, SMART_GOALS=4, PREFERENCES=5, DONE=6
     val currentIdx = step.ordinal
     val totalIdx = OnboardingStep.entries.size - 2 
-    val progress = currentIdx.toFloat() / totalIdx.toFloat()
+    val progress = (currentIdx.toFloat() / totalIdx.toFloat()).coerceIn(0f, 1f)
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(bottom = HealthSpacing.sm)
+        modifier = Modifier.fillMaxWidth().padding(bottom = HealthSpacing.sm).testTag("onboarding_progress_indicator")
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

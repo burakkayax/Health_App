@@ -22,6 +22,9 @@ interface SettingsRepository {
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
         useDefaultSupplementsWhenEmpty: Boolean = true,
+        dashboardCards: List<com.burak.healthapp.domain.model.DashboardCardConfig>? = null,
+        waterReminderSettings: WaterReminderSettings? = null,
+        stepTrackingEnabled: Boolean? = null,
     )
 
     suspend fun updateGoalSettings(goals: GoalSettings)

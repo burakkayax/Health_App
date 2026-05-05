@@ -96,6 +96,17 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
                     DashboardCardType.EXERCISE -> R.string.dashboard_card_exercise
                     DashboardCardType.SUPPLEMENTS -> R.string.dashboard_card_supplements
                 }
+                val subtitleRes = when (area) {
+                    DashboardCardType.HYDRATION -> R.string.onboarding_tracking_subtitle_hydration
+                    DashboardCardType.SLEEP -> R.string.onboarding_tracking_subtitle_sleep
+                    DashboardCardType.NUTRITION -> R.string.onboarding_tracking_subtitle_nutrition
+                    DashboardCardType.STEPS -> R.string.onboarding_tracking_subtitle_steps
+                    DashboardCardType.WEIGHT -> R.string.onboarding_tracking_subtitle_weight
+                    DashboardCardType.CAFFEINE -> R.string.onboarding_tracking_subtitle_caffeine
+                    DashboardCardType.SMOKING -> R.string.onboarding_tracking_subtitle_smoking
+                    DashboardCardType.EXERCISE -> R.string.onboarding_tracking_subtitle_exercise
+                    DashboardCardType.SUPPLEMENTS -> R.string.onboarding_tracking_subtitle_supplements
+                }
                 HealthCard(
                     modifier = Modifier
                         .weight(1f)
@@ -108,25 +119,29 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(titleRes),
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                        )
-                        if (isSelected) {
-                            Icon(
-                                painter = painterResource(android.R.drawable.checkbox_on_background),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                        Column(modifier = Modifier.weight(1f).padding(end = HealthSpacing.xs)) {
+                            Text(
+                                text = stringResource(titleRes),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
+                            Text(
+                                text = stringResource(subtitleRes),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier.size(20.dp).background(MaterialTheme.colorScheme.primary, shape = androidx.compose.foundation.shape.CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("✓", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelSmall)
+                            }
                         } else {
-                            Icon(
-                                painter = painterResource(android.R.drawable.checkbox_off_background),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
+                            Box(
+                                modifier = Modifier.size(20.dp).background(MaterialTheme.colorScheme.surfaceVariant, shape = androidx.compose.foundation.shape.CircleShape)
                             )
                         }
                     }
@@ -134,7 +149,7 @@ fun TrackingAreasStep(state: OnboardingUiState, onAction: (OnboardingAction) -> 
             }
         }
         
-        state.validationErrors["tracking_areas"]?.let { error ->
+        state.validationErrors[OnboardingFieldKeys.TRACKING_AREAS]?.let { error ->
             Text(text = error.asString(), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
     }
@@ -166,8 +181,8 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             label = stringResource(R.string.onboarding_label_age),
             value = state.age,
             onValueChange = { onAction(OnboardingAction.UpdateAge(it)) },
-            isError = state.validationErrors["age"] != null,
-            supportingText = state.validationErrors["age"]?.asString(),
+            isError = state.validationErrors[OnboardingFieldKeys.AGE] != null,
+            supportingText = state.validationErrors[OnboardingFieldKeys.AGE]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         
@@ -197,8 +212,8 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             label = stringResource(R.string.onboarding_label_height),
             value = state.heightCm,
             onValueChange = { onAction(OnboardingAction.UpdateHeight(it)) },
-            isError = state.validationErrors["height"] != null,
-            supportingText = state.validationErrors["height"]?.asString(),
+            isError = state.validationErrors[OnboardingFieldKeys.HEIGHT] != null,
+            supportingText = state.validationErrors[OnboardingFieldKeys.HEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             suffix = { Text("cm") }
         )
@@ -206,8 +221,8 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             label = stringResource(R.string.onboarding_label_current_weight),
             value = state.currentWeightKg,
             onValueChange = { onAction(OnboardingAction.UpdateCurrentWeight(it)) },
-            isError = state.validationErrors["currentWeight"] != null,
-            supportingText = state.validationErrors["currentWeight"]?.asString(),
+            isError = state.validationErrors[OnboardingFieldKeys.CURRENT_WEIGHT] != null,
+            supportingText = state.validationErrors[OnboardingFieldKeys.CURRENT_WEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             suffix = { Text("kg") }
         )
@@ -215,8 +230,8 @@ fun BasicInfoStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Unit
             label = stringResource(R.string.onboarding_label_target_weight),
             value = state.targetWeightKg,
             onValueChange = { onAction(OnboardingAction.UpdateTargetWeight(it)) },
-            isError = state.validationErrors["targetWeight"] != null,
-            supportingText = state.validationErrors["targetWeight"]?.asString(),
+            isError = state.validationErrors[OnboardingFieldKeys.TARGET_WEIGHT] != null,
+            supportingText = state.validationErrors[OnboardingFieldKeys.TARGET_WEIGHT]?.asString(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             suffix = { Text("kg") }
         )
@@ -307,8 +322,8 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     label = stringResource(R.string.onboarding_water_goal_field),
                     value = state.waterTargetMl,
                     onValueChange = { onAction(OnboardingAction.UpdateWaterTarget(it)) },
-                    isError = state.validationErrors["water"] != null,
-                    supportingText = state.validationErrors["water"]?.asString(),
+                    isError = state.validationErrors[OnboardingFieldKeys.WATER] != null,
+                    supportingText = state.validationErrors[OnboardingFieldKeys.WATER]?.asString(),
                     modifier = Modifier.testTag("onboarding_water_goal_field"),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     suffix = { Text("ml") }
@@ -327,16 +342,16 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                     label = stringResource(R.string.profile_goal_calories),
                     value = state.dailyCaloriesTarget,
                     onValueChange = { onAction(OnboardingAction.UpdateCalories(it)) },
-                    isError = state.validationErrors["calories"] != null,
-                    supportingText = state.validationErrors["calories"]?.asString(),
+                    isError = state.validationErrors[OnboardingFieldKeys.CALORIES] != null,
+                    supportingText = state.validationErrors[OnboardingFieldKeys.CALORIES]?.asString(),
                     modifier = Modifier.testTag("onboarding_calorie_goal_field"),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     suffix = { Text("kcal") }
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_protein), value = state.proteinTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateProtein(it)) }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_carbs), value = state.carbTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateCarbs(it)) }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_fat), value = state.fatTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateFat(it)) }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_protein), value = state.proteinTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateProtein(it)) }, isError = state.validationErrors[OnboardingFieldKeys.PROTEIN] != null, supportingText = state.validationErrors[OnboardingFieldKeys.PROTEIN]?.asString(), modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_carbs), value = state.carbTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateCarbs(it)) }, isError = state.validationErrors[OnboardingFieldKeys.CARBS] != null, supportingText = state.validationErrors[OnboardingFieldKeys.CARBS]?.asString(), modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_fat), value = state.fatTargetGrams, onValueChange = { onAction(OnboardingAction.UpdateFat(it)) }, isError = state.validationErrors[OnboardingFieldKeys.FAT] != null, supportingText = state.validationErrors[OnboardingFieldKeys.FAT]?.asString(), modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("g") })
                 }
                 Text(text = stringResource(R.string.onboarding_not_medical_advice_short), style = MaterialTheme.typography.labelSmall)
             }
@@ -347,9 +362,21 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
                 Text(text = stringResource(R.string.dashboard_card_caffeine), fontWeight = FontWeight.Bold)
                 Text(text = stringResource(R.string.onboarding_caffeine_suggestion_info), style = MaterialTheme.typography.bodySmall)
                 HealthPillTextField(
+                    label = stringResource(R.string.onboarding_caffeine_limit_label),
+                    value = state.dailyCaffeineLimitMg,
+                    onValueChange = { onAction(OnboardingAction.UpdateCaffeineLimit(it)) },
+                    isError = state.validationErrors[OnboardingFieldKeys.CAFFEINE_LIMIT] != null,
+                    supportingText = state.validationErrors[OnboardingFieldKeys.CAFFEINE_LIMIT]?.asString(),
+                    modifier = Modifier.testTag("onboarding_caffeine_limit_field"),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    suffix = { Text("mg") }
+                )
+                HealthPillTextField(
                     label = stringResource(R.string.profile_goal_caffeine_cutoff_time),
                     value = state.caffeineCutoffTime,
                     onValueChange = { onAction(OnboardingAction.UpdateCaffeineCutoff(it)) },
+                    isError = state.validationErrors[OnboardingFieldKeys.CAFFEINE_CUTOFF] != null,
+                    supportingText = state.validationErrors[OnboardingFieldKeys.CAFFEINE_CUTOFF]?.asString(),
                     modifier = Modifier.testTag("onboarding_caffeine_cutoff_field")
                 )
             }
@@ -359,8 +386,8 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_sleep), fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_bedtime), value = state.sleepBedtime, onValueChange = { onAction(OnboardingAction.UpdateSleepBedtime(it)) }, modifier = Modifier.weight(1f))
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_wake_time), value = state.sleepWakeTime, onValueChange = { onAction(OnboardingAction.UpdateSleepWakeTime(it)) }, modifier = Modifier.weight(1f))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_bedtime), value = state.sleepBedtime, onValueChange = { onAction(OnboardingAction.UpdateSleepBedtime(it)) }, isError = state.validationErrors[OnboardingFieldKeys.SLEEP_BEDTIME] != null, supportingText = state.validationErrors[OnboardingFieldKeys.SLEEP_BEDTIME]?.asString(), modifier = Modifier.weight(1f))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_wake_time), value = state.sleepWakeTime, onValueChange = { onAction(OnboardingAction.UpdateSleepWakeTime(it)) }, isError = state.validationErrors[OnboardingFieldKeys.SLEEP_WAKE_TIME] != null, supportingText = state.validationErrors[OnboardingFieldKeys.SLEEP_WAKE_TIME]?.asString(), modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -368,7 +395,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
         if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_steps), fontWeight = FontWeight.Bold)
-                HealthPillTextField(label = stringResource(R.string.profile_goal_step_target), value = state.dailyStepTarget, onValueChange = { onAction(OnboardingAction.UpdateDailySteps(it)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                HealthPillTextField(label = stringResource(R.string.profile_goal_step_target), value = state.dailyStepTarget, onValueChange = { onAction(OnboardingAction.UpdateDailySteps(it)) }, isError = state.validationErrors[OnboardingFieldKeys.DAILY_STEPS] != null, supportingText = state.validationErrors[OnboardingFieldKeys.DAILY_STEPS]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
             }
         }
 
@@ -376,8 +403,8 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_exercise), fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_days), value = state.exerciseDaysPerWeek, onValueChange = { onAction(OnboardingAction.UpdateExerciseDays(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors["exercise_days"] != null, supportingText = state.validationErrors["exercise_days"]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_duration), value = state.exerciseDurationMinutes, onValueChange = { onAction(OnboardingAction.UpdateExerciseDuration(it)) }, modifier = Modifier.weight(1f), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("dk") })
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_days), value = state.exerciseDaysPerWeek, onValueChange = { onAction(OnboardingAction.UpdateExerciseDays(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors[OnboardingFieldKeys.EXERCISE_DAYS] != null, supportingText = state.validationErrors[OnboardingFieldKeys.EXERCISE_DAYS]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                    HealthPillTextField(label = stringResource(R.string.profile_goal_exercise_duration), value = state.exerciseDurationMinutes, onValueChange = { onAction(OnboardingAction.UpdateExerciseDuration(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors[OnboardingFieldKeys.EXERCISE_DURATION] != null, supportingText = state.validationErrors[OnboardingFieldKeys.EXERCISE_DURATION]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("dk") })
                 }
             }
         }
@@ -385,7 +412,7 @@ fun SmartGoalsStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Uni
         if (state.selectedTrackingAreas.contains(DashboardCardType.SMOKING)) {
             HealthCard {
                 Text(text = stringResource(R.string.dashboard_card_smoking), fontWeight = FontWeight.Bold)
-                HealthPillTextField(label = stringResource(R.string.profile_goal_smoke_limit), value = state.smokeDailyLimit, onValueChange = { onAction(OnboardingAction.UpdateSmokeLimit(it)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                HealthPillTextField(label = stringResource(R.string.profile_goal_smoke_limit), value = state.smokeDailyLimit, onValueChange = { onAction(OnboardingAction.UpdateSmokeLimit(it)) }, isError = state.validationErrors[OnboardingFieldKeys.SMOKE_LIMIT] != null, supportingText = state.validationErrors[OnboardingFieldKeys.SMOKE_LIMIT]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
             }
         }
     }
@@ -415,9 +442,9 @@ fun PreferencesStep(state: OnboardingUiState, onAction: (OnboardingAction) -> Un
                 }
                 if (state.waterReminderEnabled) {
                     Row(horizontalArrangement = Arrangement.spacedBy(HealthSpacing.xs)) {
-                        HealthPillTextField(label = stringResource(R.string.profile_goal_start), value = state.waterReminderStartTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderStart(it)) }, modifier = Modifier.weight(1f))
-                        HealthPillTextField(label = stringResource(R.string.profile_goal_end), value = state.waterReminderEndTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderEnd(it)) }, modifier = Modifier.weight(1f))
-                        HealthPillTextField(label = stringResource(R.string.profile_goal_frequency), value = state.waterReminderIntervalMinutes, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderInterval(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors["reminder_interval"] != null, supportingText = state.validationErrors["reminder_interval"]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("dk") })
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_start), value = state.waterReminderStartTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderStart(it)) }, isError = state.validationErrors[OnboardingFieldKeys.REMINDER_START_TIME] != null, supportingText = state.validationErrors[OnboardingFieldKeys.REMINDER_START_TIME]?.asString(), modifier = Modifier.weight(1f))
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_end), value = state.waterReminderEndTime, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderEnd(it)) }, isError = state.validationErrors[OnboardingFieldKeys.REMINDER_END_TIME] != null, supportingText = state.validationErrors[OnboardingFieldKeys.REMINDER_END_TIME]?.asString(), modifier = Modifier.weight(1f))
+                        HealthPillTextField(label = stringResource(R.string.profile_goal_frequency), value = state.waterReminderIntervalMinutes, onValueChange = { onAction(OnboardingAction.UpdateWaterReminderInterval(it)) }, modifier = Modifier.weight(1f), isError = state.validationErrors[OnboardingFieldKeys.REMINDER_INTERVAL] != null, supportingText = state.validationErrors[OnboardingFieldKeys.REMINDER_INTERVAL]?.asString(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), suffix = { Text("dk") })
                     }
                 }
             }

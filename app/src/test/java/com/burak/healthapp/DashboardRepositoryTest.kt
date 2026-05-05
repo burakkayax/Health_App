@@ -565,6 +565,9 @@ private class FakeSettingsRepository : SettingsRepository {
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
         useDefaultSupplementsWhenEmpty: Boolean,
+        dashboardCards: List<com.burak.healthapp.domain.model.DashboardCardConfig>?,
+        waterReminderSettings: com.burak.healthapp.domain.model.WaterReminderSettings?,
+        stepTrackingEnabled: Boolean?,
     ) = Unit
 
     override suspend fun updateGoalSettings(goals: GoalSettings) = Unit

@@ -104,6 +104,9 @@ class SettingsRepositoryImpl(
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
         useDefaultSupplementsWhenEmpty: Boolean,
+        dashboardCards: List<DashboardCardConfig>?,
+        waterReminderSettings: WaterReminderSettings?,
+        stepTrackingEnabled: Boolean?,
     ) {
         updateProfile(profile)
         updateGoalSettings(goals)
@@ -118,6 +121,15 @@ class SettingsRepositoryImpl(
                 names = supplementNamesToUse,
             ),
         )
+        if (dashboardCards != null) {
+            saveDashboardCardConfig(dashboardCards)
+        }
+        if (waterReminderSettings != null) {
+            updateWaterReminderSettings(waterReminderSettings)
+        }
+        if (stepTrackingEnabled != null) {
+            updateStepTrackingEnabled(stepTrackingEnabled)
+        }
         dataStore.edit { preferences ->
             preferences[SettingsKeys.onboardingComplete] = true
         }

@@ -2,6 +2,7 @@ package com.burak.healthapp
 
 import com.burak.healthapp.core.ui.text.UiText
 import com.burak.healthapp.domain.model.BodyMeasurementEntry
+import com.burak.healthapp.domain.model.DashboardCardConfig
 import com.burak.healthapp.domain.model.DashboardCardType
 import com.burak.healthapp.domain.model.GoalSettings
 import com.burak.healthapp.domain.model.SettingsState
@@ -210,6 +211,9 @@ class OnboardingViewModelTest {
                 initialMeasurement: BodyMeasurementEntry,
                 supplements: List<String>,
                 useDefaultSupplementsWhenEmpty: Boolean,
+                dashboardCards: List<DashboardCardConfig>?,
+                waterReminderSettings: WaterReminderSettings?,
+                stepTrackingEnabled: Boolean?,
             ) {
                 throw IllegalStateException("Database error")
             }
@@ -262,11 +266,25 @@ class FakeOnboardingSettingsRepository : SettingsRepository {
         initialMeasurement: BodyMeasurementEntry,
         supplements: List<String>,
         useDefaultSupplementsWhenEmpty: Boolean,
+        dashboardCards: List<DashboardCardConfig>?,
+        waterReminderSettings: WaterReminderSettings?,
+        stepTrackingEnabled: Boolean?,
     ) {
         lastProfile = profile
         lastGoals = goals
         lastMeasurement = initialMeasurement
         lastSupplements = supplements
+        if (dashboardCards != null) {
+            dashboardCards.forEach {
+                dashboardVisibilities[it.type] = it.isVisible
+            }
+        }
+        if (waterReminderSettings != null) {
+            lastWaterReminderSettings = waterReminderSettings
+        }
+        if (stepTrackingEnabled != null) {
+            lastStepTrackingEnabled = stepTrackingEnabled
+        }
     }
 
     override suspend fun updateGoalSettings(goals: GoalSettings) {}

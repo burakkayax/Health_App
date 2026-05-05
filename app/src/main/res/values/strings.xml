@@ -620,4 +620,15 @@
     <string name="onboarding_error_exercise_duration">Egzersiz süresi negatif olamaz.</string>
     <string name="onboarding_error_smoke_limit">Sigara limiti negatif olamaz.</string>
     <string name="onboarding_error_save_failed">Kurulum kaydedilemedi. Lütfen tekrar dene.</string>
-<string name="onboarding_label_height">Boy (cm)</string></resources>
+    <string name="onboarding_label_height">Boy (cm)</string>
+    <string name="onboarding_tracking_subtitle_hydration">Günlük su hedefini takip et</string>
+    <string name="onboarding_tracking_subtitle_sleep">Yatış ve uyanış düzenini izle</string>
+    <string name="onboarding_tracking_subtitle_nutrition">Kalori ve makroları kaydet</string>
+    <string name="onboarding_tracking_subtitle_steps">Günlük hareket hedefini takip et</string>
+    <string name="onboarding_tracking_subtitle_weight">Kilo değişimini izle</string>
+    <string name="onboarding_tracking_subtitle_caffeine">Kafein miktarı ve saatini takip et</string>
+    <string name="onboarding_tracking_subtitle_smoking">Günlük sigara kaydını izle</string>
+    <string name="onboarding_tracking_subtitle_exercise">Egzersiz günlerini takip et</string>
+    <string name="onboarding_tracking_subtitle_supplements">Takviye dozlarını takip et</string>
+    <string name="onboarding_caffeine_limit_label">Kafein Limiti (mg)</string>
+</resources>

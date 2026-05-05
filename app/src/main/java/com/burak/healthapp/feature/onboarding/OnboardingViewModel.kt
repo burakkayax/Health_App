@@ -40,19 +40,30 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
+    private inline fun <reified T : Enum<T>> enumValueOrNull(raw: String?): T? =
+        raw?.let { value -> enumValues<T>().firstOrNull { it.name == value } }
+
     private fun restoreState(): OnboardingUiState? {
         val currentStepName = savedStateHandle.get<String>("currentStep") ?: return null
+        val currentStep = enumValueOrNull<OnboardingStep>(currentStepName) ?: OnboardingStep.WELCOME
+        
+        val selectedTrackingAreas = savedStateHandle.get<List<String>>("selectedTrackingAreas")
+            ?.mapNotNull { enumValueOrNull<DashboardCardType>(it) }
+            ?.toSet()
+            ?.takeIf { it.isNotEmpty() }
+            ?: defaultOnboardingTrackingAreas()
+
         return OnboardingUiState(
-            currentStep = OnboardingStep.valueOf(currentStepName),
-            selectedTrackingAreas = savedStateHandle.get<List<String>>("selectedTrackingAreas")?.map { DashboardCardType.valueOf(it) }?.toSet() ?: defaultOnboardingTrackingAreas(),
+            currentStep = currentStep,
+            selectedTrackingAreas = selectedTrackingAreas,
             name = savedStateHandle.get<String>("name") ?: "",
             age = savedStateHandle.get<String>("age") ?: "",
-            sex = savedStateHandle.get<String>("sex")?.let { OnboardingSex.valueOf(it) } ?: OnboardingSex.UNSPECIFIED,
+            sex = enumValueOrNull<OnboardingSex>(savedStateHandle.get<String>("sex")) ?: OnboardingSex.UNSPECIFIED,
             heightCm = savedStateHandle.get<String>("heightCm") ?: "",
             currentWeightKg = savedStateHandle.get<String>("currentWeightKg") ?: "",
             targetWeightKg = savedStateHandle.get<String>("targetWeightKg") ?: "",
-            activityLevel = savedStateHandle.get<String>("activityLevel")?.let { OnboardingActivityLevel.valueOf(it) } ?: OnboardingActivityLevel.LIGHT,
-            mainGoal = savedStateHandle.get<String>("mainGoal")?.let { OnboardingMainGoal.valueOf(it) } ?: OnboardingMainGoal.MAINTAIN,
+            activityLevel = enumValueOrNull<OnboardingActivityLevel>(savedStateHandle.get<String>("activityLevel")) ?: OnboardingActivityLevel.LIGHT,
+            mainGoal = enumValueOrNull<OnboardingMainGoal>(savedStateHandle.get<String>("mainGoal")) ?: OnboardingMainGoal.MAINTAIN,
             waterTargetMl = savedStateHandle.get<String>("waterTargetMl") ?: "",
             dailyStepTarget = savedStateHandle.get<String>("dailyStepTarget") ?: "",
             sleepBedtime = savedStateHandle.get<String>("sleepBedtime") ?: "",
@@ -200,21 +211,19 @@ class OnboardingViewModel @Inject constructor(
                     waistCm = goals.baselineWaistCm,
                     hipCm = goals.baselineHipCm,
                 )
+                val defaultTrackingAreas = defaultOnboardingTrackingAreas()
+                val dashboardConfig = buildDashboardConfigFromTrackingAreas(defaultTrackingAreas)
+                
                 settingsRepository.completeOnboarding(
                     profile = profile,
                     goals = goals,
                     initialMeasurement = measurement,
                     supplements = emptyList(),
                     useDefaultSupplementsWhenEmpty = false,
+                    dashboardCards = dashboardConfig,
+                    waterReminderSettings = WaterReminderSettings(enabled = false),
+                    stepTrackingEnabled = false,
                 )
-                // Save dashboard config and preferences
-                val defaultTrackingAreas = defaultOnboardingTrackingAreas()
-                val dashboardConfig = buildDashboardConfigFromTrackingAreas(defaultTrackingAreas)
-                dashboardConfig.forEach { config ->
-                    settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
-                }
-                settingsRepository.updateWaterReminderSettings(WaterReminderSettings(enabled = false))
-                settingsRepository.updateStepTrackingEnabled(false)
                 _uiState.update { it.copy(isSaving = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false, saveError = UiText.StringResource(R.string.onboarding_error_save_failed)) }
@@ -276,23 +285,15 @@ class OnboardingViewModel @Inject constructor(
                     initialMeasurement = measurement,
                     supplements = supplements,
                     useDefaultSupplementsWhenEmpty = useSupplements,
-                )
-
-                val dashboardConfig = buildDashboardConfigFromTrackingAreas(state.selectedTrackingAreas)
-                dashboardConfig.forEach { config ->
-                    settingsRepository.updateDashboardCardVisibility(config.type, config.isVisible)
-                }
-
-                settingsRepository.updateWaterReminderSettings(
-                    WaterReminderSettings(
+                    dashboardCards = buildDashboardConfigFromTrackingAreas(state.selectedTrackingAreas),
+                    waterReminderSettings = WaterReminderSettings(
                         enabled = state.waterReminderEnabled,
                         startTime = state.waterReminderStartTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_START_TIME,
                         endTime = state.waterReminderEndTime.toLocalTimeOrNull() ?: DefaultHealthGoals.WATER_REMINDER_END_TIME,
                         intervalMinutes = state.waterReminderIntervalMinutes.toIntOrNull() ?: DefaultHealthGoals.WATER_REMINDER_INTERVAL_MINUTES,
-                    )
+                    ),
+                    stepTrackingEnabled = false,
                 )
-
-                settingsRepository.updateStepTrackingEnabled(false) // Safe mode, intentional
                 
                 _uiState.update { it.copy(isSaving = false) }
             } catch (e: Exception) {
@@ -360,83 +361,83 @@ class OnboardingViewModel @Inject constructor(
         when (state.currentStep) {
             OnboardingStep.TRACKING_AREAS -> {
                 if (state.selectedTrackingAreas.isEmpty()) {
-                    errors["tracking_areas"] = UiText.StringResource(R.string.onboarding_error_select_one_tracking_area)
+                    errors[OnboardingFieldKeys.TRACKING_AREAS] = UiText.StringResource(R.string.onboarding_error_select_one_tracking_area)
                 }
             }
             OnboardingStep.BASIC_INFO -> {
                 val age = state.age.toIntOrNull()
                 if (state.age.isNotBlank() && (age == null || age !in 13..100)) {
-                    errors["age"] = UiText.StringResource(R.string.onboarding_error_range_age)
+                    errors[OnboardingFieldKeys.AGE] = UiText.StringResource(R.string.onboarding_error_range_age)
                 }
                 val height = parseLocalizedDecimalInput(state.heightCm)
                 if (state.heightCm.isNotBlank() && (height == null || height !in 100f..230f)) {
-                    errors["height"] = UiText.StringResource(R.string.onboarding_error_range_height)
+                    errors[OnboardingFieldKeys.HEIGHT] = UiText.StringResource(R.string.onboarding_error_range_height)
                 }
                 val weight = parseLocalizedDecimalInput(state.currentWeightKg)
                 if (state.currentWeightKg.isNotBlank() && (weight == null || weight !in 30f..250f)) {
-                    errors["currentWeight"] = UiText.StringResource(R.string.onboarding_error_range_weight)
+                    errors[OnboardingFieldKeys.CURRENT_WEIGHT] = UiText.StringResource(R.string.onboarding_error_range_weight)
                 }
                 val targetWeight = parseLocalizedDecimalInput(state.targetWeightKg)
                 if (state.targetWeightKg.isNotBlank() && (targetWeight == null || targetWeight !in 30f..250f)) {
-                    errors["targetWeight"] = UiText.StringResource(R.string.onboarding_error_range_weight)
+                    errors[OnboardingFieldKeys.TARGET_WEIGHT] = UiText.StringResource(R.string.onboarding_error_range_weight)
                 }
             }
             OnboardingStep.SMART_GOALS -> {
                 if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION)) {
                     val water = state.waterTargetMl.toIntOrNull()
-                    if (water == null || water <= 0) errors["water"] = UiText.StringResource(R.string.onboarding_error_water_positive)
+                    if (water == null || water <= 0) errors[OnboardingFieldKeys.WATER] = UiText.StringResource(R.string.onboarding_error_water_positive)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.STEPS)) {
                     val steps = state.dailyStepTarget.toIntOrNull()
-                    if (steps == null || steps < 0 || steps > 100000) errors["steps"] = UiText.StringResource(R.string.onboarding_error_step_target_invalid)
+                    if (steps == null || steps < 0 || steps > 100000) errors[OnboardingFieldKeys.DAILY_STEPS] = UiText.StringResource(R.string.onboarding_error_step_target_invalid)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.SLEEP)) {
                     val bedtime = state.sleepBedtime.toLocalTimeOrNull()
-                    if (bedtime == null) errors["sleepBedtime"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    if (bedtime == null) errors[OnboardingFieldKeys.SLEEP_BEDTIME] = UiText.StringResource(R.string.onboarding_error_invalid_time)
                     val wakeTime = state.sleepWakeTime.toLocalTimeOrNull()
-                    if (wakeTime == null) errors["sleepWakeTime"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    if (wakeTime == null) errors[OnboardingFieldKeys.SLEEP_WAKE_TIME] = UiText.StringResource(R.string.onboarding_error_invalid_time)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.CAFFEINE)) {
                     val caffeineLimit = state.dailyCaffeineLimitMg.toIntOrNull()
-                    if (caffeineLimit == null || caffeineLimit < 0) errors["caffeineLimit"] = UiText.StringResource(R.string.onboarding_error_caffeine_limit_invalid)
+                    if (caffeineLimit == null || caffeineLimit < 0) errors[OnboardingFieldKeys.CAFFEINE_LIMIT] = UiText.StringResource(R.string.onboarding_error_caffeine_limit_invalid)
                     val caffeineCutoff = state.caffeineCutoffTime.toLocalTimeOrNull()
-                    if (caffeineCutoff == null) errors["caffeineCutoff"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    if (caffeineCutoff == null) errors[OnboardingFieldKeys.CAFFEINE_CUTOFF] = UiText.StringResource(R.string.onboarding_error_invalid_time)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.NUTRITION)) {
                     val cal = state.dailyCaloriesTarget.toIntOrNull()
-                    if (cal == null || cal <= 0) errors["calories"] = UiText.StringResource(R.string.onboarding_error_calorie_positive)
+                    if (cal == null || cal <= 0) errors[OnboardingFieldKeys.CALORIES] = UiText.StringResource(R.string.onboarding_error_calorie_positive)
                     
                     val protein = state.proteinTargetGrams.toIntOrNull()
-                    if (protein == null || protein < 0) errors["protein"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
+                    if (protein == null || protein < 0) errors[OnboardingFieldKeys.PROTEIN] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
                     
                     val carb = state.carbTargetGrams.toIntOrNull()
-                    if (carb == null || carb < 0) errors["carb"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
+                    if (carb == null || carb < 0) errors[OnboardingFieldKeys.CARBS] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
                     
                     val fat = state.fatTargetGrams.toIntOrNull()
-                    if (fat == null || fat < 0) errors["fat"] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
+                    if (fat == null || fat < 0) errors[OnboardingFieldKeys.FAT] = UiText.StringResource(R.string.onboarding_error_macro_not_negative)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.EXERCISE)) {
                     val days = state.exerciseDaysPerWeek.toIntOrNull()
-                    if (days == null || days !in 0..7) errors["exerciseDays"] = UiText.StringResource(R.string.onboarding_error_exercise_days)
+                    if (days == null || days !in 0..7) errors[OnboardingFieldKeys.EXERCISE_DAYS] = UiText.StringResource(R.string.onboarding_error_exercise_days)
                     
                     val duration = state.exerciseDurationMinutes.toIntOrNull()
-                    if (duration == null || duration < 0) errors["exerciseDuration"] = UiText.StringResource(R.string.onboarding_error_exercise_duration)
+                    if (duration == null || duration < 0) errors[OnboardingFieldKeys.EXERCISE_DURATION] = UiText.StringResource(R.string.onboarding_error_exercise_duration)
                 }
                 if (state.selectedTrackingAreas.contains(DashboardCardType.SMOKING)) {
                     val smoke = state.smokeDailyLimit.toIntOrNull()
-                    if (smoke == null || smoke < 0) errors["smokeLimit"] = UiText.StringResource(R.string.onboarding_error_smoke_limit)
+                    if (smoke == null || smoke < 0) errors[OnboardingFieldKeys.SMOKE_LIMIT] = UiText.StringResource(R.string.onboarding_error_smoke_limit)
                 }
             }
             OnboardingStep.PREFERENCES -> {
                 if (state.selectedTrackingAreas.contains(DashboardCardType.HYDRATION) && state.waterReminderEnabled) {
                     val startTime = state.waterReminderStartTime.toLocalTimeOrNull()
-                    if (startTime == null) errors["reminder_start_time"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    if (startTime == null) errors[OnboardingFieldKeys.REMINDER_START_TIME] = UiText.StringResource(R.string.onboarding_error_invalid_time)
                     val endTime = state.waterReminderEndTime.toLocalTimeOrNull()
-                    if (endTime == null) errors["reminder_end_time"] = UiText.StringResource(R.string.onboarding_error_invalid_time)
+                    if (endTime == null) errors[OnboardingFieldKeys.REMINDER_END_TIME] = UiText.StringResource(R.string.onboarding_error_invalid_time)
 
                     val interval = state.waterReminderIntervalMinutes.toIntOrNull()
                     if (interval == null || interval < DefaultHealthGoals.MIN_WATER_REMINDER_INTERVAL_MINUTES) {
-                        errors["reminder_interval"] = UiText.StringResource(R.string.onboarding_error_reminder_interval)
+                        errors[OnboardingFieldKeys.REMINDER_INTERVAL] = UiText.StringResource(R.string.onboarding_error_reminder_interval)
                     }
                 }
             }
