@@ -1,8 +1,8 @@
 package com.burak.healthapp
 
+import com.burak.healthapp.domain.calculation.buildCalendarMonthDays
 import com.burak.healthapp.domain.model.TrendsPeriod
 import com.burak.healthapp.feature.detail.buildMonthGridDays
-import com.burak.healthapp.feature.detail.buildMonthToDateDays
 import com.burak.healthapp.feature.detail.buildPeriodDays
 import com.burak.healthapp.feature.detail.buildTrailingDays
 import com.burak.healthapp.feature.detail.buildTrailingWeekDays
@@ -24,8 +24,8 @@ class MetricDateWindowsTest {
     }
 
     @Test
-    fun monthToDateDays_returnsFullCalendarMonthForMetricPeriods() {
-        val days = buildMonthToDateDays(anchorDate)
+    fun calendarMonthPeriodDays_returnsFullCalendarMonth() {
+        val days = buildCalendarMonthDays(anchorDate)
 
         assertEquals(LocalDate.of(2026, 4, 1), days.first())
         assertEquals(LocalDate.of(2026, 4, 30), days.last())
@@ -35,7 +35,7 @@ class MetricDateWindowsTest {
     @Test
     fun buildPeriodDays_matchesSelectedPeriod() {
         assertEquals(buildTrailingWeekDays(anchorDate), buildPeriodDays(anchorDate, TrendsPeriod.WEEKLY))
-        assertEquals(buildMonthToDateDays(anchorDate), buildPeriodDays(anchorDate, TrendsPeriod.MONTHLY))
+        assertEquals(buildCalendarMonthDays(anchorDate), buildPeriodDays(anchorDate, TrendsPeriod.MONTHLY))
     }
 
     @Test

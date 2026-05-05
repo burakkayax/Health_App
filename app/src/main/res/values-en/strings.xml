@@ -492,8 +492,13 @@
     <string name="onboarding_tracking_subtitle_exercise">Track exercise days</string>
     <string name="onboarding_tracking_subtitle_supplements">Track supplement doses</string>
     <string name="onboarding_caffeine_limit_label">Caffeine Limit (mg)</string>
-    <string name="profile_goal_step_tracking_helper">Uses a foreground service, shows a notification, and can be turned off anytime.</string>
+    <string name="profile_goal_step_tracking_helper">Step tracking requires device permission. Tracking starts after permission is granted.</string>
     <string name="profile_goal_start">Start</string>
     <string name="profile_goal_end">End</string>
     <string name="profile_goal_frequency">Frequency (min)</string>
+    <string name="step_tracking_requires_permission">Step tracking requires device permission. Tracking starts after permission is granted.</string>
+    <string name="water_reminder_interval_too_short">Reminder interval must be at least %1$d minutes.</string>
+    <string name="dashboard_visibility_update_failed">Card visibility could not be updated. Please try again.</string>
+    <string name="dashboard_reset_failed">Card layout could not be reset. Please try again.</string>
+    <string name="profile_step_tracking_helper">Step tracking requires device permission. Tracking starts after permission is granted.</string>
 </resources>

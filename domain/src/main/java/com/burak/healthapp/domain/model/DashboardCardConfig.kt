@@ -35,7 +35,13 @@ fun defaultDashboardCardConfig(): List<DashboardCardConfig> = listOf(
 ).mapIndexed { index, type ->
     DashboardCardConfig(
         type = type,
-        isVisible = type != DashboardCardType.CAFFEINE,
+        isVisible = type in setOf(
+            DashboardCardType.HYDRATION,
+            DashboardCardType.SLEEP,
+            DashboardCardType.NUTRITION,
+            DashboardCardType.STEPS,
+            DashboardCardType.WEIGHT,
+        ),
         sortOrder = index,
     )
 }

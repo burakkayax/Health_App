@@ -43,10 +43,19 @@ class DashboardCardConfigTest {
     }
 
     @Test
-    fun defaultConfig_caffeineIsHiddenByDefault() {
+    fun defaultConfig_matchesOnboardingSkipDefaults() {
         val config = defaultDashboardCardConfig()
-        assertFalse(config.first { it.type == DashboardCardType.CAFFEINE }.isVisible)
-        assertTrue(config.filterNot { it.type == DashboardCardType.CAFFEINE }.all(DashboardCardConfig::isVisible))
+        val visibleTypes = config.filter { it.isVisible }.map { it.type }.toSet()
+        assertEquals(
+            setOf(
+                DashboardCardType.HYDRATION,
+                DashboardCardType.SLEEP,
+                DashboardCardType.NUTRITION,
+                DashboardCardType.STEPS,
+                DashboardCardType.WEIGHT,
+            ),
+            visibleTypes,
+        )
     }
 
     @Test

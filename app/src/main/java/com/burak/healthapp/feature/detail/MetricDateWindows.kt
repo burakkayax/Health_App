@@ -1,6 +1,5 @@
 package com.burak.healthapp.feature.detail
 
-import com.burak.healthapp.domain.calculation.buildCalendarMonthDays
 import com.burak.healthapp.domain.calculation.metricDateWindowFor
 import com.burak.healthapp.domain.model.TrendsPeriod
 import java.time.LocalDate
@@ -15,8 +14,6 @@ internal fun buildTrailingDays(
     if (dayCount <= 0) return emptyList()
     return ((dayCount - 1).toLong() downTo 0L).map(anchorDate::minusDays)
 }
-
-internal fun buildMonthToDateDays(anchorDate: LocalDate): List<LocalDate> = buildCalendarMonthDays(anchorDate)
 
 internal fun buildPeriodDays(
     anchorDate: LocalDate,

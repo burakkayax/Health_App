@@ -725,7 +725,10 @@ private fun DashboardCustomizationSheet(
                         Switch(
                             modifier = Modifier.testTag("dashboard_card_switch_${config.type.name}"),
                             checked = config.isVisible,
-                            onCheckedChange = { checked -> onVisibilityChange(config.type, checked) },
+                            onCheckedChange = { checked ->
+                                localCards = localCards.map { if (it.type == config.type) it.copy(isVisible = checked) else it }
+                                onVisibilityChange(config.type, checked)
+                            },
                         )
                     }
                 }
