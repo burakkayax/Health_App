@@ -1,0 +1,41 @@
+# Saglik App
+
+An Android health tracking app built with Kotlin, Jetpack Compose, Hilt, Navigation Compose, Room, DataStore, and a multi-module architecture.
+
+## V1 Demo Status
+
+Current V1 features:
+
+- Onboarding and profile setup
+- Summary dashboard
+- Weight tracking
+- BMI calculation
+- Sleep tracking
+- Persistent app chrome
+- Floating bottom navigation
+- Collapsing frosted header
+- Manual entries
+- Charts
+- History lists
+
+V1 polish focus:
+
+- Premium pastel gradient and glass card interface
+- Shared app chrome on main screens
+- Real weight, BMI, and sleep data on the Summary dashboard
+- All-time Weight Trend with newest-first history
+- Manual sleep entry with overnight duration support
+- Consistent empty, validation, and saving states
+
+Intentionally missing from V1:
+
+- Health Connect
+- Water tracking
+- Caffeine tracking
+- Mood or stress tracking
+- Screen time
+- Real insights
+- Correlations
+- AI coach
+- Cloud sync
+- Authentication
