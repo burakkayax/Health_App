@@ -24,20 +24,11 @@ import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.designsystem.theme.HealthShapeTokens
 import com.saglik.core.common.time.SleepTimeTextFormatter
 import com.saglik.core.model.SleepQuality
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
-import com.saglik.core.ui.component.HealthPrimaryPillButton
 import com.saglik.feature.sleep.AddSleepUiState
 import com.saglik.feature.sleep.SleepTimeTarget
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import java.util.Calendar
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AddSleepCard(
     state: AddSleepUiState,
@@ -96,32 +87,40 @@ fun AddSleepCard(
     }
 
     if (state.selectedPickerTarget != null) {
-        val initialHour = if (state.selectedPickerTarget == SleepTimeTarget.START) state.startHour else state.wakeHour
-        val initialMinute = if (state.selectedPickerTarget == SleepTimeTarget.START) state.startMinute else state.wakeMinute
+        val isStart = state.selectedPickerTarget == SleepTimeTarget.START
+        val initialHour = if (isStart) state.startHour else state.wakeHour
+        val initialMinute = if (isStart) state.startMinute else state.wakeMinute
         
-        val timePickerState = rememberTimePickerState(
-            initialHour = initialHour,
-            initialMinute = initialMinute,
-            is24Hour = true,
-        )
+        val localHourState = androidx.compose.runtime.remember(state.selectedPickerTarget, initialHour) { androidx.compose.runtime.mutableIntStateOf(initialHour) }
+        val localMinuteState = androidx.compose.runtime.remember(state.selectedPickerTarget, initialMinute) { androidx.compose.runtime.mutableIntStateOf(initialMinute) }
 
-        AlertDialog(
-            onDismissRequest = onTimePickerDismiss,
-            title = { Text(text = if (state.selectedPickerTarget == SleepTimeTarget.START) "Select Sleep Start" else "Select Wake Time") },
-            text = {
-                TimePicker(state = timePickerState)
-            },
-            confirmButton = {
-                TextButton(onClick = { onTimePickerConfirm(timePickerState.hour, timePickerState.minute) }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onTimePickerDismiss) {
-                    Text("Cancel")
-                }
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = onTimePickerDismiss
+        ) {
+            com.saglik.core.ui.component.picker.HealthBottomSheetSurface {
+                com.saglik.core.ui.component.picker.HealthPickerActionRow(
+                    title = if (isStart) "Sleep start" else "Wake time",
+                    onCancel = onTimePickerDismiss,
+                    onDone = { onTimePickerConfirm(localHourState.intValue, localMinuteState.intValue) }
+                )
+                com.saglik.core.ui.component.picker.HealthTimePickerContent(
+                    hourContent = {
+                        com.saglik.core.ui.component.picker.HealthWheelPickerColumn(
+                            range = 0..23,
+                            value = localHourState.intValue,
+                            onValueChange = { localHourState.intValue = it }
+                        )
+                    },
+                    minuteContent = {
+                        com.saglik.core.ui.component.picker.HealthWheelPickerColumn(
+                            range = 0..59,
+                            value = localMinuteState.intValue,
+                            onValueChange = { localMinuteState.intValue = it }
+                        )
+                    }
+                )
             }
-        )
+        }
     }
 }
 

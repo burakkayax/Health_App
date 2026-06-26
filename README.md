@@ -39,3 +39,37 @@ Intentionally missing from V1:
 - AI coach
 - Cloud sync
 - Authentication
+
+## Development
+
+Build:
+
+```bash
+./gradlew assembleDebug
+```
+
+JVM tests:
+
+```bash
+./gradlew test
+```
+
+Android debug unit tests:
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+Lint:
+
+```bash
+./gradlew lintDebug
+```
+
+Optional full local check:
+
+```bash
+./gradlew assembleDebug test testDebugUnitTest lintDebug
+```
+
+CI runs the debug build, JVM tests, debug unit tests, and debug lint through GitHub Actions on push and pull requests to `main`.

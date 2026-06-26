@@ -21,13 +21,24 @@ internal fun SleepEntryEntity.toDomain(): SleepEntry =
         note = note,
     )
 
-internal fun SleepEntry.toEntity(): SleepEntryEntity =
-    SleepEntryEntity(
+internal fun SleepEntry.toEntity(): SleepEntryEntity {
+    val endTimeEpochMillis = endTime.toEpochMilliseconds()
+    val syncMetadata = manualSyncMetadata(endTimeEpochMillis)
+
+    return SleepEntryEntity(
         id = id,
         startTime = startTime.toEpochMilliseconds(),
-        endTime = endTime.toEpochMilliseconds(),
+        endTime = endTimeEpochMillis,
         durationMinutes = durationMinutes,
         quality = quality?.name,
         source = source.name,
         note = note,
+        sourceRecordId = syncMetadata.sourceRecordId,
+        sourcePackageName = syncMetadata.sourcePackageName,
+        sourceAppName = syncMetadata.sourceAppName,
+        createdAt = syncMetadata.createdAt,
+        updatedAt = syncMetadata.updatedAt,
+        lastSyncedAt = syncMetadata.lastSyncedAt,
+        deletedAt = syncMetadata.deletedAt,
     )
+}

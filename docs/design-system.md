@@ -42,8 +42,20 @@ This document outlines the core principles, tokens, and components for the Healt
 - `HealthLoadingState`: Centered progress.
 - `HealthErrorState`: For failures.
 
+### Pickers & Bottom Sheets
+- **Do not use default Material TimePicker** for the app's premium picker flows.
+- Use shared picker components (`HealthBottomSheetSurface`, `HealthPickerActionRow`, `HealthTimePickerContent`) for time selection.
+- Time input must be bounded and non-free-form. `HealthWheelPickerColumn` ensures users can only select valid ranges.
+
 ### Motion
 Use `HealthMotion` functions:
+- Motion should be calm and restrained. Avoid playful, game-like bounces.
 - `standardTween()`: general layout changes.
 - `sheetEnter()`, `sheetExit()`: pickers.
-- `cardPress()`: touch feedback.
+- `cardPress()`: touch feedback (should be calm and non-bouncy).
+
+## New Feature UI Checklist
+- [ ] Uses shared cards (`HealthAddEntryCard`, `HealthHistoryCard`, etc.) instead of raw `GlassHealthCard`.
+- [ ] Uses shared forms (`HealthTextInput`, `HealthNumberInput`, etc.) instead of raw text fields.
+- [ ] Pickers use the custom bounded `HealthWheelPickerColumn`.
+- [ ] Avoids standard Material3 dialogs for time/date selection.

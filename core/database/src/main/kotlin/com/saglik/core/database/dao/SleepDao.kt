@@ -31,6 +31,27 @@ interface SleepDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSleepEntry(entry: SleepEntryEntity)
 
+    @Query(
+        """
+        SELECT * FROM sleep_entries
+        WHERE source = :source
+            AND sourceRecordId = :sourceRecordId
+            AND (
+                (:sourcePackageName IS NULL AND sourcePackageName IS NULL)
+                OR sourcePackageName = :sourcePackageName
+            )
+        LIMIT 1
+        """,
+    )
+    suspend fun findByExternalIdentity(
+        source: String,
+        sourcePackageName: String?,
+        sourceRecordId: String,
+    ): SleepEntryEntity?
+
+    @Query("SELECT * FROM sleep_entries WHERE source = :source ORDER BY endTime DESC")
+    fun observeBySource(source: String): Flow<List<SleepEntryEntity>>
+
     @Delete
     suspend fun deleteSleepEntry(entry: SleepEntryEntity)
 }

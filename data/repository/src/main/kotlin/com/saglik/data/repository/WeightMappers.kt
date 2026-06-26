@@ -16,11 +16,22 @@ internal fun WeightEntryEntity.toDomain(): WeightEntry =
         note = note,
     )
 
-internal fun WeightEntry.toEntity(): WeightEntryEntity =
-    WeightEntryEntity(
+internal fun WeightEntry.toEntity(): WeightEntryEntity {
+    val recordedAtEpochMillis = recordedAt.toEpochMilliseconds()
+    val syncMetadata = manualSyncMetadata(recordedAtEpochMillis)
+
+    return WeightEntryEntity(
         id = id,
         weightKg = weightKg,
-        recordedAt = recordedAt.toEpochMilliseconds(),
+        recordedAt = recordedAtEpochMillis,
         source = source.name,
         note = note,
+        sourceRecordId = syncMetadata.sourceRecordId,
+        sourcePackageName = syncMetadata.sourcePackageName,
+        sourceAppName = syncMetadata.sourceAppName,
+        createdAt = syncMetadata.createdAt,
+        updatedAt = syncMetadata.updatedAt,
+        lastSyncedAt = syncMetadata.lastSyncedAt,
+        deletedAt = syncMetadata.deletedAt,
     )
+}

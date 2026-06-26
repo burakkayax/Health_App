@@ -12,7 +12,7 @@ object HealthMotion {
     fun <T> slowTween() = tween<T>(durationMillis = 500, easing = FastOutSlowInEasing)
     
     fun <T> cardPress() = spring<T>(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
+        dampingRatio = Spring.DampingRatioNoBouncy,
         stiffness = Spring.StiffnessMedium
     )
     

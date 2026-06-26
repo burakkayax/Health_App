@@ -1,5 +1,7 @@
 package com.saglik.feature.weight
 
+import com.saglik.core.ui.component.GlassHealthCard
+import com.saglik.core.ui.component.HealthCardHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,8 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.ui.chart.BmiRangeCylinderChart
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
 import com.saglik.domain.bmi.BmiCategory
 
 @Composable

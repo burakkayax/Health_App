@@ -21,6 +21,7 @@ import com.saglik.core.model.HealthGoal
 import com.saglik.core.model.Sex
 import com.saglik.core.ui.component.GlassHealthCard
 
+
 @Composable
 internal fun OnboardingScreen(
     state: OnboardingUiState,

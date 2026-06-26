@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.designsystem.theme.HealthShapeTokens
 import com.saglik.core.model.PeriodType
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
 import com.saglik.feature.sleep.SleepDetailUiState
 
 @Composable

@@ -1,5 +1,7 @@
 package com.saglik.feature.summary.component
 
+import com.saglik.core.ui.component.GlassHealthCard
+import com.saglik.core.ui.component.HealthCardHeader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.ui.chart.RingProgressIndicator
 import com.saglik.core.ui.chart.RingProgressSegment
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
 import com.saglik.feature.summary.ActivitySummary
 
 @Composable

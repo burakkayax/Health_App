@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.designsystem.theme.HealthSpacing
 import com.saglik.core.ui.chart.MiniLineChart
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
-import com.saglik.core.ui.component.HealthNumberInput
-import com.saglik.core.ui.component.HealthPrimaryPillButton
+
 
 @Composable
 fun WeightDetailScreen(

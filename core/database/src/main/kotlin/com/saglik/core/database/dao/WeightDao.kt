@@ -17,4 +17,25 @@ interface WeightDao {
 
     @Query("SELECT * FROM weight_entries ORDER BY recordedAt DESC")
     fun observeWeightEntries(): Flow<List<WeightEntryEntity>>
+
+    @Query(
+        """
+        SELECT * FROM weight_entries
+        WHERE source = :source
+            AND sourceRecordId = :sourceRecordId
+            AND (
+                (:sourcePackageName IS NULL AND sourcePackageName IS NULL)
+                OR sourcePackageName = :sourcePackageName
+            )
+        LIMIT 1
+        """,
+    )
+    suspend fun findByExternalIdentity(
+        source: String,
+        sourcePackageName: String?,
+        sourceRecordId: String,
+    ): WeightEntryEntity?
+
+    @Query("SELECT * FROM weight_entries WHERE source = :source ORDER BY recordedAt DESC")
+    fun observeBySource(source: String): Flow<List<WeightEntryEntity>>
 }

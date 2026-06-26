@@ -21,8 +21,8 @@ import com.saglik.core.database.entity.WeightEntryEntity
         WeightEntryEntity::class,
         SleepEntryEntity::class,
     ],
-    version = 3,
-    exportSchema = false,
+    version = 4,
+    exportSchema = true,
 )
 @TypeConverters(DateTimeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -76,6 +76,52 @@ abstract class AppDatabase : RoomDatabase() {
                         source TEXT NOT NULL,
                         note TEXT
                     )
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN sourceRecordId TEXT")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN sourcePackageName TEXT")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN sourceAppName TEXT")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN createdAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN lastSyncedAt INTEGER")
+                db.execSQL("ALTER TABLE weight_entries ADD COLUMN deletedAt INTEGER")
+                db.execSQL(
+                    """
+                    UPDATE weight_entries
+                    SET createdAt = recordedAt,
+                        updatedAt = recordedAt
+                    """.trimIndent(),
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS index_weight_entries_external_identity
+                    ON weight_entries(source, sourcePackageName, sourceRecordId)
+                    """.trimIndent(),
+                )
+
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN sourceRecordId TEXT")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN sourcePackageName TEXT")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN sourceAppName TEXT")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN createdAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN lastSyncedAt INTEGER")
+                db.execSQL("ALTER TABLE sleep_entries ADD COLUMN deletedAt INTEGER")
+                db.execSQL(
+                    """
+                    UPDATE sleep_entries
+                    SET createdAt = endTime,
+                        updatedAt = endTime
+                    """.trimIndent(),
+                )
+                db.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS index_sleep_entries_external_identity
+                    ON sleep_entries(source, sourcePackageName, sourceRecordId)
                     """.trimIndent(),
                 )
             }

@@ -17,8 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.ui.chart.BmiRangeCylinderChart
-import com.saglik.core.ui.component.GlassHealthCard
-import com.saglik.core.ui.component.HealthCardHeader
 import com.saglik.domain.bmi.BmiCategory
 import com.saglik.feature.summary.BmiSummaryUiState
 
