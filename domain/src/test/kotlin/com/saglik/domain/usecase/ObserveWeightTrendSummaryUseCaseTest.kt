@@ -64,14 +64,14 @@ class ObserveWeightTrendSummaryUseCaseTest {
     }
 
     @Test
-    fun chartUsesLatestEntryWhenMultipleEntriesShareADay() {
+    fun chartUsesAllEntriesChronologically() {
         val morning = weight("morning", 63f, 1_000)
         val evening = weight("evening", 62.5f, 2_000)
         val nextDay = weight("next", 62.1f, 86_401_000)
 
         val summary = ObserveWeightTrendSummaryUseCase.buildSummary(listOf(morning, nextDay, evening))
 
-        assertEquals(listOf(62.5f, 62.1f), summary.chartPoints.map { it.weightKg })
+        assertEquals(listOf(63f, 62.5f, 62.1f), summary.chartPoints.map { it.weightKg })
         assertEquals(listOf(nextDay, evening, morning), summary.history)
     }
 

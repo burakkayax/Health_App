@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.designsystem.theme.HealthSpacing
@@ -97,11 +100,17 @@ object HealthAppScaffoldDefaults {
         horizontal: Dp = HealthSpacing.screenHorizontal,
     ): PaddingValues {
         val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val imeBottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+        
+        val baseBottom = BottomContentPadding + navBarBottom
+        val activeBottom = max(baseBottom, imeBottom + 16.dp)
+
         return PaddingValues(
             start = horizontal,
             top = statusBarTop + ExpandedHeaderBodyHeight + ExpandedHeaderContentGap,
             end = horizontal,
-            bottom = BottomContentPadding,
+            bottom = activeBottom,
         )
     }
 }

@@ -54,12 +54,12 @@ fun HealthCardHeader(
         Text(
             text = title,
             color = accentColor,
+            modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(modifier = Modifier.weight(1f))
         if (trailingText != null || showChevron) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),

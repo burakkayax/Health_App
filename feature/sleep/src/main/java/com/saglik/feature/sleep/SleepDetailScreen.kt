@@ -3,6 +3,7 @@ package com.saglik.feature.sleep
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -35,11 +36,14 @@ fun SleepDetailScreen(
         item {
             AddSleepCard(
                 state = state.addSleep,
-                onStartChanged = { onEvent(SleepDetailEvent.StartChanged(it)) },
-                onEndChanged = { onEvent(SleepDetailEvent.EndChanged(it)) },
+                onStartTimeClick = { onEvent(SleepDetailEvent.StartTimeClicked) },
+                onWakeTimeClick = { onEvent(SleepDetailEvent.WakeTimeClicked) },
+                onTimePickerConfirm = { hour, minute -> onEvent(SleepDetailEvent.TimePickerConfirmed(hour, minute)) },
+                onTimePickerDismiss = { onEvent(SleepDetailEvent.TimePickerDismissed) },
                 onQualitySelected = { onEvent(SleepDetailEvent.QualitySelected(it)) },
                 onNoteChanged = { onEvent(SleepDetailEvent.NoteChanged(it)) },
                 onSaveClick = { onEvent(SleepDetailEvent.SaveSleepClicked) },
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {

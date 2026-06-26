@@ -28,12 +28,23 @@ import com.saglik.core.ui.component.GlassHealthCard
 import com.saglik.core.ui.component.HealthCardHeader
 import com.saglik.core.ui.component.HealthPrimaryPillButton
 import com.saglik.feature.sleep.AddSleepUiState
+import com.saglik.feature.sleep.SleepTimeTarget
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSleepCard(
     state: AddSleepUiState,
-    onStartChanged: (String) -> Unit,
-    onEndChanged: (String) -> Unit,
+    onStartTimeClick: () -> Unit,
+    onWakeTimeClick: () -> Unit,
+    onTimePickerConfirm: (Int, Int) -> Unit,
+    onTimePickerDismiss: () -> Unit,
     onQualitySelected: (SleepQuality?) -> Unit,
     onNoteChanged: (String) -> Unit,
     onSaveClick: () -> Unit,
@@ -51,17 +62,17 @@ fun AddSleepCard(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SleepTimeInput(
-                value = state.startText,
-                onValueChange = onStartChanged,
+                hour = state.startHour,
+                minute = state.startMinute,
+                onClick = onStartTimeClick,
                 label = "Sleep start",
-                placeholder = "23:50",
                 isError = state.errorMessage != null,
             )
             SleepTimeInput(
-                value = state.endText,
-                onValueChange = onEndChanged,
+                hour = state.wakeHour,
+                minute = state.wakeMinute,
+                onClick = onWakeTimeClick,
                 label = "Wake time",
-                placeholder = "07:14",
                 isError = state.errorMessage != null,
             )
             SleepQualitySelector(
@@ -84,11 +95,38 @@ fun AddSleepCard(
         HealthPrimaryPillButton(
             text = if (state.isSaving) "Saving" else "Add Sleep",
             onClick = onSaveClick,
-            enabled = !state.isSaving &&
-                SleepTimeTextFormatter.isComplete(state.startText) &&
-                SleepTimeTextFormatter.isComplete(state.endText),
+            enabled = !state.isSaving,
             containerColor = HealthColors.SleepPurple,
             modifier = Modifier.padding(top = 18.dp),
+        )
+    }
+
+    if (state.selectedPickerTarget != null) {
+        val initialHour = if (state.selectedPickerTarget == SleepTimeTarget.START) state.startHour else state.wakeHour
+        val initialMinute = if (state.selectedPickerTarget == SleepTimeTarget.START) state.startMinute else state.wakeMinute
+        
+        val timePickerState = rememberTimePickerState(
+            initialHour = initialHour,
+            initialMinute = initialMinute,
+            is24Hour = true,
+        )
+
+        AlertDialog(
+            onDismissRequest = onTimePickerDismiss,
+            title = { Text(text = if (state.selectedPickerTarget == SleepTimeTarget.START) "Select Sleep Start" else "Select Wake Time") },
+            text = {
+                TimePicker(state = timePickerState)
+            },
+            confirmButton = {
+                TextButton(onClick = { onTimePickerConfirm(timePickerState.hour, timePickerState.minute) }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onTimePickerDismiss) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }

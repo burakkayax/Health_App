@@ -32,19 +32,14 @@ class ObserveWeightTrendSummaryUseCase(
     companion object {
         fun buildSummary(entries: List<WeightEntry>): WeightTrendSummary {
             val history = entries.sortedByDescending { it.recordedAt.toEpochMilliseconds() }
-            val latestPerDay = entries
-                .groupBy { it.recordedAt.toLocalDateTime(TimeZone.UTC).date }
-                .values
-                .mapNotNull { dayEntries ->
-                    dayEntries.maxByOrNull { it.recordedAt.toEpochMilliseconds() }
-                }
+            val points = entries
                 .sortedBy { it.recordedAt.toEpochMilliseconds() }
-            val points = latestPerDay.map { entry ->
-                WeightTrendPoint(
-                    recordedAt = entry.recordedAt,
-                    weightKg = entry.weightKg,
-                )
-            }
+                .map { entry ->
+                    WeightTrendPoint(
+                        recordedAt = entry.recordedAt,
+                        weightKg = entry.weightKg,
+                    )
+                }
 
             return WeightTrendSummary(
                 latestEntry = history.firstOrNull(),

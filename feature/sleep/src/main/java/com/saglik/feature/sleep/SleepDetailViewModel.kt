@@ -58,11 +58,31 @@ class SleepDetailViewModel @Inject constructor(
     fun onEvent(event: SleepDetailEvent) {
         when (event) {
             is SleepDetailEvent.PeriodSelected -> selectedPeriod.value = event.periodType
-            is SleepDetailEvent.StartChanged -> formState.update {
-                it.copy(startText = SleepTimeTextFormatter.format(event.value), errorMessage = null)
+            is SleepDetailEvent.StartTimeClicked -> formState.update {
+                it.copy(selectedPickerTarget = SleepTimeTarget.START, errorMessage = null)
             }
-            is SleepDetailEvent.EndChanged -> formState.update {
-                it.copy(endText = SleepTimeTextFormatter.format(event.value), errorMessage = null)
+            is SleepDetailEvent.WakeTimeClicked -> formState.update {
+                it.copy(selectedPickerTarget = SleepTimeTarget.WAKE, errorMessage = null)
+            }
+            is SleepDetailEvent.TimePickerDismissed -> formState.update {
+                it.copy(selectedPickerTarget = null)
+            }
+            is SleepDetailEvent.TimePickerConfirmed -> formState.update {
+                when (it.selectedPickerTarget) {
+                    SleepTimeTarget.START -> it.copy(
+                        startHour = event.hour,
+                        startMinute = event.minute,
+                        selectedPickerTarget = null,
+                        errorMessage = null,
+                    )
+                    SleepTimeTarget.WAKE -> it.copy(
+                        wakeHour = event.hour,
+                        wakeMinute = event.minute,
+                        selectedPickerTarget = null,
+                        errorMessage = null,
+                    )
+                    null -> it
+                }
             }
             is SleepDetailEvent.QualitySelected -> formState.update {
                 it.copy(
@@ -116,14 +136,11 @@ class SleepDetailViewModel @Inject constructor(
         )
 
     private fun AddSleepUiState.toSleepInput(): SleepInput {
-        val startTime = SleepTimeTextFormatter.parseOrNull(startText)
-        val endTime = SleepTimeTextFormatter.parseOrNull(endText)
-        val endInstant = endTime?.resolveEndInstant()
-        val startInstant = if (startTime != null && endTime != null) {
-            startTime.resolveStartInstant(endTime)
-        } else {
-            null
-        }
+        val startTime = LocalTime.of(startHour, startMinute)
+        val endTime = LocalTime.of(wakeHour, wakeMinute)
+        
+        val endInstant = endTime.resolveEndInstant()
+        val startInstant = startTime.resolveStartInstant(endTime)
 
         return SleepInput(
             startTime = startInstant,
@@ -207,8 +224,10 @@ class SleepDetailViewModel @Inject constructor(
         val end = ZonedDateTime.now().minusMinutes(15)
         val start = end.minusHours(8)
         return AddSleepUiState(
-            startText = start.format(TimeOutputFormatter),
-            endText = end.format(TimeOutputFormatter),
+            startHour = start.hour,
+            startMinute = start.minute,
+            wakeHour = end.hour,
+            wakeMinute = end.minute,
         )
     }
 

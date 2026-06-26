@@ -37,13 +37,21 @@ data class SleepDetailUiState(
 
 @Immutable
 data class AddSleepUiState(
-    val startText: String = "",
-    val endText: String = "",
+    val startHour: Int = 23,
+    val startMinute: Int = 50,
+    val wakeHour: Int = 7,
+    val wakeMinute: Int = 14,
+    val selectedPickerTarget: SleepTimeTarget? = null,
     val selectedQuality: SleepQuality? = null,
     val note: String = "",
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )
+
+enum class SleepTimeTarget {
+    START,
+    WAKE
+}
 
 @Immutable
 data class SleepHistoryItemUi(

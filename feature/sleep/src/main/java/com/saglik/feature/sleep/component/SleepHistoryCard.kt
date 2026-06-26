@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.ui.component.GlassHealthCard
@@ -76,11 +77,15 @@ private fun SleepHistoryRow(
                 text = item.dateText,
                 style = MaterialTheme.typography.bodyLarge,
                 color = HealthColors.Ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = item.timeRangeText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = HealthColors.SecondaryText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
         Column(
@@ -92,12 +97,16 @@ private fun SleepHistoryRow(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = HealthColors.Ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             if (item.qualityText != null) {
                 Text(
                     text = item.qualityText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = HealthColors.SleepPurple,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
