@@ -11,6 +11,7 @@ import com.saglik.core.common.time.SleepTimeTextFormatter
 import com.saglik.domain.sleep.SleepDetail
 import com.saglik.domain.usecase.AddSleepEntryUseCase
 import com.saglik.domain.usecase.ObserveSleepDetailUseCase
+import com.saglik.domain.usecase.ResolveSleepTimeRangeUseCase
 import com.saglik.domain.usecase.SleepInput
 import com.saglik.domain.usecase.ValidateSleepInputUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +39,7 @@ class SleepDetailViewModel @Inject constructor(
     private val observeSleepDetailUseCase: ObserveSleepDetailUseCase,
     private val validateSleepInputUseCase: ValidateSleepInputUseCase,
     private val addSleepEntryUseCase: AddSleepEntryUseCase,
+    private val resolveSleepTimeRangeUseCase: ResolveSleepTimeRangeUseCase,
 ) : ViewModel() {
     private val selectedPeriod = MutableStateFlow(PeriodType.WEEKLY)
     private val formState = MutableStateFlow(initialAddSleepState())
@@ -136,11 +138,12 @@ class SleepDetailViewModel @Inject constructor(
         )
 
     private fun AddSleepUiState.toSleepInput(): SleepInput {
-        val startTime = LocalTime.of(startHour, startMinute)
-        val endTime = LocalTime.of(wakeHour, wakeMinute)
-        
-        val endInstant = endTime.resolveEndInstant()
-        val startInstant = startTime.resolveStartInstant(endTime)
+        val (startInstant, endInstant) = resolveSleepTimeRangeUseCase.invoke(
+            startHour = startHour,
+            startMinute = startMinute,
+            wakeHour = wakeHour,
+            wakeMinute = wakeMinute
+        )
 
         return SleepInput(
             startTime = startInstant,
@@ -148,31 +151,6 @@ class SleepDetailViewModel @Inject constructor(
             quality = selectedQuality,
             note = note,
         )
-    }
-
-    private fun LocalTime.resolveEndInstant(): Instant {
-        val now = ZonedDateTime.now(zone)
-        val endDate = if (this.isAfter(now.toLocalTime())) {
-            now.toLocalDate().minusDays(1)
-        } else {
-            now.toLocalDate()
-        }
-        return ZonedDateTime.of(endDate, this, zone).toKotlinInstant()
-    }
-
-    private fun LocalTime.resolveStartInstant(endTime: LocalTime): Instant {
-        val now = ZonedDateTime.now(zone)
-        val endDate = if (endTime.isAfter(now.toLocalTime())) {
-            now.toLocalDate().minusDays(1)
-        } else {
-            now.toLocalDate()
-        }
-        val startDate = if (this.isAfter(endTime)) {
-            endDate.minusDays(1)
-        } else {
-            endDate
-        }
-        return ZonedDateTime.of(startDate, this, zone).toKotlinInstant()
     }
 
     private fun SleepEntry.toHistoryItem(): SleepHistoryItemUi {

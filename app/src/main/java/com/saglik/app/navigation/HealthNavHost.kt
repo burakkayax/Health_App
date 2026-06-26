@@ -40,14 +40,7 @@ fun HealthNavHost(
     modifier: Modifier = Modifier,
     startDestination: String = SplashRoute.route,
 ) {
-    val bottomItems = remember {
-        listOf(
-            HealthBottomNavItem(SummaryRoute.route, "Summary", Icons.Rounded.Favorite),
-            HealthBottomNavItem(HealthTabRoutes.trends, "Trends", Icons.Rounded.AutoGraph),
-            HealthBottomNavItem(HealthTabRoutes.insights, "Insights", Icons.Rounded.Lightbulb),
-            HealthBottomNavItem(HealthTabRoutes.search, "Search", Icons.Rounded.Search),
-        )
-    }
+    val bottomItems = remember { HealthRoutes.topLevelDestinations }
 
     NavHost(
         navController = navController,
@@ -88,7 +81,7 @@ fun HealthNavHost(
 
             MainChromeRoute(
                 title = "Summary",
-                selectedRoute = SummaryRoute.route,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(SummaryRoute.route),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
@@ -121,7 +114,7 @@ fun HealthNavHost(
 
             MainChromeRoute(
                 title = "Weight",
-                selectedRoute = SummaryRoute.route,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(WeightRoute.route),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
@@ -141,7 +134,7 @@ fun HealthNavHost(
 
             MainChromeRoute(
                 title = "Sleep",
-                selectedRoute = SummaryRoute.route,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(SleepRoute.route),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
@@ -158,7 +151,7 @@ fun HealthNavHost(
         composable(HealthTabRoutes.trends) {
             MainChromeRoute(
                 title = "Trends",
-                selectedRoute = HealthTabRoutes.trends,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(HealthTabRoutes.trends),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
@@ -173,7 +166,7 @@ fun HealthNavHost(
         composable(HealthTabRoutes.insights) {
             MainChromeRoute(
                 title = "Insights",
-                selectedRoute = HealthTabRoutes.insights,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(HealthTabRoutes.insights),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
@@ -188,7 +181,7 @@ fun HealthNavHost(
         composable(HealthTabRoutes.search) {
             MainChromeRoute(
                 title = "Search",
-                selectedRoute = HealthTabRoutes.search,
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(HealthTabRoutes.search),
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
