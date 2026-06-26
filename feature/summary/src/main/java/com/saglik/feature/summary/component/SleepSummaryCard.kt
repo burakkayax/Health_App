@@ -24,28 +24,17 @@ fun SleepSummaryCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    GlassHealthCard(modifier = modifier, onClick = onClick) {
-        HealthCardHeader(
-            title = "Sleep",
-            trailingText = if (summary.hasData) "Today" else "Add data",
-            accentColor = HealthColors.SleepPurple,
-            icon = Icons.Rounded.NightsStay,
-        )
-        Row(
-            modifier = Modifier.padding(top = 22.dp),
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                SummaryValueText(text = summary.duration)
-                SummarySecondaryText(
-                    text = summary.quality.orEmpty(),
-                    color = HealthColors.SleepPurple,
-                )
-            }
+    com.saglik.core.ui.component.card.HealthSummaryMetricCard(
+        title = "Sleep",
+        icon = Icons.Rounded.NightsStay,
+        accentColor = HealthColors.SleepPurple,
+        mainValue = summary.duration,
+        secondaryText = summary.quality.orEmpty(),
+        trailingText = if (summary.hasData) "Today" else "Add data",
+        modifier = modifier,
+        isEmpty = !summary.hasData,
+        onClick = onClick,
+        contentSlot = {
             if (summary.weeklyHours.any { it > 0f }) {
                 MiniBarChart(
                     values = summary.weeklyHours,
@@ -56,5 +45,5 @@ fun SleepSummaryCard(
                 )
             }
         }
-    }
+    )
 }

@@ -24,28 +24,17 @@ fun WeightSummaryCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    GlassHealthCard(modifier = modifier, onClick = onClick) {
-        HealthCardHeader(
-            title = "Weight",
-            trailingText = "Today",
-            accentColor = HealthColors.WeightBlue,
-            icon = Icons.Rounded.AutoGraph,
-        )
-        Row(
-            modifier = Modifier.padding(top = 22.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                SummaryValueText(text = summary.value)
-                SummarySecondaryText(
-                    text = summary.delta,
-                    color = HealthColors.WeightBlue,
-                )
-            }
+    com.saglik.core.ui.component.card.HealthSummaryMetricCard(
+        title = "Weight",
+        icon = Icons.Rounded.AutoGraph,
+        accentColor = HealthColors.WeightBlue,
+        mainValue = summary.value,
+        secondaryText = summary.delta,
+        trailingText = "Today",
+        modifier = modifier,
+        isEmpty = summary.trend.isEmpty(),
+        onClick = onClick,
+        contentSlot = {
             MiniLineChart(
                 values = summary.trend,
                 color = HealthColors.WeightBlue,
@@ -54,5 +43,5 @@ fun WeightSummaryCard(
                     .height(58.dp),
             )
         }
-    }
+    )
 }

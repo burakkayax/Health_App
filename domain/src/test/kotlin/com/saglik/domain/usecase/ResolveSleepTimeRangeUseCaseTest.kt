@@ -14,8 +14,7 @@ class ResolveSleepTimeRangeUseCaseTest {
     private val fixedNow = ZonedDateTime.of(2024, 1, 2, 12, 0, 0, 0, fixedZone)
 
     private val useCase = ResolveSleepTimeRangeUseCase(
-        nowProvider = { fixedNow },
-        zoneProvider = { fixedZone }
+        nowProvider = { fixedNow }
     )
 
     @Test

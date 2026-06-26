@@ -16,4 +16,10 @@ object HealthShapeTokens {
     val card = RoundedCornerShape(32.dp)
     val bottomBar = RoundedCornerShape(38.dp)
     val pill = RoundedCornerShape(999.dp)
+    
+    // New design tokens
+    val cardRadius = 32.dp
+    val sheetRadius = 32.dp
+    val buttonRadius = 999.dp
+    val inputRadius = 24.dp
 }

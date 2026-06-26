@@ -26,19 +26,14 @@ fun SleepHistoryCard(
     history: List<SleepHistoryItemUi>,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        HealthCardHeader(
-            title = "History",
-            accentColor = HealthColors.Ink,
-            icon = Icons.Rounded.History,
-            showChevron = false,
-        )
+    com.saglik.core.ui.component.card.HealthHistoryCard(
+        title = "History",
+        modifier = modifier
+    ) {
         if (history.isEmpty()) {
-            Text(
-                text = "Your saved sleep entries will appear here.",
-                modifier = Modifier.padding(top = 18.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.SecondaryText,
+            com.saglik.core.ui.component.state.HealthEmptyState(
+                message = "Your saved sleep entries will appear here.",
+                modifier = Modifier.padding(top = 18.dp)
             )
         } else {
             Column(

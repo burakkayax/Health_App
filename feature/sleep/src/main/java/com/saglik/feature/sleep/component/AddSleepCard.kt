@@ -50,15 +50,11 @@ fun AddSleepCard(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        HealthCardHeader(
-            title = "Add Sleep",
-            accentColor = HealthColors.SleepPurple,
-            icon = Icons.Rounded.Add,
-            showChevron = false,
-        )
+    com.saglik.core.ui.component.card.HealthAddEntryCard(
+        title = "Add Sleep",
+        modifier = modifier
+    ) {
         Column(
-            modifier = Modifier.padding(top = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SleepTimeInput(
@@ -85,14 +81,12 @@ fun AddSleepCard(
             )
         }
         if (state.errorMessage != null) {
-            Text(
-                text = state.errorMessage,
-                modifier = Modifier.padding(top = 14.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.ActivityOrange,
+            com.saglik.core.ui.component.form.HealthValidationMessage(
+                message = state.errorMessage,
+                modifier = Modifier.padding(top = 14.dp)
             )
         }
-        HealthPrimaryPillButton(
+        com.saglik.core.ui.component.form.HealthPrimaryButton(
             text = if (state.isSaving) "Saving" else "Add Sleep",
             onClick = onSaveClick,
             enabled = !state.isSaving,

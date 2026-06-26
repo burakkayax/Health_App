@@ -1,5 +1,7 @@
 package com.saglik.core.ui.component
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoGraph
@@ -78,6 +80,52 @@ fun WeightChartPreview() {
             MiniLineChart(
                 values = listOf(70f, 69f, 68f, 68.4f),
                 color = HealthColors.WeightBlue
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Health Empty State")
+@Composable
+fun HealthEmptyStatePreview() {
+    HealthTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            com.saglik.core.ui.component.state.HealthEmptyState(
+                message = "No data available."
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Health Loading State")
+@Composable
+fun HealthLoadingStatePreview() {
+    HealthTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            com.saglik.core.ui.component.state.HealthLoadingState()
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Health Summary Metric Card")
+@Composable
+fun HealthSummaryMetricCardPreview() {
+    HealthTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            com.saglik.core.ui.component.card.HealthSummaryMetricCard(
+                title = "Weight",
+                icon = Icons.Rounded.AutoGraph,
+                accentColor = HealthColors.WeightBlue,
+                mainValue = "72.4 kg",
+                secondaryText = "-0.2 kg",
+                trailingText = "Today",
+                contentSlot = {
+                    com.saglik.core.ui.component.chart.HealthMiniLineChart(
+                        dataPoints = listOf(70f, 69f, 68f, 68.4f),
+                        lineColor = HealthColors.WeightBlue,
+                        modifier = Modifier.padding(top = 16.dp).fillMaxWidth().height(58.dp)
+                    )
+                }
             )
         }
     }

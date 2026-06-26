@@ -33,8 +33,10 @@ object HealthRoutes {
 
     fun selectedBottomRouteFor(route: String?): String {
         return when (route) {
-            WeightRoute.route, SleepRoute.route -> SummaryRoute.route
-            else -> route ?: SummaryRoute.route
+            HealthTabRoutes.trends -> HealthTabRoutes.trends
+            HealthTabRoutes.insights -> HealthTabRoutes.insights
+            HealthTabRoutes.search -> HealthTabRoutes.search
+            else -> SummaryRoute.route
         }
     }
 }

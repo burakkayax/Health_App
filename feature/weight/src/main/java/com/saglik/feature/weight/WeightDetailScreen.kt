@@ -70,55 +70,40 @@ private fun WeightTrendHeroCard(
     state: WeightDetailUiState,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        HealthCardHeader(
-            title = "Weight Trend",
-            trailingText = "All Time",
-            accentColor = HealthColors.WeightBlue,
-            icon = Icons.Rounded.AutoGraph,
-            showChevron = false,
-        )
-        Text(
-            text = state.latestWeightText,
-            modifier = Modifier.padding(top = 22.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = HealthColors.Ink,
-        )
-        Text(
-            text = state.latestEntryText,
-            modifier = Modifier.padding(top = 4.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = HealthColors.SecondaryText,
-        )
-        TrendStatRow(
-            label = "Highest",
-            value = state.highestWeightText,
-            modifier = Modifier.padding(top = 18.dp),
-        )
-        if (state.trend.isEmpty()) {
-            Text(
-                text = "Add weight entries to see your all-time trend.",
+    com.saglik.core.ui.component.card.HealthDetailHeroCard(
+        title = "Weight Trend (All Time)",
+        mainValue = state.latestWeightText,
+        secondaryText = state.latestEntryText,
+        modifier = modifier,
+        contentSlot = {
+            TrendStatRow(
+                label = "Highest",
+                value = state.highestWeightText,
                 modifier = Modifier.padding(top = 18.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.SecondaryText,
             )
-        } else {
-            MiniLineChart(
-                values = state.trend,
-                color = HealthColors.WeightBlue,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(118.dp)
-                    .padding(top = 18.dp),
+            if (state.trend.isEmpty()) {
+                com.saglik.core.ui.component.state.HealthEmptyState(
+                    message = "Add weight entries to see your all-time trend.",
+                    modifier = Modifier.padding(top = 18.dp)
+                )
+            } else {
+                com.saglik.core.ui.component.chart.HealthChartContainer(
+                    modifier = Modifier.padding(top = 18.dp)
+                ) {
+                    com.saglik.core.ui.component.chart.HealthMiniLineChart(
+                        dataPoints = state.trend,
+                        lineColor = HealthColors.WeightBlue,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            TrendStatRow(
+                label = "Lowest",
+                value = state.lowestWeightText,
+                modifier = Modifier.padding(top = 14.dp),
             )
         }
-        TrendStatRow(
-            label = "Lowest",
-            value = state.lowestWeightText,
-            modifier = Modifier.padding(top = 14.dp),
-        )
-    }
+    )
 }
 
 @Composable
@@ -160,32 +145,25 @@ private fun AddWeightCard(
     onAddWeightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        HealthCardHeader(
-            title = "Add Weight",
-            accentColor = HealthColors.SystemBlue,
-            icon = Icons.Rounded.Add,
-            showChevron = false,
-        )
-        HealthNumberInput(
+    com.saglik.core.ui.component.card.HealthAddEntryCard(
+        title = "Add Weight",
+        modifier = modifier
+    ) {
+        com.saglik.core.ui.component.form.HealthNumberInput(
             value = state.addWeightValue,
             onValueChange = onWeightInputChanged,
             label = "Weight",
             suffix = "kg",
             isError = state.errorMessage != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
         )
         if (state.errorMessage != null) {
-            Text(
-                text = state.errorMessage,
-                modifier = Modifier.padding(top = 10.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.ActivityOrange,
+            com.saglik.core.ui.component.form.HealthValidationMessage(
+                message = state.errorMessage,
+                modifier = Modifier.padding(top = 10.dp)
             )
         }
-        HealthPrimaryPillButton(
+        com.saglik.core.ui.component.form.HealthPrimaryButton(
             text = if (state.isSaving) "Saving" else "Add Weight",
             onClick = onAddWeightClick,
             enabled = state.canSave,
@@ -199,19 +177,14 @@ private fun WeightHistoryCard(
     history: List<WeightHistoryUiState>,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        HealthCardHeader(
-            title = "History",
-            accentColor = HealthColors.Ink,
-            icon = Icons.Rounded.History,
-            showChevron = false,
-        )
+    com.saglik.core.ui.component.card.HealthHistoryCard(
+        title = "History",
+        modifier = modifier
+    ) {
         if (history.isEmpty()) {
-            Text(
-                text = "Your saved weights will appear here.",
-                modifier = Modifier.padding(top = 18.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.SecondaryText,
+            com.saglik.core.ui.component.state.HealthEmptyState(
+                message = "Your saved weights will appear here.",
+                modifier = Modifier.padding(top = 18.dp)
             )
         } else {
             Column(

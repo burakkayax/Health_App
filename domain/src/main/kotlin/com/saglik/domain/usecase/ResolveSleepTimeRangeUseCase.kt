@@ -8,8 +8,7 @@ import java.time.ZonedDateTime
 import kotlinx.datetime.Instant
 
 class ResolveSleepTimeRangeUseCase(
-    private val nowProvider: () -> ZonedDateTime = { ZonedDateTime.now(ZoneId.systemDefault()) },
-    private val zoneProvider: () -> ZoneId = { ZoneId.systemDefault() }
+    private val nowProvider: () -> ZonedDateTime = { ZonedDateTime.now(ZoneId.systemDefault()) }
 ) {
     fun invoke(
         startHour: Int,
@@ -20,7 +19,7 @@ class ResolveSleepTimeRangeUseCase(
         val startTime = LocalTime.of(startHour, startMinute)
         val endTime = LocalTime.of(wakeHour, wakeMinute)
         
-        val zone = zoneProvider()
+        val zone = nowProvider().zone
         val endInstant = endTime.resolveEndInstant(zone)
         val startInstant = startTime.resolveStartInstant(endTime, zone)
         

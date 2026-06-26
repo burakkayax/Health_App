@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,65 +37,49 @@ fun SleepTrendCard(
     onPeriodSelected: (PeriodType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    GlassHealthCard(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            HealthCardHeader(
-                title = "Sleep Trend",
-                accentColor = HealthColors.SleepPurple,
-                icon = Icons.Rounded.NightsStay,
-                showChevron = false,
-                modifier = Modifier.weight(1f),
+    com.saglik.core.ui.component.card.HealthDetailHeroCard(
+        title = "Sleep Trend",
+        mainValue = state.latestDurationText,
+        secondaryText = "Latest sleep",
+        modifier = modifier,
+        contentSlot = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                SleepPeriodSelector(
+                    selectedPeriod = state.selectedPeriod,
+                    onPeriodSelected = onPeriodSelected,
+                )
+            }
+            SleepStatRow(
+                label = "Longest",
+                value = state.longestText ?: "Not available",
+                modifier = Modifier.padding(top = 8.dp),
             )
-            SleepPeriodSelector(
-                selectedPeriod = state.selectedPeriod,
-                onPeriodSelected = onPeriodSelected,
-            )
-        }
-        Text(
-            text = state.latestDurationText,
-            modifier = Modifier.padding(top = 22.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = HealthColors.Ink,
-        )
-        Text(
-            text = "Latest sleep",
-            modifier = Modifier.padding(top = 4.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = HealthColors.SecondaryText,
-        )
-        SleepStatRow(
-            label = "Longest",
-            value = state.longestText ?: "Not available",
-            modifier = Modifier.padding(top = 18.dp),
-        )
-        if (state.chartPoints.none { it.value > 0f }) {
-            Text(
-                text = "Your sleep trend will appear here.",
-                modifier = Modifier.padding(top = 18.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = HealthColors.SecondaryText,
-            )
-        } else {
-            SleepBarChart(
-                points = state.chartPoints,
-                color = HealthColors.SleepPurple,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(132.dp)
-                    .padding(top = 18.dp),
+            if (state.chartPoints.none { it.value > 0f }) {
+                com.saglik.core.ui.component.state.HealthEmptyState(
+                    message = "Your sleep trend will appear here.",
+                    modifier = Modifier.padding(top = 18.dp)
+                )
+            } else {
+                com.saglik.core.ui.component.chart.HealthChartContainer(
+                    modifier = Modifier.padding(top = 18.dp)
+                ) {
+                    SleepBarChart(
+                        points = state.chartPoints,
+                        color = HealthColors.SleepPurple,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            SleepStatRow(
+                label = "Shortest",
+                value = state.shortestText ?: "Not available",
+                modifier = Modifier.padding(top = 14.dp),
             )
         }
-        SleepStatRow(
-            label = "Shortest",
-            value = state.shortestText ?: "Not available",
-            modifier = Modifier.padding(top = 14.dp),
-        )
-    }
+    )
 }
 
 @Composable
