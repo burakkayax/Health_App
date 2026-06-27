@@ -6,16 +6,19 @@ data class SettingsUiState(
     val personalHealthContext: PersonalHealthContextUiState = PersonalHealthContextUiState.empty(),
     val dataPrivacyItems: List<SettingsItemUiState> = SettingsDefaults.dataPrivacyItems,
     val dataSourceItems: List<SettingsItemUiState> = SettingsDefaults.dataSourceItems,
-    val healthConnectItems: List<SettingsItemUiState> = SettingsDefaults.healthConnectItems,
+    val healthConnect: HealthConnectSettingsUiState = HealthConnectSettingsUiMapper.checking(),
     val insightsAiItems: List<SettingsItemUiState> = SettingsDefaults.insightsAiItems,
     val safetyItems: List<String> = SettingsDefaults.safetyItems,
     val preferenceItems: List<SettingsItemUiState> = SettingsDefaults.preferenceItems,
     val appInfoItems: List<SettingsItemUiState> = SettingsDefaults.appInfoItems,
 ) {
     companion object {
-        fun loading(): SettingsUiState =
+        fun loading(
+            healthConnect: HealthConnectSettingsUiState = HealthConnectSettingsUiMapper.checking(),
+        ): SettingsUiState =
             SettingsUiState(
                 isLoading = true,
+                healthConnect = healthConnect,
                 profileSummary = ProfileSummaryUiState(
                     displayName = "Loading profile",
                     supportingText = "Reading your local profile details.",
@@ -95,6 +98,29 @@ data class SettingsItemUiState(
     val enabled: Boolean = true,
 )
 
+enum class HealthConnectAction {
+    GrantPermissions,
+    OpenSettings,
+    InstallOrUpdate,
+    Refresh,
+}
+
+data class HealthConnectActionUiState(
+    val action: HealthConnectAction,
+    val text: String,
+)
+
+data class HealthConnectSettingsUiState(
+    val description: String,
+    val statusMessage: String,
+    val items: List<SettingsItemUiState>,
+    val requiredPermissions: Set<String> = emptySet(),
+    val primaryAction: HealthConnectActionUiState? = null,
+    val secondaryAction: HealthConnectActionUiState? = null,
+    val tertiaryAction: HealthConnectActionUiState? = null,
+    val isChecking: Boolean = false,
+)
+
 object SettingsDefaults {
     val dataPrivacyItems = listOf(
         SettingsItemUiState(
@@ -132,7 +158,7 @@ object SettingsDefaults {
         ),
         SettingsItemUiState(
             title = "Health Connect",
-            description = "Data from Health Connect after you grant permission.",
+            description = "Weight and sleep data from Health Connect after you grant permission.",
             status = "Future",
             enabled = false,
         ),
@@ -145,27 +171,6 @@ object SettingsDefaults {
         SettingsItemUiState(
             title = "Estimated",
             description = "Values calculated or estimated by the app.",
-        ),
-    )
-
-    val healthConnectItems = listOf(
-        SettingsItemUiState(
-            title = "Status",
-            description = "No Health Connect data is being read yet.",
-            status = "Not active",
-            enabled = false,
-        ),
-        SettingsItemUiState(
-            title = "Permissions",
-            description = "You will choose which permissions to grant.",
-            status = "Later",
-            enabled = false,
-        ),
-        SettingsItemUiState(
-            title = "Supported data later",
-            description = "Weight, sleep, steps, and exercise may be connected in future updates.",
-            status = "Planned",
-            enabled = false,
         ),
     )
 

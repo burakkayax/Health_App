@@ -23,6 +23,7 @@ android {
 
 dependencies {
     implementation(project(":core:database"))
+    implementation(project(":core:healthconnect"))
     implementation(project(":core:model"))
     implementation(project(":data:local"))
     implementation(project(":domain"))

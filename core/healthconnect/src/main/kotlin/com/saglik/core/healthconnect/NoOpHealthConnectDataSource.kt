@@ -1,14 +1,21 @@
 package com.saglik.core.healthconnect
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.saglik.core.model.HealthConnectAvailability
+import com.saglik.core.model.HealthConnectPermissionStatus
 
-class NoOpHealthConnectDataSource : HealthConnectDataSource {
-    private val availabilityState = MutableStateFlow(HealthConnectAvailability.UNKNOWN)
+class NoOpHealthConnectDataSource(
+    private val availability: HealthConnectAvailability = HealthConnectAvailability.Unsupported,
+    private val grantedPermissions: Set<String> = emptySet(),
+    private val requiredPermissions: Set<String> = HealthConnectPermissions.requiredPermissions,
+) : HealthConnectDataSource {
 
-    override val availability: StateFlow<HealthConnectAvailability> =
-        availabilityState.asStateFlow()
+    override fun getRequiredPermissions(): Set<String> = requiredPermissions
 
-    override suspend fun hasPermissions(permissionTypes: Set<HealthPermissionType>): Boolean = false
+    override suspend fun getAvailability(): HealthConnectAvailability = availability
+
+    override suspend fun getPermissionStatus(): HealthConnectPermissionStatus =
+        HealthConnectPermissionStatus.from(
+            requiredPermissions = getRequiredPermissions(),
+            grantedPermissions = grantedPermissions,
+        )
 }

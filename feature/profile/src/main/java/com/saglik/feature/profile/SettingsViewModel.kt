@@ -2,35 +2,103 @@ package com.saglik.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.saglik.core.model.HealthConnectAvailability
 import com.saglik.core.model.HealthGoal
 import com.saglik.core.model.Sex
 import com.saglik.core.model.UserProfile
+import com.saglik.domain.usecase.CheckHealthConnectAvailabilityUseCase
+import com.saglik.domain.usecase.GetHealthConnectPermissionStatusUseCase
+import com.saglik.domain.usecase.GetHealthConnectRequiredPermissionsUseCase
 import com.saglik.domain.usecase.ObserveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     observeUserProfileUseCase: ObserveUserProfileUseCase,
+    private val checkHealthConnectAvailabilityUseCase: CheckHealthConnectAvailabilityUseCase,
+    private val getHealthConnectPermissionStatusUseCase: GetHealthConnectPermissionStatusUseCase,
+    getHealthConnectRequiredPermissionsUseCase: GetHealthConnectRequiredPermissionsUseCase,
 ) : ViewModel() {
+    private val requiredHealthConnectPermissions = getHealthConnectRequiredPermissionsUseCase()
+    private val healthConnectState = MutableStateFlow(
+        HealthConnectSettingsUiMapper.checking(requiredHealthConnectPermissions),
+    )
+
     val uiState: StateFlow<SettingsUiState> =
-        observeUserProfileUseCase()
-            .map { profile ->
+        combine(
+            observeUserProfileUseCase(),
+            healthConnectState,
+        ) { profile, healthConnect ->
                 SettingsUiState(
                     profileSummary = profile.toProfileSummary(),
                     personalHealthContext = profile.toPersonalHealthContext(),
+                    healthConnect = healthConnect,
                 )
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = SettingsUiState.loading(),
+                initialValue = SettingsUiState.loading(
+                    healthConnect = HealthConnectSettingsUiMapper.checking(
+                        requiredHealthConnectPermissions,
+                    ),
+                ),
             )
+
+    init {
+        refreshHealthConnectStatus()
+    }
+
+    fun refreshHealthConnectStatus() {
+        viewModelScope.launch {
+            healthConnectState.value = HealthConnectSettingsUiMapper.checking(
+                requiredHealthConnectPermissions,
+            )
+
+            runCatching {
+                val availability = checkHealthConnectAvailabilityUseCase()
+                val permissionStatus = if (availability == HealthConnectAvailability.Available) {
+                    getHealthConnectPermissionStatusUseCase()
+                } else {
+                    null
+                }
+
+                HealthConnectSettingsUiMapper.from(
+                    availability = availability,
+                    permissionStatus = permissionStatus,
+                    requiredPermissions = requiredHealthConnectPermissions,
+                )
+            }.onSuccess { healthConnect ->
+                healthConnectState.value = healthConnect
+            }.onFailure {
+                healthConnectState.value = HealthConnectSettingsUiMapper.error(
+                    requiredHealthConnectPermissions,
+                )
+            }
+        }
+    }
+
+    fun onGrantHealthConnectPermissionsClick() = Unit
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onHealthConnectPermissionResult(grantedPermissions: Set<String>) {
+        refreshHealthConnectStatus()
+    }
+
+    fun onHealthConnectExternalActionError() {
+        healthConnectState.update { current ->
+            HealthConnectSettingsUiMapper.withExternalActionError(current)
+        }
+    }
 
     private fun UserProfile?.toProfileSummary(): ProfileSummaryUiState {
         if (this == null) {

@@ -15,6 +15,10 @@ fun SettingsProfilePreview_WithData() {
             SettingsScreen(
                 state = settingsPreviewStateWithData(),
                 onBackClick = {},
+                onGrantHealthConnectPermissionsClick = {},
+                onOpenHealthConnectSettingsClick = {},
+                onInstallOrUpdateHealthConnectClick = {},
+                onRefreshHealthConnectStatusClick = {},
                 listState = rememberLazyListState(),
             )
         }
@@ -32,6 +36,10 @@ fun SettingsProfilePreview_MissingData() {
                     personalHealthContext = PersonalHealthContextUiState.empty(),
                 ),
                 onBackClick = {},
+                onGrantHealthConnectPermissionsClick = {},
+                onOpenHealthConnectSettingsClick = {},
+                onInstallOrUpdateHealthConnectClick = {},
+                onRefreshHealthConnectStatusClick = {},
                 listState = rememberLazyListState(),
             )
         }

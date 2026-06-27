@@ -57,6 +57,10 @@ import com.saglik.core.ui.screen.HealthGradientBackground
 fun SettingsScreen(
     state: SettingsUiState,
     onBackClick: () -> Unit,
+    onGrantHealthConnectPermissionsClick: (Set<String>) -> Unit,
+    onOpenHealthConnectSettingsClick: () -> Unit,
+    onInstallOrUpdateHealthConnectClick: () -> Unit,
+    onRefreshHealthConnectStatusClick: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
@@ -95,7 +99,13 @@ fun SettingsScreen(
                 )
             }
             item {
-                HealthConnectSection(items = state.healthConnectItems)
+                HealthConnectSection(
+                    state = state.healthConnect,
+                    onGrantPermissionsClick = onGrantHealthConnectPermissionsClick,
+                    onOpenSettingsClick = onOpenHealthConnectSettingsClick,
+                    onInstallOrUpdateClick = onInstallOrUpdateHealthConnectClick,
+                    onRefreshClick = onRefreshHealthConnectStatusClick,
+                )
             }
             item {
                 InsightsAiSection(
@@ -282,7 +292,11 @@ private fun SettingsListSectionCard(
 
 @Composable
 private fun HealthConnectSection(
-    items: List<SettingsItemUiState>,
+    state: HealthConnectSettingsUiState,
+    onGrantPermissionsClick: (Set<String>) -> Unit,
+    onOpenSettingsClick: () -> Unit,
+    onInstallOrUpdateClick: () -> Unit,
+    onRefreshClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SettingsSectionCard(
@@ -292,21 +306,84 @@ private fun HealthConnectSection(
         modifier = modifier,
     ) {
         Text(
-            text = "Connect Health Connect to import supported health data in a future update.",
+            text = state.description,
             style = HealthTypography.bodyMedium,
             color = HealthColors.SecondaryText,
         )
         HealthInlineStatusMessage(
-            message = "No Health Connect data is being read yet.",
+            message = state.statusMessage,
             modifier = Modifier.padding(top = 16.dp),
         )
         Spacer(modifier = Modifier.height(16.dp))
-        SettingsItemList(items = items)
-        HealthPrimaryButton(
-            text = "Setup coming soon",
-            onClick = {},
-            enabled = false,
+        SettingsItemList(items = state.items)
+        HealthConnectActionButton(
+            action = state.primaryAction,
+            requiredPermissions = state.requiredPermissions,
+            onGrantPermissionsClick = onGrantPermissionsClick,
+            onOpenSettingsClick = onOpenSettingsClick,
+            onInstallOrUpdateClick = onInstallOrUpdateClick,
+            onRefreshClick = onRefreshClick,
+            primary = true,
             modifier = Modifier.padding(top = 18.dp),
+        )
+        HealthConnectActionButton(
+            action = state.secondaryAction,
+            requiredPermissions = state.requiredPermissions,
+            onGrantPermissionsClick = onGrantPermissionsClick,
+            onOpenSettingsClick = onOpenSettingsClick,
+            onInstallOrUpdateClick = onInstallOrUpdateClick,
+            onRefreshClick = onRefreshClick,
+            primary = false,
+            modifier = Modifier.padding(top = 10.dp),
+        )
+        HealthConnectActionButton(
+            action = state.tertiaryAction,
+            requiredPermissions = state.requiredPermissions,
+            onGrantPermissionsClick = onGrantPermissionsClick,
+            onOpenSettingsClick = onOpenSettingsClick,
+            onInstallOrUpdateClick = onInstallOrUpdateClick,
+            onRefreshClick = onRefreshClick,
+            primary = false,
+            modifier = Modifier.padding(top = 10.dp),
+        )
+    }
+}
+
+@Composable
+private fun HealthConnectActionButton(
+    action: HealthConnectActionUiState?,
+    requiredPermissions: Set<String>,
+    onGrantPermissionsClick: (Set<String>) -> Unit,
+    onOpenSettingsClick: () -> Unit,
+    onInstallOrUpdateClick: () -> Unit,
+    onRefreshClick: () -> Unit,
+    primary: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    if (action == null) {
+        return
+    }
+
+    val onClick = {
+        when (action.action) {
+            HealthConnectAction.GrantPermissions -> onGrantPermissionsClick(requiredPermissions)
+            HealthConnectAction.OpenSettings -> onOpenSettingsClick()
+            HealthConnectAction.InstallOrUpdate -> onInstallOrUpdateClick()
+            HealthConnectAction.Refresh -> onRefreshClick()
+        }
+    }
+
+    if (primary) {
+        HealthPrimaryButton(
+            text = action.text,
+            onClick = onClick,
+            modifier = modifier,
+        )
+    } else {
+        HealthSecondaryButton(
+            text = action.text,
+            onClick = onClick,
+            modifier = modifier,
         )
     }
 }

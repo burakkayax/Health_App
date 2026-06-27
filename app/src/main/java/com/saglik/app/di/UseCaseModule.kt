@@ -3,13 +3,17 @@
 package com.saglik.app.di
 
 import com.saglik.domain.repository.AppPreferencesRepository
+import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
 import com.saglik.domain.usecase.AddSleepEntryUseCase
 import com.saglik.domain.usecase.AddWeightEntryUseCase
+import com.saglik.domain.usecase.CheckHealthConnectAvailabilityUseCase
 import com.saglik.domain.usecase.CompleteOnboardingUseCase
 import com.saglik.domain.usecase.CreateInitialWeightEntryUseCase
+import com.saglik.domain.usecase.GetHealthConnectPermissionStatusUseCase
+import com.saglik.domain.usecase.GetHealthConnectRequiredPermissionsUseCase
 import com.saglik.domain.usecase.ObserveBmiSummaryUseCase
 import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveOnboardingCompletedUseCase
@@ -113,4 +117,22 @@ object UseCaseModule {
         weightRepository = weightRepository,
         appPreferencesRepository = appPreferencesRepository,
     )
+
+    @Provides
+    fun provideCheckHealthConnectAvailabilityUseCase(
+        repository: HealthConnectRepository,
+    ): CheckHealthConnectAvailabilityUseCase =
+        CheckHealthConnectAvailabilityUseCase(repository)
+
+    @Provides
+    fun provideGetHealthConnectPermissionStatusUseCase(
+        repository: HealthConnectRepository,
+    ): GetHealthConnectPermissionStatusUseCase =
+        GetHealthConnectPermissionStatusUseCase(repository)
+
+    @Provides
+    fun provideGetHealthConnectRequiredPermissionsUseCase(
+        repository: HealthConnectRepository,
+    ): GetHealthConnectRequiredPermissionsUseCase =
+        GetHealthConnectRequiredPermissionsUseCase(repository)
 }

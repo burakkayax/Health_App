@@ -3,12 +3,15 @@ package com.saglik.app.di
 import com.saglik.core.database.dao.SleepDao
 import com.saglik.core.database.dao.UserProfileDao
 import com.saglik.core.database.dao.WeightDao
+import com.saglik.core.healthconnect.HealthConnectDataSource
 import com.saglik.data.local.PreferencesLocalDataSource
 import com.saglik.data.repository.DefaultAppPreferencesRepository
+import com.saglik.data.repository.DefaultHealthConnectRepository
 import com.saglik.data.repository.DefaultSleepRepository
 import com.saglik.data.repository.DefaultUserProfileRepository
 import com.saglik.data.repository.DefaultWeightRepository
 import com.saglik.domain.repository.AppPreferencesRepository
+import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
@@ -45,4 +48,10 @@ object RepositoryModule {
     fun provideSleepRepository(
         sleepDao: SleepDao,
     ): SleepRepository = DefaultSleepRepository(sleepDao)
+
+    @Provides
+    @Singleton
+    fun provideHealthConnectRepository(
+        dataSource: HealthConnectDataSource,
+    ): HealthConnectRepository = DefaultHealthConnectRepository(dataSource)
 }

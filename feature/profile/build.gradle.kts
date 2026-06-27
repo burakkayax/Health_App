@@ -30,6 +30,7 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:healthconnect"))
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":domain"))
