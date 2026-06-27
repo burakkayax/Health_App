@@ -1,17 +1,21 @@
 package com.saglik.app.di
 
+import com.saglik.core.database.dao.ExerciseDao
 import com.saglik.core.database.dao.SleepDao
+import com.saglik.core.database.dao.StepsDao
 import com.saglik.core.database.dao.UserProfileDao
 import com.saglik.core.database.dao.WeightDao
 import com.saglik.core.healthconnect.HealthConnectDataSource
 import com.saglik.data.local.PreferencesLocalDataSource
 import com.saglik.data.repository.DefaultAppPreferencesRepository
+import com.saglik.data.repository.DefaultExerciseRepository
 import com.saglik.data.repository.DefaultHealthConnectRepository
 import com.saglik.data.repository.DefaultHealthConnectSyncRepository
 import com.saglik.data.repository.DefaultSleepRepository
 import com.saglik.data.repository.DefaultUserProfileRepository
 import com.saglik.data.repository.DefaultWeightRepository
 import com.saglik.domain.repository.AppPreferencesRepository
+import com.saglik.domain.repository.ExerciseRepository
 import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
@@ -53,6 +57,12 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideExerciseRepository(
+        exerciseDao: ExerciseDao,
+    ): ExerciseRepository = DefaultExerciseRepository(exerciseDao)
+
+    @Provides
+    @Singleton
     fun provideHealthConnectRepository(
         dataSource: HealthConnectDataSource,
     ): HealthConnectRepository = DefaultHealthConnectRepository(dataSource)
@@ -63,9 +73,13 @@ object RepositoryModule {
         dataSource: HealthConnectDataSource,
         weightDao: WeightDao,
         sleepDao: SleepDao,
+        stepsDao: StepsDao,
+        exerciseDao: ExerciseDao,
     ): HealthConnectSyncRepository = DefaultHealthConnectSyncRepository(
         dataSource = dataSource,
         weightDao = weightDao,
         sleepDao = sleepDao,
+        stepsDao = stepsDao,
+        exerciseDao = exerciseDao,
     )
 }

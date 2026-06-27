@@ -199,6 +199,175 @@ class AppDatabaseMigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate4To5_createsStepsTableAndRejectsDuplicateExternalIdentity() {
+        helper.createDatabase(STEPS_TEST_DB, 4).close()
+
+        val db = helper.runMigrationsAndValidate(
+            STEPS_TEST_DB,
+            5,
+            true,
+            AppDatabase.MIGRATION_4_5,
+        )
+
+        db.execSQL(
+            """
+            INSERT INTO steps_entries(
+                id,
+                startTime,
+                endTime,
+                count,
+                source,
+                note,
+                createdAt,
+                updatedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                "manual-steps-1",
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                1_200L,
+                "MANUAL",
+                null,
+                1L,
+                1L,
+            ),
+        )
+        db.execSQL(
+            """
+            INSERT INTO steps_entries(
+                id,
+                startTime,
+                endTime,
+                count,
+                source,
+                note,
+                createdAt,
+                updatedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                "manual-steps-2",
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                1_200L,
+                "MANUAL",
+                null,
+                1L,
+                1L,
+            ),
+        )
+
+        insertExternalSteps(db, "external-steps-1")
+        expectUniqueConstraintFailure {
+            insertExternalSteps(db, "external-steps-2")
+        }
+
+        db.query("SELECT * FROM steps_entries WHERE id = 'external-steps-1'").use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals("external-steps-1", cursor.string("id"))
+            assertEquals(1_720_036_000_000L, cursor.long("startTime"))
+            assertEquals(1_720_039_600_000L, cursor.long("endTime"))
+            assertEquals(1_200L, cursor.long("count"))
+            assertEquals("HEALTH_CONNECT", cursor.string("source"))
+            assertEquals("external-steps-record", cursor.string("sourceRecordId"))
+            assertEquals("com.example.health", cursor.string("sourcePackageName"))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate5To6_createsExerciseSessionsTableAndRejectsDuplicateExternalIdentity() {
+        helper.createDatabase(EXERCISE_TEST_DB, 5).close()
+
+        val db = helper.runMigrationsAndValidate(
+            EXERCISE_TEST_DB,
+            6,
+            true,
+            AppDatabase.MIGRATION_5_6,
+        )
+
+        db.execSQL(
+            """
+            INSERT INTO exercise_sessions(
+                id,
+                startTime,
+                endTime,
+                durationMinutes,
+                exerciseType,
+                title,
+                notes,
+                source,
+                createdAt,
+                updatedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                "manual-exercise-1",
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                60,
+                "WALKING",
+                "Walk",
+                null,
+                "MANUAL",
+                1L,
+                1L,
+            ),
+        )
+        db.execSQL(
+            """
+            INSERT INTO exercise_sessions(
+                id,
+                startTime,
+                endTime,
+                durationMinutes,
+                exerciseType,
+                title,
+                notes,
+                source,
+                createdAt,
+                updatedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                "manual-exercise-2",
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                60,
+                "WALKING",
+                "Walk",
+                null,
+                "MANUAL",
+                1L,
+                1L,
+            ),
+        )
+
+        insertExternalExercise(db, "external-exercise-1")
+        expectUniqueConstraintFailure {
+            insertExternalExercise(db, "external-exercise-2")
+        }
+
+        db.query("SELECT * FROM exercise_sessions WHERE id = 'external-exercise-1'").use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals("external-exercise-1", cursor.string("id"))
+            assertEquals(1_720_036_000_000L, cursor.long("startTime"))
+            assertEquals(1_720_039_600_000L, cursor.long("endTime"))
+            assertEquals(60, cursor.getInt(cursor.getColumnIndexOrThrow("durationMinutes")))
+            assertEquals("WALKING", cursor.string("exerciseType"))
+            assertEquals("HEALTH_CONNECT", cursor.string("source"))
+            assertEquals("external-exercise-record", cursor.string("sourceRecordId"))
+            assertEquals("com.example.health", cursor.string("sourcePackageName"))
+        }
+        db.close()
+    }
+
     private fun insertExternalWeight(
         db: androidx.sqlite.db.SupportSQLiteDatabase,
         id: String,
@@ -277,6 +446,88 @@ class AppDatabaseMigrationTest {
         )
     }
 
+    private fun insertExternalSteps(
+        db: androidx.sqlite.db.SupportSQLiteDatabase,
+        id: String,
+    ) {
+        db.execSQL(
+            """
+            INSERT INTO steps_entries(
+                id,
+                startTime,
+                endTime,
+                count,
+                source,
+                note,
+                sourceRecordId,
+                sourcePackageName,
+                sourceAppName,
+                createdAt,
+                updatedAt,
+                lastSyncedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                id,
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                1_200L,
+                "HEALTH_CONNECT",
+                null,
+                "external-steps-record",
+                "com.example.health",
+                "Example Health",
+                1L,
+                1L,
+                1L,
+            ),
+        )
+    }
+
+    private fun insertExternalExercise(
+        db: androidx.sqlite.db.SupportSQLiteDatabase,
+        id: String,
+    ) {
+        db.execSQL(
+            """
+            INSERT INTO exercise_sessions(
+                id,
+                startTime,
+                endTime,
+                durationMinutes,
+                exerciseType,
+                title,
+                notes,
+                source,
+                sourceRecordId,
+                sourcePackageName,
+                sourceAppName,
+                createdAt,
+                updatedAt,
+                lastSyncedAt
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            arrayOf<Any?>(
+                id,
+                1_720_036_000_000L,
+                1_720_039_600_000L,
+                60,
+                "WALKING",
+                "Walk",
+                null,
+                "HEALTH_CONNECT",
+                "external-exercise-record",
+                "com.example.health",
+                "Example Health",
+                1L,
+                1L,
+                1L,
+            ),
+        )
+    }
+
     private fun expectUniqueConstraintFailure(block: () -> Unit) {
         try {
             block()
@@ -300,5 +551,7 @@ class AppDatabaseMigrationTest {
         const val WEIGHT_TEST_DB = "weight-migration-test.db"
         const val SLEEP_TEST_DB = "sleep-migration-test.db"
         const val INDEX_TEST_DB = "index-migration-test.db"
+        const val STEPS_TEST_DB = "steps-migration-test.db"
+        const val EXERCISE_TEST_DB = "exercise-migration-test.db"
     }
 }

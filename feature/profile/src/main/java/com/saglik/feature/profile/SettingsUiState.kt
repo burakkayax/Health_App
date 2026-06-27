@@ -103,7 +103,7 @@ enum class HealthConnectAction {
     OpenSettings,
     InstallOrUpdate,
     Refresh,
-    SyncWeightAndSleep,
+    SyncHealthConnectData,
 }
 
 data class HealthConnectActionUiState(
@@ -161,7 +161,7 @@ object SettingsDefaults {
         ),
         SettingsItemUiState(
             title = "Health Connect",
-            description = "Weight and sleep data imported from Health Connect after you grant permission.",
+            description = "Weight, sleep, steps, and exercise sessions imported from Health Connect after you grant permission.",
             status = "Optional",
         ),
         SettingsItemUiState(

@@ -23,3 +23,26 @@ data class HealthConnectSleepSessionSnapshot(
     val durationMinutes: Int,
     val lastModifiedAtMillis: Long?,
 )
+
+data class HealthConnectStepsRecordSnapshot(
+    val healthConnectId: String,
+    val sourcePackageName: String?,
+    val sourceAppName: String?,
+    val startTimeMillis: Long,
+    val endTimeMillis: Long,
+    val count: Long,
+    val lastModifiedAtMillis: Long?,
+)
+
+data class HealthConnectExerciseSessionSnapshot(
+    val healthConnectId: String,
+    val sourcePackageName: String?,
+    val sourceAppName: String?,
+    val startTimeMillis: Long,
+    val endTimeMillis: Long,
+    val durationMinutes: Int,
+    val exerciseType: Int,
+    val title: String?,
+    val notes: String?,
+    val lastModifiedAtMillis: Long?,
+)

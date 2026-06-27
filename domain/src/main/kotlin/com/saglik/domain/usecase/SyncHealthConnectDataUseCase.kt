@@ -8,7 +8,7 @@ import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.HealthConnectSyncRepository
 import kotlin.time.Clock
 
-class SyncHealthConnectWeightAndSleepUseCase(
+class SyncHealthConnectDataUseCase(
     private val healthConnectRepository: HealthConnectRepository,
     private val syncRepository: HealthConnectSyncRepository,
     private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
@@ -41,6 +41,14 @@ class SyncHealthConnectWeightAndSleepUseCase(
                 startTimeMillis = syncWindow.startTimeMillis,
                 endTimeMillis = syncWindow.endTimeMillis,
             )
+            val stepsRecords = syncRepository.readStepsRecords(
+                startTimeMillis = syncWindow.startTimeMillis,
+                endTimeMillis = syncWindow.endTimeMillis,
+            )
+            val exerciseRecords = syncRepository.readExerciseSessionRecords(
+                startTimeMillis = syncWindow.startTimeMillis,
+                endTimeMillis = syncWindow.endTimeMillis,
+            )
 
             val weightCount = syncRepository.importWeightRecords(
                 records = weightRecords,
@@ -50,13 +58,28 @@ class SyncHealthConnectWeightAndSleepUseCase(
                 records = sleepRecords,
                 lastSyncedAtMillis = startedAtMillis,
             )
+            val stepsCount = syncRepository.importStepsRecords(
+                records = stepsRecords,
+                lastSyncedAtMillis = startedAtMillis,
+            )
+            val exerciseCount = syncRepository.importExerciseSessionRecords(
+                records = exerciseRecords,
+                lastSyncedAtMillis = startedAtMillis,
+            )
             val finishedAtMillis = nowMillis()
             val result = HealthConnectSyncResult(
                 weightInserted = weightCount.inserted,
                 weightUpdated = weightCount.updated,
                 sleepInserted = sleepCount.inserted,
                 sleepUpdated = sleepCount.updated,
-                skipped = weightCount.skipped + sleepCount.skipped,
+                stepsInserted = stepsCount.inserted,
+                stepsUpdated = stepsCount.updated,
+                exerciseInserted = exerciseCount.inserted,
+                exerciseUpdated = exerciseCount.updated,
+                skipped = weightCount.skipped +
+                    sleepCount.skipped +
+                    stepsCount.skipped +
+                    exerciseCount.skipped,
                 startedAtMillis = startedAtMillis,
                 finishedAtMillis = finishedAtMillis,
             )
@@ -96,12 +119,23 @@ data class HealthConnectSyncResult(
     val weightUpdated: Int,
     val sleepInserted: Int,
     val sleepUpdated: Int,
+    val stepsInserted: Int,
+    val stepsUpdated: Int,
+    val exerciseInserted: Int,
+    val exerciseUpdated: Int,
     val skipped: Int,
     val startedAtMillis: Long,
     val finishedAtMillis: Long,
 ) {
     val hasImportedChanges: Boolean =
-        weightInserted > 0 || weightUpdated > 0 || sleepInserted > 0 || sleepUpdated > 0
+        weightInserted > 0 ||
+            weightUpdated > 0 ||
+            sleepInserted > 0 ||
+            sleepUpdated > 0 ||
+            stepsInserted > 0 ||
+            stepsUpdated > 0 ||
+            exerciseInserted > 0 ||
+            exerciseUpdated > 0
 }
 
 data class HealthConnectImportCount(

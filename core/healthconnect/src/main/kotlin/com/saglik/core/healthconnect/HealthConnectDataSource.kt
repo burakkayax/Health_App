@@ -1,8 +1,10 @@
 package com.saglik.core.healthconnect
 
 import com.saglik.core.model.HealthConnectAvailability
+import com.saglik.core.model.HealthConnectExerciseSessionSnapshot
 import com.saglik.core.model.HealthConnectPermissionStatus
 import com.saglik.core.model.HealthConnectSleepSessionSnapshot
+import com.saglik.core.model.HealthConnectStepsRecordSnapshot
 import com.saglik.core.model.HealthConnectWeightRecordSnapshot
 
 interface HealthConnectDataSource {
@@ -21,4 +23,14 @@ interface HealthConnectDataSource {
         startTimeMillis: Long,
         endTimeMillis: Long,
     ): List<HealthConnectSleepSessionSnapshot>
+
+    suspend fun readStepsRecords(
+        startTimeMillis: Long,
+        endTimeMillis: Long,
+    ): List<HealthConnectStepsRecordSnapshot>
+
+    suspend fun readExerciseSessionRecords(
+        startTimeMillis: Long,
+        endTimeMillis: Long,
+    ): List<HealthConnectExerciseSessionSnapshot>
 }

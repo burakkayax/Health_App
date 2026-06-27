@@ -61,7 +61,7 @@ fun SettingsScreen(
     onOpenHealthConnectSettingsClick: () -> Unit,
     onInstallOrUpdateHealthConnectClick: () -> Unit,
     onRefreshHealthConnectStatusClick: () -> Unit,
-    onSyncHealthConnectWeightAndSleepClick: () -> Unit,
+    onSyncHealthConnectDataClick: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
@@ -106,7 +106,7 @@ fun SettingsScreen(
                     onOpenSettingsClick = onOpenHealthConnectSettingsClick,
                     onInstallOrUpdateClick = onInstallOrUpdateHealthConnectClick,
                     onRefreshClick = onRefreshHealthConnectStatusClick,
-                    onSyncClick = onSyncHealthConnectWeightAndSleepClick,
+                    onSyncClick = onSyncHealthConnectDataClick,
                 )
             }
             item {
@@ -377,7 +377,7 @@ private fun HealthConnectActionButton(
             HealthConnectAction.OpenSettings -> onOpenSettingsClick()
             HealthConnectAction.InstallOrUpdate -> onInstallOrUpdateClick()
             HealthConnectAction.Refresh -> onRefreshClick()
-            HealthConnectAction.SyncWeightAndSleep -> onSyncClick()
+            HealthConnectAction.SyncHealthConnectData -> onSyncClick()
         }
     }
 

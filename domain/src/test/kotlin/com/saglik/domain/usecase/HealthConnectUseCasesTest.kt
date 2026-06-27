@@ -1,8 +1,10 @@
 package com.saglik.domain.usecase
 
 import com.saglik.core.model.HealthConnectAvailability
+import com.saglik.core.model.HealthConnectExerciseSessionSnapshot
 import com.saglik.core.model.HealthConnectPermissionStatus
 import com.saglik.core.model.HealthConnectSleepSessionSnapshot
+import com.saglik.core.model.HealthConnectStepsRecordSnapshot
 import com.saglik.core.model.HealthConnectWeightRecordSnapshot
 import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.HealthConnectSyncRepository
@@ -15,7 +17,9 @@ import org.junit.Test
 class HealthConnectUseCasesTest {
     private val readWeight = "android.permission.health.READ_WEIGHT"
     private val readSleep = "android.permission.health.READ_SLEEP"
-    private val requiredPermissions = setOf(readWeight, readSleep)
+    private val readSteps = "android.permission.health.READ_STEPS"
+    private val readExercise = "android.permission.health.READ_EXERCISE"
+    private val requiredPermissions = setOf(readWeight, readSleep, readSteps, readExercise)
 
     @Test
     fun fakeRepositoryReportsUnsupportedAndMissingPermissions() = runBlocking {
@@ -40,7 +44,7 @@ class HealthConnectUseCasesTest {
     @Test
     fun unsupportedAvailabilityReturnsNoSyncOutcome() = runBlocking {
         val syncRepository = FakeHealthConnectSyncRepository()
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Unsupported,
@@ -55,12 +59,14 @@ class HealthConnectUseCasesTest {
         assertEquals(HealthConnectSyncOutcome.Unsupported, outcome)
         assertEquals(0, syncRepository.weightReadCount)
         assertEquals(0, syncRepository.sleepReadCount)
+        assertEquals(0, syncRepository.stepsReadCount)
+        assertEquals(0, syncRepository.exerciseReadCount)
     }
 
     @Test
     fun providerUpdateRequiredReturnsNoSyncOutcome() = runBlocking {
         val syncRepository = FakeHealthConnectSyncRepository()
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.ProviderUpdateRequired,
@@ -75,12 +81,14 @@ class HealthConnectUseCasesTest {
         assertEquals(HealthConnectSyncOutcome.ProviderUpdateRequired, outcome)
         assertEquals(0, syncRepository.weightReadCount)
         assertEquals(0, syncRepository.sleepReadCount)
+        assertEquals(0, syncRepository.stepsReadCount)
+        assertEquals(0, syncRepository.exerciseReadCount)
     }
 
     @Test
     fun missingPermissionsReturnNoSyncOutcome() = runBlocking {
         val syncRepository = FakeHealthConnectSyncRepository()
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Available,
@@ -95,6 +103,8 @@ class HealthConnectUseCasesTest {
         assertEquals(HealthConnectSyncOutcome.PermissionMissing, outcome)
         assertEquals(0, syncRepository.weightReadCount)
         assertEquals(0, syncRepository.sleepReadCount)
+        assertEquals(0, syncRepository.stepsReadCount)
+        assertEquals(0, syncRepository.exerciseReadCount)
     }
 
     @Test
@@ -102,8 +112,10 @@ class HealthConnectUseCasesTest {
         val syncRepository = FakeHealthConnectSyncRepository(
             weightRecords = listOf(weightSnapshot("weight-1")),
             sleepRecords = listOf(sleepSnapshot("sleep-1")),
+            stepsRecords = listOf(stepsSnapshot("steps-1")),
+            exerciseRecords = listOf(exerciseSnapshot("exercise-1")),
         )
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Available,
@@ -119,15 +131,21 @@ class HealthConnectUseCasesTest {
         val result = (outcome as HealthConnectSyncOutcome.Success).result
         assertEquals(1, result.weightInserted)
         assertEquals(1, result.sleepInserted)
+        assertEquals(1, result.stepsInserted)
+        assertEquals(1, result.exerciseInserted)
         assertEquals(Now - ThirtyDaysMillis, syncRepository.lastWeightStartTimeMillis)
         assertEquals(Now, syncRepository.lastWeightEndTimeMillis)
         assertEquals(Now - ThirtyDaysMillis, syncRepository.lastSleepStartTimeMillis)
         assertEquals(Now, syncRepository.lastSleepEndTimeMillis)
+        assertEquals(Now - ThirtyDaysMillis, syncRepository.lastStepsStartTimeMillis)
+        assertEquals(Now, syncRepository.lastStepsEndTimeMillis)
+        assertEquals(Now - ThirtyDaysMillis, syncRepository.lastExerciseStartTimeMillis)
+        assertEquals(Now, syncRepository.lastExerciseEndTimeMillis)
     }
 
     @Test
     fun emptyHealthConnectResultReturnsNoData() = runBlocking {
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Available,
@@ -145,12 +163,16 @@ class HealthConnectUseCasesTest {
         assertEquals(0, result.weightUpdated)
         assertEquals(0, result.sleepInserted)
         assertEquals(0, result.sleepUpdated)
+        assertEquals(0, result.stepsInserted)
+        assertEquals(0, result.stepsUpdated)
+        assertEquals(0, result.exerciseInserted)
+        assertEquals(0, result.exerciseUpdated)
         assertEquals(0, result.skipped)
     }
 
     @Test
     fun readFailureReturnsSafeFailure() = runBlocking {
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Available,
@@ -170,8 +192,10 @@ class HealthConnectUseCasesTest {
         val syncRepository = FakeHealthConnectSyncRepository(
             weightRecords = listOf(weightSnapshot("weight-1")),
             sleepRecords = listOf(sleepSnapshot("sleep-1")),
+            stepsRecords = listOf(stepsSnapshot("steps-1")),
+            exerciseRecords = listOf(exerciseSnapshot("exercise-1")),
         )
-        val useCase = SyncHealthConnectWeightAndSleepUseCase(
+        val useCase = SyncHealthConnectDataUseCase(
             healthConnectRepository = FakeHealthConnectRepository(
                 requiredPermissions = requiredPermissions,
                 availability = HealthConnectAvailability.Available,
@@ -190,8 +214,14 @@ class HealthConnectUseCasesTest {
         assertEquals(1, result.weightUpdated)
         assertEquals(0, result.sleepInserted)
         assertEquals(1, result.sleepUpdated)
+        assertEquals(0, result.stepsInserted)
+        assertEquals(1, result.stepsUpdated)
+        assertEquals(0, result.exerciseInserted)
+        assertEquals(1, result.exerciseUpdated)
         assertEquals(1, syncRepository.importedWeightIds.size)
         assertEquals(1, syncRepository.importedSleepIds.size)
+        assertEquals(1, syncRepository.importedStepsIds.size)
+        assertEquals(1, syncRepository.importedExerciseIds.size)
     }
 
     private class FakeHealthConnectRepository(
@@ -213,16 +243,26 @@ class HealthConnectUseCasesTest {
     private class FakeHealthConnectSyncRepository(
         private val weightRecords: List<HealthConnectWeightRecordSnapshot> = emptyList(),
         private val sleepRecords: List<HealthConnectSleepSessionSnapshot> = emptyList(),
+        private val stepsRecords: List<HealthConnectStepsRecordSnapshot> = emptyList(),
+        private val exerciseRecords: List<HealthConnectExerciseSessionSnapshot> = emptyList(),
         private val throwOnRead: Boolean = false,
     ) : HealthConnectSyncRepository {
         val importedWeightIds = mutableSetOf<String>()
         val importedSleepIds = mutableSetOf<String>()
+        val importedStepsIds = mutableSetOf<String>()
+        val importedExerciseIds = mutableSetOf<String>()
         var weightReadCount = 0
         var sleepReadCount = 0
+        var stepsReadCount = 0
+        var exerciseReadCount = 0
         var lastWeightStartTimeMillis: Long? = null
         var lastWeightEndTimeMillis: Long? = null
         var lastSleepStartTimeMillis: Long? = null
         var lastSleepEndTimeMillis: Long? = null
+        var lastStepsStartTimeMillis: Long? = null
+        var lastStepsEndTimeMillis: Long? = null
+        var lastExerciseStartTimeMillis: Long? = null
+        var lastExerciseEndTimeMillis: Long? = null
 
         override suspend fun readWeightRecords(
             startTimeMillis: Long,
@@ -248,6 +288,32 @@ class HealthConnectUseCasesTest {
             lastSleepStartTimeMillis = startTimeMillis
             lastSleepEndTimeMillis = endTimeMillis
             return sleepRecords
+        }
+
+        override suspend fun readStepsRecords(
+            startTimeMillis: Long,
+            endTimeMillis: Long,
+        ): List<HealthConnectStepsRecordSnapshot> {
+            if (throwOnRead) {
+                error("read failed")
+            }
+            stepsReadCount += 1
+            lastStepsStartTimeMillis = startTimeMillis
+            lastStepsEndTimeMillis = endTimeMillis
+            return stepsRecords
+        }
+
+        override suspend fun readExerciseSessionRecords(
+            startTimeMillis: Long,
+            endTimeMillis: Long,
+        ): List<HealthConnectExerciseSessionSnapshot> {
+            if (throwOnRead) {
+                error("read failed")
+            }
+            exerciseReadCount += 1
+            lastExerciseStartTimeMillis = startTimeMillis
+            lastExerciseEndTimeMillis = endTimeMillis
+            return exerciseRecords
         }
 
         override suspend fun importWeightRecords(
@@ -285,6 +351,54 @@ class HealthConnectUseCasesTest {
             }
             return HealthConnectImportCount(inserted = inserted, updated = updated, skipped = 0)
         }
+
+        override suspend fun importStepsRecords(
+            records: List<HealthConnectStepsRecordSnapshot>,
+            lastSyncedAtMillis: Long,
+        ): HealthConnectImportCount {
+            var inserted = 0
+            var updated = 0
+            records.forEach { record ->
+                if (
+                    record.healthConnectId.isBlank() ||
+                    record.endTimeMillis <= record.startTimeMillis ||
+                    record.count <= 0L
+                ) {
+                    return@forEach
+                }
+
+                if (importedStepsIds.add(record.healthConnectId)) {
+                    inserted += 1
+                } else {
+                    updated += 1
+                }
+            }
+            return HealthConnectImportCount(inserted = inserted, updated = updated, skipped = 0)
+        }
+
+        override suspend fun importExerciseSessionRecords(
+            records: List<HealthConnectExerciseSessionSnapshot>,
+            lastSyncedAtMillis: Long,
+        ): HealthConnectImportCount {
+            var inserted = 0
+            var updated = 0
+            records.forEach { record ->
+                if (
+                    record.healthConnectId.isBlank() ||
+                    record.endTimeMillis <= record.startTimeMillis ||
+                    record.durationMinutes <= 0
+                ) {
+                    return@forEach
+                }
+
+                if (importedExerciseIds.add(record.healthConnectId)) {
+                    inserted += 1
+                } else {
+                    updated += 1
+                }
+            }
+            return HealthConnectImportCount(inserted = inserted, updated = updated, skipped = 0)
+        }
     }
 
     private fun weightSnapshot(id: String): HealthConnectWeightRecordSnapshot =
@@ -305,6 +419,31 @@ class HealthConnectUseCasesTest {
             startTimeMillis = Now - 30_000_000L,
             endTimeMillis = Now - 1_000L,
             durationMinutes = 499,
+            lastModifiedAtMillis = null,
+        )
+
+    private fun stepsSnapshot(id: String): HealthConnectStepsRecordSnapshot =
+        HealthConnectStepsRecordSnapshot(
+            healthConnectId = id,
+            sourcePackageName = "com.example.source",
+            sourceAppName = null,
+            startTimeMillis = Now - 3_600_000L,
+            endTimeMillis = Now - 1_000L,
+            count = 1_500L,
+            lastModifiedAtMillis = null,
+        )
+
+    private fun exerciseSnapshot(id: String): HealthConnectExerciseSessionSnapshot =
+        HealthConnectExerciseSessionSnapshot(
+            healthConnectId = id,
+            sourcePackageName = "com.example.source",
+            sourceAppName = null,
+            startTimeMillis = Now - 3_600_000L,
+            endTimeMillis = Now - 1_000L,
+            durationMinutes = 59,
+            exerciseType = 79,
+            title = "Walk",
+            notes = null,
             lastModifiedAtMillis = null,
         )
 

@@ -13,7 +13,9 @@ import org.junit.Test
 class HealthConnectSettingsUiMapperTest {
     private val readWeight = "android.permission.health.READ_WEIGHT"
     private val readSleep = "android.permission.health.READ_SLEEP"
-    private val requiredPermissions = setOf(readWeight, readSleep)
+    private val readSteps = "android.permission.health.READ_STEPS"
+    private val readExercise = "android.permission.health.READ_EXERCISE"
+    private val requiredPermissions = setOf(readWeight, readSleep, readSteps, readExercise)
 
     @Test
     fun availableWithAllPermissionsGrantedMapsToReadyState() {
@@ -28,13 +30,13 @@ class HealthConnectSettingsUiMapperTest {
 
         assertEquals(requiredPermissions, state.requiredPermissions)
         assertEquals(
-            "Health Connect is ready. Sync imports weight and sleep records from the last 30 days only.",
+            "Health Connect is ready. Sync imports weight, sleep, steps, and exercise sessions from the last 30 days only.",
             state.description,
         )
         assertEquals("Ready", state.item("Status").status)
         assertEquals("Granted", state.item("Permissions").status)
         assertEquals("Last 30 days", state.item("Scope").status)
-        assertEquals(HealthConnectAction.SyncWeightAndSleep, state.primaryAction?.action)
+        assertEquals(HealthConnectAction.SyncHealthConnectData, state.primaryAction?.action)
         assertEquals(HealthConnectAction.OpenSettings, state.secondaryAction?.action)
         assertEquals(HealthConnectAction.Refresh, state.tertiaryAction?.action)
         assertFalse(state.isChecking)
@@ -54,7 +56,7 @@ class HealthConnectSettingsUiMapperTest {
 
         assertEquals(requiredPermissions, state.requiredPermissions)
         assertEquals("Permission needed", state.item("Status").status)
-        assertEquals("1 missing", state.item("Permissions").status)
+        assertEquals("3 missing", state.item("Permissions").status)
         assertEquals("Blocked", state.item("Scope").status)
         assertEquals(HealthConnectAction.GrantPermissions, state.primaryAction?.action)
         assertEquals(HealthConnectAction.OpenSettings, state.secondaryAction?.action)
@@ -138,8 +140,8 @@ class HealthConnectSettingsUiMapperTest {
 
         assertEquals(requiredPermissions, state.requiredPermissions)
         assertEquals("Syncing", state.item("Status").status)
-        assertEquals("Syncing Health Connect weight and sleep records...", state.statusMessage)
-        assertEquals(HealthConnectAction.SyncWeightAndSleep, state.primaryAction?.action)
+        assertEquals("Syncing Health Connect records...", state.statusMessage)
+        assertEquals(HealthConnectAction.SyncHealthConnectData, state.primaryAction?.action)
         assertFalse(state.primaryAction?.enabled ?: true)
         assertTrue(state.isSyncing)
     }
@@ -153,6 +155,10 @@ class HealthConnectSettingsUiMapperTest {
                     weightUpdated = 2,
                     sleepInserted = 3,
                     sleepUpdated = 4,
+                    stepsInserted = 5,
+                    stepsUpdated = 6,
+                    exerciseInserted = 7,
+                    exerciseUpdated = 8,
                     skipped = 1,
                     startedAtMillis = 1L,
                     finishedAtMillis = 2L,
@@ -164,11 +170,11 @@ class HealthConnectSettingsUiMapperTest {
         assertEquals("Ready", state.item("Status").status)
         assertEquals("Synced", state.item("Last sync").status)
         assertEquals(
-            "Weight: 1 inserted, 2 updated. Sleep: 3 inserted, 4 updated. Skipped: 1.",
+            "Weight: 1 inserted, 2 updated. Sleep: 3 inserted, 4 updated. Steps: 5 inserted, 6 updated. Exercise: 7 inserted, 8 updated. Skipped: 1.",
             state.item("Last sync").description,
         )
         assertTrue(state.statusMessage.startsWith("Last sync: just now."))
-        assertEquals(HealthConnectAction.SyncWeightAndSleep, state.primaryAction?.action)
+        assertEquals(HealthConnectAction.SyncHealthConnectData, state.primaryAction?.action)
     }
 
     @Test
@@ -180,6 +186,10 @@ class HealthConnectSettingsUiMapperTest {
                     weightUpdated = 0,
                     sleepInserted = 0,
                     sleepUpdated = 0,
+                    stepsInserted = 0,
+                    stepsUpdated = 0,
+                    exerciseInserted = 0,
+                    exerciseUpdated = 0,
                     skipped = 0,
                     startedAtMillis = 1L,
                     finishedAtMillis = 2L,
@@ -188,9 +198,9 @@ class HealthConnectSettingsUiMapperTest {
             requiredPermissions = requiredPermissions,
         )
 
-        assertEquals("No new Health Connect weight or sleep records were found.", state.statusMessage)
+        assertEquals("No new Health Connect records were found.", state.statusMessage)
         assertEquals("No data", state.item("Last sync").status)
-        assertEquals(HealthConnectAction.SyncWeightAndSleep, state.primaryAction?.action)
+        assertEquals(HealthConnectAction.SyncHealthConnectData, state.primaryAction?.action)
     }
 
     @Test

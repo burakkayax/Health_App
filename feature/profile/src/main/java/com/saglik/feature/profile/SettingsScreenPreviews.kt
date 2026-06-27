@@ -19,7 +19,7 @@ fun SettingsProfilePreview_WithData() {
                 onOpenHealthConnectSettingsClick = {},
                 onInstallOrUpdateHealthConnectClick = {},
                 onRefreshHealthConnectStatusClick = {},
-                onSyncHealthConnectWeightAndSleepClick = {},
+                onSyncHealthConnectDataClick = {},
                 listState = rememberLazyListState(),
             )
         }
@@ -41,7 +41,7 @@ fun SettingsProfilePreview_MissingData() {
                 onOpenHealthConnectSettingsClick = {},
                 onInstallOrUpdateHealthConnectClick = {},
                 onRefreshHealthConnectStatusClick = {},
-                onSyncHealthConnectWeightAndSleepClick = {},
+                onSyncHealthConnectDataClick = {},
                 listState = rememberLazyListState(),
             )
         }

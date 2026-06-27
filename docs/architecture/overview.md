@@ -13,7 +13,7 @@ The app is organized into the following Gradle modules:
   - `:core:ui`: Shared Composables used across multiple features.
   - `:core:database`: Room database, DAOs, entities, and converters.
   - `:core:datastore`: DataStore definitions for preferences.
-  - `:core:healthconnect`: Wrapper/placeholder for Health Connect.
+  - `:core:healthconnect`: Health Connect availability, permissions, record reads, and snapshot mapping.
 - `:domain`: Business logic, use cases, and repository interfaces.
 - `:data:*`: Data access layers.
   - `:data:local`: Local data sources (e.g., DataStore abstractions).
@@ -36,10 +36,10 @@ UI (Compose) ↔ ViewModel ↔ Use Case ↔ Repository Interface (`:domain`)
 - Weight tracking (with trend charts)
 - BMI calculation
 - Sleep tracking (duration, overnight ranges)
+- Health Connect foreground import for weight, sleep, steps, and exercise sessions
 
 ## Future Features
 Intentionally absent for now, planned for subsequent PRs:
-- Health Connect real integration
 - Settings / Privacy tools
-- Water / Caffeine / Mood / Symptoms / Activity tracking
+- Water / Caffeine / Mood / Symptoms tracking
 - Cloud sync / Authentication

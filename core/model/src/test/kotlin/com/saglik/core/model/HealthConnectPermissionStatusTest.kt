@@ -8,7 +8,8 @@ import org.junit.Test
 class HealthConnectPermissionStatusTest {
     private val readWeight = "android.permission.health.READ_WEIGHT"
     private val readSleep = "android.permission.health.READ_SLEEP"
-    private val requiredPermissions = setOf(readWeight, readSleep)
+    private val readSteps = "android.permission.health.READ_STEPS"
+    private val requiredPermissions = setOf(readWeight, readSleep, readSteps)
 
     @Test
     fun allRequiredPermissionsGranted() {
@@ -25,11 +26,11 @@ class HealthConnectPermissionStatusTest {
     fun missingOneRequiredPermission() {
         val status = HealthConnectPermissionStatus.from(
             requiredPermissions = requiredPermissions,
-            grantedPermissions = setOf(readWeight),
+            grantedPermissions = setOf(readWeight, readSleep),
         )
 
         assertFalse(status.allRequiredGranted)
-        assertEquals(setOf(readSleep), status.missingPermissions)
+        assertEquals(setOf(readSteps), status.missingPermissions)
     }
 
     @Test

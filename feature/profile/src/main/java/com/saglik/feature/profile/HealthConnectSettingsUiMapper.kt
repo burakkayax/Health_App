@@ -22,7 +22,7 @@ object HealthConnectSettingsUiMapper {
                 ),
                 SettingsItemUiState(
                     title = "Permissions",
-                    description = "Weight and sleep permission status will appear here.",
+                    description = "Weight, sleep, steps, and exercise session permission status will appear here.",
                     status = "Checking",
                     enabled = false,
                 ),
@@ -94,22 +94,22 @@ object HealthConnectSettingsUiMapper {
     ): HealthConnectSettingsUiState =
         HealthConnectSettingsUiState(
             description = ReadyDescription,
-            statusMessage = "Syncing Health Connect weight and sleep records...",
+            statusMessage = "Syncing Health Connect records...",
             requiredPermissions = requiredPermissions,
             items = syncItems(
                 statusDescription = "Health Connect is available and required permissions are granted.",
                 status = "Syncing",
-                permissionsDescription = "Weight and sleep read access is granted.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access is granted.",
                 permissionsStatus = "Granted",
                 resultItem = SettingsItemUiState(
                     title = "Sync window",
-                    description = "Importing Health Connect weight and sleep records from the last 30 days.",
+                    description = "Importing Health Connect records from the last 30 days.",
                     status = "Last 30 days",
                 ),
             ),
             primaryAction = HealthConnectActionUiState(
-                action = HealthConnectAction.SyncWeightAndSleep,
-                text = "Syncing weight & sleep",
+                action = HealthConnectAction.SyncHealthConnectData,
+                text = "Syncing Health Connect data",
                 enabled = false,
             ),
             secondaryAction = HealthConnectActionUiState(
@@ -159,12 +159,12 @@ object HealthConnectSettingsUiMapper {
             items = syncItems(
                 statusDescription = "Health Connect is available and required permissions are granted.",
                 status = "Ready",
-                permissionsDescription = "Weight and sleep read access is granted.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access is granted.",
                 permissionsStatus = "Granted",
             ),
             primaryAction = HealthConnectActionUiState(
-                action = HealthConnectAction.SyncWeightAndSleep,
-                text = "Sync weight & sleep",
+                action = HealthConnectAction.SyncHealthConnectData,
+                text = "Sync Health Connect data",
             ),
             secondaryAction = HealthConnectActionUiState(
                 action = HealthConnectAction.OpenSettings,
@@ -180,13 +180,13 @@ object HealthConnectSettingsUiMapper {
         permissionStatus: HealthConnectPermissionStatus,
     ): HealthConnectSettingsUiState =
         HealthConnectSettingsUiState(
-            description = "Health Connect is available. Grant access to weight and sleep data before syncing.",
+            description = "Health Connect is available. Grant access to weight, sleep, steps, and exercise sessions before syncing.",
             statusMessage = "Sync is not available until required permissions are granted.",
             requiredPermissions = permissionStatus.requiredPermissions,
             items = syncItems(
                 statusDescription = "Health Connect is available.",
                 status = "Permission needed",
-                permissionsDescription = "Weight and sleep read access is not fully granted.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access is not fully granted.",
                 permissionsStatus = missingPermissionStatus(permissionStatus),
                 scopeStatus = "Blocked",
             ),
@@ -259,13 +259,13 @@ object HealthConnectSettingsUiMapper {
             items = syncItems(
                 statusDescription = "Health Connect is available and required permissions are granted.",
                 status = "Ready",
-                permissionsDescription = "Weight and sleep read access is granted.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access is granted.",
                 permissionsStatus = "Granted",
                 resultItem = result.toSettingsItem(),
             ),
             primaryAction = HealthConnectActionUiState(
-                action = HealthConnectAction.SyncWeightAndSleep,
-                text = "Sync weight & sleep",
+                action = HealthConnectAction.SyncHealthConnectData,
+                text = "Sync Health Connect data",
             ),
             secondaryAction = HealthConnectActionUiState(
                 action = HealthConnectAction.OpenSettings,
@@ -283,18 +283,18 @@ object HealthConnectSettingsUiMapper {
     ): HealthConnectSettingsUiState =
         HealthConnectSettingsUiState(
             description = ReadyDescription,
-            statusMessage = "No new Health Connect weight or sleep records were found.",
+            statusMessage = "No new Health Connect records were found.",
             requiredPermissions = requiredPermissions,
             items = syncItems(
                 statusDescription = "Health Connect is available and required permissions are granted.",
                 status = "Ready",
-                permissionsDescription = "Weight and sleep read access is granted.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access is granted.",
                 permissionsStatus = "Granted",
                 resultItem = result.toSettingsItem(status = "No data"),
             ),
             primaryAction = HealthConnectActionUiState(
-                action = HealthConnectAction.SyncWeightAndSleep,
-                text = "Sync weight & sleep",
+                action = HealthConnectAction.SyncHealthConnectData,
+                text = "Sync Health Connect data",
             ),
             secondaryAction = HealthConnectActionUiState(
                 action = HealthConnectAction.OpenSettings,
@@ -316,7 +316,7 @@ object HealthConnectSettingsUiMapper {
             items = syncItems(
                 statusDescription = "Health Connect is available, but the last sync did not finish.",
                 status = "Ready",
-                permissionsDescription = "Weight and sleep read access should be checked before trying again.",
+                permissionsDescription = "Weight, sleep, steps, and exercise session read access should be checked before trying again.",
                 permissionsStatus = "Check again",
                 resultItem = SettingsItemUiState(
                     title = "Last sync",
@@ -326,7 +326,7 @@ object HealthConnectSettingsUiMapper {
                 ),
             ),
             primaryAction = HealthConnectActionUiState(
-                action = HealthConnectAction.SyncWeightAndSleep,
+                action = HealthConnectAction.SyncHealthConnectData,
                 text = "Try sync again",
             ),
             secondaryAction = HealthConnectActionUiState(
@@ -362,7 +362,7 @@ object HealthConnectSettingsUiMapper {
             ),
             SettingsItemUiState(
                 title = "Scope",
-                description = "User-initiated foreground sync imports only weight and sleep records from the last 30 days.",
+                description = "User-initiated foreground sync imports only weight, sleep, steps, and exercise sessions from the last 30 days.",
                 status = scopeStatus,
                 enabled = status != "Unsupported" && scopeStatus != "Unavailable",
             ),
@@ -380,7 +380,9 @@ object HealthConnectSettingsUiMapper {
     private fun HealthConnectSyncResult.summaryText(): String {
         val skippedText = if (skipped > 0) " Skipped: $skipped." else ""
         return "Weight: $weightInserted inserted, $weightUpdated updated. " +
-            "Sleep: $sleepInserted inserted, $sleepUpdated updated.$skippedText"
+            "Sleep: $sleepInserted inserted, $sleepUpdated updated. " +
+            "Steps: $stepsInserted inserted, $stepsUpdated updated. " +
+            "Exercise: $exerciseInserted inserted, $exerciseUpdated updated.$skippedText"
     }
 
     private fun HealthConnectSyncResult.toSettingsItem(
@@ -393,5 +395,5 @@ object HealthConnectSettingsUiMapper {
         )
 
     private const val ReadyDescription =
-        "Health Connect is ready. Sync imports weight and sleep records from the last 30 days only."
+        "Health Connect is ready. Sync imports weight, sleep, steps, and exercise sessions from the last 30 days only."
 }

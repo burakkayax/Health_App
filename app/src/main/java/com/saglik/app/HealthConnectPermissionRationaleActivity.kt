@@ -69,7 +69,7 @@ private fun HealthConnectPermissionRationaleScreen(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
-                    text = "Health App asks for read access to weight and sleep data so you can import recent records after you choose to sync.",
+                    text = "Health App asks for read access to weight, sleep, steps, and exercise sessions so you can import recent records after you choose to sync.",
                     style = HealthTypography.bodyMedium,
                     color = HealthColors.SecondaryText,
                 )

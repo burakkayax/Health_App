@@ -3,11 +3,13 @@
 package com.saglik.app.di
 
 import com.saglik.domain.repository.AppPreferencesRepository
+import com.saglik.domain.repository.ExerciseRepository
 import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
+import com.saglik.domain.usecase.AddExerciseSessionUseCase
 import com.saglik.domain.usecase.AddSleepEntryUseCase
 import com.saglik.domain.usecase.AddWeightEntryUseCase
 import com.saglik.domain.usecase.CheckHealthConnectAvailabilityUseCase
@@ -16,6 +18,8 @@ import com.saglik.domain.usecase.CreateInitialWeightEntryUseCase
 import com.saglik.domain.usecase.GetHealthConnectPermissionStatusUseCase
 import com.saglik.domain.usecase.GetHealthConnectRequiredPermissionsUseCase
 import com.saglik.domain.usecase.ObserveBmiSummaryUseCase
+import com.saglik.domain.usecase.ObserveExerciseSessionsUseCase
+import com.saglik.domain.usecase.ObserveExerciseSummaryUseCase
 import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveOnboardingCompletedUseCase
 import com.saglik.domain.usecase.ObserveSleepDetailUseCase
@@ -24,7 +28,8 @@ import com.saglik.domain.usecase.ObserveUserProfileUseCase
 import com.saglik.domain.usecase.ObserveWeightTrendSummaryUseCase
 import com.saglik.domain.usecase.SaveUserProfileUseCase
 import com.saglik.domain.usecase.SetOnboardingCompletedUseCase
-import com.saglik.domain.usecase.SyncHealthConnectWeightAndSleepUseCase
+import com.saglik.domain.usecase.SyncHealthConnectDataUseCase
+import com.saglik.domain.usecase.ValidateExerciseSessionInputUseCase
 import com.saglik.domain.usecase.ValidateSleepInputUseCase
 import com.saglik.domain.usecase.ResolveSleepTimeRangeUseCase
 import dagger.Module
@@ -101,6 +106,29 @@ object UseCaseModule {
     ): ObserveSleepDetailUseCase = ObserveSleepDetailUseCase(repository)
 
     @Provides
+    fun provideValidateExerciseSessionInputUseCase(): ValidateExerciseSessionInputUseCase =
+        ValidateExerciseSessionInputUseCase()
+
+    @Provides
+    fun provideAddExerciseSessionUseCase(
+        repository: ExerciseRepository,
+        validateExerciseSessionInputUseCase: ValidateExerciseSessionInputUseCase,
+    ): AddExerciseSessionUseCase = AddExerciseSessionUseCase(
+        repository = repository,
+        validateExerciseSessionInputUseCase = validateExerciseSessionInputUseCase,
+    )
+
+    @Provides
+    fun provideObserveExerciseSessionsUseCase(
+        repository: ExerciseRepository,
+    ): ObserveExerciseSessionsUseCase = ObserveExerciseSessionsUseCase(repository)
+
+    @Provides
+    fun provideObserveExerciseSummaryUseCase(
+        repository: ExerciseRepository,
+    ): ObserveExerciseSummaryUseCase = ObserveExerciseSummaryUseCase(repository)
+
+    @Provides
     fun provideObserveBmiSummaryUseCase(
         userProfileRepository: UserProfileRepository,
         weightRepository: WeightRepository,
@@ -139,11 +167,11 @@ object UseCaseModule {
         GetHealthConnectRequiredPermissionsUseCase(repository)
 
     @Provides
-    fun provideSyncHealthConnectWeightAndSleepUseCase(
+    fun provideSyncHealthConnectDataUseCase(
         healthConnectRepository: HealthConnectRepository,
         healthConnectSyncRepository: HealthConnectSyncRepository,
-    ): SyncHealthConnectWeightAndSleepUseCase =
-        SyncHealthConnectWeightAndSleepUseCase(
+    ): SyncHealthConnectDataUseCase =
+        SyncHealthConnectDataUseCase(
             healthConnectRepository = healthConnectRepository,
             syncRepository = healthConnectSyncRepository,
         )

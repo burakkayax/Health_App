@@ -10,7 +10,7 @@ import com.saglik.domain.usecase.CheckHealthConnectAvailabilityUseCase
 import com.saglik.domain.usecase.GetHealthConnectPermissionStatusUseCase
 import com.saglik.domain.usecase.GetHealthConnectRequiredPermissionsUseCase
 import com.saglik.domain.usecase.ObserveUserProfileUseCase
-import com.saglik.domain.usecase.SyncHealthConnectWeightAndSleepUseCase
+import com.saglik.domain.usecase.SyncHealthConnectDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
@@ -28,7 +28,7 @@ class SettingsViewModel @Inject constructor(
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val checkHealthConnectAvailabilityUseCase: CheckHealthConnectAvailabilityUseCase,
     private val getHealthConnectPermissionStatusUseCase: GetHealthConnectPermissionStatusUseCase,
-    private val syncHealthConnectWeightAndSleepUseCase: SyncHealthConnectWeightAndSleepUseCase,
+    private val syncHealthConnectDataUseCase: SyncHealthConnectDataUseCase,
     getHealthConnectRequiredPermissionsUseCase: GetHealthConnectRequiredPermissionsUseCase,
 ) : ViewModel() {
     private val requiredHealthConnectPermissions = getHealthConnectRequiredPermissionsUseCase()
@@ -97,7 +97,7 @@ class SettingsViewModel @Inject constructor(
 
     fun onGrantHealthConnectPermissionsClick() = Unit
 
-    fun syncHealthConnectWeightAndSleep() {
+    fun syncHealthConnectData() {
         if (healthConnectSyncJob?.isActive == true) {
             return
         }
@@ -107,7 +107,7 @@ class SettingsViewModel @Inject constructor(
                 requiredHealthConnectPermissions,
             )
 
-            val outcome = syncHealthConnectWeightAndSleepUseCase()
+            val outcome = syncHealthConnectDataUseCase()
             healthConnectState.value = HealthConnectSettingsUiMapper.fromSyncOutcome(
                 outcome = outcome,
                 requiredPermissions = requiredHealthConnectPermissions,

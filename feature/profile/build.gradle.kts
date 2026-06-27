@@ -51,54 +51,58 @@ dependencies {
     testImplementation(libs.junit)
 }
 
-val asciiDebugUnitTestRuntimeDir = File(
+val asciiUnitTestRuntimeRootDir = File(
     System.getProperty("user.home"),
-    ".gradle/saglik-feature-profile-debug-unit-test-runtime",
+    ".gradle/saglik-feature-profile-unit-test-runtime",
 )
 
 tasks.withType<Test>().configureEach {
-    if (name == "testDebugUnitTest") {
-        doFirst {
-            val resolvedClasspath = classpath
-            val runtimeClassesDir = File(asciiDebugUnitTestRuntimeDir, "runtime-classes")
-            val runtimeJarsDir = File(asciiDebugUnitTestRuntimeDir, "runtime-jars")
-            delete(asciiDebugUnitTestRuntimeDir)
-            copy {
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                into(asciiDebugUnitTestRuntimeDir)
-                into("main") {
-                    from(layout.buildDirectory.dir("tmp/kotlin-classes/debug"))
-                    from(layout.buildDirectory.dir("intermediates/javac/debug/compileDebugJavaWithJavac/classes"))
+    val unitTestMatch = Regex("""test(.+)UnitTest""").matchEntire(name) ?: return@configureEach
+    val variantTaskName = unitTestMatch.groupValues[1]
+    val variantName = variantTaskName.substring(0, 1).lowercase() + variantTaskName.substring(1)
+    val unitTestVariantName = "${variantName}UnitTest"
+
+    doFirst {
+        val resolvedClasspath = classpath
+        val runtimeDir = File(asciiUnitTestRuntimeRootDir, name)
+        val runtimeClassesDir = File(runtimeDir, "runtime-classes")
+        val runtimeJarsDir = File(runtimeDir, "runtime-jars")
+        delete(runtimeDir)
+        copy {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            into(runtimeDir)
+            into("main") {
+                from(layout.buildDirectory.dir("tmp/kotlin-classes/$variantName"))
+                from(layout.buildDirectory.dir("intermediates/javac/$variantName/compile${variantTaskName}JavaWithJavac/classes"))
+            }
+            into("test") {
+                from(layout.buildDirectory.dir("tmp/kotlin-classes/$unitTestVariantName"))
+                from(layout.buildDirectory.dir("intermediates/javac/$unitTestVariantName/compile${variantTaskName}UnitTestJavaWithJavac/classes"))
+            }
+        }
+        resolvedClasspath.files.forEachIndexed { index, file ->
+            if (file.isDirectory) {
+                copy {
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    from(file)
+                    into(runtimeClassesDir)
                 }
-                into("test") {
-                    from(layout.buildDirectory.dir("tmp/kotlin-classes/debugUnitTest"))
-                    from(layout.buildDirectory.dir("intermediates/javac/debugUnitTest/compileDebugUnitTestJavaWithJavac/classes"))
+            } else if (file.extension.equals("jar", ignoreCase = true)) {
+                copy {
+                    from(file)
+                    into(runtimeJarsDir)
+                    rename { originalName -> "$index-$originalName" }
                 }
             }
-            resolvedClasspath.files.forEachIndexed { index, file ->
-                if (file.isDirectory) {
-                    copy {
-                        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                        from(file)
-                        into(runtimeClassesDir)
-                    }
-                } else if (file.extension.equals("jar", ignoreCase = true)) {
-                    copy {
-                        from(file)
-                        into(runtimeJarsDir)
-                        rename { originalName -> "$index-$originalName" }
-                    }
-                }
-            }
-            workingDir = asciiDebugUnitTestRuntimeDir
-            testClassesDirs = files(File(asciiDebugUnitTestRuntimeDir, "test"))
-            classpath = files(
-                File(asciiDebugUnitTestRuntimeDir, "test"),
-                File(asciiDebugUnitTestRuntimeDir, "main"),
-                runtimeClassesDir,
-            ) + fileTree(runtimeJarsDir) {
-                include("*.jar")
-            }
+        }
+        workingDir = runtimeDir
+        testClassesDirs = files(File(runtimeDir, "test"))
+        classpath = files(
+            File(runtimeDir, "test"),
+            File(runtimeDir, "main"),
+            runtimeClassesDir,
+        ) + fileTree(runtimeJarsDir) {
+            include("*.jar")
         }
     }
 }
