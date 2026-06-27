@@ -1,8 +1,10 @@
-# Health Connect Foundation
+# Health Connect
 
 PR-8 adds the foundation for Health Connect without importing, syncing, or storing any Health Connect records. Weight and sleep sync is intentionally left for PR-9.
 
-## Scope
+PR-9 adds foreground, user-initiated Weight/Sleep sync. It reads Health Connect `WeightRecord` and `SleepSessionRecord` data from the last 30 days and imports those records into the existing local Room tables.
+
+## PR-8 Foundation Scope
 
 - Adds the Health Connect SDK to `:core:healthconnect`.
 - Checks provider availability.
@@ -12,6 +14,19 @@ PR-8 adds the foundation for Health Connect without importing, syncing, or stori
 - Shows calm Settings/Profile states for ready, missing permission, update required, unsupported, loading, and error.
 
 PR-8 does not read `WeightRecord`, read `SleepSessionRecord`, write records, start background sync, use WorkManager, write to Room, or change the database schema.
+
+## PR-9 Foreground Sync Scope
+
+- Sync is started only after the user taps `Sync weight & sleep` in Settings/Profile.
+- Sync checks availability and required read permissions before reading records.
+- Sync reads only the last 30 days: from now minus 30 days to now.
+- Sync imports only `WeightRecord` and `SleepSessionRecord`.
+- Imported rows use `DataSource.HEALTH_CONNECT`.
+- Duplicate prevention uses `source + sourcePackageName + sourceRecordId`.
+- Re-running sync updates the existing Health Connect row instead of creating a duplicate.
+- Invalid sleep sessions are skipped safely.
+
+PR-9 does not add Health Connect writes, write permissions, background read permission, historical read permission, WorkManager, automatic sync, deletion sync, changes-token sync, conflict UI, or database schema changes.
 
 ## Android Version Behavior
 
@@ -38,20 +53,21 @@ Required permissions are centralized in `HealthConnectPermissions`:
 
 `HealthConnectPermissionStatus` computes required, granted, missing, and `allRequiredGranted`. Permission status is refreshable because users can grant or revoke access outside the app.
 
-Only Weight and Sleep read permissions are requested because PR-9 will handle Weight/Sleep import. No write, steps, exercise, hydration, nutrition, medical data, heart-rate, blood-pressure, or background read permissions are requested.
+Only Weight and Sleep read permissions are requested. No write, steps, exercise, hydration, nutrition, medical data, heart-rate, blood-pressure, historical read, or background read permissions are requested.
 
 ## Architecture Boundary
 
-- `:core:healthconnect` owns Health Connect SDK calls, required permissions, availability mapping, permission status checks, permission request contract, and safe intent helpers.
-- `:domain` owns the `HealthConnectRepository` interface and small use cases.
-- `:data:repository` adapts the Health Connect data source to the domain repository.
+- `:core:healthconnect` owns Health Connect SDK calls, required permissions, availability mapping, permission status checks, record reads, permission request contract, and safe intent helpers.
+- `:core:model` owns app-level Health Connect snapshots so SDK record classes do not leak into feature UI.
+- `:domain` owns the `HealthConnectRepository`, `HealthConnectSyncRepository`, and foreground sync use case.
+- `:data:repository` adapts the Health Connect data source and existing DAOs for idempotent import.
 - `:feature:profile` observes domain use cases and launches the permission request only after a user taps the Settings/Profile button.
 
-Feature UI does not read Health Connect records and does not insert Health Connect data into Room.
+Feature UI does not import Health Connect SDK record classes and does not write records directly. It triggers the sync use case and renders typed outcomes.
 
 ## Settings/Profile Integration
 
-The Health Connect section shows real foundation state:
+The Health Connect section shows real state:
 
 - Checking/loading
 - Available with permissions granted
@@ -59,14 +75,27 @@ The Health Connect section shows real foundation state:
 - Provider install/update required
 - Unsupported
 - Error
+- Syncing
+- Success with inserted/updated counts
+- No data
 
-The section may show actions to grant permissions, open Health Connect settings, install/update Health Connect, or refresh status. Permission launch is user initiated and returning from the permission screen refreshes state.
+The section may show actions to sync weight and sleep, grant permissions, open Health Connect settings, install/update Health Connect, or refresh status. Permission launch and sync are both user initiated. Returning from the permission screen refreshes state.
 
 ## Privacy Copy Rules
 
 Health Connect setup copy must stay narrow and factual:
 
-- Say that no data is being imported yet.
+- Say that sync imports only Weight/Sleep records from the last 30 days.
 - Say users can grant or revoke permissions at any time.
-- Say Weight and Sleep sync will be added later.
+- Say sync starts only after the user taps the sync action.
 - Do not make medical, diagnostic, recommendation, insight, forecasting, or AI claims.
+
+## Current Limitations
+
+- No Health Connect writes.
+- No background sync, automatic sync, notifications, or WorkManager.
+- No historical read permission and no all-time import.
+- No deletion sync.
+- No changes token yet.
+- No conflict-resolution or merge UI.
+- PR-10 is expected to be Activity/Steps Core, not an expansion of this sync engine unless explicitly planned later.

@@ -10,9 +10,11 @@ import com.saglik.domain.usecase.CheckHealthConnectAvailabilityUseCase
 import com.saglik.domain.usecase.GetHealthConnectPermissionStatusUseCase
 import com.saglik.domain.usecase.GetHealthConnectRequiredPermissionsUseCase
 import com.saglik.domain.usecase.ObserveUserProfileUseCase
+import com.saglik.domain.usecase.SyncHealthConnectWeightAndSleepUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,12 +28,14 @@ class SettingsViewModel @Inject constructor(
     observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val checkHealthConnectAvailabilityUseCase: CheckHealthConnectAvailabilityUseCase,
     private val getHealthConnectPermissionStatusUseCase: GetHealthConnectPermissionStatusUseCase,
+    private val syncHealthConnectWeightAndSleepUseCase: SyncHealthConnectWeightAndSleepUseCase,
     getHealthConnectRequiredPermissionsUseCase: GetHealthConnectRequiredPermissionsUseCase,
 ) : ViewModel() {
     private val requiredHealthConnectPermissions = getHealthConnectRequiredPermissionsUseCase()
     private val healthConnectState = MutableStateFlow(
         HealthConnectSettingsUiMapper.checking(requiredHealthConnectPermissions),
     )
+    private var healthConnectSyncJob: Job? = null
 
     val uiState: StateFlow<SettingsUiState> =
         combine(
@@ -59,6 +63,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun refreshHealthConnectStatus() {
+        if (healthConnectSyncJob?.isActive == true) {
+            return
+        }
+
         viewModelScope.launch {
             healthConnectState.value = HealthConnectSettingsUiMapper.checking(
                 requiredHealthConnectPermissions,
@@ -88,6 +96,24 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onGrantHealthConnectPermissionsClick() = Unit
+
+    fun syncHealthConnectWeightAndSleep() {
+        if (healthConnectSyncJob?.isActive == true) {
+            return
+        }
+
+        healthConnectSyncJob = viewModelScope.launch {
+            healthConnectState.value = HealthConnectSettingsUiMapper.syncing(
+                requiredHealthConnectPermissions,
+            )
+
+            val outcome = syncHealthConnectWeightAndSleepUseCase()
+            healthConnectState.value = HealthConnectSettingsUiMapper.fromSyncOutcome(
+                outcome = outcome,
+                requiredPermissions = requiredHealthConnectPermissions,
+            )
+        }
+    }
 
     @Suppress("UNUSED_PARAMETER")
     fun onHealthConnectPermissionResult(grantedPermissions: Set<String>) {

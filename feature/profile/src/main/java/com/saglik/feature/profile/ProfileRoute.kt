@@ -53,6 +53,7 @@ fun NavGraphBuilder.profileScreen(
                 }
             },
             onRefreshHealthConnectStatusClick = viewModel::refreshHealthConnectStatus,
+            onSyncHealthConnectWeightAndSleepClick = viewModel::syncHealthConnectWeightAndSleep,
         )
     }
 }

@@ -69,12 +69,12 @@ private fun HealthConnectPermissionRationaleScreen(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
-                    text = "Health App asks for read access to weight and sleep data so future sync can be enabled after you choose to connect it.",
+                    text = "Health App asks for read access to weight and sleep data so you can import recent records after you choose to sync.",
                     style = HealthTypography.bodyMedium,
                     color = HealthColors.SecondaryText,
                 )
                 HealthInlineStatusMessage(
-                    message = "No Health Connect data is being imported yet.",
+                    message = "Sync starts only after you tap the Health Connect sync action in Settings.",
                     modifier = Modifier.padding(top = 16.dp),
                 )
                 Spacer(modifier = Modifier.height(14.dp))

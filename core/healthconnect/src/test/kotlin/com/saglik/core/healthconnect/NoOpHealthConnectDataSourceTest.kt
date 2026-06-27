@@ -51,4 +51,12 @@ class NoOpHealthConnectDataSourceTest {
         assertTrue(status.allRequiredGranted)
         assertEquals(emptySet<String>(), status.missingPermissions)
     }
+
+    @Test
+    fun readMethodsReturnEmptyLists() = runBlocking {
+        val dataSource = NoOpHealthConnectDataSource()
+
+        assertTrue(dataSource.readWeightRecords(0L, 1L).isEmpty())
+        assertTrue(dataSource.readSleepSessionRecords(0L, 1L).isEmpty())
+    }
 }

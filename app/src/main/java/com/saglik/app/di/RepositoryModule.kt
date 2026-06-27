@@ -7,11 +7,13 @@ import com.saglik.core.healthconnect.HealthConnectDataSource
 import com.saglik.data.local.PreferencesLocalDataSource
 import com.saglik.data.repository.DefaultAppPreferencesRepository
 import com.saglik.data.repository.DefaultHealthConnectRepository
+import com.saglik.data.repository.DefaultHealthConnectSyncRepository
 import com.saglik.data.repository.DefaultSleepRepository
 import com.saglik.data.repository.DefaultUserProfileRepository
 import com.saglik.data.repository.DefaultWeightRepository
 import com.saglik.domain.repository.AppPreferencesRepository
 import com.saglik.domain.repository.HealthConnectRepository
+import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
@@ -54,4 +56,16 @@ object RepositoryModule {
     fun provideHealthConnectRepository(
         dataSource: HealthConnectDataSource,
     ): HealthConnectRepository = DefaultHealthConnectRepository(dataSource)
+
+    @Provides
+    @Singleton
+    fun provideHealthConnectSyncRepository(
+        dataSource: HealthConnectDataSource,
+        weightDao: WeightDao,
+        sleepDao: SleepDao,
+    ): HealthConnectSyncRepository = DefaultHealthConnectSyncRepository(
+        dataSource = dataSource,
+        weightDao = weightDao,
+        sleepDao = sleepDao,
+    )
 }

@@ -4,6 +4,7 @@ package com.saglik.app.di
 
 import com.saglik.domain.repository.AppPreferencesRepository
 import com.saglik.domain.repository.HealthConnectRepository
+import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
@@ -23,6 +24,7 @@ import com.saglik.domain.usecase.ObserveUserProfileUseCase
 import com.saglik.domain.usecase.ObserveWeightTrendSummaryUseCase
 import com.saglik.domain.usecase.SaveUserProfileUseCase
 import com.saglik.domain.usecase.SetOnboardingCompletedUseCase
+import com.saglik.domain.usecase.SyncHealthConnectWeightAndSleepUseCase
 import com.saglik.domain.usecase.ValidateSleepInputUseCase
 import com.saglik.domain.usecase.ResolveSleepTimeRangeUseCase
 import dagger.Module
@@ -135,4 +137,14 @@ object UseCaseModule {
         repository: HealthConnectRepository,
     ): GetHealthConnectRequiredPermissionsUseCase =
         GetHealthConnectRequiredPermissionsUseCase(repository)
+
+    @Provides
+    fun provideSyncHealthConnectWeightAndSleepUseCase(
+        healthConnectRepository: HealthConnectRepository,
+        healthConnectSyncRepository: HealthConnectSyncRepository,
+    ): SyncHealthConnectWeightAndSleepUseCase =
+        SyncHealthConnectWeightAndSleepUseCase(
+            healthConnectRepository = healthConnectRepository,
+            syncRepository = healthConnectSyncRepository,
+        )
 }

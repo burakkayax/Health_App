@@ -61,6 +61,7 @@ fun SettingsScreen(
     onOpenHealthConnectSettingsClick: () -> Unit,
     onInstallOrUpdateHealthConnectClick: () -> Unit,
     onRefreshHealthConnectStatusClick: () -> Unit,
+    onSyncHealthConnectWeightAndSleepClick: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
@@ -105,6 +106,7 @@ fun SettingsScreen(
                     onOpenSettingsClick = onOpenHealthConnectSettingsClick,
                     onInstallOrUpdateClick = onInstallOrUpdateHealthConnectClick,
                     onRefreshClick = onRefreshHealthConnectStatusClick,
+                    onSyncClick = onSyncHealthConnectWeightAndSleepClick,
                 )
             }
             item {
@@ -297,6 +299,7 @@ private fun HealthConnectSection(
     onOpenSettingsClick: () -> Unit,
     onInstallOrUpdateClick: () -> Unit,
     onRefreshClick: () -> Unit,
+    onSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SettingsSectionCard(
@@ -323,6 +326,7 @@ private fun HealthConnectSection(
             onOpenSettingsClick = onOpenSettingsClick,
             onInstallOrUpdateClick = onInstallOrUpdateClick,
             onRefreshClick = onRefreshClick,
+            onSyncClick = onSyncClick,
             primary = true,
             modifier = Modifier.padding(top = 18.dp),
         )
@@ -333,6 +337,7 @@ private fun HealthConnectSection(
             onOpenSettingsClick = onOpenSettingsClick,
             onInstallOrUpdateClick = onInstallOrUpdateClick,
             onRefreshClick = onRefreshClick,
+            onSyncClick = onSyncClick,
             primary = false,
             modifier = Modifier.padding(top = 10.dp),
         )
@@ -343,6 +348,7 @@ private fun HealthConnectSection(
             onOpenSettingsClick = onOpenSettingsClick,
             onInstallOrUpdateClick = onInstallOrUpdateClick,
             onRefreshClick = onRefreshClick,
+            onSyncClick = onSyncClick,
             primary = false,
             modifier = Modifier.padding(top = 10.dp),
         )
@@ -357,6 +363,7 @@ private fun HealthConnectActionButton(
     onOpenSettingsClick: () -> Unit,
     onInstallOrUpdateClick: () -> Unit,
     onRefreshClick: () -> Unit,
+    onSyncClick: () -> Unit,
     primary: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -370,6 +377,7 @@ private fun HealthConnectActionButton(
             HealthConnectAction.OpenSettings -> onOpenSettingsClick()
             HealthConnectAction.InstallOrUpdate -> onInstallOrUpdateClick()
             HealthConnectAction.Refresh -> onRefreshClick()
+            HealthConnectAction.SyncWeightAndSleep -> onSyncClick()
         }
     }
 
@@ -377,12 +385,14 @@ private fun HealthConnectActionButton(
         HealthPrimaryButton(
             text = action.text,
             onClick = onClick,
+            enabled = action.enabled,
             modifier = modifier,
         )
     } else {
         HealthSecondaryButton(
             text = action.text,
             onClick = onClick,
+            enabled = action.enabled,
             modifier = modifier,
         )
     }

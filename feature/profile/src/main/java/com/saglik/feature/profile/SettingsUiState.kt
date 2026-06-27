@@ -103,11 +103,13 @@ enum class HealthConnectAction {
     OpenSettings,
     InstallOrUpdate,
     Refresh,
+    SyncWeightAndSleep,
 }
 
 data class HealthConnectActionUiState(
     val action: HealthConnectAction,
     val text: String,
+    val enabled: Boolean = true,
 )
 
 data class HealthConnectSettingsUiState(
@@ -119,6 +121,7 @@ data class HealthConnectSettingsUiState(
     val secondaryAction: HealthConnectActionUiState? = null,
     val tertiaryAction: HealthConnectActionUiState? = null,
     val isChecking: Boolean = false,
+    val isSyncing: Boolean = false,
 )
 
 object SettingsDefaults {
@@ -158,9 +161,8 @@ object SettingsDefaults {
         ),
         SettingsItemUiState(
             title = "Health Connect",
-            description = "Weight and sleep data from Health Connect after you grant permission.",
-            status = "Future",
-            enabled = false,
+            description = "Weight and sleep data imported from Health Connect after you grant permission.",
+            status = "Optional",
         ),
         SettingsItemUiState(
             title = "Imported",
@@ -235,7 +237,7 @@ object SettingsDefaults {
         ),
         SettingsItemUiState(
             title = "Privacy note",
-            description = "This foundation does not add cloud sync, Health Connect reading, export, delete, or AI processing.",
+            description = "Health Connect sync is user initiated. Cloud sync, export, delete, and AI processing are not active.",
         ),
         SettingsItemUiState(
             title = "Repository",

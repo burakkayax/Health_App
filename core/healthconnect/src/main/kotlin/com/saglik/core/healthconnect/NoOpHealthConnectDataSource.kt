@@ -2,6 +2,8 @@ package com.saglik.core.healthconnect
 
 import com.saglik.core.model.HealthConnectAvailability
 import com.saglik.core.model.HealthConnectPermissionStatus
+import com.saglik.core.model.HealthConnectSleepSessionSnapshot
+import com.saglik.core.model.HealthConnectWeightRecordSnapshot
 
 class NoOpHealthConnectDataSource(
     private val availability: HealthConnectAvailability = HealthConnectAvailability.Unsupported,
@@ -18,4 +20,14 @@ class NoOpHealthConnectDataSource(
             requiredPermissions = getRequiredPermissions(),
             grantedPermissions = grantedPermissions,
         )
+
+    override suspend fun readWeightRecords(
+        startTimeMillis: Long,
+        endTimeMillis: Long,
+    ): List<HealthConnectWeightRecordSnapshot> = emptyList()
+
+    override suspend fun readSleepSessionRecords(
+        startTimeMillis: Long,
+        endTimeMillis: Long,
+    ): List<HealthConnectSleepSessionSnapshot> = emptyList()
 }
