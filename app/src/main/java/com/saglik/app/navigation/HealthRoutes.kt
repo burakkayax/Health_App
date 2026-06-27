@@ -10,6 +10,7 @@ import com.saglik.feature.sleep.SleepRoute
 import com.saglik.feature.summary.ExerciseRoute
 import com.saglik.feature.summary.StepsRoute
 import com.saglik.feature.summary.SummaryRoute
+import com.saglik.feature.summary.WaterRoute
 import com.saglik.feature.weight.WeightRoute
 
 object HealthRoutes {
@@ -26,6 +27,7 @@ object HealthRoutes {
         SleepRoute.route,
         StepsRoute.route,
         ExerciseRoute.route,
+        WaterRoute.route,
         HealthTabRoutes.trends,
         HealthTabRoutes.insights,
         HealthTabRoutes.search
@@ -41,7 +43,8 @@ object HealthRoutes {
             WeightRoute.route,
             SleepRoute.route,
             StepsRoute.route,
-            ExerciseRoute.route -> SummaryRoute.route
+            ExerciseRoute.route,
+            WaterRoute.route -> SummaryRoute.route
             HealthTabRoutes.trends -> HealthTabRoutes.trends
             HealthTabRoutes.insights -> HealthTabRoutes.insights
             HealthTabRoutes.search -> HealthTabRoutes.search

@@ -17,6 +17,7 @@ import com.saglik.feature.summary.component.ExerciseSummaryCard
 import com.saglik.feature.summary.component.MoodOrInsightSummaryCard
 import com.saglik.feature.summary.component.SleepSummaryCard
 import com.saglik.feature.summary.component.StepsSummaryCard
+import com.saglik.feature.summary.component.WaterSummaryCard
 import com.saglik.feature.summary.component.WeightSummaryCard
 
 @Composable
@@ -31,9 +32,10 @@ fun SummaryScreen(
     onSleepClick: () -> Unit = {},
     onStepsClick: () -> Unit = {},
     onExerciseClick: () -> Unit = {},
+    onWaterClick: () -> Unit = {},
 ) {
     val cards = remember(state) {
-        listOf("weight", "bmi", "sleep", "steps", "exercise", "mood")
+        listOf("weight", "bmi", "sleep", "steps", "exercise", "water", "mood")
     }
 
     LazyColumn(
@@ -75,6 +77,11 @@ fun SummaryScreen(
                 "exercise" -> ExerciseSummaryCard(
                     summary = state.exercise,
                     onClick = onExerciseClick,
+                )
+
+                "water" -> WaterSummaryCard(
+                    summary = state.water,
+                    onClick = onWaterClick,
                 )
 
                 "mood" -> MoodOrInsightSummaryCard(summary = state.mood)

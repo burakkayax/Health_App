@@ -12,6 +12,7 @@ import com.saglik.domain.usecase.ObserveExerciseSummaryUseCase
 import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveSleepSummaryUseCase
 import com.saglik.domain.usecase.ObserveStepsSummaryUseCase
+import com.saglik.domain.usecase.water.ObserveWaterSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
@@ -27,21 +28,30 @@ class SummaryViewModel @Inject constructor(
     observeSleepSummaryUseCase: ObserveSleepSummaryUseCase,
     observeStepsSummaryUseCase: ObserveStepsSummaryUseCase,
     observeExerciseSummaryUseCase: ObserveExerciseSummaryUseCase,
+    observeWaterSummaryUseCase: ObserveWaterSummaryUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<SummaryUiState> =
         combine(
-            observeLatestWeightEntryUseCase(),
-            observeBmiSummaryUseCase(),
-            observeSleepSummaryUseCase(),
-            observeStepsSummaryUseCase(),
-            observeExerciseSummaryUseCase(),
-        ) { latestWeight, bmiSummary, sleepSummary, stepsSummary, exerciseSummary ->
+            combine(
+                observeLatestWeightEntryUseCase(),
+                observeBmiSummaryUseCase(),
+                observeSleepSummaryUseCase(),
+                ::Triple
+            ),
+            combine(
+                observeStepsSummaryUseCase(),
+                observeExerciseSummaryUseCase(),
+                observeWaterSummaryUseCase(),
+                ::Triple
+            )
+        ) { (latestWeight, bmiSummary, sleepSummary), (stepsSummary, exerciseSummary, waterSummary) ->
             SummaryUiState.loading().copy(
                 weight = latestWeight.toWeightSummary(),
                 bmi = BmiUiMapper.map(bmiSummary),
                 sleep = sleepSummary.toSleepSummaryUiState(),
                 steps = stepsSummary.toStepsSummaryUiState(),
                 exercise = exerciseSummary.toExerciseSummaryUiState(),
+                water = waterSummary.toWaterSummaryUiState(),
             )
         }.stateIn(
             scope = viewModelScope,
@@ -161,4 +171,24 @@ class SummaryViewModel @Inject constructor(
             SleepQuality.EXCELLENT -> "Excellent"
             null -> "Sleep logged"
         }
+
+    private fun com.saglik.core.model.WaterSummary.toWaterSummaryUiState(): WaterSummaryUiState {
+        if (!hasData) {
+            return WaterSummaryUiState(
+                primaryText = "No water yet",
+                secondaryText = "Add your first water entry",
+                weeklyText = "Last 7 days unavailable",
+                hasData = false,
+                isLoading = false,
+            )
+        }
+
+        return WaterSummaryUiState(
+            primaryText = String.format(Locale.US, "%,d ml", totalTodayMl),
+            secondaryText = "Today",
+            weeklyText = String.format(Locale.US, "%,d ml in 7 days", totalLast7DaysMl),
+            hasData = true,
+            isLoading = false,
+        )
+    }
 }

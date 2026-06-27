@@ -4,6 +4,7 @@ import com.saglik.core.database.dao.ExerciseDao
 import com.saglik.core.database.dao.SleepDao
 import com.saglik.core.database.dao.StepsDao
 import com.saglik.core.database.dao.UserProfileDao
+import com.saglik.core.database.dao.WaterDao
 import com.saglik.core.database.dao.WeightDao
 import com.saglik.core.healthconnect.HealthConnectDataSource
 import com.saglik.data.local.PreferencesLocalDataSource
@@ -14,6 +15,7 @@ import com.saglik.data.repository.DefaultHealthConnectSyncRepository
 import com.saglik.data.repository.DefaultSleepRepository
 import com.saglik.data.repository.DefaultStepsRepository
 import com.saglik.data.repository.DefaultUserProfileRepository
+import com.saglik.data.repository.DefaultWaterRepository
 import com.saglik.data.repository.DefaultWeightRepository
 import com.saglik.domain.repository.AppPreferencesRepository
 import com.saglik.domain.repository.ExerciseRepository
@@ -22,6 +24,7 @@ import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.StepsRepository
 import com.saglik.domain.repository.UserProfileRepository
+import com.saglik.domain.repository.WaterRepository
 import com.saglik.domain.repository.WeightRepository
 import dagger.Module
 import dagger.Provides
@@ -68,6 +71,12 @@ object RepositoryModule {
     fun provideExerciseRepository(
         exerciseDao: ExerciseDao,
     ): ExerciseRepository = DefaultExerciseRepository(exerciseDao)
+
+    @Provides
+    @Singleton
+    fun provideWaterRepository(
+        waterDao: WaterDao,
+    ): WaterRepository = DefaultWaterRepository(waterDao)
 
     @Provides
     @Singleton

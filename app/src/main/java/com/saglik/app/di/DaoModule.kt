@@ -29,4 +29,7 @@ object DaoModule {
 
     @Provides
     fun provideExerciseDao(database: AppDatabase): ExerciseDao = database.exerciseDao()
+
+    @Provides
+    fun provideWaterDao(database: AppDatabase): com.saglik.core.database.dao.WaterDao = database.waterDao()
 }

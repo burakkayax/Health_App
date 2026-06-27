@@ -32,6 +32,9 @@ import com.saglik.feature.summary.StepsRoute
 import com.saglik.feature.summary.SummaryRoute
 import com.saglik.feature.summary.SummaryScreen
 import com.saglik.feature.summary.SummaryViewModel
+import com.saglik.feature.summary.WaterDetailScreen
+import com.saglik.feature.summary.WaterDetailViewModel
+import com.saglik.feature.summary.WaterRoute
 import com.saglik.feature.weight.WeightDetailScreen
 import com.saglik.feature.weight.WeightDetailViewModel
 import com.saglik.feature.weight.WeightRoute
@@ -114,6 +117,11 @@ fun HealthNavHost(
                     },
                     onExerciseClick = {
                         navController.navigate(ExerciseRoute.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onWaterClick = {
+                        navController.navigate(WaterRoute.route) {
                             launchSingleTop = true
                         }
                     },
@@ -206,6 +214,33 @@ fun HealthNavHost(
             ) { listState, contentPadding ->
                 ExerciseDetailScreen(
                     state = state,
+                    listState = listState,
+                    contentPadding = contentPadding,
+                )
+            }
+        }
+        composable(WaterRoute.route) {
+            val viewModel: WaterDetailViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            MainChromeRoute(
+                title = "Water",
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(WaterRoute.route),
+                bottomItems = bottomItems,
+                onBottomTabSelected = navController::navigateHealthTab,
+                onProfileClick = navController::navigateToProfile,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                showProfileButton = false,
+            ) { listState, contentPadding ->
+                WaterDetailScreen(
+                    state = state,
+                    onAmountInputChanged = viewModel::onAmountInputChanged,
+                    onNoteInputChanged = viewModel::onNoteInputChanged,
+                    onAddWaterClick = viewModel::addWater,
+                    onQuickAddClick = viewModel::quickAddWater,
+                    onDeleteEntryClick = viewModel::deleteWaterEntry,
                     listState = listState,
                     contentPadding = contentPadding,
                 )

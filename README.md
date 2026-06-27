@@ -11,6 +11,7 @@ Current V1 features:
 - Weight tracking
 - BMI calculation
 - Sleep tracking
+- Water tracking
 - Health Connect import for weight, sleep, steps, and exercise
 - Read-only Steps and Exercise Summary cards with drill-down detail pages
 - Persistent app chrome
@@ -32,7 +33,6 @@ V1 polish focus:
 
 Intentionally missing from V1:
 
-- Water tracking
 - Caffeine tracking
 - Mood or stress tracking
 - Screen time

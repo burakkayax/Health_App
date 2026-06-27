@@ -11,12 +11,14 @@ import com.saglik.core.database.dao.SleepDao
 import com.saglik.core.database.dao.StepsDao
 import com.saglik.core.database.dao.UserProfileDao
 import com.saglik.core.database.dao.WeightDao
+import com.saglik.core.database.dao.WaterDao
 import com.saglik.core.database.entity.AppMetadataEntity
 import com.saglik.core.database.entity.ExerciseSessionEntity
 import com.saglik.core.database.entity.SleepEntryEntity
 import com.saglik.core.database.entity.StepsEntryEntity
 import com.saglik.core.database.entity.UserProfileEntity
 import com.saglik.core.database.entity.WeightEntryEntity
+import com.saglik.core.database.entity.WaterEntryEntity
 
 @Database(
     entities = [
@@ -26,8 +28,9 @@ import com.saglik.core.database.entity.WeightEntryEntity
         SleepEntryEntity::class,
         StepsEntryEntity::class,
         ExerciseSessionEntity::class,
+        WaterEntryEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(DateTimeConverters::class)
@@ -41,6 +44,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun stepsDao(): StepsDao
 
     abstract fun exerciseDao(): ExerciseDao
+
+    abstract fun waterDao(): WaterDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -194,6 +199,25 @@ abstract class AppDatabase : RoomDatabase() {
                     """
                     CREATE UNIQUE INDEX IF NOT EXISTS index_exercise_sessions_external_identity
                     ON exercise_sessions(source, sourcePackageName, sourceRecordId)
+                    """.trimIndent(),
+                )
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS water_entries (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        amountMl INTEGER NOT NULL,
+                        recordedAt INTEGER NOT NULL,
+                        source TEXT NOT NULL,
+                        note TEXT,
+                        createdAt INTEGER NOT NULL DEFAULT 0,
+                        updatedAt INTEGER NOT NULL DEFAULT 0,
+                        deletedAt INTEGER
+                    )
                     """.trimIndent(),
                 )
             }

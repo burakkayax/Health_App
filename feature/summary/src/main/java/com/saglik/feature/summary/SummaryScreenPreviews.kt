@@ -45,6 +45,13 @@ fun SummaryPreview_WithData() {
             hasData = true,
             isLoading = false,
         ),
+        water = WaterSummaryUiState(
+            primaryText = "1,250 ml",
+            secondaryText = "250 ml at 14:30",
+            weeklyText = "12.5 L in 7 days",
+            hasData = true,
+            isLoading = false
+        ),
         mood = MoodSummary(title = "Great", tags = "Energetic")
     )
 
@@ -94,6 +101,13 @@ fun SummaryPreview_EmptyData() {
             latestText = "No sessions logged",
             hasData = false,
             isLoading = false,
+        ),
+        water = WaterSummaryUiState(
+            primaryText = "--",
+            secondaryText = "--",
+            weeklyText = "--",
+            hasData = false,
+            isLoading = false
         ),
         mood = MoodSummary(title = "No mood", tags = "Add your mood")
     )

@@ -11,6 +11,7 @@ data class SummaryUiState(
     val sleep: SleepSummaryUiState,
     val steps: StepsSummaryUiState,
     val exercise: ExerciseSummaryUiState,
+    val water: WaterSummaryUiState,
     val mood: MoodSummary,
 ) {
     companion object {
@@ -25,6 +26,7 @@ data class SummaryUiState(
             sleep = SleepSummaryUiState.loading(),
             steps = StepsSummaryUiState.loading(),
             exercise = ExerciseSummaryUiState.loading(),
+            water = WaterSummaryUiState.loading(),
             mood = MoodSummary(
                 title = "A Slightly Pleasant Moment",
                 tags = "Happy - Health - Fitness",
@@ -129,3 +131,23 @@ data class MoodSummary(
     val title: String,
     val tags: String,
 )
+
+@Immutable
+data class WaterSummaryUiState(
+    val primaryText: String,
+    val secondaryText: String,
+    val weeklyText: String,
+    val hasData: Boolean,
+    val isLoading: Boolean,
+) {
+    companion object {
+        fun loading(): WaterSummaryUiState =
+            WaterSummaryUiState(
+                primaryText = "Loading",
+                secondaryText = "Reading water logs",
+                weeklyText = "Last 7 days unavailable",
+                hasData = false,
+                isLoading = true,
+            )
+    }
+}

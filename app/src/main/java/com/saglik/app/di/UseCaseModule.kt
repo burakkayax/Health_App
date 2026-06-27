@@ -9,6 +9,7 @@ import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
 import com.saglik.domain.repository.StepsRepository
 import com.saglik.domain.repository.UserProfileRepository
+import com.saglik.domain.repository.WaterRepository
 import com.saglik.domain.repository.WeightRepository
 import com.saglik.domain.usecase.AddExerciseSessionUseCase
 import com.saglik.domain.usecase.AddSleepEntryUseCase
@@ -35,6 +36,11 @@ import com.saglik.domain.usecase.SyncHealthConnectDataUseCase
 import com.saglik.domain.usecase.ValidateExerciseSessionInputUseCase
 import com.saglik.domain.usecase.ValidateSleepInputUseCase
 import com.saglik.domain.usecase.ResolveSleepTimeRangeUseCase
+import com.saglik.domain.usecase.water.AddWaterEntryUseCase
+import com.saglik.domain.usecase.water.DeleteWaterEntryUseCase
+import com.saglik.domain.usecase.water.ObserveWaterEntriesUseCase
+import com.saglik.domain.usecase.water.ObserveWaterSummaryUseCase
+import com.saglik.domain.usecase.water.ValidateWaterEntryInputUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -140,6 +146,34 @@ object UseCaseModule {
     fun provideObserveExerciseSummaryUseCase(
         repository: ExerciseRepository,
     ): ObserveExerciseSummaryUseCase = ObserveExerciseSummaryUseCase(repository)
+
+    @Provides
+    fun provideValidateWaterEntryInputUseCase(): ValidateWaterEntryInputUseCase =
+        ValidateWaterEntryInputUseCase()
+
+    @Provides
+    fun provideAddWaterEntryUseCase(
+        repository: WaterRepository,
+        validateWaterEntryInputUseCase: ValidateWaterEntryInputUseCase,
+    ): AddWaterEntryUseCase = AddWaterEntryUseCase(
+        repository = repository,
+        validateWaterEntryInputUseCase = validateWaterEntryInputUseCase,
+    )
+
+    @Provides
+    fun provideObserveWaterEntriesUseCase(
+        repository: WaterRepository,
+    ): ObserveWaterEntriesUseCase = ObserveWaterEntriesUseCase(repository)
+
+    @Provides
+    fun provideObserveWaterSummaryUseCase(
+        repository: WaterRepository,
+    ): ObserveWaterSummaryUseCase = ObserveWaterSummaryUseCase(repository)
+
+    @Provides
+    fun provideDeleteWaterEntryUseCase(
+        repository: WaterRepository,
+    ): DeleteWaterEntryUseCase = DeleteWaterEntryUseCase(repository)
 
     @Provides
     fun provideObserveBmiSummaryUseCase(
