@@ -12,7 +12,7 @@ Current V1 features:
 - BMI calculation
 - Sleep tracking
 - Health Connect import for weight, sleep, steps, and exercise
-- Read-only Steps and Exercise cards on the Summary dashboard
+- Read-only Steps and Exercise Summary cards with drill-down detail pages
 - Persistent app chrome
 - Floating bottom navigation
 - Collapsing frosted header
@@ -26,6 +26,7 @@ V1 polish focus:
 - Shared app chrome on main screens
 - Real weight, BMI, sleep, steps, and exercise data on the Summary dashboard
 - All-time Weight Trend with newest-first history
+- Steps and Exercise detail pages show local synced data without charts, recommendations, route, calories, distance, or heart-rate metrics
 - Manual sleep entry with overnight duration support
 - Consistent empty, validation, and saving states
 

@@ -29,6 +29,8 @@ fun SummaryScreen(
     onWeightClick: () -> Unit = {},
     onBmiClick: () -> Unit = {},
     onSleepClick: () -> Unit = {},
+    onStepsClick: () -> Unit = {},
+    onExerciseClick: () -> Unit = {},
 ) {
     val cards = remember(state) {
         listOf("weight", "bmi", "sleep", "steps", "exercise", "mood")
@@ -65,9 +67,15 @@ fun SummaryScreen(
                     onClick = onSleepClick,
                 )
 
-                "steps" -> StepsSummaryCard(summary = state.steps)
+                "steps" -> StepsSummaryCard(
+                    summary = state.steps,
+                    onClick = onStepsClick,
+                )
 
-                "exercise" -> ExerciseSummaryCard(summary = state.exercise)
+                "exercise" -> ExerciseSummaryCard(
+                    summary = state.exercise,
+                    onClick = onExerciseClick,
+                )
 
                 "mood" -> MoodOrInsightSummaryCard(summary = state.mood)
             }

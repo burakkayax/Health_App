@@ -25,6 +25,7 @@ import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveOnboardingCompletedUseCase
 import com.saglik.domain.usecase.ObserveSleepDetailUseCase
 import com.saglik.domain.usecase.ObserveSleepSummaryUseCase
+import com.saglik.domain.usecase.ObserveStepsEntriesUseCase
 import com.saglik.domain.usecase.ObserveStepsSummaryUseCase
 import com.saglik.domain.usecase.ObserveUserProfileUseCase
 import com.saglik.domain.usecase.ObserveWeightTrendSummaryUseCase
@@ -111,6 +112,11 @@ object UseCaseModule {
     fun provideObserveStepsSummaryUseCase(
         repository: StepsRepository,
     ): ObserveStepsSummaryUseCase = ObserveStepsSummaryUseCase(repository)
+
+    @Provides
+    fun provideObserveStepsEntriesUseCase(
+        repository: StepsRepository,
+    ): ObserveStepsEntriesUseCase = ObserveStepsEntriesUseCase(repository)
 
     @Provides
     fun provideValidateExerciseSessionInputUseCase(): ValidateExerciseSessionInputUseCase =

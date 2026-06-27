@@ -23,6 +23,12 @@ import com.saglik.feature.profile.profileScreen
 import com.saglik.feature.sleep.SleepDetailScreen
 import com.saglik.feature.sleep.SleepDetailViewModel
 import com.saglik.feature.sleep.SleepRoute
+import com.saglik.feature.summary.ExerciseDetailScreen
+import com.saglik.feature.summary.ExerciseDetailViewModel
+import com.saglik.feature.summary.ExerciseRoute
+import com.saglik.feature.summary.StepsDetailScreen
+import com.saglik.feature.summary.StepsDetailViewModel
+import com.saglik.feature.summary.StepsRoute
 import com.saglik.feature.summary.SummaryRoute
 import com.saglik.feature.summary.SummaryScreen
 import com.saglik.feature.summary.SummaryViewModel
@@ -101,6 +107,16 @@ fun HealthNavHost(
                             launchSingleTop = true
                         }
                     },
+                    onStepsClick = {
+                        navController.navigate(StepsRoute.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onExerciseClick = {
+                        navController.navigate(ExerciseRoute.route) {
+                            launchSingleTop = true
+                        }
+                    },
                 )
             }
         }
@@ -146,6 +162,50 @@ fun HealthNavHost(
                 SleepDetailScreen(
                     state = state,
                     onEvent = viewModel::onEvent,
+                    listState = listState,
+                    contentPadding = contentPadding,
+                )
+            }
+        }
+        composable(StepsRoute.route) {
+            val viewModel: StepsDetailViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            MainChromeRoute(
+                title = "Steps",
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(StepsRoute.route),
+                bottomItems = bottomItems,
+                onBottomTabSelected = navController::navigateHealthTab,
+                onProfileClick = navController::navigateToProfile,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                showProfileButton = false,
+            ) { listState, contentPadding ->
+                StepsDetailScreen(
+                    state = state,
+                    listState = listState,
+                    contentPadding = contentPadding,
+                )
+            }
+        }
+        composable(ExerciseRoute.route) {
+            val viewModel: ExerciseDetailViewModel = hiltViewModel()
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+            MainChromeRoute(
+                title = "Exercise",
+                selectedRoute = HealthRoutes.selectedBottomRouteFor(ExerciseRoute.route),
+                bottomItems = bottomItems,
+                onBottomTabSelected = navController::navigateHealthTab,
+                onProfileClick = navController::navigateToProfile,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                showProfileButton = false,
+            ) { listState, contentPadding ->
+                ExerciseDetailScreen(
+                    state = state,
                     listState = listState,
                     contentPadding = contentPadding,
                 )

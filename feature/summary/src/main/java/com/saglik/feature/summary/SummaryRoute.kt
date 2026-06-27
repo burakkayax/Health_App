@@ -12,9 +12,19 @@ object SummaryRoute {
     const val route = "summary"
 }
 
+object StepsRoute {
+    const val route = "steps"
+}
+
+object ExerciseRoute {
+    const val route = "exercise"
+}
+
 fun NavGraphBuilder.summaryScreen(
     onBottomTabSelected: (String) -> Unit = {},
     onNavigateToWeight: () -> Unit = {},
+    onNavigateToSteps: () -> Unit = {},
+    onNavigateToExercise: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
 ) {
     composable(SummaryRoute.route) {
@@ -27,6 +37,8 @@ fun NavGraphBuilder.summaryScreen(
             contentPadding = PaddingValues(),
             onWeightClick = onNavigateToWeight,
             onBmiClick = onNavigateToWeight,
+            onStepsClick = onNavigateToSteps,
+            onExerciseClick = onNavigateToExercise,
         )
     }
 }
