@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -46,6 +48,7 @@ import com.saglik.core.designsystem.theme.HealthColors
 import com.saglik.core.designsystem.theme.HealthSpacing
 import com.saglik.core.ui.component.FloatingHealthBottomBar
 import com.saglik.core.ui.component.HealthBottomNavItem
+import com.saglik.core.ui.component.HealthFloatingBackButton
 
 @Composable
 fun HealthAppScaffold(
@@ -56,6 +59,8 @@ fun HealthAppScaffold(
     listState: LazyListState,
     modifier: Modifier = Modifier,
     onProfileClick: () -> Unit = {},
+    onBackClick: (() -> Unit)? = null,
+    showProfileButton: Boolean = true,
     content: @Composable BoxScope.(PaddingValues) -> Unit,
 ) {
     val collapseProgress by remember(listState) {
@@ -85,6 +90,8 @@ fun HealthAppScaffold(
             title = title,
             collapseProgress = collapseProgress,
             onProfileClick = onProfileClick,
+            onBackClick = onBackClick,
+            showProfileButton = showProfileButton,
             modifier = Modifier.align(Alignment.TopCenter),
         )
     }
@@ -121,6 +128,8 @@ fun CollapsingHealthHeader(
     collapseProgress: Float,
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onBackClick: (() -> Unit)? = null,
+    showProfileButton: Boolean = true,
 ) {
     FrostedTopBar(
         collapseProgress = collapseProgress,
@@ -134,21 +143,30 @@ fun CollapsingHealthHeader(
                 .padding(horizontal = HealthSpacing.screenHorizontal),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            onBackClick?.let {
+                HealthFloatingBackButton(onClick = it)
+                Spacer(modifier = Modifier.width(12.dp))
+            }
             Text(
                 text = title,
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontSize = lerpTextUnit(42.sp, 22.sp, progress),
                     lineHeight = lerpTextUnit(48.sp, 28.sp, progress),
                 ),
                 fontWeight = FontWeight.Bold,
                 color = HealthColors.Ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.weight(1f))
-            HealthAvatarButton(
-                size = lerpDp(44.dp, 34.dp, progress),
-                iconSize = lerpDp(24.dp, 19.dp, progress),
-                onClick = onProfileClick,
-            )
+            if (showProfileButton) {
+                Spacer(modifier = Modifier.width(12.dp))
+                HealthAvatarButton(
+                    size = lerpDp(44.dp, 34.dp, progress),
+                    iconSize = lerpDp(24.dp, 19.dp, progress),
+                    onClick = onProfileClick,
+                )
+            }
         }
     }
 }

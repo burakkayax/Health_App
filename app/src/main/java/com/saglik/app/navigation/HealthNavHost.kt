@@ -114,6 +114,10 @@ fun HealthNavHost(
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                showProfileButton = false,
             ) { listState, contentPadding ->
                 WeightDetailScreen(
                     state = state,
@@ -134,6 +138,10 @@ fun HealthNavHost(
                 bottomItems = bottomItems,
                 onBottomTabSelected = navController::navigateHealthTab,
                 onProfileClick = navController::navigateToProfile,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                showProfileButton = false,
             ) { listState, contentPadding ->
                 SleepDetailScreen(
                     state = state,
@@ -189,7 +197,11 @@ fun HealthNavHost(
                 )
             }
         }
-        profileScreen()
+        profileScreen(
+            onBackClick = {
+                navController.popBackStack()
+            },
+        )
     }
 }
 
@@ -200,6 +212,8 @@ private fun MainChromeRoute(
     bottomItems: List<HealthBottomNavItem>,
     onBottomTabSelected: (String) -> Unit,
     onProfileClick: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
+    showProfileButton: Boolean = true,
     content: @Composable (LazyListState, PaddingValues) -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -210,6 +224,8 @@ private fun MainChromeRoute(
         onBottomTabSelected = onBottomTabSelected,
         listState = listState,
         onProfileClick = onProfileClick,
+        onBackClick = onBackClick,
+        showProfileButton = showProfileButton,
     ) { contentPadding ->
         content(listState, contentPadding)
     }
