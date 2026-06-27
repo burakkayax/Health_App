@@ -11,6 +11,8 @@ Current V1 features:
 - Weight tracking
 - BMI calculation
 - Sleep tracking
+- Health Connect import for weight, sleep, steps, and exercise
+- Read-only Steps and Exercise cards on the Summary dashboard
 - Persistent app chrome
 - Floating bottom navigation
 - Collapsing frosted header
@@ -22,14 +24,13 @@ V1 polish focus:
 
 - Premium pastel gradient and glass card interface
 - Shared app chrome on main screens
-- Real weight, BMI, and sleep data on the Summary dashboard
+- Real weight, BMI, sleep, steps, and exercise data on the Summary dashboard
 - All-time Weight Trend with newest-first history
 - Manual sleep entry with overnight duration support
 - Consistent empty, validation, and saving states
 
 Intentionally missing from V1:
 
-- Health Connect
 - Water tracking
 - Caffeine tracking
 - Mood or stress tracking
@@ -37,6 +38,7 @@ Intentionally missing from V1:
 - Real insights
 - Correlations
 - AI coach
+- Steps or exercise recommendations, trend analysis, route, calories, heart-rate, distance, speed, or training guidance
 - Cloud sync
 - Authentication
 

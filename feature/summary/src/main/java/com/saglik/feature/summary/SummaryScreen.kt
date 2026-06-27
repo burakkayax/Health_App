@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -13,10 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.saglik.core.designsystem.theme.HealthSpacing
 import com.saglik.core.ui.component.EditChip
-import com.saglik.feature.summary.component.ActivitySummaryCard
 import com.saglik.feature.summary.component.BmiSummaryCard
+import com.saglik.feature.summary.component.ExerciseSummaryCard
 import com.saglik.feature.summary.component.MoodOrInsightSummaryCard
 import com.saglik.feature.summary.component.SleepSummaryCard
+import com.saglik.feature.summary.component.StepsSummaryCard
 import com.saglik.feature.summary.component.WeightSummaryCard
 
 @Composable
@@ -31,7 +31,7 @@ fun SummaryScreen(
     onSleepClick: () -> Unit = {},
 ) {
     val cards = remember(state) {
-        listOf("weight", "bmi", "sleep", "activity", "mood")
+        listOf("weight", "bmi", "sleep", "steps", "exercise", "mood")
     }
 
     LazyColumn(
@@ -65,7 +65,9 @@ fun SummaryScreen(
                     onClick = onSleepClick,
                 )
 
-                "activity" -> ActivitySummaryCard(summary = state.activity)
+                "steps" -> StepsSummaryCard(summary = state.steps)
+
+                "exercise" -> ExerciseSummaryCard(summary = state.exercise)
 
                 "mood" -> MoodOrInsightSummaryCard(summary = state.mood)
             }

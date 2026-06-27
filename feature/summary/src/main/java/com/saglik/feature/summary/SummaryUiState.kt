@@ -9,7 +9,8 @@ data class SummaryUiState(
     val weight: WeightSummary,
     val bmi: BmiSummaryUiState,
     val sleep: SleepSummaryUiState,
-    val activity: ActivitySummary,
+    val steps: StepsSummaryUiState,
+    val exercise: ExerciseSummaryUiState,
     val mood: MoodSummary,
 ) {
     companion object {
@@ -22,11 +23,8 @@ data class SummaryUiState(
             ),
             bmi = BmiSummaryUiState.loading(),
             sleep = SleepSummaryUiState.loading(),
-            activity = ActivitySummary(
-                move = "265 cal",
-                exercise = "11 min",
-                stand = "3 hr",
-            ),
+            steps = StepsSummaryUiState.loading(),
+            exercise = ExerciseSummaryUiState.loading(),
             mood = MoodSummary(
                 title = "A Slightly Pleasant Moment",
                 tags = "Happy - Health - Fitness",
@@ -87,11 +85,44 @@ data class SleepSummaryUiState(
 }
 
 @Immutable
-data class ActivitySummary(
-    val move: String,
-    val exercise: String,
-    val stand: String,
-)
+data class StepsSummaryUiState(
+    val primaryText: String,
+    val secondaryText: String,
+    val weeklyText: String,
+    val hasData: Boolean,
+    val isLoading: Boolean,
+) {
+    companion object {
+        fun loading(): StepsSummaryUiState =
+            StepsSummaryUiState(
+                primaryText = "Loading",
+                secondaryText = "Reading steps",
+                weeklyText = "Last 7 days unavailable",
+                hasData = false,
+                isLoading = true,
+            )
+    }
+}
+
+@Immutable
+data class ExerciseSummaryUiState(
+    val primaryText: String,
+    val secondaryText: String,
+    val latestText: String,
+    val hasData: Boolean,
+    val isLoading: Boolean,
+) {
+    companion object {
+        fun loading(): ExerciseSummaryUiState =
+            ExerciseSummaryUiState(
+                primaryText = "Loading",
+                secondaryText = "Reading sessions",
+                latestText = "No sessions logged",
+                hasData = false,
+                isLoading = true,
+            )
+    }
+}
 
 @Immutable
 data class MoodSummary(

@@ -31,7 +31,20 @@ fun SummaryPreview_WithData() {
             hasData = true,
             isLoading = false
         ),
-        activity = ActivitySummary(move = "450 cal", exercise = "30 min", stand = "8 hr"),
+        steps = StepsSummaryUiState(
+            primaryText = "6,240 steps",
+            secondaryText = "Today",
+            weeklyText = "42,100 in 7 days",
+            hasData = true,
+            isLoading = false,
+        ),
+        exercise = ExerciseSummaryUiState(
+            primaryText = "3 sessions",
+            secondaryText = "185 min total",
+            latestText = "Morning run",
+            hasData = true,
+            isLoading = false,
+        ),
         mood = MoodSummary(title = "Great", tags = "Energetic")
     )
 
@@ -68,7 +81,20 @@ fun SummaryPreview_EmptyData() {
             hasData = false,
             isLoading = false
         ),
-        activity = ActivitySummary(move = "--", exercise = "--", stand = "--"),
+        steps = StepsSummaryUiState(
+            primaryText = "No steps yet",
+            secondaryText = "Sync Health Connect to import steps",
+            weeklyText = "Last 7 days unavailable",
+            hasData = false,
+            isLoading = false,
+        ),
+        exercise = ExerciseSummaryUiState(
+            primaryText = "No exercise yet",
+            secondaryText = "Sync Health Connect or add a session later",
+            latestText = "No sessions logged",
+            hasData = false,
+            isLoading = false,
+        ),
         mood = MoodSummary(title = "No mood", tags = "Add your mood")
     )
 

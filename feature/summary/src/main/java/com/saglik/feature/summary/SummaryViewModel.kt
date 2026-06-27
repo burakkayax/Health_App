@@ -2,12 +2,16 @@ package com.saglik.feature.summary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saglik.core.model.WeightEntry
+import com.saglik.core.model.ExerciseSummary
+import com.saglik.core.model.ExerciseType
 import com.saglik.core.model.SleepQuality
-import com.saglik.domain.bmi.BmiSummary
+import com.saglik.core.model.WeightEntry
+import com.saglik.domain.steps.StepsSummary
 import com.saglik.domain.usecase.ObserveBmiSummaryUseCase
+import com.saglik.domain.usecase.ObserveExerciseSummaryUseCase
 import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveSleepSummaryUseCase
+import com.saglik.domain.usecase.ObserveStepsSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
@@ -21,17 +25,23 @@ class SummaryViewModel @Inject constructor(
     observeLatestWeightEntryUseCase: ObserveLatestWeightEntryUseCase,
     observeBmiSummaryUseCase: ObserveBmiSummaryUseCase,
     observeSleepSummaryUseCase: ObserveSleepSummaryUseCase,
+    observeStepsSummaryUseCase: ObserveStepsSummaryUseCase,
+    observeExerciseSummaryUseCase: ObserveExerciseSummaryUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<SummaryUiState> =
         combine(
             observeLatestWeightEntryUseCase(),
             observeBmiSummaryUseCase(),
             observeSleepSummaryUseCase(),
-        ) { latestWeight, bmiSummary, sleepSummary ->
+            observeStepsSummaryUseCase(),
+            observeExerciseSummaryUseCase(),
+        ) { latestWeight, bmiSummary, sleepSummary, stepsSummary, exerciseSummary ->
             SummaryUiState.loading().copy(
                 weight = latestWeight.toWeightSummary(),
                 bmi = BmiUiMapper.map(bmiSummary),
                 sleep = sleepSummary.toSleepSummaryUiState(),
+                steps = stepsSummary.toStepsSummaryUiState(),
+                exercise = exerciseSummary.toExerciseSummaryUiState(),
             )
         }.stateIn(
             scope = viewModelScope,
@@ -75,6 +85,63 @@ class SummaryViewModel @Inject constructor(
             isLoading = false,
         )
     }
+
+    private fun StepsSummary.toStepsSummaryUiState(): StepsSummaryUiState {
+        if (!hasData) {
+            return StepsSummaryUiState(
+                primaryText = "No steps yet",
+                secondaryText = "Sync Health Connect to import steps",
+                weeklyText = "Last 7 days unavailable",
+                hasData = false,
+                isLoading = false,
+            )
+        }
+
+        return StepsSummaryUiState(
+            primaryText = String.format(Locale.US, "%,d steps", totalStepsToday),
+            secondaryText = "Today",
+            weeklyText = String.format(Locale.US, "%,d in 7 days", totalStepsLast7Days),
+            hasData = true,
+            isLoading = false,
+        )
+    }
+
+    private fun ExerciseSummary.toExerciseSummaryUiState(): ExerciseSummaryUiState {
+        val latestSession = mostRecentSession
+        if (sessionCount == 0 || latestSession == null) {
+            return ExerciseSummaryUiState(
+                primaryText = "No exercise yet",
+                secondaryText = "Sync Health Connect or add a session later",
+                latestText = "No sessions logged",
+                hasData = false,
+                isLoading = false,
+            )
+        }
+
+        return ExerciseSummaryUiState(
+            primaryText = sessionCount.formatSessionCount(),
+            secondaryText = String.format(Locale.US, "%d min total", totalDurationMinutes),
+            latestText = latestSession.title?.trim()?.takeIf { it.isNotEmpty() }
+                ?: latestSession.exerciseType.toDisplayText(),
+            hasData = true,
+            isLoading = false,
+        )
+    }
+
+    private fun Int.formatSessionCount(): String =
+        if (this == 1) "1 session" else "$this sessions"
+
+    private fun ExerciseType.toDisplayText(): String =
+        when (this) {
+            ExerciseType.WALKING -> "Walking"
+            ExerciseType.RUNNING -> "Running"
+            ExerciseType.CYCLING -> "Cycling"
+            ExerciseType.SWIMMING -> "Swimming"
+            ExerciseType.STRENGTH_TRAINING -> "Strength training"
+            ExerciseType.YOGA -> "Yoga"
+            ExerciseType.HIIT -> "HIIT"
+            ExerciseType.OTHER -> "Latest session logged"
+        }
 
     private fun Int.formatDuration(): String {
         val hours = this / 60

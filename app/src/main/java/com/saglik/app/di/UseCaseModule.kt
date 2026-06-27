@@ -7,6 +7,7 @@ import com.saglik.domain.repository.ExerciseRepository
 import com.saglik.domain.repository.HealthConnectRepository
 import com.saglik.domain.repository.HealthConnectSyncRepository
 import com.saglik.domain.repository.SleepRepository
+import com.saglik.domain.repository.StepsRepository
 import com.saglik.domain.repository.UserProfileRepository
 import com.saglik.domain.repository.WeightRepository
 import com.saglik.domain.usecase.AddExerciseSessionUseCase
@@ -24,6 +25,7 @@ import com.saglik.domain.usecase.ObserveLatestWeightEntryUseCase
 import com.saglik.domain.usecase.ObserveOnboardingCompletedUseCase
 import com.saglik.domain.usecase.ObserveSleepDetailUseCase
 import com.saglik.domain.usecase.ObserveSleepSummaryUseCase
+import com.saglik.domain.usecase.ObserveStepsSummaryUseCase
 import com.saglik.domain.usecase.ObserveUserProfileUseCase
 import com.saglik.domain.usecase.ObserveWeightTrendSummaryUseCase
 import com.saglik.domain.usecase.SaveUserProfileUseCase
@@ -104,6 +106,11 @@ object UseCaseModule {
     fun provideObserveSleepDetailUseCase(
         repository: SleepRepository,
     ): ObserveSleepDetailUseCase = ObserveSleepDetailUseCase(repository)
+
+    @Provides
+    fun provideObserveStepsSummaryUseCase(
+        repository: StepsRepository,
+    ): ObserveStepsSummaryUseCase = ObserveStepsSummaryUseCase(repository)
 
     @Provides
     fun provideValidateExerciseSessionInputUseCase(): ValidateExerciseSessionInputUseCase =
