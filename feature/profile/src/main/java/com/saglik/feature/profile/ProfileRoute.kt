@@ -61,19 +61,22 @@ private fun Context.startActivitySafely(
     intent: Intent,
     fallbackIntent: Intent? = null,
 ): Boolean {
+    if (tryStartActivity(intent)) {
+        return true
+    }
+
+    return fallbackIntent?.let(::tryStartActivity) == true
+}
+
+private fun Context.tryStartActivity(intent: Intent): Boolean {
     return try {
         startActivity(intent)
         true
     } catch (_: ActivityNotFoundException) {
-        if (fallbackIntent == null) {
-            false
-        } else {
-            try {
-                startActivity(fallbackIntent)
-                true
-            } catch (_: ActivityNotFoundException) {
-                false
-            }
-        }
+        false
+    } catch (_: SecurityException) {
+        false
+    } catch (_: RuntimeException) {
+        false
     }
 }

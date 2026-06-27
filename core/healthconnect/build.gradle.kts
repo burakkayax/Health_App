@@ -25,4 +25,5 @@ dependencies {
     implementation(project(":core:model"))
     implementation(libs.androidx.health.connect.client)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
 }
